@@ -2,10 +2,11 @@ import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   FlatList,
   Platform,
   Pressable,
@@ -14,6 +15,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CarCard } from "@/components/ui/CarCard";
@@ -37,6 +39,8 @@ export default function FleetScreen() {
   const qc = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const swipeableRefs = useRef<Map<number, Swipeable>>(new Map());
+  const openRowId = useRef<number | null>(null);
 
   const { data: cars, isLoading } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -45,7 +49,10 @@ export default function FleetScreen() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/cars/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["cars"] }),
+    onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      qc.invalidateQueries({ queryKey: ["cars"] });
+    },
   });
 
   const onRefresh = async () => {
@@ -54,21 +61,61 @@ export default function FleetScreen() {
     setRefreshing(false);
   };
 
-  const handleDelete = (car: Car) => {
+  const closeRow = useCallback((carId: number) => {
+    const ref = swipeableRefs.current.get(carId);
+    if (ref) ref.close();
+    if (openRowId.current === carId) openRowId.current = null;
+  }, []);
+
+  const closePreviousRow = useCallback((nextId: number) => {
+    if (openRowId.current !== null && openRowId.current !== nextId) {
+      closeRow(openRowId.current);
+    }
+    openRowId.current = nextId;
+  }, [closeRow]);
+
+  const handleDelete = useCallback((car: Car) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
-      "Remove Car",
-      `Remove ${car.year} ${car.make} ${car.model} from your logbook?`,
+      "Delete Car",
+      `This will permanently delete ${car.year} ${car.make} ${car.model} and ALL associated records — maintenance, fuel, parts, insurance, dealerships, and malfunctions.\n\nThis cannot be undone.`,
       [
-        { text: "Cancel", style: "cancel" },
         {
-          text: "Remove",
+          text: "Cancel",
+          style: "cancel",
+          onPress: () => closeRow(car.id),
+        },
+        {
+          text: "Delete Everything",
           style: "destructive",
-          onPress: () => deleteMutation.mutate(car.id),
+          onPress: () => {
+            closeRow(car.id);
+            deleteMutation.mutate(car.id);
+          },
         },
       ]
     );
-  };
+  }, [closeRow, deleteMutation]);
+
+  const renderRightActions = useCallback(
+    (_progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+      const scale = dragX.interpolate({
+        inputRange: [-100, -50, 0],
+        outputRange: [1, 0.8, 0],
+        extrapolate: "clamp",
+      });
+
+      return (
+        <View style={styles.deleteActionContainer}>
+          <Animated.View style={[styles.deleteAction, { transform: [{ scale }] }]}>
+            <Feather name="trash-2" size={22} color="#fff" />
+            <Text style={styles.deleteActionText}>Delete</Text>
+          </Animated.View>
+        </View>
+      );
+    },
+    []
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
@@ -113,14 +160,34 @@ export default function FleetScreen() {
             />
           }
           renderItem={({ item }) => (
-            <CarCard
-              car={item}
-              onPress={() => {
-                Haptics.selectionAsync();
-                router.push({ pathname: "/car/[id]", params: { id: String(item.id) } });
+            <Swipeable
+              renderRightActions={renderRightActions}
+              onSwipeableOpen={(direction) => {
+                if (direction === "right") {
+                  handleDelete(item);
+                }
               }}
-              onLongPress={() => handleDelete(item)}
-            />
+              onSwipeableWillOpen={() => {
+                closePreviousRow(item.id);
+              }}
+              ref={(ref) => {
+                if (ref) {
+                  swipeableRefs.current.set(item.id, ref);
+                } else {
+                  swipeableRefs.current.delete(item.id);
+                }
+              }}
+              overshootRight={false}
+              friction={2}
+            >
+              <CarCard
+                car={item}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  router.push({ pathname: "/car/[id]", params: { id: String(item.id) } });
+                }}
+              />
+            </Swipeable>
           )}
         />
       )}
@@ -157,4 +224,25 @@ const styles = StyleSheet.create({
   },
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
   listContent: { paddingHorizontal: 20, paddingTop: 16 },
+  deleteActionContainer: {
+    justifyContent: "center",
+    alignItems: "flex-end",
+    marginBottom: 12,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  deleteAction: {
+    backgroundColor: "#DC2626",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 90,
+    height: "100%",
+    borderRadius: 16,
+    gap: 4,
+  },
+  deleteActionText: {
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+  },
 });

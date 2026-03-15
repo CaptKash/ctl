@@ -23,7 +23,6 @@ type Car = {
 type Props = {
   car: Car;
   onPress: () => void;
-  onLongPress?: () => void;
 };
 
 const CAR_COLORS: Record<string, string> = {
@@ -56,14 +55,13 @@ function getFirstPhoto(photos?: string | null): string | null {
   }
 }
 
-export function CarCard({ car, onPress, onLongPress }: Props) {
+export function CarCard({ car, onPress }: Props) {
   const C = Colors.light;
   const firstPhoto = getFirstPhoto(car.photos);
 
   return (
     <Pressable
       onPress={onPress}
-      onLongPress={onLongPress}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: C.card, opacity: pressed ? 0.92 : 1, shadowColor: C.shadow },
