@@ -88,7 +88,7 @@ export default function MenuDashboardScreen() {
         <View style={{ flex: 1 }}>
           <Text style={[styles.headerEyebrow, { color: C.textSecondary }]}>{today}</Text>
           <Text style={[styles.headerTitle, { color: C.text }]}>
-            {isAuthenticated && user ? `Hi, ${user.name.split(" ")[0]}` : "CTL"}
+            {isAuthenticated && user ? `Hello, ${user.name.split(" ")[0]}!` : "CTL"}
           </Text>
           <Text style={[styles.headerSub, { color: C.textSecondary }]}>Car Technical Log</Text>
         </View>
@@ -111,30 +111,6 @@ export default function MenuDashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Quick Actions</Text>
-
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/event/add");
-          }}
-          style={({ pressed }) => [
-            styles.tile,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="plus-circle" size={24} color={C.tint} />
-          </View>
-          <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Add Event</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              Log a malfunction, maintenance, or registration
-            </Text>
-          </View>
-          <View style={styles.tileArrow}>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
-          </View>
-        </Pressable>
 
         <Pressable
           onPress={() => {
@@ -169,6 +145,30 @@ export default function MenuDashboardScreen() {
             <Feather name="plus" size={13} color="#fff" />
             <Text style={styles.addCarChipText}>Add Car</Text>
           </Pressable>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/event/add");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="plus-circle" size={24} color={C.tint} />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Add Event</Text>
+            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              Log a malfunction, maintenance, or registration
+            </Text>
+          </View>
+          <View style={styles.tileArrow}>
+            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          </View>
         </Pressable>
 
         <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>
