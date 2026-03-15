@@ -134,7 +134,7 @@ router.post("/auth/forgot-password", async (req, res) => {
         expiresAt,
       });
 
-      console.log(`[PASSWORD RESET] Token for ${user.email}: ${resetToken}`);
+      console.log(`[PASSWORD RESET] Reset link for ${user.email}: https://app.example.com/reset-password?token=${resetToken}`);
     }
 
     res.json({ message: "If an account with that email exists, reset instructions have been sent." });
