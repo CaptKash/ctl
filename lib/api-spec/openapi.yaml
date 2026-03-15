@@ -1,22 +1,32 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Car Logbook API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: cars
+    description: Car management
+  - name: maintenance
+    description: Maintenance records
+  - name: parts
+    description: Parts records
+  - name: insurance
+    description: Insurance records
+  - name: dealerships
+    description: Dealership records
+  - name: fuel
+    description: Fuel log records
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +34,603 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /cars:
+    get:
+      operationId: getCars
+      tags: [cars]
+      summary: Get all cars
+      responses:
+        "200":
+          description: List of cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Car"
+    post:
+      operationId: createCar
+      tags: [cars]
+      summary: Create a car
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCarInput"
+      responses:
+        "201":
+          description: Created car
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+
+  /cars/{carId}:
+    get:
+      operationId: getCar
+      tags: [cars]
+      summary: Get a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Car
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateCar
+      tags: [cars]
+      summary: Update a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCarInput"
+      responses:
+        "200":
+          description: Updated car
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+    delete:
+      operationId: deleteCar
+      tags: [cars]
+      summary: Delete a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cars/{carId}/maintenance:
+    get:
+      operationId: getMaintenanceRecords
+      tags: [maintenance]
+      summary: Get maintenance records for a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of maintenance records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MaintenanceRecord"
+    post:
+      operationId: createMaintenanceRecord
+      tags: [maintenance]
+      summary: Create maintenance record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMaintenanceInput"
+      responses:
+        "201":
+          description: Created record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaintenanceRecord"
+
+  /cars/{carId}/maintenance/{recordId}:
+    put:
+      operationId: updateMaintenanceRecord
+      tags: [maintenance]
+      summary: Update maintenance record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMaintenanceInput"
+      responses:
+        "200":
+          description: Updated record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaintenanceRecord"
+    delete:
+      operationId: deleteMaintenanceRecord
+      tags: [maintenance]
+      summary: Delete maintenance record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cars/{carId}/parts:
+    get:
+      operationId: getPartsRecords
+      tags: [parts]
+      summary: Get parts records for a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of parts records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PartsRecord"
+    post:
+      operationId: createPartsRecord
+      tags: [parts]
+      summary: Create parts record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePartsInput"
+      responses:
+        "201":
+          description: Created record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartsRecord"
+
+  /cars/{carId}/parts/{recordId}:
+    put:
+      operationId: updatePartsRecord
+      tags: [parts]
+      summary: Update parts record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePartsInput"
+      responses:
+        "200":
+          description: Updated record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartsRecord"
+    delete:
+      operationId: deletePartsRecord
+      tags: [parts]
+      summary: Delete parts record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cars/{carId}/insurance:
+    get:
+      operationId: getInsuranceRecords
+      tags: [insurance]
+      summary: Get insurance records for a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of insurance records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InsuranceRecord"
+    post:
+      operationId: createInsuranceRecord
+      tags: [insurance]
+      summary: Create insurance record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInsuranceInput"
+      responses:
+        "201":
+          description: Created record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsuranceRecord"
+
+  /cars/{carId}/insurance/{recordId}:
+    put:
+      operationId: updateInsuranceRecord
+      tags: [insurance]
+      summary: Update insurance record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInsuranceInput"
+      responses:
+        "200":
+          description: Updated record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsuranceRecord"
+    delete:
+      operationId: deleteInsuranceRecord
+      tags: [insurance]
+      summary: Delete insurance record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cars/{carId}/dealerships:
+    get:
+      operationId: getDealershipRecords
+      tags: [dealerships]
+      summary: Get dealership records for a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of dealership records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DealershipRecord"
+    post:
+      operationId: createDealershipRecord
+      tags: [dealerships]
+      summary: Create dealership record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDealershipInput"
+      responses:
+        "201":
+          description: Created record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealershipRecord"
+
+  /cars/{carId}/dealerships/{recordId}:
+    put:
+      operationId: updateDealershipRecord
+      tags: [dealerships]
+      summary: Update dealership record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDealershipInput"
+      responses:
+        "200":
+          description: Updated record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealershipRecord"
+    delete:
+      operationId: deleteDealershipRecord
+      tags: [dealerships]
+      summary: Delete dealership record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cars/{carId}/fuel:
+    get:
+      operationId: getFuelRecords
+      tags: [fuel]
+      summary: Get fuel records for a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of fuel records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FuelRecord"
+    post:
+      operationId: createFuelRecord
+      tags: [fuel]
+      summary: Create fuel record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFuelInput"
+      responses:
+        "201":
+          description: Created record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FuelRecord"
+
+  /cars/{carId}/fuel/{recordId}:
+    put:
+      operationId: updateFuelRecord
+      tags: [fuel]
+      summary: Update fuel record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFuelInput"
+      responses:
+        "200":
+          description: Updated record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FuelRecord"
+    delete:
+      operationId: deleteFuelRecord
+      tags: [fuel]
+      summary: Delete fuel record
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cars/{carId}/report:
+    get:
+      operationId: getCarReport
+      tags: [cars]
+      summary: Get full report for a car
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Car report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarReport"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +641,468 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
+
+    Car:
+      type: object
+      properties:
+        id:
+          type: integer
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        color:
+          type: string
+        licensePlate:
+          type: string
+        vin:
+          type: string
+        mileage:
+          type: integer
+        notes:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - make
+        - model
+        - year
+        - createdAt
+        - updatedAt
+
+    CreateCarInput:
+      type: object
+      properties:
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        color:
+          type: string
+        licensePlate:
+          type: string
+        vin:
+          type: string
+        mileage:
+          type: integer
+        notes:
+          type: string
+      required:
+        - make
+        - model
+        - year
+
+    MaintenanceRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        mileage:
+          type: integer
+        cost:
+          type: number
+        shop:
+          type: string
+        notes:
+          type: string
+        nextDueDate:
+          type: string
+        nextDueMileage:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - carId
+        - type
+        - description
+        - date
+        - createdAt
+
+    CreateMaintenanceInput:
+      type: object
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        mileage:
+          type: integer
+        cost:
+          type: number
+        shop:
+          type: string
+        notes:
+          type: string
+        nextDueDate:
+          type: string
+        nextDueMileage:
+          type: integer
+      required:
+        - type
+        - description
+        - date
+
+    PartsRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        name:
+          type: string
+        partNumber:
+          type: string
+        brand:
+          type: string
+        category:
+          type: string
+        cost:
+          type: number
+        quantity:
+          type: integer
+        installedDate:
+          type: string
+        installedMileage:
+          type: integer
+        supplier:
+          type: string
+        warranty:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - carId
+        - name
+        - category
+        - createdAt
+
+    CreatePartsInput:
+      type: object
+      properties:
+        name:
+          type: string
+        partNumber:
+          type: string
+        brand:
+          type: string
+        category:
+          type: string
+        cost:
+          type: number
+        quantity:
+          type: integer
+        installedDate:
+          type: string
+        installedMileage:
+          type: integer
+        supplier:
+          type: string
+        warranty:
+          type: string
+        notes:
+          type: string
+      required:
+        - name
+        - category
+
+    InsuranceRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        provider:
+          type: string
+        policyNumber:
+          type: string
+        type:
+          type: string
+        premium:
+          type: number
+        premiumFrequency:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        deductible:
+          type: number
+        coverageLimit:
+          type: number
+        agentName:
+          type: string
+        agentPhone:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - carId
+        - provider
+        - policyNumber
+        - type
+        - startDate
+        - createdAt
+
+    CreateInsuranceInput:
+      type: object
+      properties:
+        provider:
+          type: string
+        policyNumber:
+          type: string
+        type:
+          type: string
+        premium:
+          type: number
+        premiumFrequency:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        deductible:
+          type: number
+        coverageLimit:
+          type: number
+        agentName:
+          type: string
+        agentPhone:
+          type: string
+        notes:
+          type: string
+      required:
+        - provider
+        - policyNumber
+        - type
+        - startDate
+
+    DealershipRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        contactPerson:
+          type: string
+        visitDate:
+          type: string
+        purpose:
+          type: string
+        cost:
+          type: number
+        notes:
+          type: string
+        rating:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - carId
+        - name
+        - visitDate
+        - purpose
+        - createdAt
+
+    CreateDealershipInput:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        contactPerson:
+          type: string
+        visitDate:
+          type: string
+        purpose:
+          type: string
+        cost:
+          type: number
+        notes:
+          type: string
+        rating:
+          type: integer
+      required:
+        - name
+        - visitDate
+        - purpose
+
+    FuelRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        date:
+          type: string
+        mileage:
+          type: integer
+        liters:
+          type: number
+        pricePerLiter:
+          type: number
+        totalCost:
+          type: number
+        fuelType:
+          type: string
+        station:
+          type: string
+        fullTank:
+          type: boolean
+        notes:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - carId
+        - date
+        - mileage
+        - liters
+        - totalCost
+        - createdAt
+
+    CreateFuelInput:
+      type: object
+      properties:
+        date:
+          type: string
+        mileage:
+          type: integer
+        liters:
+          type: number
+        pricePerLiter:
+          type: number
+        totalCost:
+          type: number
+        fuelType:
+          type: string
+        station:
+          type: string
+        fullTank:
+          type: boolean
+        notes:
+          type: string
+      required:
+        - date
+        - mileage
+        - liters
+        - totalCost
+
+    CarReport:
+      type: object
+      properties:
+        car:
+          $ref: "#/components/schemas/Car"
+        totalMaintenanceCost:
+          type: number
+        totalPartsCost:
+          type: number
+        totalInsuranceCost:
+          type: number
+        totalFuelCost:
+          type: number
+        totalCost:
+          type: number
+        maintenanceCount:
+          type: integer
+        partsCount:
+          type: integer
+        fuelCount:
+          type: integer
+        lastMaintenance:
+          type: string
+          nullable: true
+        upcomingMaintenanceDue:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaintenanceRecord"
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+      required:
+        - car
+        - totalMaintenanceCost
+        - totalPartsCost
+        - totalInsuranceCost
+        - totalFuelCost
+        - totalCost
+        - maintenanceCount
+        - partsCount
+        - fuelCount
+        - upcomingMaintenanceDue
+        - recentActivity
+
+    ActivityItem:
+      type: object
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        cost:
+          type: number
+          nullable: true
+      required:
+        - type
+        - description
+        - date
