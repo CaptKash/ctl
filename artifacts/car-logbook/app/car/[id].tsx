@@ -428,6 +428,37 @@ export default function CarDetailScreen() {
         )}
       </View>
 
+      {/* Submenus */}
+      <View style={[styles.submenuSection, { backgroundColor: C.card, borderColor: C.border }]}>
+        <Pressable
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push({ pathname: "/car/faults", params: { id: String(carId) } });
+          }}
+          style={({ pressed }) => [styles.submenuRow, { opacity: pressed ? 0.7 : 1 }]}
+        >
+          <View style={[styles.submenuIcon, { backgroundColor: "#FEE2E2" }]}>
+            <Feather name="alert-triangle" size={16} color="#DC2626" />
+          </View>
+          <Text style={[styles.submenuLabel, { color: C.text }]}>Fault</Text>
+          <Feather name="chevron-right" size={16} color={C.textTertiary} />
+        </Pressable>
+        <View style={[styles.submenuDivider, { backgroundColor: C.borderLight }]} />
+        <Pressable
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push({ pathname: "/car/maintenance", params: { id: String(carId) } });
+          }}
+          style={({ pressed }) => [styles.submenuRow, { opacity: pressed ? 0.7 : 1 }]}
+        >
+          <View style={[styles.submenuIcon, { backgroundColor: "#FEF3C7" }]}>
+            <Feather name="tool" size={16} color="#D97706" />
+          </View>
+          <Text style={[styles.submenuLabel, { color: C.text }]}>Maintenance</Text>
+          <Feather name="chevron-right" size={16} color={C.textTertiary} />
+        </Pressable>
+      </View>
+
       {/* Tabs */}
       <ScrollView
         horizontal
@@ -759,6 +790,36 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  submenuSection: {
+    marginHorizontal: 16,
+    marginTop: 10,
+    borderRadius: 14,
+    overflow: "hidden",
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  submenuRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    gap: 12,
+  },
+  submenuIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submenuLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: "Inter_600SemiBold",
+  },
+  submenuDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: 56,
   },
   statsStrip: {
     flexDirection: "row",
