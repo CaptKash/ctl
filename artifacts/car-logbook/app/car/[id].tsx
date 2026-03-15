@@ -28,9 +28,13 @@ type Car = {
   make: string;
   model: string;
   year: number;
+  nickname?: string | null;
   color?: string | null;
   licensePlate?: string | null;
+  licenseValidUntil?: string | null;
   vin?: string | null;
+  insuredWith?: string | null;
+  insuredUntil?: string | null;
   mileage?: number | null;
   notes?: string | null;
 };
@@ -372,22 +376,34 @@ export default function CarDetailScreen() {
         </Pressable>
         <View style={styles.headerCenter}>
           <Text style={[styles.carName, { color: C.text }]} numberOfLines={1}>
-            {car.year} {car.make} {car.model}
+            {car.nickname ?? `${car.year} ${car.make} ${car.model}`}
           </Text>
-          {car.licensePlate && (
-            <Text style={[styles.plate, { color: C.textSecondary }]}>{car.licensePlate}</Text>
-          )}
+          <Text style={[styles.plate, { color: C.textSecondary }]} numberOfLines={1}>
+            {car.nickname ? `${car.year} ${car.make} ${car.model}` : car.licensePlate ?? ""}
+          </Text>
         </View>
-        <Pressable
-          onPress={() => {
-            Haptics.selectionAsync();
-            router.push({ pathname: "/report/[id]", params: { id: String(carId) } });
-          }}
-          hitSlop={8}
-          style={[styles.reportBtn, { backgroundColor: C.infoLight }]}
-        >
-          <Feather name="file-text" size={18} color={C.info} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push({ pathname: "/car/edit", params: { id: String(carId) } });
+            }}
+            hitSlop={8}
+            style={[styles.headerBtn, { backgroundColor: C.backgroundTertiary }]}
+          >
+            <Feather name="edit-2" size={16} color={C.text} />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push({ pathname: "/report/[id]", params: { id: String(carId) } });
+            }}
+            hitSlop={8}
+            style={[styles.headerBtn, { backgroundColor: C.infoLight }]}
+          >
+            <Feather name="file-text" size={16} color={C.info} />
+          </Pressable>
+        </View>
       </View>
 
       {/* Car Stats Strip */}
@@ -733,9 +749,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_500Medium",
   },
-  reportBtn: {
-    width: 36,
-    height: 36,
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  headerBtn: {
+    width: 34,
+    height: 34,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
