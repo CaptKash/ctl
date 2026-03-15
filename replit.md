@@ -16,6 +16,7 @@ A mobile logbook app for car owners — similar to an aviation logbook but for v
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Auth**: bcryptjs (password hashing), jsonwebtoken (JWT), expo-secure-store (token storage), expo-local-authentication (biometric sign-in)
 
 ## Structure
 
@@ -38,7 +39,8 @@ artifacts-monorepo/
 
 ## Features
 
-- **Cars**: Add/manage multiple vehicles (make, model, year, color, VIN, license plate, mileage)
+- **Authentication**: Email/password login & signup with JWT tokens, biometric sign-in (Face ID / Touch ID), forgot/reset password flow
+- **Cars**: Add/manage multiple vehicles (make, model, year, color, VIN, license plate, mileage, photos)
 - **Maintenance**: Log service records with type, date, mileage, cost, shop, next due date
 - **Parts**: Track replacement parts with brand, category, cost, supplier, warranty
 - **Insurance**: Manage policies with provider, policy number, premiums, dates
@@ -48,14 +50,18 @@ artifacts-monorepo/
 
 ## Navigation
 
-- Tab 1: **My Cars** — list of all cars, add/delete cars
-- Tab 2: **Reports** — pick a car and see full logbook report
+- Tab 1: **Login** — sign in screen (tab bar hidden)
+- Tab 2: **Sign Up** — create account screen (tab bar hidden)
+- Tab 3: **Reports** — pick a car and see full logbook report
+- **Home Dashboard** (stack): quick action menu (Add Car, My Fleet, Add Maintenance, Upcoming)
 - **Car Detail** (stack): tabs for Maintenance, Parts, Insurance, Dealerships, Fuel with add/delete
 - **Add Car** (modal): form to add a new vehicle
 - **Report** (stack): full report with cost breakdown and activity
 
 ## Database Tables
 
+- `users` — user accounts (email, password_hash, name)
+- `password_reset_tokens` — password reset tokens (token, userId, expiresAt, usedAt)
 - `cars` — vehicle records
 - `maintenance_records` — service/maintenance log
 - `parts_records` — replacement parts log
@@ -63,24 +69,37 @@ artifacts-monorepo/
 - `dealership_records` — dealership/service visits
 - `fuel_records` — fuel fill-up log
 
+## Auth Flow
+
+- Login/signup via email+password → JWT token stored in expo-secure-store (native) or localStorage (web)
+- After first successful login on native device, user is prompted to enable biometric sign-in
+- Biometric button appears on login screen when device supports it and user has enrolled
+- Forgot password: modal → enter email → backend generates reset token (logged to console, email delivery TBD) → enter token + new password to reset
+- Token key: `ctl_auth_token`, user key: `ctl_auth_user`, biometric pref: `ctl_biometric_enabled`
+- API helper (`useApi.ts`) automatically attaches Bearer token to all requests
+
 ## Key Files
 
-- `artifacts/car-logbook/app/(tabs)/index.tsx` — My Cars screen
+- `artifacts/car-logbook/app/(tabs)/index.tsx` — Login screen
+- `artifacts/car-logbook/app/(tabs)/signup.tsx` — Sign up screen
 - `artifacts/car-logbook/app/(tabs)/reports.tsx` — Reports list screen
+- `artifacts/car-logbook/app/home.tsx` — Menu dashboard (post-login)
+- `artifacts/car-logbook/context/AuthContext.tsx` — Auth state + biometric management
+- `artifacts/car-logbook/hooks/useApi.ts` — API helper with auth token injection
 - `artifacts/car-logbook/app/car/[id].tsx` — Car detail with all log tabs
 - `artifacts/car-logbook/app/car/add.tsx` — Add car form
 - `artifacts/car-logbook/app/report/[id].tsx` — Full car report
-- `artifacts/api-server/src/routes/cars.ts` — All REST endpoints
+- `artifacts/api-server/src/routes/auth.ts` — Auth endpoints (register, login, forgot/reset password)
+- `artifacts/api-server/src/routes/cars.ts` — All car/maintenance REST endpoints
 - `lib/db/src/schema/cars.ts` — Drizzle schema for all tables
-- `lib/api-spec/openapi.yaml` — Full OpenAPI spec
 
 ## Packages
 
 ### `artifacts/api-server` (`@workspace/api-server`)
-Express 5 API with full CRUD + report generation.
+Express 5 API with full CRUD + report generation + auth (bcryptjs, jsonwebtoken).
 
 ### `artifacts/car-logbook` (`@workspace/car-logbook`)
-Expo mobile app with Expo Router, React Query, liquid glass tabs on iOS 26+.
+Expo mobile app with Expo Router, React Query, expo-secure-store, expo-local-authentication.
 
 ### `lib/db` (`@workspace/db`)
 Drizzle ORM with PostgreSQL. Run migrations with `pnpm --filter @workspace/db run push`.

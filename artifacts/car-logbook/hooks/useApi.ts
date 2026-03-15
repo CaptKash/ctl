@@ -1,6 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 
-const TOKEN_KEY = "@ctl_auth_token";
+const TOKEN_KEY = "ctl_auth_token";
 
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -8,7 +9,10 @@ const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
 
 async function getToken(): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(TOKEN_KEY);
+    if (Platform.OS === "web") {
+      return localStorage.getItem(TOKEN_KEY);
+    }
+    return await SecureStore.getItemAsync(TOKEN_KEY);
   } catch {
     return null;
   }
