@@ -39,8 +39,8 @@ const eventOptions: EventOption[] = [
     title: "Repair",
     description: "Log a service or repair",
     icon: "tool",
-    iconBg: "#FEF3C7",
-    iconColor: "#D97706",
+    iconBg: "#DBEAFE",
+    iconColor: "#2563EB",
     available: true,
   },
   {
@@ -57,8 +57,8 @@ const eventOptions: EventOption[] = [
     title: "Registration",
     description: "Record a registration or renewal",
     icon: "file-text",
-    iconBg: "#DBEAFE",
-    iconColor: "#2563EB",
+    iconBg: "#EDE9FE",
+    iconColor: "#7C3AED",
     available: false,
   },
 ];
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   instructionText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
 
-  list: { padding: 16, gap: 12 },
+  list: { flex: 1, padding: 16, gap: 12 },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
