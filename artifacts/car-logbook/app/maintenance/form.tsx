@@ -39,7 +39,6 @@ const MAINTENANCE_TYPES = [
   "Coolant Flush",
   "Spark Plugs",
   "Timing Belt",
-  "Inspection",
   "Other",
 ];
 

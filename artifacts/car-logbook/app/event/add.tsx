@@ -26,8 +26,8 @@ type EventOption = {
 const eventOptions: EventOption[] = [
   {
     id: "malfunction",
-    title: "Malfunction",
-    description: "Report a breakdown or issue",
+    title: "Fault",
+    description: "Report a breakdown or fault",
     icon: "alert-triangle",
     iconBg: "#FEE2E2",
     iconColor: "#DC2626",
@@ -35,12 +35,21 @@ const eventOptions: EventOption[] = [
   },
   {
     id: "maintenance",
-    title: "Maintenance",
+    title: "Repair",
     description: "Log a service or repair",
     icon: "tool",
     iconBg: "#FEF3C7",
     iconColor: "#D97706",
     available: true,
+  },
+  {
+    id: "inspection",
+    title: "Inspection",
+    description: "Record a regular check or inspection",
+    icon: "clipboard",
+    iconBg: "#D1FAE5",
+    iconColor: "#059669",
+    available: false,
   },
   {
     id: "registration",
