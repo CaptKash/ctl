@@ -154,6 +154,11 @@ export const malfunctionsTable = pgTable("malfunction_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable).omit({ id: true, createdAt: true });
+export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable)
+  .omit({ id: true, createdAt: true })
+  .extend({
+    inputMethod: z.enum(["warning_message", "written"]),
+    phase: z.enum(["car_running", "car_started", "parking", "during_drive"]),
+  });
 export type InsertMalfunction = z.infer<typeof insertMalfunctionSchema>;
 export type MalfunctionRecord = typeof malfunctionsTable.$inferSelect;
