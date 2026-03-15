@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <!-- Neon glow for CTL text -->
-    <filter id="neon" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur1"/>
-      <feGaussianBlur in="SourceGraphic" stdDeviation="6"  result="blur2"/>
+    <!-- Neon glow for CTL -->
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7"  result="blur2"/>
       <feMerge>
         <feMergeNode in="blur1"/>
         <feMergeNode in="blur1"/>
@@ -11,9 +11,9 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <!-- Subtle white glow for car outline -->
-    <filter id="carGlow" x="-10%" y="-10%" width="120%" height="120%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+    <!-- Soft glow for car outline -->
+    <filter id="glow" x="-8%" y="-8%" width="116%" height="116%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -22,56 +22,86 @@
   </defs>
 
   <!-- Dark navy background -->
-  <rect width="1024" height="1024" fill="#091525" rx="190"/>
+  <rect width="1024" height="1024" fill="#080F1E" rx="190"/>
 
-  <!-- ============================
-       MINIMALIST FRONT-FACING CAR
-       ============================ -->
+  <!-- ================================================
+       JEEP COMMANDER FRONT — MINIMALIST OUTLINE
+       
+       Key: FLAT roof, near-VERTICAL A-pillars (boxy),
+       large round wheel arches at bottom corners,
+       tires visible, central bumper section.
+  ================================================ -->
 
-  <!-- Outer body silhouette — single clean path -->
-  <!-- Roof narrows to top, A-pillars flare out to hood, bumper at bottom -->
+  <!-- OUTER BODY SILHOUETTE
+       Path goes clockwise:
+       top-left → top-right → right side down → right wheel arch →
+       down to bumper → across → up to left arch → left arch →
+       back up left side → closed
+  -->
   <path d="
-    M 512 158
-    Q 660 162 680 275
-    L 790 415
-    L 846 540
-    Q 854 580 848 618
-    L 176 618
-    Q 170 580 178 540
-    L 234 415
-    L 344 275
-    Q 364 162 512 158
+    M 172 142
+    L 852 142
+    L 856 440
+    A 98 98 0 0 1 660 440
+    L 660 590
+    L 364 590
+    L 364 440
+    A 98 98 0 0 0 168 440
     Z"
     fill="none"
     stroke="white"
     stroke-width="9"
     stroke-linejoin="round"
-    filter="url(#carGlow)"/>
+    stroke-linecap="round"
+    filter="url(#glow)"/>
 
-  <!-- Windshield — clean trapezoid outline only -->
+  <!-- RIGHT TYRE (visible in wheel arch opening) -->
+  <circle cx="758" cy="528" r="78"
+    fill="none" stroke="white" stroke-width="7"
+    filter="url(#glow)"/>
+
+  <!-- LEFT TYRE -->
+  <circle cx="266" cy="528" r="78"
+    fill="none" stroke="white" stroke-width="7"
+    filter="url(#glow)"/>
+
+  <!-- WINDSHIELD — tall, nearly rectangular (Jeep boxy style) -->
   <path d="
-    M 390 272
-    L 346 400
-    L 678 400
-    L 634 272
+    M 196 158
+    L 828 158
+    L 824 382
+    L 200 382
     Z"
     fill="none"
     stroke="white"
     stroke-width="6"
     stroke-linejoin="round"
-    opacity="0.55"/>
+    opacity="0.55"
+    filter="url(#glow)"/>
 
-  <!-- ============================
-       CTL — NEON BLUE TEXT
-       ============================ -->
+  <!-- ROOF RACK RAILS (subtle Jeep detail, two horizontal lines on roof) -->
+  <line x1="240" y1="142" x2="784" y2="142" stroke="white" stroke-width="5" opacity="0.9"/>
+  <line x1="260" y1="152" x2="764" y2="152" stroke="white" stroke-width="2.5" opacity="0.3"/>
+
+  <!-- HOOD LINE (line between windshield base and hood, minimal) -->
+  <line x1="200" y1="382" x2="824" y2="382" stroke="white" stroke-width="4" opacity="0.35"/>
+
+  <!-- LICENCE PLATE slot (centre of bumper) -->
+  <rect x="438" y="510" width="148" height="56" rx="5"
+    fill="none" stroke="white" stroke-width="4" opacity="0.45"/>
+
+  <!-- ================================================
+       CTL — NEON CYAN-BLUE
+  ================================================ -->
   <text
     x="512"
     y="810"
     font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
-    font-size="192"
+    font-size="186"
     font-weight="900"
     text-anchor="middle"
-    fill="#00CFFF"
-    letter-spacing="22"
+    fill="#00D0FF"
+    letter-spacing="20"
     filter="url(#neon)">CTL</text>
+
 </svg>
