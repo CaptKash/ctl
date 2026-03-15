@@ -90,7 +90,24 @@ type FuelRecord = {
   station?: string | null;
 };
 
-const TABS = ["Maintenance", "Parts", "Insurance", "Dealerships", "Fuel"] as const;
+type EventItem = {
+  id: number;
+  type: "maintenance" | "parts" | "insurance" | "dealership" | "fuel" | "malfunction";
+  date: string;
+  title: string;
+  subtitle: string;
+};
+
+const EVENT_TYPE_CONFIG: Record<EventItem["type"], { label: string; icon: keyof typeof Feather.glyphMap; color: string; bg: string }> = {
+  malfunction: { label: "Malfunction", icon: "alert-triangle", color: "#DC2626", bg: "#FEE2E2" },
+  maintenance: { label: "Maintenance", icon: "tool", color: "#D97706", bg: "#FEF3C7" },
+  parts: { label: "Parts", icon: "box", color: "#059669", bg: "#D1FAE5" },
+  insurance: { label: "Insurance", icon: "shield", color: "#2563EB", bg: "#DBEAFE" },
+  dealership: { label: "Dealership", icon: "map-pin", color: "#8B5CF6", bg: "#EDE9FE" },
+  fuel: { label: "Fuel", icon: "droplet", color: "#EA580C", bg: "#FED7AA" },
+};
+
+const TABS = ["Events", "Maintenance", "Parts", "Insurance", "Dealerships", "Fuel"] as const;
 type Tab = typeof TABS[number];
 
 export default function CarDetailScreen() {
@@ -99,7 +116,7 @@ export default function CarDetailScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const qc = useQueryClient();
-  const [activeTab, setActiveTab] = useState<Tab>("Maintenance");
+  const [activeTab, setActiveTab] = useState<Tab>("Events");
 
   // Sheets
   const [showAddMaintenance, setShowAddMaintenance] = useState(false);
@@ -183,6 +200,12 @@ export default function CarDetailScreen() {
     enabled: activeTab === "Fuel",
   });
 
+  const eventsQuery = useQuery<EventItem[]>({
+    queryKey: ["events", carId],
+    queryFn: () => apiGet<EventItem[]>(`/cars/${carId}/events`),
+    enabled: activeTab === "Events",
+  });
+
   const addMaintenanceMutation = useMutation({
     mutationFn: () =>
       apiPost(`/cars/${carId}/maintenance`, {
@@ -196,6 +219,7 @@ export default function CarDetailScreen() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["maintenance", carId] });
+      qc.invalidateQueries({ queryKey: ["events", carId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowAddMaintenance(false);
       setMType(""); setMDesc(""); setMCost(""); setMShop(""); setMNextDate(""); setMMileage("");
@@ -214,6 +238,7 @@ export default function CarDetailScreen() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["parts", carId] });
+      qc.invalidateQueries({ queryKey: ["events", carId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowAddParts(false);
       setPName(""); setPBrand(""); setPCategory(""); setPCost(""); setPSupplier("");
@@ -232,6 +257,7 @@ export default function CarDetailScreen() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["insurance", carId] });
+      qc.invalidateQueries({ queryKey: ["events", carId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowAddInsurance(false);
       setIProvider(""); setIPolicy(""); setIPremium(""); setIEnd("");
@@ -249,6 +275,7 @@ export default function CarDetailScreen() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dealerships", carId] });
+      qc.invalidateQueries({ queryKey: ["events", carId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowAddDealership(false);
       setDName(""); setDPurpose(""); setDCost(""); setDPhone("");
@@ -267,6 +294,7 @@ export default function CarDetailScreen() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["fuel", carId] });
+      qc.invalidateQueries({ queryKey: ["events", carId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowAddFuel(false);
       setFMileage(""); setFLiters(""); setFCost(""); setFStation("");
@@ -283,6 +311,7 @@ export default function CarDetailScreen() {
         onPress: async () => {
           await apiDelete(path);
           qc.invalidateQueries({ queryKey: [queryKey, carId] });
+          qc.invalidateQueries({ queryKey: ["events", carId] });
         },
       },
     ]);
@@ -309,6 +338,10 @@ export default function CarDetailScreen() {
 
   const openAdd = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (activeTab === "Events") {
+      router.push("/event/add");
+      return;
+    }
     if (activeTab === "Maintenance") setShowAddMaintenance(true);
     else if (activeTab === "Parts") setShowAddParts(true);
     else if (activeTab === "Insurance") setShowAddInsurance(true);
@@ -409,9 +442,38 @@ export default function CarDetailScreen() {
       >
         <SectionHeader
           title={activeTab}
-          actionLabel={`Add ${activeTab}`}
+          actionLabel={activeTab === "Events" ? "Add Event" : `Add ${activeTab}`}
           onAction={openAdd}
         />
+
+        {activeTab === "Events" && (
+          eventsQuery.isLoading ? (
+            <ActivityIndicator color={C.tint} style={{ marginTop: 20 }} />
+          ) : !eventsQuery.data || eventsQuery.data.length === 0 ? (
+            <EmptyState
+              icon="clock"
+              title="No events yet"
+              description="Start logging maintenance, malfunctions, fuel, and more."
+              actionLabel="Add Event"
+              onAction={() => router.push("/event/add")}
+            />
+          ) : (
+            eventsQuery.data.map((ev) => {
+              const cfg = EVENT_TYPE_CONFIG[ev.type];
+              return (
+                <RecordCard
+                  key={`${ev.type}-${ev.id}`}
+                  icon={cfg.icon}
+                  iconColor={cfg.color}
+                  iconBg={cfg.bg}
+                  title={ev.title}
+                  subtitle={`${cfg.label} · ${ev.subtitle}`}
+                  rightText={ev.date}
+                />
+              );
+            })
+          )
+        )}
 
         {activeTab === "Maintenance" && (
           maintenanceQuery.isLoading ? (

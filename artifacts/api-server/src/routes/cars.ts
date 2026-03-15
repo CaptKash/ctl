@@ -296,6 +296,67 @@ router.post("/cars/:carId/malfunctions", async (req, res) => {
   res.status(201).json(record);
 });
 
+// Events (unified timeline)
+router.get("/cars/:carId/events", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+
+  const [maintenance, parts, insurance, dealerships, fuel, malfunctions] = await Promise.all([
+    db.select().from(maintenanceTable).where(eq(maintenanceTable.carId, carId)),
+    db.select().from(partsTable).where(eq(partsTable.carId, carId)),
+    db.select().from(insuranceTable).where(eq(insuranceTable.carId, carId)),
+    db.select().from(dealershipsTable).where(eq(dealershipsTable.carId, carId)),
+    db.select().from(fuelTable).where(eq(fuelTable.carId, carId)),
+    db.select().from(malfunctionsTable).where(eq(malfunctionsTable.carId, carId)),
+  ]);
+
+  const events = [
+    ...maintenance.map((r) => ({
+      id: r.id,
+      type: "maintenance" as const,
+      date: r.date,
+      title: r.description,
+      subtitle: `${r.type}${r.shop ? ` · ${r.shop}` : ""}`,
+    })),
+    ...parts.map((r) => ({
+      id: r.id,
+      type: "parts" as const,
+      date: r.installedDate ?? r.createdAt.toISOString().split("T")[0],
+      title: r.name,
+      subtitle: `${r.category}${r.brand ? ` · ${r.brand}` : ""}`,
+    })),
+    ...insurance.map((r) => ({
+      id: r.id,
+      type: "insurance" as const,
+      date: r.startDate,
+      title: r.provider,
+      subtitle: `${r.type} · ${r.policyNumber}`,
+    })),
+    ...dealerships.map((r) => ({
+      id: r.id,
+      type: "dealership" as const,
+      date: r.visitDate,
+      title: r.name,
+      subtitle: r.purpose,
+    })),
+    ...fuel.map((r) => ({
+      id: r.id,
+      type: "fuel" as const,
+      date: r.date,
+      title: `${r.liters}L${r.fuelType ? ` ${r.fuelType}` : ""}`,
+      subtitle: `${r.mileage.toLocaleString()} km${r.station ? ` · ${r.station}` : ""}`,
+    })),
+    ...malfunctions.map((r) => ({
+      id: r.id,
+      type: "malfunction" as const,
+      date: r.date,
+      title: r.description,
+      subtitle: r.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    })),
+  ].sort((a, b) => b.date.localeCompare(a.date));
+
+  res.json(events);
+});
+
 // Report
 router.get("/cars/:carId/report", async (req, res) => {
   const carId = parseInt(req.params.carId);
