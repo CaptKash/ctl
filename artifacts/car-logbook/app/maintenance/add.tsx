@@ -37,7 +37,7 @@ export default function AddMaintenanceSelectCarScreen() {
 
   const handleSelectCar = (car: Car) => {
     Haptics.selectionAsync();
-    router.push({ pathname: "/car/[id]", params: { id: String(car.id) } });
+    router.push({ pathname: "/maintenance/form", params: { carId: String(car.id) } });
   };
 
   return (
