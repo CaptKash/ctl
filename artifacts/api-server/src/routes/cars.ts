@@ -14,7 +14,7 @@ import {
   insertDealershipSchema,
   insertFuelSchema,
 } from "@workspace/db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
 
 const router = Router();
 
@@ -53,6 +53,27 @@ router.delete("/cars/:carId", async (req, res) => {
   const carId = parseInt(req.params.carId);
   await db.delete(carsTable).where(eq(carsTable.id, carId));
   res.json({ success: true });
+});
+
+// Upcoming maintenance (all cars)
+router.get("/maintenance/upcoming", async (_req, res) => {
+  const records = await db
+    .select({
+      id: maintenanceTable.id,
+      carId: maintenanceTable.carId,
+      type: maintenanceTable.type,
+      description: maintenanceTable.description,
+      nextDueDate: maintenanceTable.nextDueDate,
+      nextDueMileage: maintenanceTable.nextDueMileage,
+      make: carsTable.make,
+      model: carsTable.model,
+      year: carsTable.year,
+    })
+    .from(maintenanceTable)
+    .innerJoin(carsTable, eq(maintenanceTable.carId, carsTable.id))
+    .where(isNotNull(maintenanceTable.nextDueDate))
+    .orderBy(asc(maintenanceTable.nextDueDate));
+  res.json(records);
 });
 
 // Maintenance
