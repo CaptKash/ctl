@@ -4,6 +4,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   Platform,
   Pressable,
   ScrollView,
@@ -17,7 +18,39 @@ import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
 
 type Car = { id: number };
-type UpcomingItem = { id: number };
+type UpcomingItem = {
+  id: number;
+  carId: number;
+  type: string;
+  description: string;
+  nextDueDate: string;
+  nextDueMileage: number | null;
+  make: string;
+  model: string;
+  year: number;
+};
+
+function daysFromNow(dateStr: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dateStr);
+  due.setHours(0, 0, 0, 0);
+  return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function urgencyColor(days: number, C: typeof Colors.light): string {
+  if (days < 0) return C.danger;
+  if (days <= 7) return "#F97316";
+  if (days <= 30) return C.warning;
+  return C.success;
+}
+
+function urgencyLabel(days: number): string {
+  if (days < 0) return `${Math.abs(days)}d overdue`;
+  if (days === 0) return "Due today";
+  if (days === 1) return "Due tomorrow";
+  return `In ${days} days`;
+}
 
 export default function MenuDashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -36,13 +69,12 @@ export default function MenuDashboardScreen() {
     queryFn: () => apiGet<Car[]>("/cars"),
   });
 
-  const { data: upcoming } = useQuery<UpcomingItem[]>({
+  const { data: upcoming, isLoading: upcomingLoading } = useQuery<UpcomingItem[]>({
     queryKey: ["maintenance", "upcoming"],
     queryFn: () => apiGet<UpcomingItem[]>("/maintenance/upcoming"),
   });
 
   const fleetCount = cars?.length ?? 0;
-  const upcomingCount = upcoming?.length ?? 0;
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -139,31 +171,84 @@ export default function MenuDashboardScreen() {
           </Pressable>
         </Pressable>
 
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/maintenance/upcoming");
-          }}
-          style={({ pressed }) => [
-            styles.tile,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <View style={[styles.tileIcon, { backgroundColor: "#FEE2E2" }]}>
-            <Feather name="calendar" size={24} color="#DC2626" />
+        <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>
+          Upcoming Events
+        </Text>
+
+        {upcomingLoading ? (
+          <View style={[styles.emptyState, { backgroundColor: C.card, shadowColor: C.shadow }]}>
+            <ActivityIndicator size="small" color={C.tint} />
+            <Text style={[styles.emptyText, { color: C.textSecondary }]}>Loading events…</Text>
           </View>
-          <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Upcoming Events</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              {upcomingCount === 0
-                ? "No upcoming events"
-                : `${upcomingCount} event${upcomingCount === 1 ? "" : "s"} coming up`}
+        ) : (!upcoming || upcoming.length === 0) ? (
+          <View style={[styles.emptyState, { backgroundColor: C.card, shadowColor: C.shadow }]}>
+            <Feather name="check-circle" size={22} color={C.success} />
+            <Text style={[styles.emptyText, { color: C.textSecondary }]}>
+              No upcoming events scheduled.
             </Text>
           </View>
-          <View style={styles.tileArrow}>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
-          </View>
-        </Pressable>
+        ) : (
+          upcoming.map((item) => {
+            const days = daysFromNow(item.nextDueDate);
+            const color = urgencyColor(days, C);
+            const label = urgencyLabel(days);
+            const dueDate = new Date(item.nextDueDate).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            });
+
+            return (
+              <Pressable
+                key={item.id}
+                onPress={() =>
+                  router.push({
+                    pathname: "/car/[id]",
+                    params: { id: String(item.carId) },
+                  })
+                }
+                style={({ pressed }) => [
+                  styles.eventCard,
+                  { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.92 : 1 },
+                ]}
+              >
+                <View style={[styles.urgencyBar, { backgroundColor: color }]} />
+                <View style={styles.eventCardBody}>
+                  <View style={styles.eventCardTop}>
+                    <Text style={[styles.eventCardType, { color: C.text }]} numberOfLines={1}>
+                      {item.type}
+                    </Text>
+                    <View style={[styles.urgencyBadge, { backgroundColor: color + "22" }]}>
+                      <Text style={[styles.urgencyText, { color }]}>{label}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.eventCardDesc, { color: C.textSecondary }]} numberOfLines={2}>
+                    {item.description}
+                  </Text>
+                  <View style={styles.eventCardMeta}>
+                    <MaterialCommunityIcons name="car-side" size={13} color={C.textTertiary} />
+                    <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
+                      {item.year} {item.make} {item.model}
+                    </Text>
+                    <Feather name="calendar" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                    <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
+                      {dueDate}
+                    </Text>
+                    {item.nextDueMileage != null && (
+                      <>
+                        <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                        <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
+                          {item.nextDueMileage.toLocaleString()} km
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                </View>
+                <Feather name="chevron-right" size={16} color={C.textTertiary} style={{ alignSelf: "center" }} />
+              </Pressable>
+            );
+          })
+        )}
       </ScrollView>
     </View>
   );
@@ -267,4 +352,39 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",
   },
+
+  emptyState: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 14,
+    padding: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+  },
+
+  eventCard: {
+    flexDirection: "row",
+    borderRadius: 14,
+    overflow: "hidden",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  urgencyBar: { width: 4 },
+  eventCardBody: { flex: 1, padding: 14, gap: 5 },
+  eventCardTop: { flexDirection: "row", alignItems: "center", gap: 8 },
+  eventCardType: { flex: 1, fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  urgencyBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+  urgencyText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  eventCardDesc: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  eventCardMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
+  eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
 });
