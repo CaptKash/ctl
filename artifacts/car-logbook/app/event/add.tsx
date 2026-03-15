@@ -89,14 +89,14 @@ export default function AddEventScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={C.text} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Add Event</Text>
+        <Text style={[styles.headerTitle, { color: C.text }]}>Log Event</Text>
         <View style={{ width: 36 }} />
       </View>
 
       <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
         <Feather name="info" size={15} color={C.info} />
         <Text style={[styles.instructionText, { color: C.info }]}>
-          Choose the type of event to log
+          Log a fault, repair, inspection, or registration
         </Text>
       </View>
 
