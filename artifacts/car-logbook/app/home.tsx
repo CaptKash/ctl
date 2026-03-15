@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { apiGet } from "@/hooks/useApi";
+import { useAuth } from "@/context/AuthContext";
 
 type Car = { id: number };
 type UpcomingItem = { id: number };
@@ -34,6 +35,13 @@ export default function MenuDashboardScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await logout();
+    router.replace("/(tabs)/");
+  };
 
   const { data: cars } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -122,7 +130,9 @@ export default function MenuDashboardScreen() {
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
         <View style={{ flex: 1 }}>
           <Text style={[styles.headerEyebrow, { color: C.textSecondary }]}>{today}</Text>
-          <Text style={[styles.headerTitle, { color: C.text }]}>CTL</Text>
+          <Text style={[styles.headerTitle, { color: C.text }]}>
+            {isAuthenticated && user ? `Hi, ${user.name.split(" ")[0]}` : "CTL"}
+          </Text>
           <Text style={[styles.headerSub, { color: C.textSecondary }]}>Car Technical Log</Text>
         </View>
         <View style={styles.headerRight}>
@@ -134,7 +144,7 @@ export default function MenuDashboardScreen() {
             />
           </View>
           <Pressable
-            onPress={() => router.back()}
+            onPress={handleLogout}
             hitSlop={10}
             style={[styles.logoutBtn, { backgroundColor: C.backgroundTertiary }]}
           >

@@ -3,7 +3,6 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -20,49 +19,45 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost } from "@/hooks/useApi";
 
-export default function LoginScreen() {
+export default function SignupScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login } = useAuth();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Already logged in → go straight to menu
-  if (!authLoading && isAuthenticated) {
-    router.replace("/home");
-    return null;
-  }
+  const canSubmit =
+    name.trim().length >= 2 &&
+    email.trim().includes("@") &&
+    password.length >= 6 &&
+    confirmPassword === password;
 
-  if (authLoading) {
-    return (
-      <View style={[styles.center, { backgroundColor: C.background }]}>
-        <ActivityIndicator size="large" color={C.tint} />
-      </View>
-    );
-  }
-
-  const canSubmit = email.trim().length > 0 && password.length >= 1;
-
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     if (!canSubmit) return;
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setError("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
       const res = await apiPost<{ token: string; user: { id: number; name: string; email: string } }>(
-        "/auth/login",
-        { email: email.trim(), password }
+        "/auth/register",
+        { name: name.trim(), email: email.trim(), password }
       );
       await login(res.token, res.user);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
     } catch (err: any) {
-      const msg = err?.message ?? "Login failed. Please check your credentials.";
+      const msg = err?.message ?? "Registration failed. Please try again.";
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -70,10 +65,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGuest = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/home");
-  };
+  const passwordsMatch = confirmPassword === "" || password === confirmPassword;
 
   return (
     <KeyboardAvoidingView
@@ -106,9 +98,9 @@ export default function LoginScreen() {
 
           {/* Heading */}
           <View style={styles.welcomeBlock}>
-            <Text style={[styles.welcomeTitle, { color: C.text }]}>Sign in</Text>
+            <Text style={[styles.welcomeTitle, { color: C.text }]}>Create account</Text>
             <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
-              Access your fleet and service records
+              Start logging your fleet's full service history
             </Text>
           </View>
 
@@ -122,6 +114,26 @@ export default function LoginScreen() {
 
           {/* Form */}
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
+            {/* Name */}
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Full Name</Text>
+              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+                <Feather name="user" size={16} color={C.textSecondary} />
+                <TextInput
+                  style={[styles.input, { color: C.text }]}
+                  placeholder="John Smith"
+                  placeholderTextColor={C.textTertiary}
+                  value={name}
+                  onChangeText={(t) => { setName(t); setError(""); }}
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                />
+              </View>
+            </View>
+
+            <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
+
+            {/* Email */}
             <View style={styles.fieldGroup}>
               <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Email</Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
@@ -142,8 +154,11 @@ export default function LoginScreen() {
 
             <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
 
+            {/* Password */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Password</Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>
+                Password <Text style={{ color: C.textTertiary, fontSize: 11 }}>(min 6 chars)</Text>
+              </Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="lock" size={16} color={C.textSecondary} />
                 <TextInput
@@ -154,24 +169,58 @@ export default function LoginScreen() {
                   onChangeText={(t) => { setPassword(t); setError(""); }}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
+                  returnKeyType="next"
                 />
                 <Pressable onPress={() => setShowPassword((v) => !v)} hitSlop={8}>
                   <Feather name={showPassword ? "eye-off" : "eye"} size={16} color={C.textSecondary} />
                 </Pressable>
               </View>
             </View>
+
+            <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
+
+            {/* Confirm Password */}
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Confirm Password</Text>
+              <View
+                style={[
+                  styles.inputRow,
+                  {
+                    borderColor: !passwordsMatch ? C.danger : C.border,
+                    backgroundColor: C.backgroundTertiary,
+                  },
+                ]}
+              >
+                <Feather
+                  name="lock"
+                  size={16}
+                  color={!passwordsMatch ? C.danger : C.textSecondary}
+                />
+                <TextInput
+                  style={[styles.input, { color: C.text }]}
+                  placeholder="••••••••"
+                  placeholderTextColor={C.textTertiary}
+                  value={confirmPassword}
+                  onChangeText={(t) => { setConfirmPassword(t); setError(""); }}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  returnKeyType="done"
+                  onSubmitEditing={handleSignup}
+                />
+                {confirmPassword.length > 0 && (
+                  <Feather
+                    name={passwordsMatch ? "check-circle" : "x-circle"}
+                    size={16}
+                    color={passwordsMatch ? C.success : C.danger}
+                  />
+                )}
+              </View>
+            </View>
           </View>
 
-          {/* Forgot */}
-          <Pressable style={styles.forgotRow} hitSlop={8}>
-            <Text style={[styles.forgotText, { color: C.tint }]}>Forgot password?</Text>
-          </Pressable>
-
           <PrimaryButton
-            label="Sign In"
-            onPress={handleLogin}
+            label="Create Account"
+            onPress={handleSignup}
             loading={loading}
             disabled={!canSubmit || loading}
           />
@@ -179,37 +228,24 @@ export default function LoginScreen() {
           {/* Divider */}
           <View style={styles.orRow}>
             <View style={[styles.orLine, { backgroundColor: C.border }]} />
-            <Text style={[styles.orText, { color: C.textTertiary }]}>or</Text>
+            <Text style={[styles.orText, { color: C.textTertiary }]}>already have an account?</Text>
             <View style={[styles.orLine, { backgroundColor: C.border }]} />
           </View>
 
-          {/* Guest */}
+          {/* Sign in link */}
           <Pressable
-            onPress={handleGuest}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/(tabs)/");
+            }}
             style={({ pressed }) => [
-              styles.guestBtn,
+              styles.signinBtn,
               { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.card },
             ]}
           >
-            <Text style={[styles.guestText, { color: C.text }]}>Continue as Guest</Text>
+            <Text style={[styles.signinText, { color: C.text }]}>Sign In</Text>
             <Feather name="arrow-right" size={16} color={C.textSecondary} />
           </Pressable>
-
-          {/* Sign up link */}
-          <View style={styles.signupRow}>
-            <Text style={[styles.signupText, { color: C.textSecondary }]}>
-              Don't have an account?{" "}
-            </Text>
-            <Pressable
-              hitSlop={8}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/(tabs)/signup");
-              }}
-            >
-              <Text style={[styles.signupLink, { color: C.tint }]}>Sign up</Text>
-            </Pressable>
-          </View>
         </ScrollView>
       </View>
     </KeyboardAvoidingView>
@@ -218,7 +254,6 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   scroll: { paddingHorizontal: 24, gap: 18 },
 
   brand: { alignItems: "center", gap: 10, paddingBottom: 4 },
@@ -255,14 +290,11 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular" },
   sep: { height: StyleSheet.hairlineWidth },
 
-  forgotRow: { alignItems: "flex-end" },
-  forgotText: { fontSize: 13, fontFamily: "Inter_500Medium" },
-
-  orRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  orRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   orLine: { flex: 1, height: StyleSheet.hairlineWidth },
-  orText: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  orText: { fontSize: 11, fontFamily: "Inter_400Regular" },
 
-  guestBtn: {
+  signinBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -271,9 +303,5 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     gap: 8,
   },
-  guestText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
-
-  signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
-  signupText: { fontSize: 14, fontFamily: "Inter_400Regular" },
-  signupLink: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  signinText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
 });

@@ -1,35 +1,69 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const TOKEN_KEY = "@ctl_auth_token";
+
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : "/api";
 
+async function getToken(): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+async function buildHeaders(extra?: Record<string, string>): Promise<Record<string, string>> {
+  const token = await getToken();
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
+async function parseError(res: Response): Promise<Error> {
+  try {
+    const json = await res.json();
+    return new Error(json?.error ?? `API error: ${res.status}`);
+  } catch {
+    return new Error(`API error: ${res.status}`);
+  }
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const headers = await buildHeaders();
+  const res = await fetch(`${BASE_URL}${path}`, { headers });
+  if (!res.ok) throw await parseError(res);
   return res.json();
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const headers = await buildHeaders();
   const res = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  if (!res.ok) throw await parseError(res);
   return res.json();
 }
 
 export async function apiPut<T>(path: string, body: unknown): Promise<T> {
+  const headers = await buildHeaders();
   const res = await fetch(`${BASE_URL}${path}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  if (!res.ok) throw await parseError(res);
   return res.json();
 }
 
 export async function apiDelete<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, { method: "DELETE" });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const headers = await buildHeaders();
+  const res = await fetch(`${BASE_URL}${path}`, { method: "DELETE", headers });
+  if (!res.ok) throw await parseError(res);
   return res.json();
 }

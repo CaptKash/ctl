@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,18 +29,14 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="car/[id]"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="car/add"
-        options={{ headerShown: false, presentation: "modal" }}
-      />
-      <Stack.Screen
-        name="report/[id]"
-        options={{ headerShown: false, presentation: "card" }}
-      />
+      <Stack.Screen name="home" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="fleet" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="login" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="car/[id]" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="car/add" options={{ headerShown: false, presentation: "modal" }} />
+      <Stack.Screen name="report/[id]" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="maintenance/upcoming" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="maintenance/add" options={{ headerShown: false, presentation: "card" }} />
     </Stack>
   );
 }
@@ -64,13 +61,15 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <AppProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </AppProvider>
+          <AuthProvider>
+            <AppProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </AppProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

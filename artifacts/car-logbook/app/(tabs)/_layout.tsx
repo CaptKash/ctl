@@ -5,8 +5,7 @@ import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Platform, StyleSheet, View } from "react-native";
 import Colors from "@/constants/colors";
 
 function NativeTabLayout() {
@@ -15,6 +14,10 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: "person.circle", selected: "person.circle.fill" }} />
         <Label>Login</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="signup">
+        <Icon sf={{ default: "person.badge.plus", selected: "person.badge.plus.fill" }} />
+        <Label>Sign Up</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="reports">
         <Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
@@ -25,9 +28,6 @@ function NativeTabLayout() {
 }
 
 function ClassicTabLayout() {
-  const colorScheme = useColorScheme();
-  const insets = useSafeAreaInsets();
-  const isDark = colorScheme === "dark";
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
   const C = Colors.light;
@@ -48,11 +48,7 @@ function ClassicTabLayout() {
         },
         tabBarBackground: () =>
           isIOS ? (
-            <BlurView
-              intensity={80}
-              tint="light"
-              style={StyleSheet.absoluteFill}
-            />
+            <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
           ) : isWeb ? (
             <View style={[StyleSheet.absoluteFill, { backgroundColor: "#fff" }]} />
           ) : null,
@@ -70,7 +66,19 @@ function ClassicTabLayout() {
             isIOS ? (
               <SymbolView name="person.circle.fill" tintColor={color} size={24} />
             ) : (
-              <Feather name="user" size={22} color={color} />
+              <Feather name="log-in" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="signup"
+        options={{
+          title: "Sign Up",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="person.badge.plus" tintColor={color} size={24} />
+            ) : (
+              <Feather name="user-plus" size={22} color={color} />
             ),
         }}
       />
