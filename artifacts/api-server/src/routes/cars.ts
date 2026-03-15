@@ -62,7 +62,7 @@ router.delete("/cars/:carId", async (req, res) => {
 
 // Upcoming maintenance (all cars)
 router.get("/maintenance/upcoming", async (_req, res) => {
-  const [maintenanceRecords, cars] = await Promise.all([
+  const [maintenanceRecords, cars, inspectionRecords] = await Promise.all([
     db
       .select({
         id: maintenanceTable.id,
@@ -81,6 +81,20 @@ router.get("/maintenance/upcoming", async (_req, res) => {
       .where(isNotNull(maintenanceTable.nextDueDate))
       .orderBy(asc(maintenanceTable.nextDueDate)),
     db.select().from(carsTable),
+    db
+      .select({
+        id: inspectionsTable.id,
+        carId: inspectionsTable.carId,
+        nextInspectionDate: inspectionsTable.nextInspectionDate,
+        place: inspectionsTable.place,
+        make: carsTable.make,
+        model: carsTable.model,
+        year: carsTable.year,
+        nickname: carsTable.nickname,
+      })
+      .from(inspectionsTable)
+      .innerJoin(carsTable, eq(inspectionsTable.carId, carsTable.id))
+      .where(isNotNull(inspectionsTable.nextInspectionDate)),
   ]);
 
   const carLabel = (c: typeof cars[number]) =>
@@ -124,7 +138,23 @@ router.get("/maintenance/upcoming", async (_req, res) => {
     nickname: r.nickname ?? null,
   }));
 
-  const all = [...maintenanceItems, ...licenseItems, ...insuranceItems].sort(
+  const inspectionItems = inspectionRecords
+    .filter((r) => r.nextInspectionDate)
+    .map((r) => ({
+      id: r.id,
+      carId: r.carId,
+      itemKind: "inspection" as const,
+      type: "Next Inspection",
+      description: `${r.nickname ?? `${r.year} ${r.make} ${r.model}`}${r.place ? ` · ${r.place}` : ""}`,
+      nextDueDate: r.nextInspectionDate!,
+      nextDueMileage: null,
+      make: r.make,
+      model: r.model,
+      year: r.year,
+      nickname: r.nickname ?? null,
+    }));
+
+  const all = [...maintenanceItems, ...licenseItems, ...insuranceItems, ...inspectionItems].sort(
     (a, b) => a.nextDueDate!.localeCompare(b.nextDueDate!)
   );
 

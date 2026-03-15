@@ -21,7 +21,7 @@ type Car = { id: number };
 type UpcomingItem = {
   id: number;
   carId: number;
-  itemKind: "maintenance" | "license" | "insurance";
+  itemKind: "maintenance" | "license" | "insurance" | "inspection";
   type: string;
   description: string;
   nextDueDate: string;
