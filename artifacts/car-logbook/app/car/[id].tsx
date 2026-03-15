@@ -11,7 +11,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -21,6 +20,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 
 type Car = {
@@ -301,20 +301,28 @@ export default function CarDetailScreen() {
     },
   });
 
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    confirmLabel: string;
+    onConfirm: () => void;
+  }>({ visible: false, title: "", message: "", confirmLabel: "", onConfirm: () => {} });
+
   const deleteRecord = (path: string, queryKey: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert("Delete", "Delete this record?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          await apiDelete(path);
-          qc.invalidateQueries({ queryKey: [queryKey, carId] });
-          qc.invalidateQueries({ queryKey: ["events", carId] });
-        },
+    setConfirmModal({
+      visible: true,
+      title: "Delete",
+      message: "Delete this record?",
+      confirmLabel: "Delete",
+      onConfirm: async () => {
+        setConfirmModal((s) => ({ ...s, visible: false }));
+        await apiDelete(path);
+        qc.invalidateQueries({ queryKey: [queryKey, carId] });
+        qc.invalidateQueries({ queryKey: ["events", carId] });
       },
-    ]);
+    });
   };
 
   const car = carQuery.data;
@@ -679,6 +687,16 @@ export default function CarDetailScreen() {
         <FormField label="Station" value={fStation} onChangeText={setFStation} placeholder="Gas station name" />
         <PrimaryButton label="Save Fill-up" onPress={() => addFuelMutation.mutate()} loading={addFuelMutation.isPending} disabled={!fDate || !fMileage || !fLiters || !fCost} />
       </BottomSheet>
+
+      <ConfirmModal
+        visible={confirmModal.visible}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        confirmStyle="destructive"
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((s) => ({ ...s, visible: false }))}
+      />
     </View>
   );
 }

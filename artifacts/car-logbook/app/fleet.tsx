@@ -5,7 +5,6 @@ import { router } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   FlatList,
   Platform,
@@ -20,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CarCard } from "@/components/ui/CarCard";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 
 type Car = {
@@ -74,27 +74,32 @@ export default function FleetScreen() {
     openRowId.current = nextId;
   }, [closeRow]);
 
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    confirmLabel: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+  }>({ visible: false, title: "", message: "", confirmLabel: "", onConfirm: () => {}, onCancel: () => {} });
+
   const handleDelete = useCallback((car: Car) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      "Delete Car",
-      `This will permanently delete ${car.year} ${car.make} ${car.model} and ALL associated records — maintenance, fuel, parts, insurance, dealerships, and malfunctions.\n\nThis cannot be undone.`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-          onPress: () => closeRow(car.id),
-        },
-        {
-          text: "Delete Everything",
-          style: "destructive",
-          onPress: () => {
-            closeRow(car.id);
-            deleteMutation.mutate(car.id);
-          },
-        },
-      ]
-    );
+    setConfirmModal({
+      visible: true,
+      title: "Delete Car",
+      message: `This will permanently delete ${car.year} ${car.make} ${car.model} and ALL associated records — maintenance, fuel, parts, insurance, dealerships, and malfunctions.\n\nThis cannot be undone.`,
+      confirmLabel: "Delete Everything",
+      onConfirm: () => {
+        setConfirmModal((s) => ({ ...s, visible: false }));
+        closeRow(car.id);
+        deleteMutation.mutate(car.id);
+      },
+      onCancel: () => {
+        setConfirmModal((s) => ({ ...s, visible: false }));
+        closeRow(car.id);
+      },
+    });
   }, [closeRow, deleteMutation]);
 
   const renderRightActions = useCallback(
@@ -187,6 +192,16 @@ export default function FleetScreen() {
           )}
         />
       )}
+
+      <ConfirmModal
+        visible={confirmModal.visible}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        confirmStyle="destructive"
+        onConfirm={confirmModal.onConfirm}
+        onCancel={confirmModal.onCancel}
+      />
     </View>
   );
 }
