@@ -238,7 +238,7 @@ export default function CarDetailScreen() {
           <EmptyState
             icon="alert-triangle"
             title="No fault records"
-            description="Faults logged from the Add Event page will appear here."
+            description="Faults logged from the Log Event page will appear here."
           />
         ) : (
           faultsQuery.data.map((r) => (
@@ -266,7 +266,7 @@ export default function CarDetailScreen() {
           <EmptyState
             icon="tool"
             title="No maintenance records"
-            description="Maintenance logged from the Add Event page will appear here."
+            description="Maintenance logged from the Log Event page will appear here."
           />
         ) : (
           maintenanceQuery.data.map((r) => (
@@ -293,7 +293,7 @@ export default function CarDetailScreen() {
           <EmptyState
             icon="clipboard"
             title="No inspection records"
-            description="Inspections logged from the Add Event page will appear here."
+            description="Inspections logged from the Log Event page will appear here."
           />
         ) : (
           inspectionsQuery.data.map((r) => (

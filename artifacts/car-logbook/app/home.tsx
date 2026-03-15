@@ -168,7 +168,7 @@ export default function MenuDashboardScreen() {
             <Feather name="plus-circle" size={24} color={C.tint} />
           </View>
           <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Add Event</Text>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Log Event</Text>
             <Text style={[styles.tileSub, { color: C.textSecondary }]}>
               Log a malfunction, maintenance, or registration
             </Text>
