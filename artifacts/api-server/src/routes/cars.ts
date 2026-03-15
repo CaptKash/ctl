@@ -332,12 +332,12 @@ router.delete("/cars/:carId/fuel/:recordId", async (req, res) => {
 // Malfunctions
 router.get("/cars/:carId/malfunctions", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const records = await db
-    .select()
-    .from(malfunctionsTable)
-    .where(eq(malfunctionsTable.carId, carId))
-    .orderBy(desc(malfunctionsTable.createdAt));
-  res.json(records);
+  const [records, completions] = await Promise.all([
+    db.select().from(malfunctionsTable).where(eq(malfunctionsTable.carId, carId)).orderBy(desc(malfunctionsTable.createdAt)),
+    db.select().from(eventCompletionsTable).where(and(eq(eventCompletionsTable.carId, carId), eq(eventCompletionsTable.recordType, "malfunction"))),
+  ]);
+  const completedIds = new Set(completions.map((c) => c.recordId));
+  res.json(records.map((r) => ({ ...r, completed: completedIds.has(r.id) })));
 });
 
 router.post("/cars/:carId/malfunctions", async (req, res) => {
