@@ -154,7 +154,7 @@ export default function MalfunctionLogScreen() {
               placeholder="e.g. 85000"
               placeholderTextColor={C.textTertiary}
               value={odometer}
-              onChangeText={setOdometer}
+              onChangeText={(text) => setOdometer(text.replace(/[^0-9]/g, ""))}
               keyboardType="numeric"
             />
             <Text style={[styles.odometerUnit, { color: C.textTertiary }]}>km</Text>
