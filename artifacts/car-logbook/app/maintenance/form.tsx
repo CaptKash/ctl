@@ -103,7 +103,7 @@ export default function MaintenanceFormScreen() {
 
   const car = carQuery.data;
   const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : "Car";
-  const canSubmit = type.trim().length > 0;
+  const canSubmit = type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
 
   return (
     <View style={[styles.container, { backgroundColor: C.backgroundSecondary }]}>
@@ -138,6 +138,19 @@ export default function MaintenanceFormScreen() {
             placeholder="Select service type…"
             required
           />
+          {type === "Other" && (
+            <>
+              <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+              <FormField
+                label="Description"
+                value={correctiveAction}
+                onChangeText={setCorrectiveAction}
+                placeholder="Describe the service…"
+                multiline
+                required
+              />
+            </>
+          )}
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Date"
