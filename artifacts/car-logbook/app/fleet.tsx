@@ -17,6 +17,7 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { CarCard } from "@/components/ui/CarCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -203,6 +204,7 @@ export default function FleetScreen() {
         onConfirm={confirmModal.onConfirm}
         onCancel={confirmModal.onCancel}
       />
+      <BottomNav />
     </View>
   );
 }

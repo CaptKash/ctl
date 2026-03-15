@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
 
 type InputMethod = "warning_message" | "written";
@@ -227,6 +228,7 @@ export default function MalfunctionLogScreen() {
             )}
           </Pressable>
         </ScrollView>
+        <BottomNav />
       </View>
     </KeyboardAvoidingView>
   );

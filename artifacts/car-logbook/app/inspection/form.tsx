@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiGet, apiPost } from "@/hooks/useApi";
@@ -154,6 +155,7 @@ export default function InspectionFormScreen() {
           disabled={!canSubmit}
         />
       </ScrollView>
+      <BottomNav />
     </View>
   );
 }

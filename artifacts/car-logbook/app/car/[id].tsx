@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -320,6 +321,7 @@ export default function CarDetailScreen() {
         onCancel={() => setConfirmModal((s) => ({ ...s, visible: false }))}
         destructive
       />
+      <BottomNav />
     </View>
   );
 }

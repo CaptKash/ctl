@@ -19,7 +19,7 @@ const TABS: {
   { id: "settings",  label: "Settings",  icon: "settings", route: "/settings" },
 ];
 
-type Props = { active: BottomNavTab };
+type Props = { active?: BottomNavTab };
 
 export default function BottomNav({ active }: Props) {
   const insets = useSafeAreaInsets();

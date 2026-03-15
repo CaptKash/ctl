@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 
 type EventOption = {
   id: string;
@@ -134,6 +135,7 @@ export default function AddEventScreen() {
           </Pressable>
         ))}
       </View>
+      <BottomNav />
     </View>
   );
 }

@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SelectField } from "@/components/ui/SelectField";
@@ -248,6 +249,7 @@ export default function AddCarScreen() {
           disabled={!canSubmit}
         />
       </ScrollView>
+      <BottomNav />
     </View>
   );
 }

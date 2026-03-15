@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { CarCard } from "@/components/ui/CarCard";
 import { apiGet } from "@/hooks/useApi";
 
@@ -93,6 +94,7 @@ export default function AddRepairSelectCarScreen() {
           ))}
         </ScrollView>
       )}
+      <BottomNav />
     </View>
   );
 }

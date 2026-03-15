@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { StatCard } from "@/components/ui/StatCard";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { apiGet } from "@/hooks/useApi";
@@ -218,6 +219,7 @@ export default function ReportScreen() {
           </View>
         )}
       </ScrollView>
+      <BottomNav />
     </View>
   );
 }

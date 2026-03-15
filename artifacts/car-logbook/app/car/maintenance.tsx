@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { FormField } from "@/components/ui/FormField";
 import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -278,6 +279,7 @@ export default function MaintenanceScreen() {
         onCancel={() => setConfirmId(null)}
         destructive
       />
+      <BottomNav />
     </View>
   );
 }

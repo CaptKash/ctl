@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import BottomNav from "@/components/ui/BottomNav";
 import { apiGet } from "@/hooks/useApi";
 
 type UpcomingRecord = {
@@ -154,6 +155,7 @@ export default function UpcomingEventsScreen() {
           }}
         />
       )}
+      <BottomNav />
     </View>
   );
 }
