@@ -30,16 +30,24 @@ export default function AddCarScreen() {
   const C = Colors.light;
   const qc = useQueryClient();
 
+  // Basic Info
+  const [nickname, setNickname] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState(String(CURRENT_YEAR));
-  const [nickname, setNickname] = useState("");
   const [color, setColor] = useState("");
-  const [licensePlate, setLicensePlate] = useState("");
-  const [vin, setVin] = useState("");
   const [mileage, setMileage] = useState("");
-  const [notes, setNotes] = useState("");
+
+  // License
+  const [licensePlate, setLicensePlate] = useState("");
+  const [licenseValidUntil, setLicenseValidUntil] = useState("");
+  const [vin, setVin] = useState("");
+  const [insuredWith, setInsuredWith] = useState("");
+  const [insuredUntil, setInsuredUntil] = useState("");
+
+  // Photos & Notes
   const [photos, setPhotos] = useState<string[]>([]);
+  const [notes, setNotes] = useState("");
 
   const models = getModelsForMake(make);
 
@@ -56,9 +64,12 @@ export default function AddCarScreen() {
         year: parseInt(year),
         nickname: nickname.trim() || undefined,
         color: color.trim() || undefined,
-        licensePlate: licensePlate.trim() || undefined,
-        vin: vin.trim() || undefined,
         mileage: mileage ? parseInt(mileage) : undefined,
+        licensePlate: licensePlate.trim() || undefined,
+        licenseValidUntil: licenseValidUntil.trim() || undefined,
+        vin: vin.trim() || undefined,
+        insuredWith: insuredWith.trim() || undefined,
+        insuredUntil: insuredUntil.trim() || undefined,
         notes: notes.trim() || undefined,
         photos: photos.length > 0 ? JSON.stringify(photos) : undefined,
       }),
@@ -93,6 +104,15 @@ export default function AddCarScreen() {
         {/* Basic Info */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
           <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Basic Info</Text>
+
+          <FormField
+            label="Nickname"
+            value={nickname}
+            onChangeText={setNickname}
+            placeholder="e.g. The Beast, Old Faithful"
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <SelectField
             label="Make"
@@ -138,23 +158,36 @@ export default function AddCarScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label="Nickname"
-            value={nickname}
-            onChangeText={setNickname}
-            placeholder="e.g. The Beast, Old Faithful"
+            label="Current Mileage (km)"
+            value={mileage}
+            onChangeText={setMileage}
+            placeholder="e.g. 45000"
+            keyboardType="number-pad"
           />
         </View>
 
-        {/* Details */}
+        {/* License */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Details</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>License</Text>
+
           <FormField
-            label="License Plate"
+            label="Plate Number"
             value={licensePlate}
             onChangeText={setLicensePlate}
             placeholder="e.g. ABC 1234"
           />
+
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
+          <FormField
+            label="Valid Until"
+            value={licenseValidUntil}
+            onChangeText={setLicenseValidUntil}
+            placeholder="YYYY-MM-DD"
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
           <FormField
             label="VIN"
             value={vin}
@@ -162,13 +195,23 @@ export default function AddCarScreen() {
             placeholder="Vehicle Identification Number"
             autoCapitalize="characters"
           />
+
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
           <FormField
-            label="Current Mileage (km)"
-            value={mileage}
-            onChangeText={setMileage}
-            placeholder="e.g. 45000"
-            keyboardType="number-pad"
+            label="Insured With"
+            value={insuredWith}
+            onChangeText={setInsuredWith}
+            placeholder="e.g. Allianz, AXA"
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
+          <FormField
+            label="Insured Until"
+            value={insuredUntil}
+            onChangeText={setInsuredUntil}
+            placeholder="YYYY-MM-DD"
           />
         </View>
 
