@@ -98,23 +98,24 @@ export default function FleetScreen() {
   }, [closeRow, deleteMutation]);
 
   const renderRightActions = useCallback(
-    (_progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
-      const scale = dragX.interpolate({
-        inputRange: [-100, -50, 0],
-        outputRange: [1, 0.8, 0],
-        extrapolate: "clamp",
-      });
+    (car: Car) =>
+      (_progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+        const scale = dragX.interpolate({
+          inputRange: [-100, -50, 0],
+          outputRange: [1, 0.8, 0],
+          extrapolate: "clamp",
+        });
 
-      return (
-        <View style={styles.deleteActionContainer}>
-          <Animated.View style={[styles.deleteAction, { transform: [{ scale }] }]}>
-            <Feather name="trash-2" size={22} color="#fff" />
-            <Text style={styles.deleteActionText}>Delete</Text>
-          </Animated.View>
-        </View>
-      );
-    },
-    []
+        return (
+          <Pressable style={styles.deleteActionContainer} onPress={() => handleDelete(car)}>
+            <Animated.View style={[styles.deleteAction, { transform: [{ scale }] }]}>
+              <Feather name="trash-2" size={22} color="#fff" />
+              <Text style={styles.deleteActionText}>Delete</Text>
+            </Animated.View>
+          </Pressable>
+        );
+      },
+    [handleDelete]
   );
 
   return (
@@ -161,12 +162,7 @@ export default function FleetScreen() {
           }
           renderItem={({ item }) => (
             <Swipeable
-              renderRightActions={renderRightActions}
-              onSwipeableOpen={(direction) => {
-                if (direction === "right") {
-                  handleDelete(item);
-                }
-              }}
+              renderRightActions={renderRightActions(item)}
               onSwipeableWillOpen={() => {
                 closePreviousRow(item.id);
               }}
