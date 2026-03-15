@@ -14,6 +14,7 @@ type Car = {
   make: string;
   model: string;
   year: number;
+  nickname?: string | null;
   color?: string | null;
   licensePlate?: string | null;
   mileage?: number | null;
@@ -83,27 +84,22 @@ export function CarCard({ car, onPress }: Props) {
 
       {/* Info */}
       <View style={styles.info}>
-        <Text style={[styles.carName, { color: C.text }]}>
-          {car.year} {car.make} {car.model}
+        <Text style={[styles.makeModel, { color: C.text }]} numberOfLines={1}>
+          {car.make} {car.model}
         </Text>
-        <View style={styles.meta}>
-          {car.licensePlate && (
-            <View style={[styles.badge, { backgroundColor: C.backgroundTertiary }]}>
-              <Feather name="credit-card" size={11} color={C.textSecondary} />
-              <Text style={[styles.badgeText, { color: C.textSecondary }]}>
-                {car.licensePlate}
-              </Text>
-            </View>
-          )}
-          {car.mileage != null && (
-            <View style={[styles.badge, { backgroundColor: C.backgroundTertiary }]}>
-              <Feather name="activity" size={11} color={C.textSecondary} />
-              <Text style={[styles.badgeText, { color: C.textSecondary }]}>
-                {car.mileage.toLocaleString()} km
-              </Text>
-            </View>
-          )}
-        </View>
+        <Text style={[styles.sub, { color: C.textSecondary }]} numberOfLines={1}>
+          {[car.nickname, String(car.year)].filter(Boolean).join("  |  ")}
+        </Text>
+        {(car.licensePlate || car.mileage != null) && (
+          <Text style={[styles.detail, { color: C.textTertiary }]} numberOfLines={1}>
+            {[
+              car.licensePlate,
+              car.mileage != null ? `${car.mileage.toLocaleString()} km` : null,
+            ]
+              .filter(Boolean)
+              .join("   ·   ")}
+          </Text>
+        )}
       </View>
 
       <Feather name="chevron-right" size={18} color={C.textTertiary} />
@@ -148,27 +144,18 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
-    gap: 6,
+    gap: 3,
   },
-  carName: {
+  makeModel: {
     fontSize: 16,
     fontFamily: "Inter_700Bold",
   },
-  meta: {
-    flexDirection: "row",
-    gap: 6,
-    flexWrap: "wrap",
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 12,
+  sub: {
+    fontSize: 13,
     fontFamily: "Inter_500Medium",
+  },
+  detail: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
   },
 });

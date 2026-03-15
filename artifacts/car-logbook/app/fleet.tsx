@@ -27,6 +27,7 @@ type Car = {
   make: string;
   model: string;
   year: number;
+  nickname?: string | null;
   color?: string | null;
   licensePlate?: string | null;
   mileage?: number | null;
