@@ -1,19 +1,20 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import { CarCard } from "@/components/ui/CarCard";
 import { apiGet } from "@/hooks/useApi";
 
 type Car = {
@@ -21,11 +22,14 @@ type Car = {
   make: string;
   model: string;
   year: number;
+  nickname?: string | null;
   color?: string | null;
   licensePlate?: string | null;
+  mileage?: number | null;
+  photos?: string | null;
 };
 
-export default function MalfunctionSelectCarScreen() {
+export default function AddFaultSelectCarScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -37,7 +41,10 @@ export default function MalfunctionSelectCarScreen() {
 
   const handleSelectCar = (car: Car) => {
     Haptics.selectionAsync();
-    router.push({ pathname: "/malfunction/log", params: { carId: String(car.id), carName: `${car.year} ${car.make} ${car.model}` } });
+    router.push({
+      pathname: "/malfunction/log",
+      params: { carId: String(car.id), carName: `${car.year} ${car.make} ${car.model}` },
+    });
   };
 
   return (
@@ -63,7 +70,7 @@ export default function MalfunctionSelectCarScreen() {
         </View>
       ) : !cars || cars.length === 0 ? (
         <View style={styles.center}>
-          <MaterialCommunityIcons name="car-side" size={40} color={C.textTertiary} />
+          <Feather name="truck" size={40} color={C.textTertiary} />
           <Text style={[styles.emptyTitle, { color: C.text }]}>No vehicles yet</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
             Add a car first before reporting a fault.
@@ -77,43 +84,17 @@ export default function MalfunctionSelectCarScreen() {
           </Pressable>
         </View>
       ) : (
-        <FlatList
-          data={cars}
-          keyExtractor={(item) => String(item.id)}
+        <ScrollView
           contentContainerStyle={[
             styles.list,
             { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 40 },
           ]}
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() => handleSelectCar(item)}
-              style={({ pressed }) => [
-                styles.carRow,
-                { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-              ]}
-            >
-              <View style={[styles.carIcon, { backgroundColor: "#FEE2E2" }]}>
-                <MaterialCommunityIcons name="car-side" size={26} color="#DC2626" />
-              </View>
-              <View style={styles.carInfo}>
-                <Text style={[styles.carName, { color: C.text }]}>
-                  {item.year} {item.make} {item.model}
-                </Text>
-                {item.licensePlate && (
-                  <View style={styles.plateRow}>
-                    <Feather name="credit-card" size={11} color={C.textTertiary} />
-                    <Text style={[styles.plate, { color: C.textSecondary }]}>
-                      {item.licensePlate}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <View style={[styles.goBtn, { backgroundColor: "#DC2626" }]}>
-                <Feather name="alert-triangle" size={15} color="#fff" />
-              </View>
-            </Pressable>
-          )}
-        />
+          showsVerticalScrollIndicator={false}
+        >
+          {cars.map((car) => (
+            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} />
+          ))}
+        </ScrollView>
       )}
     </View>
   );
@@ -131,7 +112,6 @@ const styles = StyleSheet.create({
   },
   backBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   headerTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
-
   instruction: {
     flexDirection: "row",
     alignItems: "center",
@@ -141,7 +121,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   instructionText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
-
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 12 },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
   emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
@@ -155,35 +134,5 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   addCarBtnText: { color: "#fff", fontSize: 15, fontFamily: "Inter_600SemiBold" },
-
-  list: { padding: 16, gap: 12 },
-  carRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    padding: 16,
-    borderRadius: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  carIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  carInfo: { flex: 1, gap: 4 },
-  carName: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
-  plateRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  plate: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  goBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  list: { padding: 16 },
 });

@@ -1,19 +1,20 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import { CarCard } from "@/components/ui/CarCard";
 import { apiGet } from "@/hooks/useApi";
 
 type Car = {
@@ -22,7 +23,10 @@ type Car = {
   model: string;
   year: number;
   nickname?: string | null;
+  color?: string | null;
   licensePlate?: string | null;
+  mileage?: number | null;
+  photos?: string | null;
 };
 
 export default function AddInspectionSelectCarScreen() {
@@ -77,38 +81,17 @@ export default function AddInspectionSelectCarScreen() {
           </Pressable>
         </View>
       ) : (
-        <FlatList
-          data={cars}
-          keyExtractor={(item) => String(item.id)}
+        <ScrollView
           contentContainerStyle={[
             styles.list,
             { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 40 },
           ]}
-          renderItem={({ item }) => (
-            <Pressable
-              onPress={() => handleSelectCar(item)}
-              style={({ pressed }) => [
-                styles.carRow,
-                { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-              ]}
-            >
-              <View style={[styles.carIcon, { backgroundColor: "#D1FAE5" }]}>
-                <MaterialCommunityIcons name="car-side" size={26} color="#059669" />
-              </View>
-              <View style={styles.carInfo}>
-                <Text style={[styles.carName, { color: C.text }]}>
-                  {item.nickname ?? `${item.year} ${item.make} ${item.model}`}
-                </Text>
-                <Text style={[styles.carSub, { color: C.textSecondary }]}>
-                  {item.nickname ? `${item.year} ${item.make} ${item.model}` : item.licensePlate ?? ""}
-                </Text>
-              </View>
-              <View style={[styles.goBtn, { backgroundColor: "#059669" }]}>
-                <Feather name="clipboard" size={15} color="#fff" />
-              </View>
-            </Pressable>
-          )}
-        />
+          showsVerticalScrollIndicator={false}
+        >
+          {cars.map((car) => (
+            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} />
+          ))}
+        </ScrollView>
       )}
     </View>
   );
@@ -148,33 +131,5 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   addCarBtnText: { color: "#fff", fontSize: 15, fontFamily: "Inter_600SemiBold" },
-  list: { padding: 16, gap: 12 },
-  carRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    padding: 16,
-    borderRadius: 16,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  carIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  carInfo: { flex: 1, gap: 3 },
-  carName: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
-  carSub: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  goBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  list: { padding: 16 },
 });
