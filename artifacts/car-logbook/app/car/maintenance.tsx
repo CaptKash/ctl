@@ -16,7 +16,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
+import { formatDate } from "@/lib/dateUtils";
 import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { RecordCard } from "@/components/ui/RecordCard";
@@ -168,7 +170,7 @@ export default function MaintenanceScreen() {
               iconColor={Colors.light.warning}
               iconBg={Colors.light.warningLight}
               title={r.description}
-              subtitle={`${r.type} · ${r.date}${r.shop ? ` · ${r.shop}` : ""}`}
+              subtitle={`${r.type} · ${formatDate(r.date)}${r.shop ? ` · ${r.shop}` : ""}`}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
               rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} km` : undefined}
               onDelete={() => setConfirmId(r.id)}
@@ -214,11 +216,10 @@ export default function MaintenanceScreen() {
                 required
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-              <FormField
+              <DatePickerField
                 label="Date"
                 value={mDate}
-                onChangeText={setMDate}
-                placeholder="YYYY-MM-DD"
+                onChange={setMDate}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
@@ -244,11 +245,10 @@ export default function MaintenanceScreen() {
                 placeholder="e.g. City Garage"
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-              <FormField
+              <DatePickerField
                 label="Next Due Date"
                 value={mNextDate}
-                onChangeText={setMNextDate}
-                placeholder="YYYY-MM-DD"
+                onChange={setMNextDate}
               />
             </View>
 

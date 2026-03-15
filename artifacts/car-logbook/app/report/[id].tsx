@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { formatDate } from "@/lib/dateUtils";
 import { StatCard } from "@/components/ui/StatCard";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { apiGet } from "@/hooks/useApi";
@@ -191,7 +192,7 @@ export default function ReportScreen() {
                 iconColor={C.warning}
                 iconBg={C.warningLight}
                 title={item.description}
-                subtitle={item.nextDueDate ? `Due: ${item.nextDueDate}` : "Due soon"}
+                subtitle={item.nextDueDate ? `Due: ${formatDate(item.nextDueDate)}` : "Due soon"}
                 rightText={item.nextDueMileage != null ? `${item.nextDueMileage.toLocaleString()} km` : undefined}
               />
             ))}
@@ -211,7 +212,7 @@ export default function ReportScreen() {
                   iconColor={cfg.color}
                   iconBg={cfg.bg}
                   title={item.description}
-                  subtitle={item.date}
+                  subtitle={formatDate(item.date)}
                   rightText={item.cost != null ? `$${item.cost.toFixed(2)}` : undefined}
                 />
               );

@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiGet, apiPost } from "@/hooks/useApi";
@@ -93,12 +94,10 @@ export default function InspectionFormScreen() {
         <View style={[styles.section, { backgroundColor: C.card }]}>
           <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Inspection Details</Text>
 
-          <FormField
+          <DatePickerField
             label="Date"
             value={date}
-            onChangeText={setDate}
-            placeholder="YYYY-MM-DD"
-            required
+            onChange={setDate}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
@@ -132,11 +131,10 @@ export default function InspectionFormScreen() {
             multiline
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
+          <DatePickerField
             label="Next Inspection Date"
             value={nextInspectionDate}
-            onChangeText={setNextInspectionDate}
-            placeholder="YYYY-MM-DD"
+            onChange={setNextInspectionDate}
           />
         </View>
 

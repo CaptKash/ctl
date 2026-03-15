@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import { formatDate } from "@/lib/dateUtils";
 import BottomNav from "@/components/ui/BottomNav";
 import { apiGet } from "@/hooks/useApi";
 
@@ -98,11 +99,7 @@ export default function UpcomingEventsScreen() {
             const days = daysFromNow(item.nextDueDate);
             const color = urgencyColor(days, C);
             const label = urgencyLabel(days);
-            const dueDate = new Date(item.nextDueDate).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
+            const dueDate = formatDate(item.nextDueDate);
 
             return (
               <Pressable

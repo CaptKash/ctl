@@ -16,7 +16,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
+import { formatDate } from "@/lib/dateUtils";
 import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { RecordCard } from "@/components/ui/RecordCard";
@@ -161,7 +163,7 @@ export default function FaultsScreen() {
               iconBg="#FEE2E2"
               title={r.description}
               subtitle={`${INPUT_METHOD_LABELS[r.inputMethod] ?? r.inputMethod} · ${PHASE_LABELS[r.phase] ?? r.phase}`}
-              rightText={r.date}
+              rightText={formatDate(r.date)}
               rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} km` : undefined}
               onDelete={() => setConfirmId(r.id)}
             />
@@ -188,11 +190,10 @@ export default function FaultsScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
-              <FormField
+              <DatePickerField
                 label="Date"
                 value={date}
-                onChangeText={setDate}
-                placeholder="YYYY-MM-DD"
+                onChange={setDate}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField

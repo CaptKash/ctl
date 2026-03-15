@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -152,11 +153,10 @@ export default function MaintenanceFormScreen() {
             </>
           )}
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
+          <DatePickerField
             label="Date"
             value={date}
-            onChangeText={setDate}
-            placeholder="YYYY-MM-DD"
+            onChange={setDate}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField

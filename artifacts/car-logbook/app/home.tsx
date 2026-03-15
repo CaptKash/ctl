@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
 import { addToCalendar } from "@/lib/addToCalendar";
@@ -199,11 +200,7 @@ export default function MenuDashboardScreen() {
             const days = daysFromNow(item.nextDueDate);
             const color = urgencyColor(days, C);
             const label = urgencyLabel(days);
-            const dueDate = new Date(item.nextDueDate).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
+            const dueDate = formatDate(item.nextDueDate);
 
             return (
               <Pressable

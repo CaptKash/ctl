@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { formatDate } from "@/lib/dateUtils";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -249,7 +250,7 @@ export default function CarDetailScreen() {
               iconBg={r.completed ? "#DCFCE7" : "#FEE2E2"}
               title={r.description}
               subtitle={`${INPUT_METHOD_LABELS[r.inputMethod] ?? r.inputMethod} · ${PHASE_LABELS[r.phase] ?? r.phase}`}
-              rightText={r.date}
+              rightText={formatDate(r.date)}
               rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} km` : undefined}
               onComplete={r.completed ? undefined : () => markSolved(r.id)}
               onDelete={() => confirmDelete(`/cars/${carId}/malfunctions/${r.id}`, "malfunctions")}
@@ -276,7 +277,7 @@ export default function CarDetailScreen() {
               iconColor={Colors.light.warning}
               iconBg={Colors.light.warningLight}
               title={r.description}
-              subtitle={`${r.type} · ${r.date}${r.shop ? ` · ${r.shop}` : ""}`}
+              subtitle={`${r.type} · ${formatDate(r.date)}${r.shop ? ` · ${r.shop}` : ""}`}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
               rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} km` : undefined}
               onDelete={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
@@ -303,9 +304,9 @@ export default function CarDetailScreen() {
               iconColor="#059669"
               iconBg="#D1FAE5"
               title={r.results ?? "Inspection"}
-              subtitle={`${r.date}${r.place ? ` · ${r.place}` : ""}`}
+              subtitle={`${formatDate(r.date)}${r.place ? ` · ${r.place}` : ""}`}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
-              rightSubtext={r.nextInspectionDate ? `Next: ${r.nextInspectionDate}` : undefined}
+              rightSubtext={r.nextInspectionDate ? `Next: ${formatDate(r.nextInspectionDate)}` : undefined}
               onDelete={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
             />
           ))
