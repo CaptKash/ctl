@@ -82,6 +82,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
+        if (Platform.OS !== "web") {
+          const compatible = await LocalAuthentication.hasHardwareAsync();
+          const enrolled = await LocalAuthentication.isEnrolledAsync();
+          setBiometricAvailable(compatible && enrolled);
+        }
+
+        const bioEnabled = await secureGet(BIOMETRIC_ENABLED_KEY);
+        const isBiometricEnabled = bioEnabled === "true" && Platform.OS !== "web";
+        setBiometricEnrolled(isBiometricEnabled);
+
+        if (isBiometricEnabled) {
+          setIsLoading(false);
+          return;
+        }
+
         const [storedToken, storedUser] = await Promise.all([
           secureGet(TOKEN_KEY),
           secureGet(USER_KEY),
@@ -89,15 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedToken && storedUser) {
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
-        }
-
-        if (Platform.OS !== "web") {
-          const compatible = await LocalAuthentication.hasHardwareAsync();
-          const enrolled = await LocalAuthentication.isEnrolledAsync();
-          setBiometricAvailable(compatible && enrolled);
-
-          const bioEnabled = await secureGet(BIOMETRIC_ENABLED_KEY);
-          setBiometricEnrolled(bioEnabled === "true");
         }
       } catch { /* ignore */ }
       finally {
@@ -119,11 +125,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await Promise.all([
       secureDelete(TOKEN_KEY),
       secureDelete(USER_KEY),
-      secureDelete(BIOMETRIC_ENABLED_KEY),
     ]);
     setToken(null);
     setUser(null);
-    setBiometricEnrolled(false);
   };
 
   const enableBiometric = async () => {

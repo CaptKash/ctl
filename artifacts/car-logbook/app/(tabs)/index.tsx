@@ -105,8 +105,8 @@ export default function LoginScreen() {
       }
 
       router.replace("/home");
-    } catch (err: any) {
-      const msg = err?.message ?? "Login failed. Please check your credentials.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Login failed. Please check your credentials.";
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -142,8 +142,8 @@ export default function LoginScreen() {
     try {
       await apiPost("/auth/forgot-password", { email: forgotEmail.trim() });
       setForgotStep("sent");
-    } catch (err: any) {
-      setForgotError(err?.message ?? "Something went wrong.");
+    } catch (err: unknown) {
+      setForgotError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setForgotLoading(false);
     }
@@ -160,8 +160,8 @@ export default function LoginScreen() {
       });
       Alert.alert("Success", res.message);
       setForgotVisible(false);
-    } catch (err: any) {
-      setResetError(err?.message ?? "Something went wrong.");
+    } catch (err: unknown) {
+      setResetError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setResetLoading(false);
     }

@@ -56,8 +56,8 @@ export default function SignupScreen() {
       await login(res.token, res.user);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
-    } catch (err: any) {
-      const msg = err?.message ?? "Registration failed. Please try again.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Registration failed. Please try again.";
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
