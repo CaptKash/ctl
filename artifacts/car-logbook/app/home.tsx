@@ -1,4 +1,5 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -58,13 +59,7 @@ export default function MenuDashboardScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const { user, isAuthenticated, logout } = useAuth();
-
-  const handleLogout = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await logout();
-    router.replace("/(tabs)/");
-  };
+  const { user, isAuthenticated } = useAuth();
 
   const { data: cars } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -94,13 +89,6 @@ export default function MenuDashboardScreen() {
           </Text>
           <Text style={[styles.headerSub, { color: C.textSecondary }]}>Car Technical Log</Text>
         </View>
-        <Pressable
-          onPress={handleLogout}
-          hitSlop={10}
-          style={[styles.logoutBtn, { backgroundColor: C.backgroundTertiary }]}
-        >
-          <Feather name="log-out" size={18} color={C.textSecondary} />
-        </Pressable>
       </View>
 
       <View style={[styles.divider, { backgroundColor: C.border }]} />
@@ -108,7 +96,7 @@ export default function MenuDashboardScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.grid,
-          { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 100 },
+          { paddingBottom: 24 },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -252,6 +240,8 @@ export default function MenuDashboardScreen() {
           })
         )}
       </ScrollView>
+
+      <BottomNav active="dashboard" />
     </View>
   );
 }
@@ -284,15 +274,6 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     marginTop: 2,
   },
-  logoutBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 24 },
 
   grid: { padding: 20, gap: 14 },

@@ -39,6 +39,8 @@ function RootLayoutNav() {
       <Stack.Screen name="malfunction/log" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="maintenance/upcoming" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="maintenance/add" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="account" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />
     </Stack>
   );
 }
