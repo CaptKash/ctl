@@ -136,8 +136,8 @@ export default function MenuDashboardScreen() {
             <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
             <Text style={[styles.tileSub, { color: C.textSecondary }]}>
               {fleetCount === 0
-                ? "No vehicles registered yet"
-                : `${fleetCount} vehicle${fleetCount === 1 ? "" : "s"} registered`}
+                ? "No cars registered yet"
+                : `${fleetCount} car${fleetCount === 1 ? "" : "s"} registered`}
             </Text>
           </View>
           <Pressable
