@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
@@ -17,10 +17,6 @@ import Colors from "@/constants/colors";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { BottomSheet } from "@/components/ui/BottomSheet";
-import { FormField } from "@/components/ui/FormField";
-import { SelectField } from "@/components/ui/SelectField";
-import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 
@@ -67,7 +63,6 @@ const INPUT_METHOD_LABELS: Record<string, string> = {
   warning_message: "Warning Message",
   written: "Written",
 };
-const INPUT_METHODS = Object.keys(INPUT_METHOD_LABELS);
 
 const PHASE_LABELS: Record<string, string> = {
   car_running: "Car Running",
@@ -75,13 +70,6 @@ const PHASE_LABELS: Record<string, string> = {
   parking: "Parking",
   during_drive: "During Drive",
 };
-const PHASES = Object.keys(PHASE_LABELS);
-
-const MAINTENANCE_TYPES = [
-  "Oil Change", "Tyre Rotation", "Tyre Replacement", "Brake Service",
-  "Battery Replacement", "Air Filter", "Transmission Service", "Coolant Flush",
-  "Spark Plugs", "Timing Belt", "Inspection", "Other",
-];
 
 export default function CarDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -91,27 +79,6 @@ export default function CarDetailScreen() {
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  // Add sheets
-  const [showAddFault, setShowAddFault] = useState(false);
-  const [showAddMaintenance, setShowAddMaintenance] = useState(false);
-
-  // Fault form
-  const [fDate, setFDate] = useState(new Date().toISOString().split("T")[0]);
-  const [fDesc, setFDesc] = useState("");
-  const [fInputMethod, setFInputMethod] = useState("written");
-  const [fOdometer, setFOdometer] = useState("");
-  const [fPhase, setFPhase] = useState("during_drive");
-
-  // Maintenance form
-  const [mType, setMType] = useState("");
-  const [mDesc, setMDesc] = useState("");
-  const [mDate, setMDate] = useState(new Date().toISOString().split("T")[0]);
-  const [mMileage, setMMileage] = useState("");
-  const [mCost, setMCost] = useState("");
-  const [mShop, setMShop] = useState("");
-  const [mNextDate, setMNextDate] = useState("");
-
-  // Confirm modal
   const [confirmModal, setConfirmModal] = useState<{
     visible: boolean;
     title: string;
@@ -119,7 +86,6 @@ export default function CarDetailScreen() {
     onConfirm: () => void;
   }>({ visible: false, title: "", message: "", onConfirm: () => {} });
 
-  // Queries
   const carQuery = useQuery<Car>({
     queryKey: ["car", carId],
     queryFn: () => apiGet<Car>(`/cars/${carId}`),
@@ -135,56 +101,12 @@ export default function CarDetailScreen() {
     queryFn: () => apiGet<MaintenanceRecord[]>(`/cars/${carId}/maintenance`),
   });
 
-  // Mutations — Add Fault
-  const addFaultMutation = useMutation({
-    mutationFn: () =>
-      apiPost(`/cars/${carId}/malfunctions`, {
-        carId,
-        date: fDate,
-        description: fDesc,
-        inputMethod: fInputMethod,
-        odometer: fOdometer ? parseInt(fOdometer) : undefined,
-        phase: fPhase,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["malfunctions", carId] });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setShowAddFault(false);
-      setFDesc(""); setFOdometer("");
-      setFDate(new Date().toISOString().split("T")[0]);
-      setFInputMethod("written"); setFPhase("during_drive");
-    },
-  });
-
-  // Mutations — Add Maintenance
-  const addMaintenanceMutation = useMutation({
-    mutationFn: () =>
-      apiPost(`/cars/${carId}/maintenance`, {
-        type: mType,
-        description: mDesc,
-        date: mDate,
-        mileage: mMileage ? parseInt(mMileage) : undefined,
-        cost: mCost ? parseFloat(mCost) : undefined,
-        shop: mShop || undefined,
-        nextDueDate: mNextDate || undefined,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["maintenance", carId] });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setShowAddMaintenance(false);
-      setMType(""); setMDesc(""); setMCost(""); setMShop(""); setMNextDate(""); setMMileage("");
-      setMDate(new Date().toISOString().split("T")[0]);
-    },
-  });
-
-  // Mark fault as solved
   const markSolved = (recordId: number) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     apiPost(`/cars/${carId}/events/complete`, { recordType: "malfunction", recordId })
       .then(() => qc.invalidateQueries({ queryKey: ["malfunctions", carId] }));
   };
 
-  // Delete record
   const confirmDelete = (path: string, queryKey: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setConfirmModal({
@@ -256,7 +178,7 @@ export default function CarDetailScreen() {
         </View>
       </View>
 
-      {/* Car Stats Strip */}
+      {/* Stats Strip */}
       <View style={[styles.statsStrip, { backgroundColor: C.card }]}>
         {car.mileage != null && (
           <View style={styles.statItem}>
@@ -291,14 +213,7 @@ export default function CarDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Faults */}
-        <SectionHeader
-          title="Faults"
-          actionLabel="Add Fault"
-          onAction={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setShowAddFault(true);
-          }}
-        />
+        <SectionHeader title="Faults" />
 
         {faultsQuery.isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 16 }} />
@@ -306,9 +221,7 @@ export default function CarDetailScreen() {
           <EmptyState
             icon="alert-triangle"
             title="No fault records"
-            description="Log warning messages and malfunctions here."
-            actionLabel="Add Fault"
-            onAction={() => setShowAddFault(true)}
+            description="Faults logged from the Add Event page will appear here."
           />
         ) : (
           faultsQuery.data.map((r) => (
@@ -328,14 +241,7 @@ export default function CarDetailScreen() {
         )}
 
         {/* Maintenance */}
-        <SectionHeader
-          title="Maintenance"
-          actionLabel="Add Entry"
-          onAction={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setShowAddMaintenance(true);
-          }}
-        />
+        <SectionHeader title="Maintenance" />
 
         {maintenanceQuery.isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 16 }} />
@@ -343,9 +249,7 @@ export default function CarDetailScreen() {
           <EmptyState
             icon="tool"
             title="No maintenance records"
-            description="Log oil changes, tyre rotations, brake service, and more."
-            actionLabel="Add Entry"
-            onAction={() => setShowAddMaintenance(true)}
+            description="Maintenance logged from the Add Event page will appear here."
           />
         ) : (
           maintenanceQuery.data.map((r) => (
@@ -363,47 +267,6 @@ export default function CarDetailScreen() {
           ))
         )}
       </ScrollView>
-
-      {/* Add Fault Sheet */}
-      <BottomSheet visible={showAddFault} onClose={() => setShowAddFault(false)} title="Add Fault">
-        <FormField label="Date" value={fDate} onChangeText={setFDate} placeholder="YYYY-MM-DD" />
-        <FormField label="Description" value={fDesc} onChangeText={setFDesc} placeholder="Describe the fault…" multiline required />
-        <SelectField
-          label="Input Method"
-          value={INPUT_METHOD_LABELS[fInputMethod] ?? fInputMethod}
-          onSelect={(v) => setFInputMethod(Object.keys(INPUT_METHOD_LABELS).find((k) => INPUT_METHOD_LABELS[k] === v) ?? v)}
-          options={INPUT_METHODS.map((k) => INPUT_METHOD_LABELS[k])}
-          placeholder="Select method…"
-        />
-        <SelectField
-          label="Phase"
-          value={PHASE_LABELS[fPhase] ?? fPhase}
-          onSelect={(v) => setFPhase(Object.keys(PHASE_LABELS).find((k) => PHASE_LABELS[k] === v) ?? v)}
-          options={PHASES.map((k) => PHASE_LABELS[k])}
-          placeholder="Select phase…"
-        />
-        <FormField label="Odometer (km)" value={fOdometer} onChangeText={setFOdometer} placeholder="e.g. 54200" keyboardType="number-pad" />
-        <PrimaryButton label="Save Fault" onPress={() => addFaultMutation.mutate()} loading={addFaultMutation.isPending} disabled={!fDesc.trim()} />
-      </BottomSheet>
-
-      {/* Add Maintenance Sheet */}
-      <BottomSheet visible={showAddMaintenance} onClose={() => setShowAddMaintenance(false)} title="Add Maintenance">
-        <SelectField
-          label="Type"
-          value={mType}
-          onSelect={setMType}
-          options={MAINTENANCE_TYPES}
-          placeholder="Select type…"
-          required
-        />
-        <FormField label="Description" value={mDesc} onChangeText={setMDesc} placeholder="Describe the work done" required />
-        <FormField label="Date" value={mDate} onChangeText={setMDate} placeholder="YYYY-MM-DD" />
-        <FormField label="Mileage (km)" value={mMileage} onChangeText={setMMileage} placeholder="Current odometer" keyboardType="number-pad" />
-        <FormField label="Cost ($)" value={mCost} onChangeText={setMCost} placeholder="Total cost" keyboardType="decimal-pad" />
-        <FormField label="Shop / Technician" value={mShop} onChangeText={setMShop} placeholder="Where was it done?" />
-        <FormField label="Next Due Date" value={mNextDate} onChangeText={setMNextDate} placeholder="YYYY-MM-DD" />
-        <PrimaryButton label="Save Record" onPress={() => addMaintenanceMutation.mutate()} loading={addMaintenanceMutation.isPending} disabled={!mType || !mDesc} />
-      </BottomSheet>
 
       <ConfirmModal
         visible={confirmModal.visible}
