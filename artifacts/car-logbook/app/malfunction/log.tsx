@@ -60,7 +60,7 @@ export default function MalfunctionLogScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save malfunction.";
+      const msg = err instanceof Error ? err.message : "Failed to save fault.";
       Alert.alert("Error", msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -78,7 +78,7 @@ export default function MalfunctionLogScreen() {
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: C.text }]}>Log Malfunction</Text>
+          <Text style={[styles.headerTitle, { color: C.text }]}>Log Fault</Text>
           <View style={{ width: 36 }} />
         </View>
 
@@ -221,7 +221,7 @@ export default function MalfunctionLogScreen() {
                     { color: canSave ? "#fff" : C.textTertiary },
                   ]}
                 >
-                  Save Malfunction
+                  Save Fault
                 </Text>
               </>
             )}

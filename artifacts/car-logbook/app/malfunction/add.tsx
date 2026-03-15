@@ -46,31 +46,31 @@ export default function MalfunctionSelectCarScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={C.text} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Report Malfunction</Text>
+        <Text style={[styles.headerTitle, { color: C.text }]}>Add Fault</Text>
         <View style={{ width: 36 }} />
       </View>
 
-      <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
-        <Feather name="info" size={15} color={C.info} />
-        <Text style={[styles.instructionText, { color: C.info }]}>
-          Select the vehicle with the issue
+      <View style={[styles.instruction, { backgroundColor: C.dangerLight }]}>
+        <Feather name="info" size={15} color={C.danger} />
+        <Text style={[styles.instructionText, { color: C.danger }]}>
+          Select the vehicle with the fault
         </Text>
       </View>
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.tint} />
+          <ActivityIndicator size="large" color={C.danger} />
         </View>
       ) : !cars || cars.length === 0 ? (
         <View style={styles.center}>
           <MaterialCommunityIcons name="car-side" size={40} color={C.textTertiary} />
           <Text style={[styles.emptyTitle, { color: C.text }]}>No vehicles yet</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            Add a car first before reporting a malfunction.
+            Add a car first before reporting a fault.
           </Text>
           <Pressable
             onPress={() => router.replace("/car/add")}
-            style={[styles.addCarBtn, { backgroundColor: C.tint }]}
+            style={[styles.addCarBtn, { backgroundColor: C.danger }]}
           >
             <Feather name="plus" size={16} color="#fff" />
             <Text style={styles.addCarBtnText}>Add Car</Text>

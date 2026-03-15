@@ -47,32 +47,32 @@ export default function AddMaintenanceSelectCarScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={C.text} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Add Maintenance</Text>
+        <Text style={[styles.headerTitle, { color: C.text }]}>Add Repair</Text>
         <View style={{ width: 36 }} />
       </View>
 
       {/* Instruction */}
-      <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
-        <Feather name="info" size={15} color={C.info} />
-        <Text style={[styles.instructionText, { color: C.info }]}>
-          Select the vehicle you want to log maintenance for
+      <View style={[styles.instruction, { backgroundColor: C.warningLight }]}>
+        <Feather name="info" size={15} color={C.warning} />
+        <Text style={[styles.instructionText, { color: C.warning }]}>
+          Select the vehicle you want to log a repair for
         </Text>
       </View>
 
       {isLoading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.tint} />
+          <ActivityIndicator size="large" color={C.warning} />
         </View>
       ) : !cars || cars.length === 0 ? (
         <View style={styles.center}>
           <Feather name="truck" size={40} color={C.textTertiary} />
           <Text style={[styles.emptyTitle, { color: C.text }]}>No vehicles yet</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            Add a car first before logging maintenance.
+            Add a car first before logging a repair.
           </Text>
           <Pressable
             onPress={() => router.replace("/car/add")}
-            style={[styles.addCarBtn, { backgroundColor: C.tint }]}
+            style={[styles.addCarBtn, { backgroundColor: C.warning }]}
           >
             <Feather name="plus" size={16} color="#fff" />
             <Text style={styles.addCarBtnText}>Add Car</Text>
@@ -94,8 +94,8 @@ export default function AddMaintenanceSelectCarScreen() {
                 { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
               ]}
             >
-              <View style={[styles.carIcon, { backgroundColor: C.infoLight }]}>
-                <MaterialCommunityIcons name="car-side" size={26} color={C.info} />
+              <View style={[styles.carIcon, { backgroundColor: C.warningLight }]}>
+                <MaterialCommunityIcons name="car-side" size={26} color={C.warning} />
               </View>
               <View style={styles.carInfo}>
                 <Text style={[styles.carName, { color: C.text }]}>
@@ -110,7 +110,7 @@ export default function AddMaintenanceSelectCarScreen() {
                   </View>
                 )}
               </View>
-              <View style={[styles.goBtn, { backgroundColor: C.tint }]}>
+              <View style={[styles.goBtn, { backgroundColor: C.warning }]}>
                 <Feather name="tool" size={15} color="#fff" />
               </View>
             </Pressable>
