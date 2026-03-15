@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#0D1B2A" rx="200"/>
+
+  <!-- CTL bold letters - glowing behind the car -->
+  <text x="512" y="700"
+    font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+    font-size="230"
+    font-weight="900"
+    text-anchor="middle"
+    fill="#1A3F7A"
+    letter-spacing="24">CTL</text>
+
+  <!-- Subtle glow behind CTL -->
+  <text x="512" y="700"
+    font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+    font-size="230"
+    font-weight="900"
+    text-anchor="middle"
+    fill="none"
+    stroke="#2563EB"
+    stroke-width="1.5"
+    stroke-opacity="0.3"
+    letter-spacing="24">CTL</text>
+
+  <!-- === FRONT-FACING CAR OUTLINE === -->
+  <!-- All strokes in bright white/silver, no fill -->
+  <!-- Stroke width: 6px for main body, 4px for details -->
+
+  <!-- CABIN / ROOF (rounded top) -->
+  <path d="M 362 290 Q 370 220 400 205 L 624 205 Q 654 220 662 290 Z"
+    fill="none" stroke="#E2E8F0" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- WINDSHIELD (inside cabin) -->
+  <path d="M 375 285 L 400 218 L 624 218 L 649 285 Z"
+    fill="#0D2347" stroke="#93C5FD" stroke-width="3.5" stroke-linejoin="round" fill-opacity="0.5"/>
+
+  <!-- LEFT A-PILLAR -->
+  <line x1="362" y1="290" x2="270" y2="415" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
+  <!-- RIGHT A-PILLAR -->
+  <line x1="662" y1="290" x2="754" y2="415" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- HOOD (main front body - trapezoid) -->
+  <path d="M 270 415 L 220 480 L 804 480 L 754 415 Z"
+    fill="none" stroke="#E2E8F0" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- CENTER HOOD LINES (subtle detail) -->
+  <line x1="512" y1="415" x2="512" y2="480" stroke="#64748B" stroke-width="2.5" stroke-dasharray="4,4"/>
+
+  <!-- LEFT HEADLIGHT assembly -->
+  <rect x="228" y="422" width="120" height="46" rx="8"
+    fill="#0D2347" stroke="#93C5FD" stroke-width="4"/>
+  <!-- Headlight inner glow lines -->
+  <line x1="242" y1="445" x2="336" y2="445" stroke="#60A5FA" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+  <line x1="242" y1="455" x2="316" y2="455" stroke="#60A5FA" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- RIGHT HEADLIGHT assembly -->
+  <rect x="676" y="422" width="120" height="46" rx="8"
+    fill="#0D2347" stroke="#93C5FD" stroke-width="4"/>
+  <!-- Headlight inner glow lines -->
+  <line x1="688" y1="445" x2="782" y2="445" stroke="#60A5FA" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+  <line x1="708" y1="455" x2="782" y2="455" stroke="#60A5FA" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- FRONT GRILLE (center, between headlights) -->
+  <rect x="360" y="428" width="304" height="40" rx="6"
+    fill="none" stroke="#475569" stroke-width="3.5"/>
+  <!-- Grille slats -->
+  <line x1="410" y1="428" x2="410" y2="468" stroke="#475569" stroke-width="2"/>
+  <line x1="460" y1="428" x2="460" y2="468" stroke="#475569" stroke-width="2"/>
+  <line x1="512" y1="428" x2="512" y2="468" stroke="#475569" stroke-width="2"/>
+  <line x1="564" y1="428" x2="564" y2="468" stroke="#475569" stroke-width="2"/>
+  <line x1="614" y1="428" x2="614" y2="468" stroke="#475569" stroke-width="2"/>
+  <!-- Grille center emblem circle -->
+  <circle cx="512" cy="448" r="16" fill="none" stroke="#60A5FA" stroke-width="3"/>
+
+  <!-- FRONT BUMPER (wide curved bar) -->
+  <path d="M 185 480 Q 185 540 210 555 L 814 555 Q 839 540 839 480"
+    fill="none" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- BUMPER LOWER TRIM -->
+  <path d="M 215 540 L 250 555 L 774 555 L 809 540"
+    fill="none" stroke="#64748B" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- LEFT FOG LIGHT -->
+  <rect x="215" y="510" width="70" height="28" rx="5"
+    fill="none" stroke="#FBBF24" stroke-width="3"/>
+  <line x1="225" y1="524" x2="275" y2="524" stroke="#FCD34D" stroke-width="2" opacity="0.7"/>
+
+  <!-- RIGHT FOG LIGHT -->
+  <rect x="739" y="510" width="70" height="28" rx="5"
+    fill="none" stroke="#FBBF24" stroke-width="3"/>
+  <line x1="749" y1="524" x2="799" y2="524" stroke="#FCD34D" stroke-width="2" opacity="0.7"/>
+
+  <!-- FRONT LICENCE PLATE area -->
+  <rect x="432" y="510" width="160" height="38" rx="4"
+    fill="#0D2347" stroke="#94A3B8" stroke-width="2.5"/>
+
+  <!-- LEFT WHEEL ARCH -->
+  <path d="M 185 555 Q 160 580 158 620 L 230 620 Q 228 580 245 555"
+    fill="none" stroke="#E2E8F0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Left Tyre partial -->
+  <path d="M 158 620 Q 160 660 194 662 Q 228 660 230 620"
+    fill="none" stroke="#94A3B8" stroke-width="4"/>
+
+  <!-- RIGHT WHEEL ARCH -->
+  <path d="M 839 555 Q 864 580 866 620 L 794 620 Q 796 580 779 555"
+    fill="none" stroke="#E2E8F0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right Tyre partial -->
+  <path d="M 866 620 Q 864 660 830 662 Q 796 660 794 620"
+    fill="none" stroke="#94A3B8" stroke-width="4"/>
+
+  <!-- LEFT SIDE MIRROR -->
+  <path d="M 270 340 L 230 355 L 225 385 L 270 380 Z"
+    fill="none" stroke="#94A3B8" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- RIGHT SIDE MIRROR -->
+  <path d="M 754 340 L 794 355 L 799 385 L 754 380 Z"
+    fill="none" stroke="#94A3B8" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- BODY SIDE LINES connecting A-pillar to bumper -->
+  <line x1="270" y1="415" x2="185" y2="555" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
+  <line x1="754" y1="415" x2="839" y2="555" stroke="#E2E8F0" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- BOTTOM UNDERBODY line -->
+  <line x1="230" y1="620" x2="794" y2="620" stroke="#475569" stroke-width="3"/>
+</svg>

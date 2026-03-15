@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Nt8KmQJPMXX0hIpC0sP62"
+uri = "file://artifacts/car-logbook/assets/images/icon.png"
+type = "image"
+title = "CTL App Logo"
