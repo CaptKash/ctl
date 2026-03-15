@@ -55,9 +55,9 @@ export default function AddRepairSelectCarScreen() {
         <View style={{ width: 36 }} />
       </View>
 
-      <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
-        <Feather name="info" size={15} color={C.info} />
-        <Text style={[styles.instructionText, { color: C.info }]}>
+      <View style={[styles.instruction, { backgroundColor: "#FEF3C7" }]}>
+        <Feather name="tool" size={15} color="#D97706" />
+        <Text style={[styles.instructionText, { color: "#D97706" }]}>
           Select the vehicle you want to log a repair for
         </Text>
       </View>
