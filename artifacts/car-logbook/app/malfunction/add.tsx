@@ -50,9 +50,9 @@ export default function MalfunctionSelectCarScreen() {
         <View style={{ width: 36 }} />
       </View>
 
-      <View style={[styles.instruction, { backgroundColor: C.dangerLight }]}>
-        <Feather name="info" size={15} color={C.danger} />
-        <Text style={[styles.instructionText, { color: C.danger }]}>
+      <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
+        <Feather name="info" size={15} color={C.info} />
+        <Text style={[styles.instructionText, { color: C.info }]}>
           Select the vehicle with the fault
         </Text>
       </View>
