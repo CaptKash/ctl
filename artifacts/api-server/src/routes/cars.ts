@@ -296,6 +296,15 @@ router.post("/cars/:carId/malfunctions", async (req, res) => {
   res.status(201).json(record);
 });
 
+router.delete("/cars/:carId/malfunctions/:recordId", async (req, res) => {
+  const recordId = parseInt(req.params.recordId);
+  const carId = parseInt(req.params.carId);
+  await db
+    .delete(malfunctionsTable)
+    .where(and(eq(malfunctionsTable.id, recordId), eq(malfunctionsTable.carId, carId)));
+  res.json({ success: true });
+});
+
 // Events (unified timeline)
 router.get("/cars/:carId/events", async (req, res) => {
   const carId = parseInt(req.params.carId);

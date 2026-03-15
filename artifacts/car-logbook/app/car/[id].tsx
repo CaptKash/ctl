@@ -460,6 +460,15 @@ export default function CarDetailScreen() {
           ) : (
             eventsQuery.data.map((ev) => {
               const cfg = EVENT_TYPE_CONFIG[ev.type];
+              const deleteMap: Record<EventItem["type"], { path: string; queryKey: string }> = {
+                maintenance: { path: `/cars/${carId}/maintenance/${ev.id}`, queryKey: "maintenance" },
+                parts: { path: `/cars/${carId}/parts/${ev.id}`, queryKey: "parts" },
+                insurance: { path: `/cars/${carId}/insurance/${ev.id}`, queryKey: "insurance" },
+                dealership: { path: `/cars/${carId}/dealerships/${ev.id}`, queryKey: "dealerships" },
+                fuel: { path: `/cars/${carId}/fuel/${ev.id}`, queryKey: "fuel" },
+                malfunction: { path: `/cars/${carId}/malfunctions/${ev.id}`, queryKey: "malfunctions" },
+              };
+              const del = deleteMap[ev.type];
               return (
                 <RecordCard
                   key={`${ev.type}-${ev.id}`}
@@ -469,6 +478,7 @@ export default function CarDetailScreen() {
                   title={ev.title}
                   subtitle={`${cfg.label} · ${ev.subtitle}`}
                   rightText={ev.date}
+                  onDelete={() => deleteRecord(del.path, del.queryKey)}
                 />
               );
             })
