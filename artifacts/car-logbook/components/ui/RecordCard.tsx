@@ -18,6 +18,7 @@ type Props = {
   rightSubtext?: string;
   onPress?: () => void;
   onDelete?: () => void;
+  onComplete?: () => void;
 };
 
 export function RecordCard({
@@ -30,6 +31,7 @@ export function RecordCard({
   rightSubtext,
   onPress,
   onDelete,
+  onComplete,
 }: Props) {
   const C = Colors.light;
 
@@ -55,11 +57,20 @@ export function RecordCard({
           <Text style={[styles.rightSubtext, { color: C.textTertiary }]}>{rightSubtext}</Text>
         ) : null}
       </View>
+      {onComplete && (
+        <Pressable
+          onPress={onComplete}
+          hitSlop={8}
+          style={({ pressed }) => [styles.actionBtn, { opacity: pressed ? 0.6 : 1 }]}
+        >
+          <Feather name="check-circle" size={16} color="#16A34A" />
+        </Pressable>
+      )}
       {onDelete && (
         <Pressable
           onPress={onDelete}
           hitSlop={8}
-          style={({ pressed }) => [styles.deleteBtn, { opacity: pressed ? 0.6 : 1 }]}
+          style={({ pressed }) => [styles.actionBtn, { opacity: pressed ? 0.6 : 1 }]}
         >
           <Feather name="trash-2" size={16} color={C.danger} />
         </Pressable>
@@ -113,7 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter_400Regular",
   },
-  deleteBtn: {
+  actionBtn: {
     padding: 4,
   },
 });

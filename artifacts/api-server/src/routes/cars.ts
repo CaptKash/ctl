@@ -8,6 +8,7 @@ import {
   dealershipsTable,
   fuelTable,
   malfunctionsTable,
+  eventCompletionsTable,
   insertCarSchema,
   insertMaintenanceSchema,
   insertPartsSchema,
@@ -305,18 +306,32 @@ router.delete("/cars/:carId/malfunctions/:recordId", async (req, res) => {
   res.json({ success: true });
 });
 
+// Event completions
+router.post("/cars/:carId/events/complete", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+  const { recordType, recordId } = req.body;
+  if (!recordType || !recordId) {
+    return res.status(400).json({ error: "recordType and recordId are required" });
+  }
+  await db.insert(eventCompletionsTable).values({ carId, recordType, recordId: parseInt(recordId) });
+  res.json({ success: true });
+});
+
 // Events (unified timeline)
 router.get("/cars/:carId/events", async (req, res) => {
   const carId = parseInt(req.params.carId);
 
-  const [maintenance, parts, insurance, dealerships, fuel, malfunctions] = await Promise.all([
+  const [maintenance, parts, insurance, dealerships, fuel, malfunctions, completions] = await Promise.all([
     db.select().from(maintenanceTable).where(eq(maintenanceTable.carId, carId)),
     db.select().from(partsTable).where(eq(partsTable.carId, carId)),
     db.select().from(insuranceTable).where(eq(insuranceTable.carId, carId)),
     db.select().from(dealershipsTable).where(eq(dealershipsTable.carId, carId)),
     db.select().from(fuelTable).where(eq(fuelTable.carId, carId)),
     db.select().from(malfunctionsTable).where(eq(malfunctionsTable.carId, carId)),
+    db.select().from(eventCompletionsTable).where(eq(eventCompletionsTable.carId, carId)),
   ]);
+
+  const completedKeys = new Set(completions.map((c) => `${c.recordType}-${c.recordId}`));
 
   const events = [
     ...maintenance.map((r) => ({
@@ -361,7 +376,9 @@ router.get("/cars/:carId/events", async (req, res) => {
       title: r.description,
       subtitle: r.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
     })),
-  ].sort((a, b) => b.date.localeCompare(a.date));
+  ]
+    .filter((ev) => !completedKeys.has(`${ev.type}-${ev.id}`))
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   res.json(events);
 });

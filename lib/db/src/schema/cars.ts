@@ -162,3 +162,11 @@ export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable)
   });
 export type InsertMalfunction = z.infer<typeof insertMalfunctionSchema>;
 export type MalfunctionRecord = typeof malfunctionsTable.$inferSelect;
+
+export const eventCompletionsTable = pgTable("event_completions", {
+  id: serial("id").primaryKey(),
+  carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  recordType: text("record_type").notNull(),
+  recordId: integer("record_id").notNull(),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+});

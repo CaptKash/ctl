@@ -301,6 +301,12 @@ export default function CarDetailScreen() {
     },
   });
 
+  const completeEvent = (recordType: string, recordId: number) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    apiPost(`/cars/${carId}/events/complete`, { recordType, recordId })
+      .then(() => qc.invalidateQueries({ queryKey: ["events", carId] }));
+  };
+
   const [confirmModal, setConfirmModal] = useState<{
     visible: boolean;
     title: string;
@@ -486,6 +492,7 @@ export default function CarDetailScreen() {
                   title={ev.title}
                   subtitle={`${cfg.label} · ${ev.subtitle}`}
                   rightText={ev.date}
+                  onComplete={() => completeEvent(ev.type, ev.id)}
                   onDelete={() => deleteRecord(del.path, del.queryKey)}
                 />
               );
