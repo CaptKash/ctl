@@ -90,7 +90,7 @@ export default function AddInspectionSelectCarScreen() {
           showsVerticalScrollIndicator={false}
         >
           {cars.map((car) => (
-            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} />
+            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} accentBg="#D1FAE5" accentIcon="#059669" />
           ))}
         </ScrollView>
       )}

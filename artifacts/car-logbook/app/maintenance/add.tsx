@@ -55,9 +55,9 @@ export default function AddRepairSelectCarScreen() {
         <View style={{ width: 36 }} />
       </View>
 
-      <View style={[styles.instruction, { backgroundColor: "#FEF3C7" }]}>
-        <Feather name="tool" size={15} color="#D97706" />
-        <Text style={[styles.instructionText, { color: "#D97706" }]}>
+      <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
+        <Feather name="info" size={15} color={C.info} />
+        <Text style={[styles.instructionText, { color: C.info }]}>
           Select the vehicle you want to log a repair for
         </Text>
       </View>
@@ -90,7 +90,7 @@ export default function AddRepairSelectCarScreen() {
           showsVerticalScrollIndicator={false}
         >
           {cars.map((car) => (
-            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} />
+            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} accentBg="#FEF3C7" accentIcon="#D97706" />
           ))}
         </ScrollView>
       )}

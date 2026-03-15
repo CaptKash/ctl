@@ -24,6 +24,8 @@ type Car = {
 type Props = {
   car: Car;
   onPress: () => void;
+  accentBg?: string;
+  accentIcon?: string;
 };
 
 const CAR_COLORS: Record<string, string> = {
@@ -56,9 +58,11 @@ function getFirstPhoto(photos?: string | null): string | null {
   }
 }
 
-export function CarCard({ car, onPress }: Props) {
+export function CarCard({ car, onPress, accentBg, accentIcon }: Props) {
   const C = Colors.light;
   const firstPhoto = getFirstPhoto(car.photos);
+  const thumbBg = accentBg ?? C.infoLight;
+  const thumbIcon = accentIcon ?? C.info;
 
   return (
     <Pressable
@@ -69,12 +73,12 @@ export function CarCard({ car, onPress }: Props) {
       ]}
     >
       {/* Thumbnail */}
-      <View style={[styles.iconContainer, { backgroundColor: C.infoLight }]}>
+      <View style={[styles.iconContainer, { backgroundColor: thumbBg }]}>
         {firstPhoto ? (
           <Image source={{ uri: firstPhoto }} style={styles.photo} resizeMode="cover" />
         ) : (
           <>
-            <MaterialCommunityIcons name="car-side" size={32} color={C.info} />
+            <MaterialCommunityIcons name="car-side" size={32} color={thumbIcon} />
             {car.color && (
               <View style={[styles.colorDot, { backgroundColor: getCarColor(car.color) }]} />
             )}
