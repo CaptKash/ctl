@@ -28,7 +28,7 @@ const eventOptions: EventOption[] = [
   {
     id: "malfunction",
     title: "Fault",
-    description: "Report a breakdown or fault",
+    description: "Log a breakdown or fault",
     icon: "alert-triangle",
     iconBg: "#FEE2E2",
     iconColor: "#DC2626",
@@ -46,7 +46,7 @@ const eventOptions: EventOption[] = [
   {
     id: "inspection",
     title: "Inspection",
-    description: "Record a regular check or inspection",
+    description: "Log a regular check or inspection",
     icon: "clipboard",
     iconBg: "#D1FAE5",
     iconColor: "#059669",
@@ -55,7 +55,7 @@ const eventOptions: EventOption[] = [
   {
     id: "registration",
     title: "Registration",
-    description: "Record a registration or renewal",
+    description: "Log a registration or renewal",
     icon: "file-text",
     iconBg: "#EDE9FE",
     iconColor: "#7C3AED",
