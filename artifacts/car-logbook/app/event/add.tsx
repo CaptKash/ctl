@@ -31,7 +31,7 @@ const eventOptions: EventOption[] = [
     icon: "alert-triangle",
     iconBg: "#FEE2E2",
     iconColor: "#DC2626",
-    available: false,
+    available: true,
   },
   {
     id: "maintenance",
@@ -64,7 +64,9 @@ export default function AddEventScreen() {
       Alert.alert("Coming Soon", `${option.title} logging will be available in a future update.`);
       return;
     }
-    if (option.id === "maintenance") {
+    if (option.id === "malfunction") {
+      router.push("/malfunction/add");
+    } else if (option.id === "maintenance") {
       router.push("/maintenance/add");
     }
   };

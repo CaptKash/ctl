@@ -7,12 +7,14 @@ import {
   insuranceTable,
   dealershipsTable,
   fuelTable,
+  malfunctionsTable,
   insertCarSchema,
   insertMaintenanceSchema,
   insertPartsSchema,
   insertInsuranceSchema,
   insertDealershipSchema,
   insertFuelSchema,
+  insertMalfunctionSchema,
 } from "@workspace/db";
 import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
 
@@ -274,6 +276,24 @@ router.delete("/cars/:carId/fuel/:recordId", async (req, res) => {
     .delete(fuelTable)
     .where(and(eq(fuelTable.id, recordId), eq(fuelTable.carId, carId)));
   res.json({ success: true });
+});
+
+// Malfunctions
+router.get("/cars/:carId/malfunctions", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+  const records = await db
+    .select()
+    .from(malfunctionsTable)
+    .where(eq(malfunctionsTable.carId, carId))
+    .orderBy(desc(malfunctionsTable.createdAt));
+  res.json(records);
+});
+
+router.post("/cars/:carId/malfunctions", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+  const body = insertMalfunctionSchema.parse({ ...req.body, carId });
+  const [record] = await db.insert(malfunctionsTable).values(body).returning();
+  res.status(201).json(record);
 });
 
 // Report

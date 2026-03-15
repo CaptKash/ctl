@@ -35,6 +35,8 @@ function RootLayoutNav() {
       <Stack.Screen name="car/add" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="report/[id]" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="event/add" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="malfunction/add" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="malfunction/log" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="maintenance/upcoming" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="maintenance/add" options={{ headerShown: false, presentation: "card" }} />
     </Stack>

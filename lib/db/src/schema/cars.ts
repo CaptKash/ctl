@@ -142,3 +142,18 @@ export const fuelTable = pgTable("fuel_records", {
 export const insertFuelSchema = createInsertSchema(fuelTable).omit({ id: true, createdAt: true });
 export type InsertFuel = z.infer<typeof insertFuelSchema>;
 export type FuelRecord = typeof fuelTable.$inferSelect;
+
+export const malfunctionsTable = pgTable("malfunction_records", {
+  id: serial("id").primaryKey(),
+  carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  date: text("date").notNull(),
+  inputMethod: text("input_method").notNull(),
+  description: text("description").notNull(),
+  odometer: integer("odometer"),
+  phase: text("phase").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable).omit({ id: true, createdAt: true });
+export type InsertMalfunction = z.infer<typeof insertMalfunctionSchema>;
+export type MalfunctionRecord = typeof malfunctionsTable.$inferSelect;
