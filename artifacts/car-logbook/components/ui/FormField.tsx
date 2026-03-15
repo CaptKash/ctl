@@ -3,30 +3,17 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TextInputProps,
   View,
-  KeyboardTypeOptions,
 } from "react-native";
 import Colors from "@/constants/colors";
 
-type Props = {
+type Props = TextInputProps & {
   label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder?: string;
-  keyboardType?: KeyboardTypeOptions;
-  multiline?: boolean;
   required?: boolean;
 };
 
-export function FormField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  keyboardType,
-  multiline,
-  required,
-}: Props) {
+export function FormField({ label, required, multiline, style, ...rest }: Props) {
   const C = Colors.light;
   return (
     <View style={styles.container}>
@@ -34,12 +21,8 @@ export function FormField({
         {label}{required ? " *" : ""}
       </Text>
       <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={C.textTertiary}
-        keyboardType={keyboardType}
         multiline={multiline}
+        placeholderTextColor={C.textTertiary}
         style={[
           styles.input,
           {
@@ -49,7 +32,9 @@ export function FormField({
             height: multiline ? 80 : 46,
             textAlignVertical: multiline ? "top" : "center",
           },
+          style,
         ]}
+        {...rest}
       />
     </View>
   );
@@ -57,7 +42,7 @@ export function FormField({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 14,
+    marginBottom: 2,
   },
   label: {
     fontSize: 13,

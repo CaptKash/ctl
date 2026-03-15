@@ -1,11 +1,11 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import {
+  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 import Colors from "@/constants/colors";
 
@@ -17,6 +17,7 @@ type Car = {
   color?: string | null;
   licensePlate?: string | null;
   mileage?: number | null;
+  photos?: string | null;
 };
 
 type Props = {
@@ -45,41 +46,68 @@ function getCarColor(color?: string | null): string {
   return CAR_COLORS[color.toLowerCase()] ?? "#6B7280";
 }
 
+function getFirstPhoto(photos?: string | null): string | null {
+  if (!photos) return null;
+  try {
+    const arr: string[] = JSON.parse(photos);
+    return arr.length > 0 ? arr[0] : null;
+  } catch {
+    return null;
+  }
+}
+
 export function CarCard({ car, onPress, onLongPress }: Props) {
-  const colorScheme = useColorScheme();
   const C = Colors.light;
+  const firstPhoto = getFirstPhoto(car.photos);
 
   return (
     <Pressable
       onPress={onPress}
       onLongPress={onLongPress}
-      style={({ pressed }) => [styles.card, { backgroundColor: C.card, opacity: pressed ? 0.92 : 1, shadowColor: C.shadow }]}
+      style={({ pressed }) => [
+        styles.card,
+        { backgroundColor: C.card, opacity: pressed ? 0.92 : 1, shadowColor: C.shadow },
+      ]}
     >
+      {/* Thumbnail */}
       <View style={[styles.iconContainer, { backgroundColor: C.infoLight }]}>
-        <MaterialCommunityIcons name="car-side" size={32} color={C.info} />
-        {car.color && (
-          <View style={[styles.colorDot, { backgroundColor: getCarColor(car.color) }]} />
+        {firstPhoto ? (
+          <Image source={{ uri: firstPhoto }} style={styles.photo} resizeMode="cover" />
+        ) : (
+          <>
+            <MaterialCommunityIcons name="car-side" size={32} color={C.info} />
+            {car.color && (
+              <View style={[styles.colorDot, { backgroundColor: getCarColor(car.color) }]} />
+            )}
+          </>
         )}
       </View>
+
+      {/* Info */}
       <View style={styles.info}>
-        <Text style={[styles.carName, { color: C.text, fontFamily: "Inter_700Bold" }]}>
+        <Text style={[styles.carName, { color: C.text }]}>
           {car.year} {car.make} {car.model}
         </Text>
         <View style={styles.meta}>
           {car.licensePlate && (
             <View style={[styles.badge, { backgroundColor: C.backgroundTertiary }]}>
               <Feather name="credit-card" size={11} color={C.textSecondary} />
-              <Text style={[styles.badgeText, { color: C.textSecondary }]}>{car.licensePlate}</Text>
+              <Text style={[styles.badgeText, { color: C.textSecondary }]}>
+                {car.licensePlate}
+              </Text>
             </View>
           )}
           {car.mileage != null && (
             <View style={[styles.badge, { backgroundColor: C.backgroundTertiary }]}>
               <Feather name="activity" size={11} color={C.textSecondary} />
-              <Text style={[styles.badgeText, { color: C.textSecondary }]}>{car.mileage.toLocaleString()} km</Text>
+              <Text style={[styles.badgeText, { color: C.textSecondary }]}>
+                {car.mileage.toLocaleString()} km
+              </Text>
             </View>
           )}
         </View>
       </View>
+
       <Feather name="chevron-right" size={18} color={C.textTertiary} />
     </Pressable>
   );
@@ -99,11 +127,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconContainer: {
-    width: 56,
-    height: 56,
+    width: 58,
+    height: 58,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  photo: {
+    width: 58,
+    height: 58,
   },
   colorDot: {
     position: "absolute",
@@ -121,6 +154,7 @@ const styles = StyleSheet.create({
   },
   carName: {
     fontSize: 16,
+    fontFamily: "Inter_700Bold",
   },
   meta: {
     flexDirection: "row",

@@ -12,6 +12,7 @@ export const carsTable = pgTable("cars", {
   vin: text("vin"),
   mileage: integer("mileage"),
   notes: text("notes"),
+  photos: text("photos"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -28,6 +28,7 @@ type Car = {
   color?: string | null;
   licensePlate?: string | null;
   mileage?: number | null;
+  photos?: string | null;
 };
 
 export default function MyCarsScreen() {
