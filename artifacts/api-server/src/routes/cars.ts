@@ -361,6 +361,22 @@ router.delete("/cars/:carId/fuel/:recordId", async (req, res) => {
   res.json({ success: true });
 });
 
+// All faults across all cars
+router.get("/malfunctions", async (_req, res) => {
+  const [records, completions, cars] = await Promise.all([
+    db.select().from(malfunctionsTable).orderBy(desc(malfunctionsTable.createdAt)),
+    db.select().from(eventCompletionsTable).where(eq(eventCompletionsTable.recordType, "malfunction")),
+    db.select().from(carsTable),
+  ]);
+  const completedIds = new Set(completions.map((c) => c.recordId));
+  const carsMap = new Map(cars.map((c) => [c.id, c]));
+  res.json(records.map((r) => ({
+    ...r,
+    completed: completedIds.has(r.id),
+    car: carsMap.get(r.carId) ?? null,
+  })));
+});
+
 // Malfunctions
 router.get("/cars/:carId/malfunctions", async (req, res) => {
   const carId = parseInt(req.params.carId);

@@ -6,17 +6,19 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 
-export type BottomNavTab = "dashboard" | "account" | "settings";
+export type BottomNavTab = "dashboard" | "faults" | "account" | "settings";
 
 const TABS: {
   id: BottomNavTab;
   label: string;
   icon: React.ComponentProps<typeof Feather>["name"];
   route: string;
+  activeColor?: string;
 }[] = [
-  { id: "dashboard", label: "Dashboard", icon: "grid", route: "/home" },
-  { id: "account",   label: "Account",   icon: "user",     route: "/account" },
-  { id: "settings",  label: "Settings",  icon: "settings", route: "/settings" },
+  { id: "dashboard", label: "Dashboard", icon: "grid",           route: "/home" },
+  { id: "faults",    label: "Faults",    icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
+  { id: "account",   label: "Account",   icon: "user",           route: "/account" },
+  { id: "settings",  label: "Settings",  icon: "settings",       route: "/settings" },
 ];
 
 type Props = { active?: BottomNavTab };
@@ -50,17 +52,17 @@ export default function BottomNav({ active }: Props) {
             style={styles.tab}
             hitSlop={4}
           >
-            <View style={[styles.iconWrap, isActive && { backgroundColor: C.tint + "15" }]}>
+            <View style={[styles.iconWrap, isActive && { backgroundColor: (tab.activeColor ?? C.tint) + "15" }]}>
               <Feather
                 name={tab.icon}
                 size={22}
-                color={isActive ? C.tint : C.textTertiary}
+                color={isActive ? (tab.activeColor ?? C.tint) : C.textTertiary}
               />
             </View>
             <Text
               style={[
                 styles.label,
-                { color: isActive ? C.tint : C.textTertiary },
+                { color: isActive ? (tab.activeColor ?? C.tint) : C.textTertiary },
                 isActive && styles.labelActive,
               ]}
             >
