@@ -39,8 +39,8 @@ const eventOptions: EventOption[] = [
     title: "Repair",
     description: "Log a service or repair",
     icon: "tool",
-    iconBg: "#DBEAFE",
-    iconColor: "#2563EB",
+    iconBg: "#FEF3C7",
+    iconColor: "#D97706",
     available: true,
   },
   {
