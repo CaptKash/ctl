@@ -49,7 +49,7 @@ const eventOptions: EventOption[] = [
     icon: "clipboard",
     iconBg: "#D1FAE5",
     iconColor: "#059669",
-    available: false,
+    available: true,
   },
   {
     id: "registration",
@@ -77,6 +77,8 @@ export default function AddEventScreen() {
       router.push("/malfunction/add");
     } else if (option.id === "maintenance") {
       router.push("/maintenance/add");
+    } else if (option.id === "inspection") {
+      router.push("/inspection/add");
     }
   };
 

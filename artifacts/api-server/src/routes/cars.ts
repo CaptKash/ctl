@@ -8,6 +8,7 @@ import {
   dealershipsTable,
   fuelTable,
   malfunctionsTable,
+  inspectionsTable,
   eventCompletionsTable,
   insertCarSchema,
   insertMaintenanceSchema,
@@ -16,6 +17,7 @@ import {
   insertDealershipSchema,
   insertFuelSchema,
   insertMalfunctionSchema,
+  insertInspectionSchema,
 } from "@workspace/db";
 import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
 
@@ -353,6 +355,33 @@ router.delete("/cars/:carId/malfunctions/:recordId", async (req, res) => {
   await db
     .delete(malfunctionsTable)
     .where(and(eq(malfunctionsTable.id, recordId), eq(malfunctionsTable.carId, carId)));
+  res.json({ success: true });
+});
+
+// Inspections
+router.get("/cars/:carId/inspections", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+  const records = await db
+    .select()
+    .from(inspectionsTable)
+    .where(eq(inspectionsTable.carId, carId))
+    .orderBy(desc(inspectionsTable.createdAt));
+  res.json(records);
+});
+
+router.post("/cars/:carId/inspections", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+  const body = insertInspectionSchema.parse({ ...req.body, carId });
+  const [record] = await db.insert(inspectionsTable).values(body).returning();
+  res.status(201).json(record);
+});
+
+router.delete("/cars/:carId/inspections/:recordId", async (req, res) => {
+  const recordId = parseInt(req.params.recordId);
+  const carId = parseInt(req.params.carId);
+  await db
+    .delete(inspectionsTable)
+    .where(and(eq(inspectionsTable.id, recordId), eq(inspectionsTable.carId, carId)));
   res.json({ success: true });
 });
 

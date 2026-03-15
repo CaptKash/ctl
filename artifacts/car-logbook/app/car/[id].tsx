@@ -59,6 +59,17 @@ type MaintenanceRecord = {
   nextDueDate?: string | null;
 };
 
+type InspectionRecord = {
+  id: number;
+  carId: number;
+  date: string;
+  place?: string | null;
+  results?: string | null;
+  cost?: number | null;
+  requiredRepairs?: string | null;
+  nextInspectionDate?: string | null;
+};
+
 const INPUT_METHOD_LABELS: Record<string, string> = {
   warning_message: "Warning Message",
   written: "Written",
@@ -99,6 +110,11 @@ export default function CarDetailScreen() {
   const maintenanceQuery = useQuery<MaintenanceRecord[]>({
     queryKey: ["maintenance", carId],
     queryFn: () => apiGet<MaintenanceRecord[]>(`/cars/${carId}/maintenance`),
+  });
+
+  const inspectionsQuery = useQuery<InspectionRecord[]>({
+    queryKey: ["inspections", carId],
+    queryFn: () => apiGet<InspectionRecord[]>(`/cars/${carId}/inspections`),
   });
 
   const markSolved = (recordId: number) => {
@@ -263,6 +279,33 @@ export default function CarDetailScreen() {
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
               rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} km` : undefined}
               onDelete={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
+            />
+          ))
+        )}
+
+        {/* Inspections */}
+        <SectionHeader title="Inspections" />
+
+        {inspectionsQuery.isLoading ? (
+          <ActivityIndicator color={C.tint} style={{ marginTop: 16 }} />
+        ) : !inspectionsQuery.data || inspectionsQuery.data.length === 0 ? (
+          <EmptyState
+            icon="clipboard"
+            title="No inspection records"
+            description="Inspections logged from the Add Event page will appear here."
+          />
+        ) : (
+          inspectionsQuery.data.map((r) => (
+            <RecordCard
+              key={r.id}
+              icon="clipboard"
+              iconColor="#059669"
+              iconBg="#D1FAE5"
+              title={r.results ?? "Inspection"}
+              subtitle={`${r.date}${r.place ? ` · ${r.place}` : ""}`}
+              rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
+              rightSubtext={r.nextInspectionDate ? `Next: ${r.nextInspectionDate}` : undefined}
+              onDelete={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
             />
           ))
         )}

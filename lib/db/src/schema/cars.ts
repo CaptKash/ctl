@@ -174,6 +174,22 @@ export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable)
 export type InsertMalfunction = z.infer<typeof insertMalfunctionSchema>;
 export type MalfunctionRecord = typeof malfunctionsTable.$inferSelect;
 
+export const inspectionsTable = pgTable("inspection_records", {
+  id: serial("id").primaryKey(),
+  carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  date: text("date").notNull(),
+  place: text("place"),
+  results: text("results"),
+  cost: real("cost"),
+  requiredRepairs: text("required_repairs"),
+  nextInspectionDate: text("next_inspection_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertInspectionSchema = createInsertSchema(inspectionsTable).omit({ id: true, createdAt: true });
+export type InsertInspection = z.infer<typeof insertInspectionSchema>;
+export type InspectionRecord = typeof inspectionsTable.$inferSelect;
+
 export const eventCompletionsTable = pgTable("event_completions", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
