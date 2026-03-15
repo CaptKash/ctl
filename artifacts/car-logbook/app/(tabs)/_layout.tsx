@@ -13,8 +13,8 @@ function NativeTabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "car", selected: "car.fill" }} />
-        <Label>My Cars</Label>
+        <Icon sf={{ default: "person.circle", selected: "person.circle.fill" }} />
+        <Label>Login</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="reports">
         <Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
@@ -65,12 +65,12 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "My Cars",
+          title: "Login",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="car.fill" tintColor={color} size={24} />
+              <SymbolView name="person.circle.fill" tintColor={color} size={24} />
             ) : (
-              <Feather name="truck" size={22} color={color} />
+              <Feather name="user" size={22} color={color} />
             ),
         }}
       />
