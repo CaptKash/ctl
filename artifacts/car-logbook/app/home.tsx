@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -115,7 +115,7 @@ export default function MenuDashboardScreen() {
           ]}
         >
           <View style={[styles.tileIcon, { backgroundColor: "#EDE9FE" }]}>
-            <Feather name="truck" size={24} color="#7C3AED" />
+            <MaterialCommunityIcons name="car-side" size={26} color="#7C3AED" />
           </View>
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>

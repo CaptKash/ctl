@@ -1,12 +1,12 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Platform,
   Pressable,
-  SectionList,
   StyleSheet,
   Text,
   View,
@@ -49,29 +49,7 @@ function urgencyLabel(days: number): string {
   return `In ${days} days`;
 }
 
-function groupByUrgency(records: UpcomingRecord[]) {
-  const overdue: UpcomingRecord[] = [];
-  const thisWeek: UpcomingRecord[] = [];
-  const thisMonth: UpcomingRecord[] = [];
-  const later: UpcomingRecord[] = [];
-
-  for (const r of records) {
-    const days = daysFromNow(r.nextDueDate);
-    if (days < 0) overdue.push(r);
-    else if (days <= 7) thisWeek.push(r);
-    else if (days <= 30) thisMonth.push(r);
-    else later.push(r);
-  }
-
-  const sections = [];
-  if (overdue.length) sections.push({ title: "Overdue", data: overdue });
-  if (thisWeek.length) sections.push({ title: "This Week", data: thisWeek });
-  if (thisMonth.length) sections.push({ title: "This Month", data: thisMonth });
-  if (later.length) sections.push({ title: "Later", data: later });
-  return sections;
-}
-
-export default function UpcomingMaintenanceScreen() {
+export default function UpcomingEventsScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -81,16 +59,15 @@ export default function UpcomingMaintenanceScreen() {
     queryFn: () => apiGet<UpcomingRecord[]>("/maintenance/upcoming"),
   });
 
-  const sections = groupByUrgency(records ?? []);
+  const sortedRecords = records ?? [];
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border }]}>
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={C.text} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Upcoming Maintenance</Text>
+        <Text style={[styles.headerTitle, { color: C.text }]}>Upcoming Events</Text>
         <View style={{ width: 36 }} />
       </View>
 
@@ -98,48 +75,24 @@ export default function UpcomingMaintenanceScreen() {
         <View style={styles.center}>
           <ActivityIndicator size="large" color={C.tint} />
         </View>
-      ) : sections.length === 0 ? (
+      ) : sortedRecords.length === 0 ? (
         <View style={styles.center}>
           <View style={[styles.emptyIcon, { backgroundColor: C.successLight }]}>
             <Feather name="check-circle" size={36} color={C.success} />
           </View>
           <Text style={[styles.emptyTitle, { color: C.text }]}>All caught up!</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            No upcoming maintenance scheduled.{"\n"}Log service records to track due dates.
+            No upcoming events scheduled.{"\n"}Log service records to track due dates.
           </Text>
         </View>
       ) : (
-        <SectionList
-          sections={sections}
+        <FlatList
+          data={sortedRecords}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={[
             styles.listContent,
             { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 40 },
           ]}
-          stickySectionHeadersEnabled={false}
-          renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeader}>
-              <View
-                style={[
-                  styles.sectionDot,
-                  {
-                    backgroundColor:
-                      section.title === "Overdue"
-                        ? C.danger
-                        : section.title === "This Week"
-                        ? "#F97316"
-                        : section.title === "This Month"
-                        ? C.warning
-                        : C.success,
-                  },
-                ]}
-              />
-              <Text style={[styles.sectionTitle, { color: C.text }]}>{section.title}</Text>
-              <Text style={[styles.sectionCount, { color: C.textSecondary }]}>
-                {section.data.length}
-              </Text>
-            </View>
-          )}
           renderItem={({ item }) => {
             const days = daysFromNow(item.nextDueDate);
             const color = urgencyColor(days, C);
@@ -177,7 +130,7 @@ export default function UpcomingMaintenanceScreen() {
                     {item.description}
                   </Text>
                   <View style={styles.cardMeta}>
-                    <Feather name="truck" size={12} color={C.textTertiary} />
+                    <MaterialCommunityIcons name="car-side" size={13} color={C.textTertiary} />
                     <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
                       {item.year} {item.make} {item.model}
                     </Text>
@@ -229,25 +182,12 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 20, fontFamily: "Inter_700Bold" },
   emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
 
-  listContent: { padding: 16, gap: 8 },
-
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 4,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  sectionDot: { width: 8, height: 8, borderRadius: 4 },
-  sectionTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold", flex: 1 },
-  sectionCount: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  listContent: { padding: 16, gap: 10 },
 
   card: {
     flexDirection: "row",
     borderRadius: 14,
     overflow: "hidden",
-    marginBottom: 8,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 6,
