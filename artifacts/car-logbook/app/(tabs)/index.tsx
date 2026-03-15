@@ -76,7 +76,7 @@ export default function MyCarsScreen() {
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
         <View>
           <Text style={[styles.headerEyebrow, { color: C.textSecondary }]}>Your Fleet</Text>
-          <Text style={[styles.headerTitle, { color: C.text }]}>Car Logbook</Text>
+          <Text style={[styles.headerTitle, { color: C.text }]}>CTL</Text>
         </View>
         <Pressable
           onPress={() => {
