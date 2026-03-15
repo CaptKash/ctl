@@ -60,6 +60,7 @@ export default function InspectionFormScreen() {
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["inspections", carId] });
+      qc.invalidateQueries({ queryKey: ["maintenance", "upcoming"] });
       router.replace({ pathname: "/car/[id]", params: { id: String(carId) } });
     },
   });
