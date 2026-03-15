@@ -21,6 +21,7 @@ type Car = { id: number };
 type UpcomingItem = {
   id: number;
   carId: number;
+  itemKind: "maintenance" | "license" | "insurance";
   type: string;
   description: string;
   nextDueDate: string;
@@ -28,6 +29,7 @@ type UpcomingItem = {
   make: string;
   model: string;
   year: number;
+  nickname: string | null;
 };
 
 function daysFromNow(dateStr: string): number {
@@ -200,7 +202,7 @@ export default function MenuDashboardScreen() {
 
             return (
               <Pressable
-                key={item.id}
+                key={`${item.itemKind}-${item.id}`}
                 onPress={() =>
                   router.push({
                     pathname: "/car/[id]",

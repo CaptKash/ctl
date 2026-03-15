@@ -60,23 +60,73 @@ router.delete("/cars/:carId", async (req, res) => {
 
 // Upcoming maintenance (all cars)
 router.get("/maintenance/upcoming", async (_req, res) => {
-  const records = await db
-    .select({
-      id: maintenanceTable.id,
-      carId: maintenanceTable.carId,
-      type: maintenanceTable.type,
-      description: maintenanceTable.description,
-      nextDueDate: maintenanceTable.nextDueDate,
-      nextDueMileage: maintenanceTable.nextDueMileage,
-      make: carsTable.make,
-      model: carsTable.model,
-      year: carsTable.year,
-    })
-    .from(maintenanceTable)
-    .innerJoin(carsTable, eq(maintenanceTable.carId, carsTable.id))
-    .where(isNotNull(maintenanceTable.nextDueDate))
-    .orderBy(asc(maintenanceTable.nextDueDate));
-  res.json(records);
+  const [maintenanceRecords, cars] = await Promise.all([
+    db
+      .select({
+        id: maintenanceTable.id,
+        carId: maintenanceTable.carId,
+        type: maintenanceTable.type,
+        description: maintenanceTable.description,
+        nextDueDate: maintenanceTable.nextDueDate,
+        nextDueMileage: maintenanceTable.nextDueMileage,
+        make: carsTable.make,
+        model: carsTable.model,
+        year: carsTable.year,
+        nickname: carsTable.nickname,
+      })
+      .from(maintenanceTable)
+      .innerJoin(carsTable, eq(maintenanceTable.carId, carsTable.id))
+      .where(isNotNull(maintenanceTable.nextDueDate))
+      .orderBy(asc(maintenanceTable.nextDueDate)),
+    db.select().from(carsTable),
+  ]);
+
+  const carLabel = (c: typeof cars[number]) =>
+    c.nickname ?? `${c.year} ${c.make} ${c.model}`;
+
+  const licenseItems = cars
+    .filter((c) => c.licenseValidUntil)
+    .map((c) => ({
+      id: c.id,
+      carId: c.id,
+      itemKind: "license" as const,
+      type: "License Expiry",
+      description: `${carLabel(c)}${c.licensePlate ? ` · ${c.licensePlate}` : ""}`,
+      nextDueDate: c.licenseValidUntil!,
+      nextDueMileage: null,
+      make: c.make,
+      model: c.model,
+      year: c.year,
+      nickname: c.nickname ?? null,
+    }));
+
+  const insuranceItems = cars
+    .filter((c) => c.insuredUntil)
+    .map((c) => ({
+      id: c.id,
+      carId: c.id,
+      itemKind: "insurance" as const,
+      type: "Insurance Expiry",
+      description: `${carLabel(c)}${c.insuredWith ? ` · ${c.insuredWith}` : ""}`,
+      nextDueDate: c.insuredUntil!,
+      nextDueMileage: null,
+      make: c.make,
+      model: c.model,
+      year: c.year,
+      nickname: c.nickname ?? null,
+    }));
+
+  const maintenanceItems = maintenanceRecords.map((r) => ({
+    ...r,
+    itemKind: "maintenance" as const,
+    nickname: r.nickname ?? null,
+  }));
+
+  const all = [...maintenanceItems, ...licenseItems, ...insuranceItems].sort(
+    (a, b) => a.nextDueDate!.localeCompare(b.nextDueDate!)
+  );
+
+  res.json(all);
 });
 
 // Maintenance
