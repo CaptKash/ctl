@@ -4,7 +4,6 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -19,17 +18,6 @@ import { useAuth } from "@/context/AuthContext";
 
 type Car = { id: number };
 type UpcomingItem = { id: number };
-
-type MenuItem = {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: keyof typeof Feather.glyphMap;
-  iconBg: string;
-  iconColor: string;
-  wide?: boolean;
-  onPress: () => void;
-};
 
 export default function MenuDashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -62,71 +50,8 @@ export default function MenuDashboardScreen() {
     day: "numeric",
   });
 
-  const menuItems: MenuItem[] = [
-    {
-      id: "add-car",
-      title: "Add Car",
-      subtitle: "Register a new vehicle",
-      icon: "plus-circle",
-      iconBg: "#DBEAFE",
-      iconColor: C.tint,
-      onPress: () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.push("/car/add");
-      },
-    },
-    {
-      id: "fleet",
-      title: "My Fleet",
-      subtitle:
-        fleetCount === 0
-          ? "No vehicles registered yet"
-          : `${fleetCount} vehicle${fleetCount === 1 ? "" : "s"} registered`,
-      icon: "truck",
-      iconBg: "#EDE9FE",
-      iconColor: "#7C3AED",
-      wide: true,
-      onPress: () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.push("/fleet");
-      },
-    },
-    {
-      id: "add-maintenance",
-      title: "Add Maintenance",
-      subtitle: "Log a service record",
-      icon: "tool",
-      iconBg: "#FEF3C7",
-      iconColor: "#D97706",
-      onPress: () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.push("/maintenance/add");
-      },
-    },
-    {
-      id: "upcoming",
-      title: "Upcoming Maintenance",
-      subtitle:
-        upcomingCount === 0
-          ? "No upcoming services"
-          : `${upcomingCount} item${upcomingCount === 1 ? "" : "s"} due`,
-      icon: "calendar",
-      iconBg: "#FEE2E2",
-      iconColor: "#DC2626",
-      wide: true,
-      onPress: () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.push("/maintenance/upcoming");
-      },
-    },
-  ];
-
-  const narrow = menuItems.filter((i) => !i.wide);
-  const wide = menuItems.filter((i) => i.wide);
-
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
         <View style={{ flex: 1 }}>
           <Text style={[styles.headerEyebrow, { color: C.textSecondary }]}>{today}</Text>
@@ -135,22 +60,13 @@ export default function MenuDashboardScreen() {
           </Text>
           <Text style={[styles.headerSub, { color: C.textSecondary }]}>Car Technical Log</Text>
         </View>
-        <View style={styles.headerRight}>
-          <View style={[styles.logoBox, { backgroundColor: "#080F1E" }]}>
-            <Image
-              source={require("@/assets/images/icon.png")}
-              style={styles.logo}
-              resizeMode="cover"
-            />
-          </View>
-          <Pressable
-            onPress={handleLogout}
-            hitSlop={10}
-            style={[styles.logoutBtn, { backgroundColor: C.backgroundTertiary }]}
-          >
-            <Feather name="log-out" size={15} color={C.textSecondary} />
-          </Pressable>
-        </View>
+        <Pressable
+          onPress={handleLogout}
+          hitSlop={10}
+          style={[styles.logoutBtn, { backgroundColor: C.backgroundTertiary }]}
+        >
+          <Feather name="log-out" size={18} color={C.textSecondary} />
+        </Pressable>
       </View>
 
       <View style={[styles.divider, { backgroundColor: C.border }]} />
@@ -164,44 +80,92 @@ export default function MenuDashboardScreen() {
       >
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Quick Actions</Text>
 
-        {/* First narrow row */}
-        <View style={styles.row}>
-          {narrow.map((item) => (
-            <MenuTile key={item.id} item={item} flex />
-          ))}
-        </View>
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/event/add");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="plus-circle" size={24} color={C.tint} />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Add Event</Text>
+            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              Log a malfunction, maintenance, or registration
+            </Text>
+          </View>
+          <View style={styles.tileArrow}>
+            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          </View>
+        </Pressable>
 
-        {/* Wide tiles */}
-        {wide.map((item) => (
-          <MenuTile key={item.id} item={item} />
-        ))}
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/fleet");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#EDE9FE" }]}>
+            <Feather name="truck" size={24} color="#7C3AED" />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
+            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              {fleetCount === 0
+                ? "No vehicles registered yet"
+                : `${fleetCount} vehicle${fleetCount === 1 ? "" : "s"} registered`}
+            </Text>
+          </View>
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/car/add");
+            }}
+            hitSlop={6}
+            style={[styles.addCarChip, { backgroundColor: C.tint }]}
+          >
+            <Feather name="plus" size={13} color="#fff" />
+            <Text style={styles.addCarChipText}>Add Car</Text>
+          </Pressable>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/maintenance/upcoming");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#FEE2E2" }]}>
+            <Feather name="calendar" size={24} color="#DC2626" />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Upcoming Events</Text>
+            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              {upcomingCount === 0
+                ? "No upcoming events"
+                : `${upcomingCount} event${upcomingCount === 1 ? "" : "s"} coming up`}
+            </Text>
+          </View>
+          <View style={styles.tileArrow}>
+            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          </View>
+        </Pressable>
       </ScrollView>
     </View>
-  );
-}
-
-function MenuTile({ item, flex }: { item: MenuItem; flex?: boolean }) {
-  const C = Colors.light;
-  return (
-    <Pressable
-      onPress={item.onPress}
-      style={({ pressed }) => [
-        styles.tile,
-        { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-        flex && { flex: 1 },
-      ]}
-    >
-      <View style={[styles.tileIcon, { backgroundColor: item.iconBg }]}>
-        <Feather name={item.icon} size={24} color={item.iconColor} />
-      </View>
-      <Text style={[styles.tileTitle, { color: C.text }]}>{item.title}</Text>
-      <Text style={[styles.tileSub, { color: C.textSecondary }]} numberOfLines={2}>
-        {item.subtitle}
-      </Text>
-      <View style={styles.tileArrow}>
-        <Feather name="arrow-right" size={14} color={C.textTertiary} />
-      </View>
-    </Pressable>
   );
 }
 
@@ -233,20 +197,13 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     marginTop: 2,
   },
-  headerRight: { alignItems: "flex-end", gap: 8 },
-  logoBox: {
-    width: 54,
-    height: 54,
-    borderRadius: 13,
-    overflow: "hidden",
-  },
-  logo: { width: 54, height: 54 },
   logoutBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 4,
   },
 
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 24 },
@@ -259,33 +216,55 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 2,
   },
-  row: { flexDirection: "row", gap: 14 },
 
   tile: {
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: 18,
     padding: 18,
-    paddingBottom: 16,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 8,
     elevation: 3,
-    gap: 8,
-    minHeight: 148,
+    gap: 14,
+    minHeight: 80,
   },
   tileIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 13,
+    width: 50,
+    height: 50,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 2,
+  },
+  tileBody: {
+    flex: 1,
+    gap: 3,
   },
   tileTitle: { fontSize: 16, fontFamily: "Inter_700Bold" },
   tileSub: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
     lineHeight: 18,
-    flex: 1,
   },
-  tileArrow: { alignItems: "flex-end" },
+  tileArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  addCarChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  addCarChipText: {
+    color: "#fff",
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+  },
 });
