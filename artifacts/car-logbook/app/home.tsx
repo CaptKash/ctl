@@ -3,9 +3,10 @@ import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -17,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
+import { addToCalendar } from "@/lib/addToCalendar";
 
 type Car = { id: number };
 type UpcomingItem = {
@@ -60,6 +62,21 @@ export default function MenuDashboardScreen() {
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { user, isAuthenticated } = useAuth();
+  const [calendarLoading, setCalendarLoading] = useState<string | null>(null);
+
+  const handleAddToCalendar = async (item: UpcomingItem) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const key = `${item.itemKind}-${item.id}`;
+    setCalendarLoading(key);
+    const carLabel = item.nickname ?? `${item.year} ${item.make} ${item.model}`;
+    const title = `${item.type} — ${carLabel}`;
+    const notes = item.description;
+    const added = await addToCalendar(title, item.nextDueDate, notes).catch(() => false);
+    setCalendarLoading(null);
+    if (added) {
+      Alert.alert("Added to Calendar", `"${item.type}" has been saved to your calendar.`);
+    }
+  };
 
   const { data: cars } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -234,7 +251,20 @@ export default function MenuDashboardScreen() {
                     )}
                   </View>
                 </View>
-                <Feather name="chevron-right" size={16} color={C.textTertiary} style={{ alignSelf: "center" }} />
+                <View style={styles.cardActions}>
+                  <Pressable
+                    onPress={() => handleAddToCalendar(item)}
+                    hitSlop={8}
+                    style={[styles.calBtn, { backgroundColor: C.tint + "12" }]}
+                  >
+                    {calendarLoading === `${item.itemKind}-${item.id}` ? (
+                      <ActivityIndicator size={13} color={C.tint} />
+                    ) : (
+                      <Feather name="calendar" size={14} color={C.tint} />
+                    )}
+                  </Pressable>
+                  <Feather name="chevron-right" size={16} color={C.textTertiary} />
+                </View>
               </Pressable>
             );
           })
@@ -370,4 +400,19 @@ const styles = StyleSheet.create({
   eventCardDesc: { fontSize: 13, fontFamily: "Inter_400Regular" },
   eventCardMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  cardActions: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingRight: 12,
+    paddingLeft: 4,
+  },
+  calBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });

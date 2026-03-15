@@ -28,7 +28,13 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow CTL to add service reminders to your calendar."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
