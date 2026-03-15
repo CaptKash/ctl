@@ -28,6 +28,7 @@ export const carsTable = pgTable("cars", {
   make: text("make").notNull(),
   model: text("model").notNull(),
   year: integer("year").notNull(),
+  nickname: text("nickname"),
   color: text("color"),
   licensePlate: text("license_plate"),
   vin: text("vin"),

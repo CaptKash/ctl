@@ -33,6 +33,7 @@ export default function AddCarScreen() {
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState(String(CURRENT_YEAR));
+  const [nickname, setNickname] = useState("");
   const [color, setColor] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [vin, setVin] = useState("");
@@ -53,6 +54,7 @@ export default function AddCarScreen() {
         make: make.trim(),
         model: model.trim(),
         year: parseInt(year),
+        nickname: nickname.trim() || undefined,
         color: color.trim() || undefined,
         licensePlate: licensePlate.trim() || undefined,
         vin: vin.trim() || undefined,
@@ -131,6 +133,15 @@ export default function AddCarScreen() {
             value={color}
             onChangeText={setColor}
             placeholder="e.g. Silver"
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
+          <FormField
+            label="Nickname"
+            value={nickname}
+            onChangeText={setNickname}
+            placeholder="e.g. The Beast, Old Faithful"
           />
         </View>
 
