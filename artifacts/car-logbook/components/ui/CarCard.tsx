@@ -24,6 +24,7 @@ type Car = {
 type Props = {
   car: Car;
   onPress: () => void;
+  onLogEvent?: () => void;
   accentBg?: string;
   accentIcon?: string;
 };
@@ -58,7 +59,7 @@ function getFirstPhoto(photos?: string | null): string | null {
   }
 }
 
-export function CarCard({ car, onPress, accentBg, accentIcon }: Props) {
+export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Props) {
   const C = Colors.light;
   const firstPhoto = getFirstPhoto(car.photos);
   const thumbBg = accentBg ?? C.infoLight;
@@ -106,7 +107,26 @@ export function CarCard({ car, onPress, accentBg, accentIcon }: Props) {
         )}
       </View>
 
-      <Feather name="chevron-right" size={18} color={C.textTertiary} />
+      {/* Right actions */}
+      <View style={styles.rightCol}>
+        {onLogEvent && (
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onLogEvent();
+            }}
+            style={({ pressed }) => [
+              styles.logBtn,
+              { opacity: pressed ? 0.75 : 1 },
+            ]}
+            hitSlop={4}
+          >
+            <Feather name="plus" size={12} color="#D97706" />
+            <Text style={styles.logBtnText}>Log Event</Text>
+          </Pressable>
+        )}
+        <Feather name="chevron-right" size={18} color={C.textTertiary} />
+      </View>
     </Pressable>
   );
 }
@@ -161,5 +181,25 @@ const styles = StyleSheet.create({
   detail: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
+  },
+  rightCol: {
+    alignItems: "center",
+    gap: 8,
+  },
+  logBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#FEF3C7",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: "#FDE68A",
+  },
+  logBtnText: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    color: "#D97706",
   },
 });

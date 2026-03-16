@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
   Alert,
@@ -58,6 +58,7 @@ export default function AddEventScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { carId } = useLocalSearchParams<{ carId?: string }>();
 
   const handleSelect = (option: EventOption) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -65,10 +66,11 @@ export default function AddEventScreen() {
       Alert.alert("Coming Soon", `${option.title} logging will be available in a future update.`);
       return;
     }
+    const params = carId ? { carId } : {};
     if (option.id === "malfunction") {
-      router.push("/malfunction/add");
+      router.push({ pathname: "/malfunction/add", params });
     } else if (option.id === "inspection") {
-      router.push("/inspection/add");
+      router.push({ pathname: "/inspection/add", params });
     }
   };
 

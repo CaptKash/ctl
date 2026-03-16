@@ -189,6 +189,10 @@ export default function FleetScreen() {
                   Haptics.selectionAsync();
                   router.push({ pathname: "/car/[id]", params: { id: String(item.id) } });
                 }}
+                onLogEvent={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push({ pathname: "/event/add", params: { carId: String(item.id) } });
+                }}
               />
             </Swipeable>
           )}

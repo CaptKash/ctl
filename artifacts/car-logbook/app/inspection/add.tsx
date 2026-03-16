@@ -1,8 +1,8 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import React from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -34,11 +34,21 @@ export default function AddInspectionSelectCarScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { carId: preselectedCarId } = useLocalSearchParams<{ carId?: string }>();
 
   const { data: cars, isLoading } = useQuery<Car[]>({
     queryKey: ["cars"],
     queryFn: () => apiGet<Car[]>("/cars"),
   });
+
+  useEffect(() => {
+    if (preselectedCarId && cars) {
+      const car = cars.find((c) => String(c.id) === preselectedCarId);
+      if (car) {
+        router.replace({ pathname: "/inspection/form", params: { carId: String(car.id) } });
+      }
+    }
+  }, [preselectedCarId, cars]);
 
   const handleSelectCar = (car: Car) => {
     Haptics.selectionAsync();
