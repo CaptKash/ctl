@@ -12,6 +12,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -250,28 +251,36 @@ export default function MaintenanceFormScreen() {
         </View>
 
         {/* Cost */}
-        <View style={[styles.costCard, { backgroundColor: C.card, borderColor: C.border }]}>
-          <View style={[styles.costHeader, { borderBottomColor: C.border }]}>
+        <View style={[styles.costCard, { backgroundColor: C.card }]}>
+          <View style={styles.costHeader}>
             <Text style={[styles.costTitle, { color: C.text }]}>Cost</Text>
           </View>
-          <FormField
-            label="Parts"
-            value={costOfParts}
-            onChangeText={setCostOfParts}
-            placeholder="e.g. 120.00"
-            keyboardType="decimal-pad"
-          />
-          <FormField
-            label="Labor"
-            value={laborCost}
-            onChangeText={setLaborCost}
-            placeholder="e.g. 80.00"
-            keyboardType="decimal-pad"
-          />
-          <View style={styles.totalFieldWrap}>
-            <Text style={[styles.totalLabel, { color: C.textSecondary }]}>Total</Text>
-            <View style={[styles.totalBox, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
-              <Text style={[styles.totalValue, { color: totalCost > 0 ? C.text : C.textTertiary }]}>
+          <View style={styles.costRow}>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Parts</Text>
+            <TextInput
+              value={costOfParts}
+              onChangeText={setCostOfParts}
+              placeholder="0.00"
+              placeholderTextColor={C.textTertiary}
+              keyboardType="decimal-pad"
+              style={[styles.costRowInput, { color: C.text, borderColor: C.border, backgroundColor: C.backgroundTertiary }]}
+            />
+          </View>
+          <View style={styles.costRow}>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Labor</Text>
+            <TextInput
+              value={laborCost}
+              onChangeText={setLaborCost}
+              placeholder="0.00"
+              placeholderTextColor={C.textTertiary}
+              keyboardType="decimal-pad"
+              style={[styles.costRowInput, { color: C.text, borderColor: C.border, backgroundColor: C.backgroundTertiary }]}
+            />
+          </View>
+          <View style={[styles.costRow, { paddingBottom: 10 }]}>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Total</Text>
+            <View style={[styles.costRowInput, { backgroundColor: C.backgroundTertiary, borderColor: C.border, justifyContent: "center" }]}>
+              <Text style={[styles.totalValue, { color: totalCost > 0 ? C.text : C.textTertiary, textAlign: "right" }]}>
                 {totalCost > 0 ? `$${totalCost.toFixed(2)}` : "—"}
               </Text>
             </View>
@@ -358,14 +367,35 @@ const styles = StyleSheet.create({
   },
   costCard: {
     borderRadius: 16,
-    borderWidth: 1,
     overflow: "hidden",
-    marginBottom: 0,
   },
   costHeader: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingTop: 14,
+    paddingBottom: 6,
+  },
+  costRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    gap: 12,
+  },
+  costRowLabel: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    flex: 1,
+  },
+  costRowInput: {
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 42,
+    paddingHorizontal: 12,
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    textAlign: "right",
+    width: 120,
   },
   costTitle: {
     fontSize: 13,
