@@ -19,7 +19,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
-import { DatePickerField } from "@/components/ui/DatePickerField";
+
 import { FormField } from "@/components/ui/FormField";
 import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -165,12 +165,6 @@ export default function MaintenanceFormScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <DatePickerField
-            label="Date"
-            value={date}
-            onChange={setDate}
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           {fromFault ? (
             <FormField
               label="Service Description"
