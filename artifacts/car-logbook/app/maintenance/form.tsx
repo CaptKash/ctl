@@ -305,7 +305,7 @@ export default function MaintenanceFormScreen() {
               ]}
             >
               <Feather name="camera" size={16} color={C.textSecondary} />
-              <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Bill Photo</Text>
+              <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of the Bill</Text>
             </Pressable>
           )}
         </View>
