@@ -85,22 +85,25 @@ export default function FaultLogScreen() {
     return (
       <View style={[styles.card, { backgroundColor: C.card, borderColor: sev?.color ?? C.border }]}>
         <View style={styles.cardHeader}>
-          {sev ? (
-            <View style={[styles.severityBadge, { backgroundColor: sev.bg }]}>
-              <Feather name={sev.icon} size={11} color={sev.color} />
-              <Text style={[styles.severityText, { color: sev.color }]}>{sev.label}</Text>
-            </View>
-          ) : (
-            <View style={[styles.severityBadge, { backgroundColor: C.backgroundTertiary }]}>
-              <Text style={[styles.severityText, { color: C.textTertiary }]}>Unknown</Text>
-            </View>
-          )}
-          {item.completed && (
-            <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
-              <Feather name="check" size={11} color="#059669" />
-              <Text style={[styles.severityText, { color: "#059669" }]}>Resolved</Text>
-            </View>
-          )}
+          <View style={styles.cardHeaderLeft}>
+            {sev ? (
+              <View style={[styles.severityBadge, { backgroundColor: sev.bg }]}>
+                <Feather name={sev.icon} size={11} color={sev.color} />
+                <Text style={[styles.severityText, { color: sev.color }]}>{sev.label}</Text>
+              </View>
+            ) : (
+              <View style={[styles.severityBadge, { backgroundColor: C.backgroundTertiary }]}>
+                <Text style={[styles.severityText, { color: C.textTertiary }]}>Unknown</Text>
+              </View>
+            )}
+            {item.completed && (
+              <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
+                <Feather name="check" size={11} color="#059669" />
+                <Text style={[styles.severityText, { color: "#059669" }]}>Resolved</Text>
+              </View>
+            )}
+          </View>
+          <Text style={[styles.carName, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
         </View>
 
         <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>
@@ -111,9 +114,6 @@ export default function FaultLogScreen() {
           <View style={styles.footerLeft}>
             <Feather name="calendar" size={12} color={C.textTertiary} />
             <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
-            <Text style={[styles.footerText, { color: C.textTertiary }]}>·</Text>
-            <Feather name="truck" size={12} color={C.textTertiary} />
-            <Text style={[styles.footerText, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
           </View>
           <Pressable
             onPress={() =>
@@ -225,7 +225,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 8,
   },
-  cardHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
+  cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
+  cardHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 6 },
+  carName: { fontSize: 11, fontFamily: "Inter_500Medium", flexShrink: 1, textAlign: "right" },
   severityBadge: {
     flexDirection: "row",
     alignItems: "center",
