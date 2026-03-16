@@ -69,8 +69,9 @@ export default function MaintenanceFormScreen() {
   // Cost
   const [costOfParts, setCostOfParts] = useState("");
   const [laborCost, setLaborCost] = useState("");
-  const [totalCost, setTotalCost] = useState("");
   const [billPhotos, setBillPhotos] = useState<string[]>([]);
+
+  const totalCost = (parseFloat(costOfParts) || 0) + (parseFloat(laborCost) || 0);
 
   const carQuery = useQuery<Car>({
     queryKey: ["car", carId],
@@ -90,7 +91,7 @@ export default function MaintenanceFormScreen() {
         shopPhone: shopPhone.trim() || undefined,
         warrantyPeriod: warrantyPeriod.trim() || undefined,
         warrantyDetails: warrantyDetails.trim() || undefined,
-        cost: totalCost ? parseFloat(totalCost) : undefined,
+        cost: totalCost > 0 ? totalCost : undefined,
         billPhoto: billPhotos.length > 0 ? billPhotos[0] : undefined,
       }),
     onSuccess: () => {
@@ -216,8 +217,9 @@ export default function MaintenanceFormScreen() {
 
         {/* Cost */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Cost</Text>
           <FormField
-            label="Cost of Parts"
+            label="Parts"
             value={costOfParts}
             onChangeText={setCostOfParts}
             placeholder="e.g. 120.00"
@@ -225,20 +227,19 @@ export default function MaintenanceFormScreen() {
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
-            label="Labor Cost"
+            label="Labor"
             value={laborCost}
             onChangeText={setLaborCost}
             placeholder="e.g. 80.00"
             keyboardType="decimal-pad"
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Total Cost"
-            value={totalCost}
-            onChangeText={setTotalCost}
-            placeholder="e.g. 200.00"
-            keyboardType="decimal-pad"
-          />
+          <View style={styles.totalRow}>
+            <Text style={[styles.totalLabel, { color: C.textSecondary }]}>Total Cost</Text>
+            <Text style={[styles.totalValue, { color: C.text }]}>
+              {totalCost > 0 ? `$${totalCost.toFixed(2)}` : "—"}
+            </Text>
+          </View>
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <View style={styles.photoSection}>
             <Text style={[styles.photoLabel, { color: C.textSecondary }]}>Bill Photo</Text>
@@ -299,6 +300,21 @@ const styles = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     marginHorizontal: -4,
+  },
+  totalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  totalLabel: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+  },
+  totalValue: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
   },
   photoSection: {
     gap: 10,
