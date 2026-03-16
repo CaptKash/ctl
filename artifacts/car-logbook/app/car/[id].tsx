@@ -301,8 +301,8 @@ export default function CarDetailScreen() {
             <RecordCard
               key={r.id}
               icon="clipboard"
-              iconColor="#059669"
-              iconBg="#D1FAE5"
+              iconColor="#D97706"
+              iconBg="#FEF3C7"
               title={r.results ?? "Inspection"}
               subtitle={`${formatDate(r.date)}${r.place ? ` · ${r.place}` : ""}`}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
