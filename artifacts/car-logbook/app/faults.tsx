@@ -47,7 +47,7 @@ const SEVERITY_META: Record<string, { label: string; bg: string; color: string; 
   critical: { label: "Critical",  bg: "#FEE2E2", color: "#DC2626", icon: "alert-octagon" },
   major:    { label: "Major",     bg: "#FEF3C7", color: "#D97706", icon: "alert-triangle" },
   minor:    { label: "Minor",     bg: "#DBEAFE", color: "#2563EB", icon: "info" },
-  cosmetic: { label: "Cosmetic",  bg: "#F3F4F6", color: "#6B7280", icon: "eye" },
+  cosmetic: { label: "Cosmetic",  bg: "#F5EFE6", color: "#92400E", icon: "eye" },
 };
 
 const carLabel = (car: Car | null) => {

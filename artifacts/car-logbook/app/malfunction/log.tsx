@@ -30,7 +30,7 @@ const SEVERITIES: {
   { key: "critical", label: "Critical",  icon: "alert-octagon", bg: "#FEE2E2", color: "#DC2626" },
   { key: "major",    label: "Major",     icon: "alert-triangle", bg: "#FEF3C7", color: "#D97706" },
   { key: "minor",    label: "Minor",     icon: "info",           bg: "#DBEAFE", color: "#2563EB" },
-  { key: "cosmetic", label: "Cosmetic",  icon: "eye",            bg: "#F3F4F6", color: "#6B7280" },
+  { key: "cosmetic", label: "Cosmetic",  icon: "eye",            bg: "#F5EFE6", color: "#92400E" },
 ];
 
 export default function MalfunctionLogScreen() {
