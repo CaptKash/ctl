@@ -216,8 +216,10 @@ export default function MaintenanceFormScreen() {
         </View>
 
         {/* Cost */}
-        <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Cost</Text>
+        <View style={[styles.costCard, { backgroundColor: C.card, borderColor: C.border }]}>
+          <View style={[styles.costHeader, { borderBottomColor: C.border }]}>
+            <Text style={[styles.costTitle, { color: C.text }]}>Cost</Text>
+          </View>
           <FormField
             label="Parts"
             value={costOfParts}
@@ -233,14 +235,16 @@ export default function MaintenanceFormScreen() {
             placeholder="e.g. 80.00"
             keyboardType="decimal-pad"
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <View style={styles.totalRow}>
-            <Text style={[styles.totalLabel, { color: C.textSecondary }]}>Total Cost</Text>
+          <View style={[styles.totalRow, { borderTopColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+            <Text style={[styles.totalLabel, { color: C.textSecondary }]}>Total</Text>
             <Text style={[styles.totalValue, { color: C.text }]}>
               {totalCost > 0 ? `$${totalCost.toFixed(2)}` : "—"}
             </Text>
           </View>
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+        </View>
+
+        {/* Bill Photo */}
+        <View style={[styles.section, { backgroundColor: C.card }]}>
           <View style={styles.photoSection}>
             <Text style={[styles.photoLabel, { color: C.textSecondary }]}>Bill Photo</Text>
             <PhotoPicker photos={billPhotos} onChange={setBillPhotos} max={1} />
@@ -301,12 +305,30 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     marginHorizontal: -4,
   },
+  costCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+    marginBottom: 0,
+  },
+  costHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  costTitle: {
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
   totalRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingVertical: 16,
+    borderTopWidth: 1,
   },
   totalLabel: {
     fontSize: 14,
