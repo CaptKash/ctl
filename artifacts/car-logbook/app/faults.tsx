@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
   FlatList,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -132,6 +134,14 @@ export default function FaultLogScreen() {
               {totalCount === 0 ? "No faults logged" : `${openCount} open · ${totalCount} total`}
             </Text>
           </View>
+          <Pressable
+            onPress={() => router.push("/malfunction/add" as any)}
+            style={[styles.logBtn, { backgroundColor: "#DC2626" }]}
+            hitSlop={6}
+          >
+            <Feather name="plus" size={15} color="#fff" />
+            <Text style={styles.logBtnText}>Log Fault</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -178,6 +188,15 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
+  logBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  logBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   listContent: { padding: 16 },
 
