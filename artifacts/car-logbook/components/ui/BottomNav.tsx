@@ -4,7 +4,9 @@ import { router } from "expo-router";
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
+import { apiGet } from "@/hooks/useApi";
 
 export type BottomNavTab = "dashboard" | "faults" | "settings";
 
@@ -27,6 +29,13 @@ export default function BottomNav({ active }: Props) {
   const C = Colors.light;
   const bottomPad = Platform.OS === "web" ? 8 : insets.bottom > 0 ? insets.bottom : 8;
 
+  const { data: faults } = useQuery<{ id: number; completed: boolean }[]>({
+    queryKey: ["malfunctions-all"],
+    queryFn: () => apiGet<{ id: number; completed: boolean }[]>("/malfunctions"),
+    staleTime: 30_000,
+  });
+  const hasActiveFaults = (faults ?? []).some((f) => !f.completed);
+
   return (
     <View
       style={[
@@ -40,6 +49,7 @@ export default function BottomNav({ active }: Props) {
     >
       {TABS.map((tab) => {
         const isActive = tab.id === active;
+        const showDot = tab.id === "faults" && hasActiveFaults;
         return (
           <Pressable
             key={tab.id}
@@ -57,6 +67,9 @@ export default function BottomNav({ active }: Props) {
                 size={22}
                 color={isActive ? (tab.activeColor ?? C.tint) : C.textTertiary}
               />
+              {showDot && (
+                <View style={styles.dot} />
+              )}
             </View>
             <Text
               style={[
@@ -91,6 +104,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+  },
+  dot: {
+    position: "absolute",
+    top: 4,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#DC2626",
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
   },
   label: {
     fontSize: 11,
