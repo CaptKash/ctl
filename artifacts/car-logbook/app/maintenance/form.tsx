@@ -57,7 +57,7 @@ export default function MaintenanceFormScreen() {
   const [type, setType] = useState(fromFault ? "Fault Repair" : "");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [correctiveAction, setCorrectiveAction] = useState("");
-  const [partsReplaced, setPartsReplaced] = useState("");
+  const [costOfParts, setCostOfParts] = useState("");
 
   // Workshop details
   const [shopName, setShopName] = useState("");
@@ -83,7 +83,7 @@ export default function MaintenanceFormScreen() {
         type,
         description: correctiveAction.trim() || type,
         date,
-        partsReplaced: partsReplaced.trim() || undefined,
+        costOfParts: costOfParts ? parseFloat(costOfParts) : undefined,
         shop: shopName.trim() || undefined,
         shopAddress: shopAddress.trim() || undefined,
         shopPhone: shopPhone.trim() || undefined,
@@ -170,11 +170,11 @@ export default function MaintenanceFormScreen() {
           )}
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
-            label="Parts Replaced"
-            value={partsReplaced}
-            onChangeText={setPartsReplaced}
-            placeholder="List any parts that were replaced…"
-            multiline
+            label="Cost of Parts"
+            value={costOfParts}
+            onChangeText={setCostOfParts}
+            placeholder="e.g. 120.00"
+            keyboardType="decimal-pad"
           />
         </View>
 
