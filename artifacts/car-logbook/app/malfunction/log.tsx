@@ -18,13 +18,7 @@ import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
 
-type InputMethod = "warning_message" | "written";
 type Phase = "car_running" | "car_started" | "parking" | "during_drive";
-
-const INPUT_METHODS: { key: InputMethod; label: string }[] = [
-  { key: "warning_message", label: "Warning Message" },
-  { key: "written", label: "Write Description" },
-];
 
 const PHASES: { key: Phase; label: string; icon: keyof typeof Feather.glyphMap }[] = [
   { key: "car_running", label: "Car Running", icon: "zap" },
@@ -39,7 +33,6 @@ export default function MalfunctionLogScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId, carName } = useLocalSearchParams<{ carId: string; carName: string }>();
 
-  const [inputMethod, setInputMethod] = useState<InputMethod>("warning_message");
   const [description, setDescription] = useState("");
   const [odometer, setOdometer] = useState("");
   const [phase, setPhase] = useState<Phase | null>(null);
@@ -53,7 +46,7 @@ export default function MalfunctionLogScreen() {
     try {
       await apiPost(`/cars/${carId}/malfunctions`, {
         date: new Date().toISOString().split("T")[0],
-        inputMethod,
+        inputMethod: "written",
         description: description.trim(),
         odometer: odometer.trim() ? parseInt(odometer.trim(), 10) : null,
         phase,
@@ -102,41 +95,10 @@ export default function MalfunctionLogScreen() {
         >
           <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Describe the Issue</Text>
 
-          <View style={styles.toggleRow}>
-            {INPUT_METHODS.map((m) => (
-              <Pressable
-                key={m.key}
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setInputMethod(m.key);
-                }}
-                style={[
-                  styles.togglePill,
-                  {
-                    backgroundColor: inputMethod === m.key ? C.tint : C.backgroundTertiary,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    { color: inputMethod === m.key ? "#fff" : C.textSecondary },
-                  ]}
-                >
-                  {m.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
           <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border }]}>
             <TextInput
               style={[styles.textArea, { color: C.text }]}
-              placeholder={
-                inputMethod === "warning_message"
-                  ? "Paste the warning message here..."
-                  : "Describe the fault in your own words..."
-              }
+              placeholder="Describe the fault in your own words..."
               placeholderTextColor={C.textTertiary}
               value={description}
               onChangeText={setDescription}
@@ -267,15 +229,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginBottom: 4,
   },
-
-  toggleRow: { flexDirection: "row", gap: 10, marginBottom: 6 },
-  togglePill: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  toggleText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 
   inputBox: {
     borderWidth: 1,
