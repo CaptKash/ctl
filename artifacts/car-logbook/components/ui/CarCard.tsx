@@ -109,7 +109,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
 
       {/* Right actions */}
       <View style={styles.rightCol}>
-        {onLogEvent && (
+        {onLogEvent ? (
           <Pressable
             onPress={(e) => {
               e.stopPropagation();
@@ -121,11 +121,12 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
             ]}
             hitSlop={4}
           >
-            <Feather name="plus" size={12} color="#D97706" />
+            <Feather name="plus" size={12} color="#2563EB" />
             <Text style={styles.logBtnText}>Log Event</Text>
           </Pressable>
+        ) : (
+          <Feather name="chevron-right" size={18} color={C.textTertiary} />
         )}
-        <Feather name="chevron-right" size={18} color={C.textTertiary} />
       </View>
     </Pressable>
   );
@@ -190,16 +191,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "#FEF3C7",
+    backgroundColor: "#DBEAFE",
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 5,
     borderWidth: 1,
-    borderColor: "#FDE68A",
+    borderColor: "#BFDBFE",
   },
   logBtnText: {
     fontSize: 11,
     fontFamily: "Inter_600SemiBold",
-    color: "#D97706",
+    color: "#2563EB",
   },
 });
