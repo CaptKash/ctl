@@ -45,7 +45,7 @@ const MAINTENANCE_TYPES = [
 ];
 
 export default function MaintenanceFormScreen() {
-  const { carId: carIdParam } = useLocalSearchParams<{ carId: string }>();
+  const { carId: carIdParam, faultDescription } = useLocalSearchParams<{ carId: string; faultDescription?: string }>();
   const carId = parseInt(carIdParam ?? "0");
   const insets = useSafeAreaInsets();
   const C = Colors.light;
@@ -56,7 +56,7 @@ export default function MaintenanceFormScreen() {
   const [type, setType] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [mileage, setMileage] = useState("");
-  const [correctiveAction, setCorrectiveAction] = useState("");
+  const [correctiveAction, setCorrectiveAction] = useState(faultDescription ?? "");
   const [partsReplaced, setPartsReplaced] = useState("");
 
   // Workshop details

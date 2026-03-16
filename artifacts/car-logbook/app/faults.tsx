@@ -111,11 +111,25 @@ export default function FaultLogScreen() {
           <View style={styles.footerLeft}>
             <Feather name="calendar" size={12} color={C.textTertiary} />
             <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
-          </View>
-          <View style={styles.footerRight}>
+            <Text style={[styles.footerText, { color: C.textTertiary }]}>·</Text>
             <Feather name="truck" size={12} color={C.textTertiary} />
             <Text style={[styles.footerText, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
           </View>
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/maintenance/form",
+                params: {
+                  carId: String(item.carId),
+                  faultDescription: item.description,
+                },
+              } as any)
+            }
+            style={[styles.fixBtn, { backgroundColor: "#FEF3C7", borderColor: "#D97706" }]}
+          >
+            <Feather name="tool" size={12} color="#D97706" />
+            <Text style={[styles.fixBtnText, { color: "#D97706" }]}>Fix</Text>
+          </Pressable>
         </View>
       </View>
     );
@@ -234,7 +248,16 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
 
   cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  footerLeft: { flexDirection: "row", alignItems: "center", gap: 5 },
-  footerRight: { flexDirection: "row", alignItems: "center", gap: 5, flexShrink: 1 },
+  footerLeft: { flexDirection: "row", alignItems: "center", gap: 5, flex: 1, flexWrap: "wrap" },
   footerText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  fixBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  fixBtnText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
 });
