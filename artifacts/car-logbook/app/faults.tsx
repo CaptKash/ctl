@@ -151,9 +151,9 @@ export default function FaultLogScreen() {
             </Pressable>
             <Pressable
               onPress={() => confirmDelete(item)}
-              style={[styles.fixBtn, { backgroundColor: "#FEE2E2", borderColor: "#DC2626" }]}
+              style={[styles.fixBtn, { backgroundColor: sev?.bg ?? C.backgroundTertiary, borderColor: sev?.color ?? C.border }]}
             >
-              <Feather name="trash-2" size={14} color="#DC2626" />
+              <Feather name="trash-2" size={14} color={sev?.color ?? C.textTertiary} />
             </Pressable>
           </View>
         </View>
