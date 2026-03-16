@@ -147,7 +147,7 @@ export default function MaintenanceScreen() {
         showsVerticalScrollIndicator={false}
       >
         <SectionHeader
-          title="Maintenance Records"
+          title="Maintenance Logs"
           actionLabel="Add Entry"
           onAction={() => setShowAdd(true)}
         />
@@ -272,7 +272,7 @@ export default function MaintenanceScreen() {
 
       <ConfirmModal
         visible={confirmId !== null}
-        title="Delete Maintenance Record"
+        title="Delete Maintenance Log"
         message="This maintenance record will be permanently deleted."
         confirmLabel="Delete"
         onConfirm={() => confirmId !== null && deleteMutation.mutate(confirmId)}

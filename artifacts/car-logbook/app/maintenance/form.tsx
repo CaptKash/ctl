@@ -374,7 +374,7 @@ export default function MaintenanceFormScreen() {
         )}
 
         <PrimaryButton
-          label="Save Maintenance Record"
+          label="Save Maintenance Log"
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
