@@ -6,7 +6,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 
-export type BottomNavTab = "dashboard" | "faults" | "account" | "settings";
+export type BottomNavTab = "dashboard" | "faults" | "settings";
 
 const TABS: {
   id: BottomNavTab;
@@ -17,7 +17,6 @@ const TABS: {
 }[] = [
   { id: "dashboard", label: "Dashboard", icon: "grid",           route: "/home" },
   { id: "faults",    label: "Fault Log", icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
-  { id: "account",   label: "Account",   icon: "user",           route: "/account" },
   { id: "settings",  label: "Settings",  icon: "settings",       route: "/settings" },
 ];
 
