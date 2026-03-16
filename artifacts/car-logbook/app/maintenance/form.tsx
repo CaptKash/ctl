@@ -227,7 +227,6 @@ export default function MaintenanceFormScreen() {
             placeholder="e.g. 120.00"
             keyboardType="decimal-pad"
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Labor"
             value={laborCost}
@@ -235,7 +234,6 @@ export default function MaintenanceFormScreen() {
             placeholder="e.g. 80.00"
             keyboardType="decimal-pad"
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <View style={styles.totalFieldWrap}>
             <Text style={[styles.totalLabel, { color: C.textSecondary }]}>Total</Text>
             <View style={[styles.totalBox, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
@@ -244,10 +242,6 @@ export default function MaintenanceFormScreen() {
               </Text>
             </View>
           </View>
-        </View>
-
-        {/* Bill Photo */}
-        <View style={[styles.section, { backgroundColor: C.card }]}>
           <View style={styles.photoSection}>
             <Text style={[styles.photoLabel, { color: C.textSecondary }]}>Bill Photo</Text>
             <PhotoPicker photos={billPhotos} onChange={setBillPhotos} max={1} />
