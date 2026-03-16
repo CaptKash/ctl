@@ -56,7 +56,6 @@ export default function MaintenanceFormScreen() {
   const fromFault = Boolean(faultDescription);
   const [type, setType] = useState(fromFault ? "Fault Repair" : "");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [mileage, setMileage] = useState("");
   const [correctiveAction, setCorrectiveAction] = useState("");
   const [partsReplaced, setPartsReplaced] = useState("");
 
@@ -84,7 +83,6 @@ export default function MaintenanceFormScreen() {
         type,
         description: correctiveAction.trim() || type,
         date,
-        mileage: mileage ? parseInt(mileage) : undefined,
         correctiveAction: correctiveAction.trim() || undefined,
         partsReplaced: partsReplaced.trim() || undefined,
         shop: shopName.trim() || undefined,
@@ -171,14 +169,6 @@ export default function MaintenanceFormScreen() {
               )}
             </>
           )}
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Mileage (km)"
-            value={mileage}
-            onChangeText={setMileage}
-            placeholder="e.g. 54200"
-            keyboardType="number-pad"
-          />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Corrective Action"
