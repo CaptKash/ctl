@@ -4,6 +4,9 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActionSheetIOS,
+  Alert,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -11,6 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
@@ -18,7 +22,7 @@ import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { PhotoPicker } from "@/components/ui/PhotoPicker";
+
 import { apiGet, apiPost } from "@/hooks/useApi";
 
 type Car = {
@@ -72,6 +76,36 @@ export default function MaintenanceFormScreen() {
   const [billPhotos, setBillPhotos] = useState<string[]>([]);
 
   const totalCost = (parseFloat(costOfParts) || 0) + (parseFloat(laborCost) || 0);
+
+  const pickBillPhoto = async (useCamera: boolean) => {
+    const perm = useCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], allowsEditing: true, quality: 0.65, base64: true })
+      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, quality: 0.65, base64: true });
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      const uri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+      setBillPhotos([uri]);
+    }
+  };
+
+  const showBillPhotoPicker = () => {
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: ["Cancel", "Take Photo", "Choose from Library"], cancelButtonIndex: 0 },
+        (i) => { if (i === 1) pickBillPhoto(true); if (i === 2) pickBillPhoto(false); }
+      );
+    } else {
+      Alert.alert("Bill Photo", "Choose a source", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Take Photo", onPress: () => pickBillPhoto(true) },
+        { text: "Choose from Library", onPress: () => pickBillPhoto(false) },
+      ]);
+    }
+  };
 
   const carQuery = useQuery<Car>({
     queryKey: ["car", carId],
@@ -242,10 +276,30 @@ export default function MaintenanceFormScreen() {
               </Text>
             </View>
           </View>
-          <View style={styles.photoSection}>
-            <Text style={[styles.photoLabel, { color: C.textSecondary }]}>Bill Photo</Text>
-            <PhotoPicker photos={billPhotos} onChange={setBillPhotos} max={1} />
-          </View>
+          {billPhotos.length > 0 ? (
+            <Pressable onPress={showBillPhotoPicker} style={styles.billThumbRow}>
+              <Image source={{ uri: billPhotos[0] }} style={styles.billThumb} resizeMode="cover" />
+              <Text style={[styles.billThumbLabel, { color: C.textSecondary }]}>Tap to replace</Text>
+              <Pressable
+                onPress={() => setBillPhotos([])}
+                style={[styles.billRemoveBtn, { backgroundColor: C.danger }]}
+                hitSlop={8}
+              >
+                <Feather name="x" size={12} color="#fff" />
+              </Pressable>
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={showBillPhotoPicker}
+              style={({ pressed }) => [
+                styles.billPhotoBtn,
+                { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.backgroundSecondary },
+              ]}
+            >
+              <Feather name="camera" size={16} color={C.textSecondary} />
+              <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Bill Photo</Text>
+            </Pressable>
+          )}
         </View>
 
         {mutation.isError && (
@@ -338,12 +392,43 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Inter_400Regular",
   },
-  photoSection: {
-    gap: 10,
+  photoSection: { gap: 10 },
+  photoLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  billPhotoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderRadius: 10,
+    paddingVertical: 14,
   },
-  photoLabel: {
-    fontSize: 13,
+  billPhotoBtnText: {
+    fontSize: 14,
     fontFamily: "Inter_500Medium",
+  },
+  billThumbRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  billThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 8,
+  },
+  billThumbLabel: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+  },
+  billRemoveBtn: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
   },
   errorBox: {
     borderRadius: 10,
