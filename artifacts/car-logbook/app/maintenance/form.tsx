@@ -57,8 +57,6 @@ export default function MaintenanceFormScreen() {
   const [type, setType] = useState(fromFault ? "Fault Repair" : "");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [correctiveAction, setCorrectiveAction] = useState("");
-  const [costOfParts, setCostOfParts] = useState("");
-
   // Workshop details
   const [shopName, setShopName] = useState("");
   const [shopAddress, setShopAddress] = useState("");
@@ -68,7 +66,9 @@ export default function MaintenanceFormScreen() {
   const [warrantyPeriod, setWarrantyPeriod] = useState("");
   const [warrantyDetails, setWarrantyDetails] = useState("");
 
-  // Cost & bill
+  // Cost
+  const [costOfParts, setCostOfParts] = useState("");
+  const [laborCost, setLaborCost] = useState("");
   const [totalCost, setTotalCost] = useState("");
   const [billPhotos, setBillPhotos] = useState<string[]>([]);
 
@@ -84,6 +84,7 @@ export default function MaintenanceFormScreen() {
         description: correctiveAction.trim() || type,
         date,
         costOfParts: costOfParts ? parseFloat(costOfParts) : undefined,
+        laborCost: laborCost ? parseFloat(laborCost) : undefined,
         shop: shopName.trim() || undefined,
         shopAddress: shopAddress.trim() || undefined,
         shopPhone: shopPhone.trim() || undefined,
@@ -168,14 +169,6 @@ export default function MaintenanceFormScreen() {
               )}
             </>
           )}
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Cost of Parts"
-            value={costOfParts}
-            onChangeText={setCostOfParts}
-            placeholder="e.g. 120.00"
-            keyboardType="decimal-pad"
-          />
         </View>
 
         {/* Workshop Details */}
@@ -221,13 +214,29 @@ export default function MaintenanceFormScreen() {
           />
         </View>
 
-        {/* Cost & Bill */}
+        {/* Cost */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
+          <FormField
+            label="Cost of Parts"
+            value={costOfParts}
+            onChangeText={setCostOfParts}
+            placeholder="e.g. 120.00"
+            keyboardType="decimal-pad"
+          />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <FormField
+            label="Labor Cost"
+            value={laborCost}
+            onChangeText={setLaborCost}
+            placeholder="e.g. 80.00"
+            keyboardType="decimal-pad"
+          />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Total Cost"
             value={totalCost}
             onChangeText={setTotalCost}
-            placeholder="e.g. 250.00"
+            placeholder="e.g. 200.00"
             keyboardType="decimal-pad"
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
