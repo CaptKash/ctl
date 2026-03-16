@@ -130,10 +130,13 @@ export default function MaintenanceFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Service Details */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Service Details</Text>
-
+          <DatePickerField
+            label="Date"
+            value={date}
+            onChange={setDate}
+          />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           {fromFault ? (
             <FormField
               label="Service Description"
@@ -169,12 +172,6 @@ export default function MaintenanceFormScreen() {
             </>
           )}
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <DatePickerField
-            label="Date"
-            value={date}
-            onChange={setDate}
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Mileage (km)"
             value={mileage}
@@ -202,8 +199,6 @@ export default function MaintenanceFormScreen() {
 
         {/* Workshop Details */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Workshop Details</Text>
-
           <FormField
             label="Shop Name"
             value={shopName}
@@ -229,8 +224,6 @@ export default function MaintenanceFormScreen() {
 
         {/* Warranty */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Warranty</Text>
-
           <FormField
             label="Warranty Period"
             value={warrantyPeriod}
@@ -249,8 +242,6 @@ export default function MaintenanceFormScreen() {
 
         {/* Cost & Bill */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Cost & Bill</Text>
-
           <FormField
             label="Total Cost"
             value={totalCost}
