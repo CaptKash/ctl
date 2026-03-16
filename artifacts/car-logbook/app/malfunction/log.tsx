@@ -18,21 +18,6 @@ import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
 
-type Severity = "critical" | "major" | "minor" | "cosmetic";
-
-const SEVERITIES: {
-  key: Severity;
-  label: string;
-  icon: keyof typeof Feather.glyphMap;
-  bg: string;
-  color: string;
-}[] = [
-  { key: "critical", label: "Critical",  icon: "alert-octagon", bg: "#FEE2E2", color: "#DC2626" },
-  { key: "major",    label: "Major",     icon: "alert-triangle", bg: "#FEF3C7", color: "#D97706" },
-  { key: "minor",    label: "Minor",     icon: "info",           bg: "#DBEAFE", color: "#2563EB" },
-  { key: "cosmetic", label: "Cosmetic",  icon: "eye",            bg: "#F5EFE6", color: "#92400E" },
-];
-
 export default function MalfunctionLogScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
@@ -40,7 +25,6 @@ export default function MalfunctionLogScreen() {
   const { carId, carName } = useLocalSearchParams<{ carId: string; carName: string }>();
 
   const [description, setDescription] = useState("");
-  const [severity, setSeverity] = useState<Severity | null>(null);
   const [saving, setSaving] = useState(false);
 
   const canSave = description.trim().length > 0;
@@ -53,7 +37,6 @@ export default function MalfunctionLogScreen() {
         date: new Date().toISOString().split("T")[0],
         inputMethod: "written",
         description: description.trim(),
-        severity,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
@@ -108,45 +91,6 @@ export default function MalfunctionLogScreen() {
               multiline
               textAlignVertical="top"
             />
-          </View>
-
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20 }]}>
-            Severity <Text style={{ textTransform: "none", letterSpacing: 0, fontSize: 11, fontFamily: "Inter_400Regular", color: C.textTertiary }}>(optional)</Text>
-          </Text>
-          <View style={styles.severityGrid}>
-            {SEVERITIES.map((s) => {
-              const selected = severity === s.key;
-              return (
-                <Pressable
-                  key={s.key}
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setSeverity(s.key);
-                  }}
-                  style={[
-                    styles.severityCard,
-                    {
-                      backgroundColor: selected ? s.bg : C.card,
-                      borderColor: selected ? s.color : C.border,
-                    },
-                  ]}
-                >
-                  <Feather
-                    name={s.icon}
-                    size={18}
-                    color={selected ? s.color : C.textSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.severityLabel,
-                      { color: selected ? s.color : C.textSecondary },
-                    ]}
-                  >
-                    {s.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
           </View>
 
           <Pressable
@@ -228,24 +172,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     minHeight: 90,
   },
-
-  severityGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  severityCard: {
-    width: "47%",
-    flexGrow: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  severityLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 
   saveBtn: {
     flexDirection: "row",
