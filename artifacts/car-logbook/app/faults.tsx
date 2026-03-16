@@ -127,8 +127,7 @@ export default function FaultLogScreen() {
             }
             style={[styles.fixBtn, { backgroundColor: "#D1FAE5", borderColor: "#059669" }]}
           >
-            <Feather name="tool" size={12} color="#059669" />
-            <Text style={[styles.fixBtnText, { color: "#059669" }]}>Fix</Text>
+            <Feather name="tool" size={14} color="#059669" />
           </Pressable>
         </View>
       </View>
@@ -251,13 +250,11 @@ const styles = StyleSheet.create({
   footerLeft: { flexDirection: "row", alignItems: "center", gap: 5, flex: 1, flexWrap: "wrap" },
   footerText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   fixBtn: {
-    flexDirection: "row",
+    width: 30,
+    height: 30,
     alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    justifyContent: "center",
     borderRadius: 8,
     borderWidth: 1,
   },
-  fixBtnText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
 });
