@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -71,14 +71,14 @@ export default function AddFaultSelectCarScreen() {
         </View>
       ) : !cars || cars.length === 0 ? (
         <View style={styles.center}>
-          <Feather name="truck" size={40} color={C.textTertiary} />
+          <MaterialCommunityIcons name="car-outline" size={44} color={C.textTertiary} />
           <Text style={[styles.emptyTitle, { color: C.text }]}>No vehicles yet</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
             Add a car first before reporting a fault.
           </Text>
           <Pressable
             onPress={() => router.replace("/car/add")}
-            style={[styles.addCarBtn, { backgroundColor: C.danger }]}
+            style={[styles.addCarBtn, { backgroundColor: C.tint }]}
           >
             <Feather name="plus" size={16} color="#fff" />
             <Text style={styles.addCarBtnText}>Add Car</Text>
