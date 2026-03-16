@@ -60,7 +60,7 @@ export default function MaintenanceFormScreen() {
 
   // Service details
   const fromFault = Boolean(faultDescription);
-  const [type, setType] = useState(fromFault ? "Fault Repair" : "");
+  const [type, setType] = useState(fromFault ? "Repair" : "");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [correctiveAction, setCorrectiveAction] = useState("");
   // Workshop details
