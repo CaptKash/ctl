@@ -179,6 +179,30 @@ export default function MenuDashboardScreen() {
           </View>
         </Pressable>
 
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/repair-history");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: "#D1FAE5", shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#A7F3D0" }]}>
+            <Feather name="file-text" size={24} color="#059669" />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: "#065F46" }]}>Generate Report</Text>
+            <Text style={[styles.tileSub, { color: "#047857" }]}>
+              View full repair history
+            </Text>
+          </View>
+          <View style={styles.tileArrow}>
+            <Feather name="chevron-right" size={18} color="#059669" />
+          </View>
+        </Pressable>
+
         <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>
           Upcoming Events
         </Text>
