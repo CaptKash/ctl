@@ -164,29 +164,32 @@ export default function MaintenanceFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.section, { backgroundColor: C.card }]}>
-          {fromFault ? (
-            <FormField
-              label="Service Description"
-              value={correctiveAction}
-              onChangeText={setCorrectiveAction}
-              placeholder="Describe the repair or service performed…"
-              multiline
-              required
-            />
-          ) : (
-            <>
-              <SelectField
-                label="Type"
-                value={type}
-                onSelect={setType}
-                options={MAINTENANCE_TYPES}
-                placeholder="Select service type…"
+        {/* Service */}
+        <View style={[styles.costCard, { backgroundColor: C.card }]}>
+          <View style={styles.costHeader}>
+            <Text style={[styles.costTitle, { color: C.text }]}>Service</Text>
+          </View>
+          <View style={styles.serviceFields}>
+            {fromFault ? (
+              <FormField
+                label="Service Description"
+                value={correctiveAction}
+                onChangeText={setCorrectiveAction}
+                placeholder="Describe the repair or service performed…"
+                multiline
                 required
               />
-              {type === "Other" && (
-                <>
-                  <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+            ) : (
+              <>
+                <SelectField
+                  label="Type"
+                  value={type}
+                  onSelect={setType}
+                  options={MAINTENANCE_TYPES}
+                  placeholder="Select service type…"
+                  required
+                />
+                {type === "Other" && (
                   <FormField
                     label="Description"
                     value={correctiveAction}
@@ -195,53 +198,42 @@ export default function MaintenanceFormScreen() {
                     multiline
                     required
                   />
-                </>
-              )}
-            </>
-          )}
-        </View>
-
-        {/* Workshop Details */}
-        <View style={[styles.section, { backgroundColor: C.card }]}>
-          <FormField
-            label="Shop Name"
-            value={shopName}
-            onChangeText={setShopName}
-            placeholder="e.g. City Auto Service"
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Address"
-            value={shopAddress}
-            onChangeText={setShopAddress}
-            placeholder="e.g. 12 Main St, Springfield"
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Phone"
-            value={shopPhone}
-            onChangeText={setShopPhone}
-            placeholder="e.g. +1 555 000 1234"
-            keyboardType="phone-pad"
-          />
-        </View>
-
-        {/* Warranty */}
-        <View style={[styles.section, { backgroundColor: C.card }]}>
-          <FormField
-            label="Warranty Period"
-            value={warrantyPeriod}
-            onChangeText={setWarrantyPeriod}
-            placeholder="e.g. 6 months / 10,000 km"
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Warranty Details"
-            value={warrantyDetails}
-            onChangeText={setWarrantyDetails}
-            placeholder="Any conditions or notes about the warranty…"
-            multiline
-          />
+                )}
+              </>
+            )}
+            <FormField
+              label="Shop Name"
+              value={shopName}
+              onChangeText={setShopName}
+              placeholder="e.g. City Auto Service"
+            />
+            <FormField
+              label="Address"
+              value={shopAddress}
+              onChangeText={setShopAddress}
+              placeholder="e.g. 12 Main St, Springfield"
+            />
+            <FormField
+              label="Phone"
+              value={shopPhone}
+              onChangeText={setShopPhone}
+              placeholder="e.g. +1 555 000 1234"
+              keyboardType="phone-pad"
+            />
+            <FormField
+              label="Warranty Period"
+              value={warrantyPeriod}
+              onChangeText={setWarrantyPeriod}
+              placeholder="e.g. 6 months / 10,000 km"
+            />
+            <FormField
+              label="Warranty Details"
+              value={warrantyDetails}
+              onChangeText={setWarrantyDetails}
+              placeholder="Any conditions or notes about the warranty…"
+              multiline
+            />
+          </View>
         </View>
 
         {/* Cost */}
@@ -363,6 +355,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
+  serviceFields: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 12,
+  },
   costHeader: {
     paddingHorizontal: 16,
     paddingTop: 14,
@@ -426,6 +423,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     paddingVertical: 14,
+    marginHorizontal: 16,
+    marginBottom: 14,
   },
   billPhotoBtnText: {
     fontSize: 14,
@@ -435,6 +434,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    marginHorizontal: 16,
+    marginBottom: 14,
   },
   billThumb: {
     width: 64,
