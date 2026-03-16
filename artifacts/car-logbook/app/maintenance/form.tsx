@@ -83,7 +83,6 @@ export default function MaintenanceFormScreen() {
         type,
         description: correctiveAction.trim() || type,
         date,
-        correctiveAction: correctiveAction.trim() || undefined,
         partsReplaced: partsReplaced.trim() || undefined,
         shop: shopName.trim() || undefined,
         shopAddress: shopAddress.trim() || undefined,
@@ -169,14 +168,6 @@ export default function MaintenanceFormScreen() {
               )}
             </>
           )}
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Corrective Action"
-            value={correctiveAction}
-            onChangeText={setCorrectiveAction}
-            placeholder="Describe what was done…"
-            multiline
-          />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Parts Replaced"
