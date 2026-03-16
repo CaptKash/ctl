@@ -53,7 +53,8 @@ export default function MaintenanceFormScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   // Service details
-  const [type, setType] = useState("");
+  const fromFault = Boolean(faultDescription);
+  const [type, setType] = useState(fromFault ? "Fault Repair" : "");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [mileage, setMileage] = useState("");
   const [correctiveAction, setCorrectiveAction] = useState(faultDescription ?? "");
@@ -104,7 +105,9 @@ export default function MaintenanceFormScreen() {
 
   const car = carQuery.data;
   const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : "Car";
-  const canSubmit = type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
+  const canSubmit = fromFault
+    ? correctiveAction.trim().length > 0
+    : type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
 
   return (
     <View style={[styles.container, { backgroundColor: C.backgroundSecondary }]}>
@@ -131,25 +134,38 @@ export default function MaintenanceFormScreen() {
         <View style={[styles.section, { backgroundColor: C.card }]}>
           <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Service Details</Text>
 
-          <SelectField
-            label="Type"
-            value={type}
-            onSelect={setType}
-            options={MAINTENANCE_TYPES}
-            placeholder="Select service type…"
-            required
-          />
-          {type === "Other" && (
+          {fromFault ? (
+            <FormField
+              label="Service Description"
+              value={correctiveAction}
+              onChangeText={setCorrectiveAction}
+              placeholder="Describe the repair or service performed…"
+              multiline
+              required
+            />
+          ) : (
             <>
-              <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-              <FormField
-                label="Description"
-                value={correctiveAction}
-                onChangeText={setCorrectiveAction}
-                placeholder="Describe the service…"
-                multiline
+              <SelectField
+                label="Type"
+                value={type}
+                onSelect={setType}
+                options={MAINTENANCE_TYPES}
+                placeholder="Select service type…"
                 required
               />
+              {type === "Other" && (
+                <>
+                  <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+                  <FormField
+                    label="Description"
+                    value={correctiveAction}
+                    onChangeText={setCorrectiveAction}
+                    placeholder="Describe the service…"
+                    multiline
+                    required
+                  />
+                </>
+              )}
             </>
           )}
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
