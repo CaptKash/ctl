@@ -20,7 +20,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
+import { apiGet, apiDelete } from "@/hooks/useApi";
 
 type Car = {
   id: number;
@@ -72,17 +72,6 @@ type InspectionRecord = {
   nextInspectionDate?: string | null;
 };
 
-const INPUT_METHOD_LABELS: Record<string, string> = {
-  warning_message: "Warning Message",
-  written: "Written",
-};
-
-const PHASE_LABELS: Record<string, string> = {
-  car_running: "Car Running",
-  car_started: "Car Started",
-  parking: "Parking",
-  during_drive: "During Drive",
-};
 
 export default function CarDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -118,12 +107,6 @@ export default function CarDetailScreen() {
     queryKey: ["inspections", carId],
     queryFn: () => apiGet<InspectionRecord[]>(`/cars/${carId}/inspections`),
   });
-
-  const markSolved = (recordId: number) => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    apiPost(`/cars/${carId}/events/complete`, { recordType: "malfunction", recordId })
-      .then(() => qc.invalidateQueries({ queryKey: ["malfunctions", carId] }));
-  };
 
   const confirmDelete = (path: string, queryKey: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -235,26 +218,48 @@ export default function CarDetailScreen() {
 
         {faultsQuery.isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 16 }} />
-        ) : !faultsQuery.data || faultsQuery.data.length === 0 ? (
+        ) : !faultsQuery.data || faultsQuery.data.filter((r) => !r.completed).length === 0 ? (
           <EmptyState
             icon="alert-triangle"
             title="No fault records"
             description="Faults logged from the Log Event page will appear here."
           />
         ) : (
-          faultsQuery.data.map((r) => (
-            <RecordCard
-              key={r.id}
-              icon="alert-triangle"
-              iconColor={r.completed ? "#16A34A" : "#DC2626"}
-              iconBg={r.completed ? "#DCFCE7" : "#FEE2E2"}
-              title={r.description}
-              subtitle={`${INPUT_METHOD_LABELS[r.inputMethod] ?? r.inputMethod} · ${PHASE_LABELS[r.phase] ?? r.phase}`}
-              rightText={formatDate(r.date)}
-              rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} km` : undefined}
-              onComplete={r.completed ? undefined : () => markSolved(r.id)}
-              onDelete={() => confirmDelete(`/cars/${carId}/malfunctions/${r.id}`, "malfunctions")}
-            />
+          faultsQuery.data.filter((r) => !r.completed).map((r) => (
+            <View key={r.id} style={[styles.faultCard, { backgroundColor: C.card, borderColor: "#DC2626" }]}>
+              <View style={styles.faultCardHeader}>
+                <View style={[styles.faultBadge, { backgroundColor: "#FEE2E2" }]}>
+                  <Feather name="alert-triangle" size={11} color="#DC2626" />
+                  <Text style={[styles.faultBadgeText, { color: "#DC2626" }]}>Fault</Text>
+                </View>
+                <Text style={[styles.faultDate, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+              </View>
+              <Text style={[styles.faultDesc, { color: C.text }]} numberOfLines={3}>
+                {r.description}
+              </Text>
+              <View style={styles.faultFooter}>
+                <View style={{ flex: 1 }} />
+                <View style={styles.faultActions}>
+                  <Pressable
+                    onPress={() =>
+                      router.push({
+                        pathname: "/maintenance/form",
+                        params: { carId: String(carId), faultDescription: r.description, faultId: String(r.id) },
+                      } as any)
+                    }
+                    style={[styles.faultBtn, { backgroundColor: "#FEE2E2", borderColor: "#DC2626" }]}
+                  >
+                    <Feather name="tool" size={14} color="#DC2626" />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => confirmDelete(`/cars/${carId}/malfunctions/${r.id}`, "malfunctions")}
+                    style={[styles.faultBtn, { backgroundColor: "#FEE2E2", borderColor: "#DC2626" }]}
+                  >
+                    <Feather name="trash-2" size={14} color="#DC2626" />
+                  </Pressable>
+                </View>
+              </View>
+            </View>
           ))
         )}
 
@@ -389,5 +394,42 @@ const styles = StyleSheet.create({
   contentPadding: {
     padding: 16,
     gap: 0,
+  },
+
+  faultCard: {
+    borderRadius: 14,
+    borderLeftWidth: 4,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  faultCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 6,
+  },
+  faultBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  faultBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  faultDate: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  faultDesc: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
+  faultFooter: { flexDirection: "row", alignItems: "center" },
+  faultActions: { flexDirection: "row", gap: 8 },
+  faultBtn: {
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    borderWidth: 1,
   },
 });
