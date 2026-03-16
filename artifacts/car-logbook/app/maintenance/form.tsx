@@ -50,7 +50,8 @@ const MAINTENANCE_TYPES = [
 ];
 
 export default function MaintenanceFormScreen() {
-  const { carId: carIdParam, faultDescription } = useLocalSearchParams<{ carId: string; faultDescription?: string }>();
+  const { carId: carIdParam, faultDescription, faultId: faultIdParam } = useLocalSearchParams<{ carId: string; faultDescription?: string; faultId?: string }>();
+  const faultId = faultIdParam ? parseInt(faultIdParam) : null;
   const carId = parseInt(carIdParam ?? "0");
   const insets = useSafeAreaInsets();
   const C = Colors.light;
@@ -160,10 +161,19 @@ export default function MaintenanceFormScreen() {
         cost: totalCost > 0 ? totalCost : undefined,
         billPhoto: billPhotos.length > 0 ? billPhotos[0] : undefined,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
+      if (faultId) {
+        try {
+          await apiPost(`/cars/${carId}/events/complete`, {
+            recordType: "malfunction",
+            recordId: faultId,
+          });
+        } catch (_) {}
+      }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["maintenance", carId] });
       qc.invalidateQueries({ queryKey: ["events", carId] });
+      qc.invalidateQueries({ queryKey: ["malfunctions-all"] });
       router.replace({ pathname: "/car/[id]", params: { id: String(carId) } });
     },
   });

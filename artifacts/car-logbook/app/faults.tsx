@@ -4,9 +4,9 @@ import React from "react";
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -94,8 +94,51 @@ export default function FaultLogScreen() {
     });
   }, [faults]);
 
+  const active = sorted.filter((f) => !f.completed);
+  const history = sorted.filter((f) => f.completed);
   const totalCount = sorted.length;
-  const openCount = sorted.filter((f) => !f.completed).length;
+  const openCount = active.length;
+
+  const [historyOpen, setHistoryOpen] = React.useState(false);
+
+  const renderHistoryCard = (item: FaultRecord) => {
+    const sev = item.severity ? SEVERITY_META[item.severity] : null;
+    const car = carLabel(item.car);
+    return (
+      <View style={[styles.card, { backgroundColor: C.card, borderColor: C.border, opacity: 0.75 }]}>
+        <View style={styles.cardHeader}>
+          <View style={styles.cardHeaderLeft}>
+            {sev ? (
+              <View style={[styles.severityBadge, { backgroundColor: sev.bg }]}>
+                <Feather name={sev.icon} size={11} color={sev.color} />
+                <Text style={[styles.severityText, { color: sev.color }]}>{sev.label}</Text>
+              </View>
+            ) : null}
+            <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
+              <Feather name="check" size={11} color="#059669" />
+              <Text style={[styles.severityText, { color: "#059669" }]}>Resolved</Text>
+            </View>
+          </View>
+          <Text style={[styles.carName, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
+        </View>
+        <Text style={[styles.cardTitle, { color: C.textSecondary }]} numberOfLines={2}>
+          {item.description}
+        </Text>
+        <View style={styles.cardFooter}>
+          <View style={styles.footerLeft}>
+            <Feather name="calendar" size={12} color={C.textTertiary} />
+            <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
+          </View>
+          <Pressable
+            onPress={() => confirmDelete(item)}
+            style={[styles.fixBtn, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}
+          >
+            <Feather name="trash-2" size={14} color={C.textTertiary} />
+          </Pressable>
+        </View>
+      </View>
+    );
+  };
 
   const renderCard = ({ item }: { item: FaultRecord }) => {
     const sev = item.severity ? SEVERITY_META[item.severity] : null;
@@ -142,6 +185,7 @@ export default function FaultLogScreen() {
                   params: {
                     carId: String(item.carId),
                     faultDescription: item.description,
+                    faultId: String(item.id),
                   },
                 } as any)
               }
@@ -190,26 +234,60 @@ export default function FaultLogScreen() {
           />
         </View>
       ) : (
-        <FlatList
-          data={sorted}
-          keyExtractor={(item) => String(item.id)}
+        <ScrollView
           contentContainerStyle={[
             styles.listContent,
             { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 24 },
           ]}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-          renderItem={renderCard}
           showsVerticalScrollIndicator={false}
-          ListFooterComponent={
-            <Pressable
-              onPress={() => router.push("/malfunction/add" as any)}
-              style={[styles.logBtn, { borderColor: "#DC2626" }]}
-            >
-              <Feather name="plus" size={15} color="#DC2626" />
-              <Text style={[styles.logBtnText, { color: "#DC2626" }]}>Log Another Fault</Text>
-            </Pressable>
-          }
-        />
+        >
+          {active.length === 0 ? (
+            <View style={[styles.emptyActive, { backgroundColor: C.card, borderColor: C.border }]}>
+              <Feather name="check-circle" size={20} color="#059669" />
+              <Text style={[styles.emptyActiveText, { color: C.textSecondary }]}>All faults resolved</Text>
+            </View>
+          ) : (
+            active.map((item) => (
+              <View key={item.id} style={{ marginBottom: 10 }}>
+                {renderCard({ item })}
+              </View>
+            ))
+          )}
+
+          <Pressable
+            onPress={() => router.push("/malfunction/add" as any)}
+            style={[styles.logBtn, { borderColor: "#DC2626" }]}
+          >
+            <Feather name="plus" size={15} color="#DC2626" />
+            <Text style={[styles.logBtnText, { color: "#DC2626" }]}>Log Another Fault</Text>
+          </Pressable>
+
+          {history.length > 0 && (
+            <View style={styles.historySection}>
+              <Pressable
+                onPress={() => setHistoryOpen((v) => !v)}
+                style={[styles.historyHeader, { backgroundColor: C.card, borderColor: C.border }]}
+              >
+                <View style={styles.historyHeaderLeft}>
+                  <View style={[styles.historyIconBox, { backgroundColor: "#D1FAE5" }]}>
+                    <Feather name="archive" size={14} color="#059669" />
+                  </View>
+                  <Text style={[styles.historyTitle, { color: C.text }]}>Fault History</Text>
+                  <View style={[styles.historyCount, { backgroundColor: "#D1FAE5" }]}>
+                    <Text style={[styles.historyCountText, { color: "#059669" }]}>{history.length}</Text>
+                  </View>
+                </View>
+                <Feather name={historyOpen ? "chevron-up" : "chevron-down"} size={18} color={C.textTertiary} />
+              </Pressable>
+
+              {historyOpen && history.map((item) => (
+                <View key={item.id} style={{ marginTop: 8 }}>
+                  {renderHistoryCard(item)}
+                </View>
+              ))}
+            </View>
+          )}
+        </ScrollView>
       )}
 
       <BottomNav active="faults" />
@@ -287,4 +365,27 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
+  emptyActive: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  emptyActiveText: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  historySection: { marginTop: 20 },
+  historyHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  historyHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+  historyIconBox: { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  historyTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  historyCount: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 10 },
+  historyCountText: { fontSize: 12, fontFamily: "Inter_700Bold" },
 });
