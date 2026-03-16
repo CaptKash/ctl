@@ -134,14 +134,6 @@ export default function FaultLogScreen() {
               {totalCount === 0 ? "No faults logged" : `${openCount} open · ${totalCount} total`}
             </Text>
           </View>
-          <Pressable
-            onPress={() => router.push("/malfunction/add" as any)}
-            style={[styles.logBtn, { backgroundColor: "#DC2626" }]}
-            hitSlop={6}
-          >
-            <Feather name="plus" size={15} color="#fff" />
-            <Text style={styles.logBtnText}>Log Fault</Text>
-          </Pressable>
         </View>
       </View>
 
@@ -168,6 +160,15 @@ export default function FaultLogScreen() {
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           renderItem={renderCard}
           showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            <Pressable
+              onPress={() => router.push("/malfunction/add" as any)}
+              style={[styles.logBtn, { borderColor: "#DC2626" }]}
+            >
+              <Feather name="plus" size={15} color="#DC2626" />
+              <Text style={[styles.logBtnText, { color: "#DC2626" }]}>Log Another Fault</Text>
+            </Pressable>
+          }
         />
       )}
 
@@ -191,12 +192,15 @@ const styles = StyleSheet.create({
   logBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 16,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
   },
-  logBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  logBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   listContent: { padding: 16 },
 
