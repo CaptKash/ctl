@@ -430,7 +430,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     borderWidth: 1,
-    borderStyle: "dashed",
     borderRadius: 10,
     paddingVertical: 14,
   },
