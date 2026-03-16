@@ -125,9 +125,9 @@ export default function FaultLogScreen() {
                 },
               } as any)
             }
-            style={[styles.fixBtn, { backgroundColor: "#D1FAE5", borderColor: "#059669" }]}
+            style={[styles.fixBtn, { backgroundColor: sev?.bg ?? C.backgroundTertiary, borderColor: sev?.color ?? C.border }]}
           >
-            <Feather name="tool" size={14} color="#059669" />
+            <Feather name="tool" size={14} color={sev?.color ?? C.textTertiary} />
           </Pressable>
         </View>
       </View>
