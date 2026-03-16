@@ -37,19 +37,8 @@ type FaultRecord = {
   car: Car | null;
 };
 
-const SEVERITY_ORDER: Record<string, number> = {
-  critical: 0,
-  major: 1,
-  minor: 2,
-  cosmetic: 3,
-};
-
-const SEVERITY_META: Record<string, { label: string; bg: string; color: string; icon: keyof typeof Feather.glyphMap }> = {
-  critical: { label: "Critical",  bg: "#FEE2E2", color: "#DC2626", icon: "alert-octagon" },
-  major:    { label: "Major",     bg: "#FEF3C7", color: "#D97706", icon: "alert-triangle" },
-  minor:    { label: "Minor",     bg: "#DBEAFE", color: "#2563EB", icon: "info" },
-  cosmetic: { label: "Cosmetic",  bg: "#F5EFE6", color: "#92400E", icon: "eye" },
-};
+const FAULT_BG = "#FEE2E2";
+const FAULT_COLOR = "#DC2626";
 
 const carLabel = (car: Car | null) => {
   if (!car) return "Unknown Car";
@@ -86,12 +75,7 @@ export default function FaultLogScreen() {
 
   const sorted = React.useMemo(() => {
     if (!faults) return [];
-    return [...faults].sort((a, b) => {
-      const sa = SEVERITY_ORDER[a.severity ?? ""] ?? 99;
-      const sb = SEVERITY_ORDER[b.severity ?? ""] ?? 99;
-      if (sa !== sb) return sa - sb;
-      return b.date.localeCompare(a.date);
-    });
+    return [...faults].sort((a, b) => b.date.localeCompare(a.date));
   }, [faults]);
 
   const active = sorted.filter((f) => !f.completed);
@@ -102,22 +86,13 @@ export default function FaultLogScreen() {
   const [historyOpen, setHistoryOpen] = React.useState(false);
 
   const renderHistoryCard = (item: FaultRecord) => {
-    const sev = item.severity ? SEVERITY_META[item.severity] : null;
     const car = carLabel(item.car);
     return (
       <View style={[styles.card, { backgroundColor: C.card, borderColor: C.border, opacity: 0.75 }]}>
         <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            {sev ? (
-              <View style={[styles.severityBadge, { backgroundColor: sev.bg }]}>
-                <Feather name={sev.icon} size={11} color={sev.color} />
-                <Text style={[styles.severityText, { color: sev.color }]}>{sev.label}</Text>
-              </View>
-            ) : null}
-            <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
-              <Feather name="check" size={11} color="#059669" />
-              <Text style={[styles.severityText, { color: "#059669" }]}>Resolved</Text>
-            </View>
+          <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
+            <Feather name="check" size={11} color="#059669" />
+            <Text style={[styles.badgeText, { color: "#059669" }]}>Resolved</Text>
           </View>
           <Text style={[styles.carName, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
         </View>
@@ -141,29 +116,13 @@ export default function FaultLogScreen() {
   };
 
   const renderCard = ({ item }: { item: FaultRecord }) => {
-    const sev = item.severity ? SEVERITY_META[item.severity] : null;
     const car = carLabel(item.car);
-
     return (
-      <View style={[styles.card, { backgroundColor: C.card, borderColor: sev?.color ?? C.border }]}>
+      <View style={[styles.card, { backgroundColor: C.card, borderColor: FAULT_COLOR }]}>
         <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            {sev ? (
-              <View style={[styles.severityBadge, { backgroundColor: sev.bg }]}>
-                <Feather name={sev.icon} size={11} color={sev.color} />
-                <Text style={[styles.severityText, { color: sev.color }]}>{sev.label}</Text>
-              </View>
-            ) : (
-              <View style={[styles.severityBadge, { backgroundColor: C.backgroundTertiary }]}>
-                <Text style={[styles.severityText, { color: C.textTertiary }]}>Unknown</Text>
-              </View>
-            )}
-            {item.completed && (
-              <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
-                <Feather name="check" size={11} color="#059669" />
-                <Text style={[styles.severityText, { color: "#059669" }]}>Resolved</Text>
-              </View>
-            )}
+          <View style={[styles.faultBadge, { backgroundColor: FAULT_BG }]}>
+            <Feather name="alert-triangle" size={11} color={FAULT_COLOR} />
+            <Text style={[styles.badgeText, { color: FAULT_COLOR }]}>Fault</Text>
           </View>
           <Text style={[styles.carName, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
         </View>
@@ -189,15 +148,15 @@ export default function FaultLogScreen() {
                   },
                 } as any)
               }
-              style={[styles.fixBtn, { backgroundColor: sev?.bg ?? C.backgroundTertiary, borderColor: sev?.color ?? C.border }]}
+              style={[styles.fixBtn, { backgroundColor: FAULT_BG, borderColor: FAULT_COLOR }]}
             >
-              <Feather name="tool" size={14} color={sev?.color ?? C.textTertiary} />
+              <Feather name="tool" size={14} color={FAULT_COLOR} />
             </Pressable>
             <Pressable
               onPress={() => confirmDelete(item)}
-              style={[styles.fixBtn, { backgroundColor: sev?.bg ?? C.backgroundTertiary, borderColor: sev?.color ?? C.border }]}
+              style={[styles.fixBtn, { backgroundColor: FAULT_BG, borderColor: FAULT_COLOR }]}
             >
-              <Feather name="trash-2" size={14} color={sev?.color ?? C.textTertiary} />
+              <Feather name="trash-2" size={14} color={FAULT_COLOR} />
             </Pressable>
           </View>
         </View>
@@ -333,7 +292,7 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
   cardHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 6 },
   carName: { fontSize: 11, fontFamily: "Inter_500Medium", flexShrink: 1, textAlign: "right" },
-  severityBadge: {
+  faultBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -349,7 +308,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  severityText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  badgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 
   cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
 
