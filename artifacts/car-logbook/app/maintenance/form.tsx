@@ -202,6 +202,28 @@ export default function MaintenanceFormScreen() {
               </>
             )}
             <FormField
+              label="Warranty Period"
+              value={warrantyPeriod}
+              onChangeText={setWarrantyPeriod}
+              placeholder="e.g. 6 months / 10,000 km"
+            />
+            <FormField
+              label="Warranty Details"
+              value={warrantyDetails}
+              onChangeText={setWarrantyDetails}
+              placeholder="Any conditions or notes about the warranty…"
+              multiline
+            />
+          </View>
+        </View>
+
+        {/* Repair Shop */}
+        <View style={[styles.costCard, { backgroundColor: C.card }]}>
+          <View style={styles.costHeader}>
+            <Text style={[styles.costTitle, { color: C.text }]}>Repair Shop</Text>
+          </View>
+          <View style={styles.serviceFields}>
+            <FormField
               label="Shop Name"
               value={shopName}
               onChangeText={setShopName}
@@ -219,19 +241,6 @@ export default function MaintenanceFormScreen() {
               onChangeText={setShopPhone}
               placeholder="e.g. +1 555 000 1234"
               keyboardType="phone-pad"
-            />
-            <FormField
-              label="Warranty Period"
-              value={warrantyPeriod}
-              onChangeText={setWarrantyPeriod}
-              placeholder="e.g. 6 months / 10,000 km"
-            />
-            <FormField
-              label="Warranty Details"
-              value={warrantyDetails}
-              onChangeText={setWarrantyDetails}
-              placeholder="Any conditions or notes about the warranty…"
-              multiline
             />
           </View>
         </View>
