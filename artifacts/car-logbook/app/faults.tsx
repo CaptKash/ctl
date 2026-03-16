@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Platform,
   Pressable,
@@ -11,12 +12,12 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/dateUtils";
-import { apiGet } from "@/hooks/useApi";
+import { apiDelete, apiGet } from "@/hooks/useApi";
 
 type Car = {
   id: number;
@@ -59,11 +60,29 @@ export default function FaultLogScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const qc = useQueryClient();
 
   const { data: faults, isLoading } = useQuery<FaultRecord[]>({
     queryKey: ["malfunctions-all"],
     queryFn: () => apiGet<FaultRecord[]>("/malfunctions"),
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ carId, id }: { carId: number; id: number }) =>
+      apiDelete(`/cars/${carId}/malfunctions/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["malfunctions-all"] }),
+  });
+
+  const confirmDelete = (item: FaultRecord) => {
+    Alert.alert("Delete Fault", "Remove this fault log permanently?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteMutation.mutate({ carId: item.carId, id: item.id }),
+      },
+    ]);
+  };
 
   const sorted = React.useMemo(() => {
     if (!faults) return [];
@@ -115,20 +134,28 @@ export default function FaultLogScreen() {
             <Feather name="calendar" size={12} color={C.textTertiary} />
             <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
           </View>
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/maintenance/form",
-                params: {
-                  carId: String(item.carId),
-                  faultDescription: item.description,
-                },
-              } as any)
-            }
-            style={[styles.fixBtn, { backgroundColor: sev?.bg ?? C.backgroundTertiary, borderColor: sev?.color ?? C.border }]}
-          >
-            <Feather name="tool" size={14} color={sev?.color ?? C.textTertiary} />
-          </Pressable>
+          <View style={styles.footerActions}>
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/maintenance/form",
+                  params: {
+                    carId: String(item.carId),
+                    faultDescription: item.description,
+                  },
+                } as any)
+              }
+              style={[styles.fixBtn, { backgroundColor: sev?.bg ?? C.backgroundTertiary, borderColor: sev?.color ?? C.border }]}
+            >
+              <Feather name="tool" size={14} color={sev?.color ?? C.textTertiary} />
+            </Pressable>
+            <Pressable
+              onPress={() => confirmDelete(item)}
+              style={[styles.fixBtn, { backgroundColor: "#FEE2E2", borderColor: "#DC2626" }]}
+            >
+              <Feather name="trash-2" size={14} color="#DC2626" />
+            </Pressable>
+          </View>
         </View>
       </View>
     );
@@ -251,6 +278,7 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   footerLeft: { flexDirection: "row", alignItems: "center", gap: 5, flex: 1, flexWrap: "wrap" },
   footerText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  footerActions: { flexDirection: "row", gap: 8 },
   fixBtn: {
     width: 30,
     height: 30,
