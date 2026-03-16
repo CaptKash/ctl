@@ -75,6 +75,7 @@ export default function MaintenanceFormScreen() {
   const [costOfParts, setCostOfParts] = useState("");
   const [laborCost, setLaborCost] = useState("");
   const [billPhotos, setBillPhotos] = useState<string[]>([]);
+  const [warrantyPhotos, setWarrantyPhotos] = useState<string[]>([]);
 
   const totalCost = (parseFloat(costOfParts) || 0) + (parseFloat(laborCost) || 0);
 
@@ -104,6 +105,36 @@ export default function MaintenanceFormScreen() {
         { text: "Cancel", style: "cancel" },
         { text: "Take Photo", onPress: () => pickBillPhoto(true) },
         { text: "Choose from Library", onPress: () => pickBillPhoto(false) },
+      ]);
+    }
+  };
+
+  const pickWarrantyPhoto = async (useCamera: boolean) => {
+    const perm = useCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], allowsEditing: true, quality: 0.65, base64: true })
+      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, quality: 0.65, base64: true });
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      const uri = asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : asset.uri;
+      setWarrantyPhotos([uri]);
+    }
+  };
+
+  const showWarrantyPhotoPicker = () => {
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: ["Cancel", "Take Photo", "Choose from Library"], cancelButtonIndex: 0 },
+        (i) => { if (i === 1) pickWarrantyPhoto(true); if (i === 2) pickWarrantyPhoto(false); }
+      );
+    } else {
+      Alert.alert("Warranty Photo", "Choose a source", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Take Photo", onPress: () => pickWarrantyPhoto(true) },
+        { text: "Choose from Library", onPress: () => pickWarrantyPhoto(false) },
       ]);
     }
   };
@@ -214,6 +245,30 @@ export default function MaintenanceFormScreen() {
               placeholder="Any conditions or notes about the warranty…"
               multiline
             />
+            {warrantyPhotos.length > 0 ? (
+              <Pressable onPress={showWarrantyPhotoPicker} style={styles.billThumbRow}>
+                <Image source={{ uri: warrantyPhotos[0] }} style={styles.billThumb} resizeMode="cover" />
+                <Text style={[styles.billThumbLabel, { color: C.textSecondary }]}>Tap to replace</Text>
+                <Pressable
+                  onPress={() => setWarrantyPhotos([])}
+                  style={[styles.billRemoveBtn, { backgroundColor: C.danger }]}
+                  hitSlop={8}
+                >
+                  <Feather name="x" size={12} color="#fff" />
+                </Pressable>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={showWarrantyPhotoPicker}
+                style={({ pressed }) => [
+                  styles.warrantyPhotoBtn,
+                  { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.backgroundSecondary },
+                ]}
+              >
+                <Feather name="camera" size={16} color={C.textSecondary} />
+                <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of the Warranty</Text>
+              </Pressable>
+            )}
           </View>
         </View>
 
@@ -431,6 +486,15 @@ const styles = StyleSheet.create({
   },
   photoSection: { gap: 10 },
   photoLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  warrantyPhotoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 14,
+  },
   billPhotoBtn: {
     flexDirection: "row",
     alignItems: "center",
