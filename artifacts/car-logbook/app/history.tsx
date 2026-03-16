@@ -164,24 +164,24 @@ export default function HistoryScreen() {
             return (
               <View key={`${ev.type}-${ev.id}`} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
                 <View style={styles.cardHeader}>
-                  <View style={styles.badgeRow}>
-                    <View style={[styles.badge, { backgroundColor: meta.bg }]}>
-                      <Feather name={meta.icon as any} size={11} color={meta.color} />
-                      <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
-                    </View>
-                    {ev.completed && (
-                      <View style={[styles.badge, { backgroundColor: "#D1FAE5" }]}>
-                        <Feather name="check-circle" size={11} color="#059669" />
-                        <Text style={[styles.badgeText, { color: "#059669" }]}>Resolved</Text>
-                      </View>
-                    )}
+                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+                    <Feather name={meta.icon as any} size={11} color={meta.color} />
+                    <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
                   </View>
                   <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
                 </View>
                 <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>{ev.title}</Text>
                 {ev.subtitle ? (
-                  <Text style={[styles.cardSub, { color: C.textSecondary }]} numberOfLines={1}>{ev.subtitle}</Text>
+                  <View style={styles.cardMeta}>
+                    <Text style={[styles.metaText, { color: C.textSecondary }]} numberOfLines={1}>{ev.subtitle}</Text>
+                  </View>
                 ) : null}
+                {ev.completed && (
+                  <View style={styles.cardMeta}>
+                    <Feather name="check-circle" size={12} color="#059669" />
+                    <Text style={[styles.metaText, { color: "#059669" }]}>Resolved</Text>
+                  </View>
+                )}
               </View>
             );
           })}
@@ -243,7 +243,6 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  badgeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   badge: {
     flexDirection: "row",
     alignItems: "center",
@@ -254,6 +253,7 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
   dateText: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  cardTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold", lineHeight: 20 },
-  cardSub: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
+  cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
 });
