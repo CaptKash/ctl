@@ -18,13 +18,19 @@ import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
 
-type Phase = "car_running" | "car_started" | "parking" | "during_drive";
+type Severity = "critical" | "major" | "minor" | "cosmetic";
 
-const PHASES: { key: Phase; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-  { key: "car_running", label: "Car Running", icon: "zap" },
-  { key: "car_started", label: "Car Started", icon: "power" },
-  { key: "parking", label: "Parking", icon: "square" },
-  { key: "during_drive", label: "During Drive", icon: "navigation" },
+const SEVERITIES: {
+  key: Severity;
+  label: string;
+  icon: keyof typeof Feather.glyphMap;
+  bg: string;
+  color: string;
+}[] = [
+  { key: "critical", label: "Critical",  icon: "alert-octagon", bg: "#FEE2E2", color: "#DC2626" },
+  { key: "major",    label: "Major",     icon: "alert-triangle", bg: "#FEF3C7", color: "#D97706" },
+  { key: "minor",    label: "Minor",     icon: "info",           bg: "#DBEAFE", color: "#2563EB" },
+  { key: "cosmetic", label: "Cosmetic",  icon: "eye",            bg: "#F3F4F6", color: "#6B7280" },
 ];
 
 export default function MalfunctionLogScreen() {
@@ -34,11 +40,11 @@ export default function MalfunctionLogScreen() {
   const { carId, carName } = useLocalSearchParams<{ carId: string; carName: string }>();
 
   const [description, setDescription] = useState("");
-  const [odometer, setOdometer] = useState("");
-  const [phase, setPhase] = useState<Phase | null>(null);
+  const [severity, setSeverity] = useState<Severity | null>(null);
+  const [actionTaken, setActionTaken] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const canSave = description.trim().length > 0 && phase !== null;
+  const canSave = description.trim().length > 0 && severity !== null;
 
   const handleSave = async () => {
     if (!canSave || !carId) return;
@@ -48,8 +54,8 @@ export default function MalfunctionLogScreen() {
         date: new Date().toISOString().split("T")[0],
         inputMethod: "written",
         description: description.trim(),
-        odometer: odometer.trim() ? parseInt(odometer.trim(), 10) : null,
-        phase,
+        severity,
+        actionTaken: actionTaken.trim() || null,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
@@ -94,7 +100,6 @@ export default function MalfunctionLogScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Describe the Issue</Text>
-
           <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border }]}>
             <TextInput
               style={[styles.textArea, { color: C.text }]}
@@ -108,58 +113,58 @@ export default function MalfunctionLogScreen() {
           </View>
 
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20 }]}>
-            Odometer Reading (optional)
+            Severity
           </Text>
-          <View style={[styles.odometerRow, { backgroundColor: C.card, borderColor: C.border }]}>
-            <Feather name="activity" size={16} color={C.textSecondary} />
-            <TextInput
-              style={[styles.odometerInput, { color: C.text }]}
-              placeholder="e.g. 85000"
-              placeholderTextColor={C.textTertiary}
-              value={odometer}
-              onChangeText={(text) => setOdometer(text.replace(/[^0-9]/g, ""))}
-              keyboardType="numeric"
-            />
-            <Text style={[styles.odometerUnit, { color: C.textTertiary }]}>km</Text>
-          </View>
-
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20 }]}>
-            When did it happen?
-          </Text>
-          <View style={styles.phaseGrid}>
-            {PHASES.map((p) => {
-              const selected = phase === p.key;
+          <View style={styles.severityGrid}>
+            {SEVERITIES.map((s) => {
+              const selected = severity === s.key;
               return (
                 <Pressable
-                  key={p.key}
+                  key={s.key}
                   onPress={() => {
                     Haptics.selectionAsync();
-                    setPhase(p.key);
+                    setSeverity(s.key);
                   }}
                   style={[
-                    styles.phaseCard,
+                    styles.severityCard,
                     {
-                      backgroundColor: selected ? C.tint : C.card,
-                      borderColor: selected ? C.tint : C.border,
+                      backgroundColor: selected ? s.bg : C.card,
+                      borderColor: selected ? s.color : C.border,
                     },
                   ]}
                 >
                   <Feather
-                    name={p.icon}
-                    size={20}
-                    color={selected ? "#fff" : C.textSecondary}
+                    name={s.icon}
+                    size={18}
+                    color={selected ? s.color : C.textSecondary}
                   />
                   <Text
                     style={[
-                      styles.phaseLabel,
-                      { color: selected ? "#fff" : C.text },
+                      styles.severityLabel,
+                      { color: selected ? s.color : C.textSecondary },
                     ]}
                   >
-                    {p.label}
+                    {s.label}
                   </Text>
                 </Pressable>
               );
             })}
+          </View>
+
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20 }]}>
+            Action Taken{" "}
+            <Text style={[styles.optional, { color: C.textTertiary }]}>(optional)</Text>
+          </Text>
+          <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border }]}>
+            <TextInput
+              style={[styles.textArea, { color: C.text }]}
+              placeholder="What was done, or what needs to be done..."
+              placeholderTextColor={C.textTertiary}
+              value={actionTaken}
+              onChangeText={setActionTaken}
+              multiline
+              textAlignVertical="top"
+            />
           </View>
 
           <Pressable
@@ -229,52 +234,38 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginBottom: 4,
   },
+  optional: { fontSize: 11, fontFamily: "Inter_400Regular", textTransform: "none", letterSpacing: 0 },
 
   inputBox: {
     borderWidth: 1,
     borderRadius: 14,
     padding: 14,
-    minHeight: 120,
+    minHeight: 110,
   },
   textArea: {
     fontSize: 15,
     fontFamily: "Inter_400Regular",
     lineHeight: 22,
-    minHeight: 100,
+    minHeight: 90,
   },
 
-  odometerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
-  },
-  odometerInput: {
-    flex: 1,
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-  },
-  odometerUnit: { fontSize: 14, fontFamily: "Inter_500Medium" },
-
-  phaseGrid: {
+  severityGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
   },
-  phaseCard: {
+  severityCard: {
     width: "47%",
     flexGrow: 1,
-    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 14,
     paddingHorizontal: 14,
     borderRadius: 14,
     borderWidth: 1,
-    alignItems: "center",
-    gap: 8,
   },
-  phaseLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center" },
+  severityLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 
   saveBtn: {
     flexDirection: "row",
