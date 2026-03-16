@@ -125,10 +125,10 @@ export default function FaultLogScreen() {
                 },
               } as any)
             }
-            style={[styles.fixBtn, { backgroundColor: "#FEF3C7", borderColor: "#D97706" }]}
+            style={[styles.fixBtn, { backgroundColor: "#D1FAE5", borderColor: "#059669" }]}
           >
-            <Feather name="tool" size={12} color="#D97706" />
-            <Text style={[styles.fixBtnText, { color: "#D97706" }]}>Fix</Text>
+            <Feather name="tool" size={12} color="#059669" />
+            <Text style={[styles.fixBtnText, { color: "#059669" }]}>Fix</Text>
           </Pressable>
         </View>
       </View>
