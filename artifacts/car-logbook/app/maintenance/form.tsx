@@ -217,6 +217,8 @@ export default function MaintenanceFormScreen() {
           </View>
         </View>
 
+        <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
+
         {/* Repair Shop */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
           <View style={styles.costHeader}>
@@ -244,6 +246,8 @@ export default function MaintenanceFormScreen() {
             />
           </View>
         </View>
+
+        <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
 
         {/* Cost */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
@@ -359,6 +363,9 @@ const styles = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     marginHorizontal: -4,
+  },
+  sectionDivider: {
+    height: StyleSheet.hairlineWidth,
   },
   costCard: {
     borderRadius: 16,
