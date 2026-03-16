@@ -1,11 +1,9 @@
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Platform,
-  Pressable,
-  SectionList,
   StyleSheet,
   Text,
   View,
@@ -31,21 +29,31 @@ type FaultRecord = {
   carId: number;
   date: string;
   description: string;
-  phase: string;
-  odometer?: number | null;
-  inputMethod: string;
+  severity?: string | null;
   completed: boolean;
   car: Car | null;
 };
 
-const PHASE_LABELS: Record<string, string> = {
-  car_running: "Car Running",
-  car_started: "Car Started",
-  parking: "Parking",
-  during_drive: "During Drive",
+const SEVERITY_ORDER: Record<string, number> = {
+  critical: 0,
+  major: 1,
+  minor: 2,
+  cosmetic: 3,
 };
 
-export default function FaultsScreen() {
+const SEVERITY_META: Record<string, { label: string; bg: string; color: string; icon: keyof typeof Feather.glyphMap }> = {
+  critical: { label: "Critical",  bg: "#FEE2E2", color: "#DC2626", icon: "alert-octagon" },
+  major:    { label: "Major",     bg: "#FEF3C7", color: "#D97706", icon: "alert-triangle" },
+  minor:    { label: "Minor",     bg: "#DBEAFE", color: "#2563EB", icon: "info" },
+  cosmetic: { label: "Cosmetic",  bg: "#F3F4F6", color: "#6B7280", icon: "eye" },
+};
+
+const carLabel = (car: Car | null) => {
+  if (!car) return "Unknown Car";
+  return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
+};
+
+export default function FaultLogScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -55,31 +63,61 @@ export default function FaultsScreen() {
     queryFn: () => apiGet<FaultRecord[]>("/malfunctions"),
   });
 
-  const carLabel = (car: Car | null) => {
-    if (!car) return "Unknown Car";
-    const base = `${car.year} ${car.make} ${car.model}`;
-    return car.nickname ? `${car.nickname} — ${base}` : base;
-  };
-
-  type Section = { title: string; carId: number; data: FaultRecord[] };
-
-  const sections: Section[] = React.useMemo(() => {
+  const sorted = React.useMemo(() => {
     if (!faults) return [];
-    const map = new Map<number, FaultRecord[]>();
-    for (const f of faults) {
-      const existing = map.get(f.carId) ?? [];
-      existing.push(f);
-      map.set(f.carId, existing);
-    }
-    return Array.from(map.entries()).map(([carId, records]) => ({
-      title: carLabel(records[0].car),
-      carId,
-      data: records,
-    }));
+    return [...faults].sort((a, b) => {
+      const sa = SEVERITY_ORDER[a.severity ?? ""] ?? 99;
+      const sb = SEVERITY_ORDER[b.severity ?? ""] ?? 99;
+      if (sa !== sb) return sa - sb;
+      return b.date.localeCompare(a.date);
+    });
   }, [faults]);
 
-  const totalCount = faults?.length ?? 0;
-  const openCount = faults?.filter((f) => !f.completed).length ?? 0;
+  const totalCount = sorted.length;
+  const openCount = sorted.filter((f) => !f.completed).length;
+
+  const renderCard = ({ item }: { item: FaultRecord }) => {
+    const sev = item.severity ? SEVERITY_META[item.severity] : null;
+    const car = carLabel(item.car);
+
+    return (
+      <View style={[styles.card, { backgroundColor: C.card, borderColor: sev?.color ?? C.border }]}>
+        <View style={styles.cardHeader}>
+          {sev ? (
+            <View style={[styles.severityBadge, { backgroundColor: sev.bg }]}>
+              <Feather name={sev.icon} size={11} color={sev.color} />
+              <Text style={[styles.severityText, { color: sev.color }]}>{sev.label}</Text>
+            </View>
+          ) : (
+            <View style={[styles.severityBadge, { backgroundColor: C.backgroundTertiary }]}>
+              <Text style={[styles.severityText, { color: C.textTertiary }]}>Unknown</Text>
+            </View>
+          )}
+          {item.completed && (
+            <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
+              <Feather name="check" size={11} color="#059669" />
+              <Text style={[styles.severityText, { color: "#059669" }]}>Resolved</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>
+          {item.description}
+        </Text>
+
+        <View style={styles.cardFooter}>
+          <View style={styles.footerLeft}>
+            <Feather name="calendar" size={12} color={C.textTertiary} />
+            <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
+          </View>
+          <View style={styles.footerRight}>
+            <Feather name="truck" size={12} color={C.textTertiary} />
+            <Text style={[styles.footerText, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
@@ -89,7 +127,7 @@ export default function FaultsScreen() {
             <Feather name="alert-triangle" size={22} color="#DC2626" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>All Faults</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Fault Log</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>
               {totalCount === 0 ? "No faults logged" : `${openCount} open · ${totalCount} total`}
             </Text>
@@ -99,7 +137,7 @@ export default function FaultsScreen() {
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={C.tint} />
+          <ActivityIndicator color="#DC2626" />
         </View>
       ) : totalCount === 0 ? (
         <View style={styles.centered}>
@@ -110,61 +148,16 @@ export default function FaultsScreen() {
           />
         </View>
       ) : (
-        <SectionList
-          sections={sections}
+        <FlatList
+          data={sorted}
           keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={styles.listContent}
-          stickySectionHeadersEnabled={false}
-          renderSectionHeader={({ section }) => (
-            <Pressable
-              onPress={() => router.push({ pathname: "/car/faults", params: { id: String(section.carId) } } as any)}
-              style={({ pressed }) => [
-                styles.sectionHeader,
-                { backgroundColor: C.card, borderColor: C.border, opacity: pressed ? 0.75 : 1 },
-              ]}
-            >
-              <View style={[styles.sectionIconWrap, { backgroundColor: "#FEE2E2" }]}>
-                <Feather name="truck" size={14} color="#DC2626" />
-              </View>
-              <Text style={[styles.sectionTitle, { color: C.text }]} numberOfLines={1}>{section.title}</Text>
-              <Feather name="chevron-right" size={14} color={C.textTertiary} />
-            </Pressable>
-          )}
-          renderItem={({ item }) => (
-            <View style={[styles.card, { backgroundColor: C.card, borderColor: item.completed ? C.border : "#FCA5A5" }]}>
-              <View style={styles.cardTop}>
-                <View style={[styles.dot, { backgroundColor: item.completed ? C.success : "#DC2626" }]} />
-                <Text style={[styles.cardDesc, { color: C.text }]} numberOfLines={2}>{item.description}</Text>
-                {item.completed && (
-                  <View style={[styles.badge, { backgroundColor: "#D1FAE5" }]}>
-                    <Text style={[styles.badgeText, { color: C.success }]}>Resolved</Text>
-                  </View>
-                )}
-              </View>
-              <View style={styles.cardMeta}>
-                <Feather name="calendar" size={12} color={C.textTertiary} />
-                <Text style={[styles.metaText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
-                {item.phase ? (
-                  <>
-                    <Text style={[styles.metaDot, { color: C.textTertiary }]}>·</Text>
-                    <Feather name="activity" size={12} color={C.textTertiary} />
-                    <Text style={[styles.metaText, { color: C.textTertiary }]}>
-                      {PHASE_LABELS[item.phase] ?? item.phase}
-                    </Text>
-                  </>
-                ) : null}
-                {item.odometer != null ? (
-                  <>
-                    <Text style={[styles.metaDot, { color: C.textTertiary }]}>·</Text>
-                    <Feather name="navigation" size={12} color={C.textTertiary} />
-                    <Text style={[styles.metaText, { color: C.textTertiary }]}>{item.odometer.toLocaleString()} km</Text>
-                  </>
-                ) : null}
-              </View>
-            </View>
-          )}
-          SectionSeparatorComponent={() => <View style={{ height: 4 }} />}
-          ItemSeparatorComponent={() => <View style={{ height: 8, marginHorizontal: 16 }} />}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 24 },
+          ]}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          renderItem={renderCard}
+          showsVerticalScrollIndicator={false}
         />
       )}
 
@@ -180,77 +173,45 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
-  listContent: { padding: 16, gap: 0 },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 8,
-  },
-  sectionIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sectionTitle: { flex: 1, fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  listContent: { padding: 16 },
+
   card: {
-    borderRadius: 12,
+    borderRadius: 14,
+    borderLeftWidth: 4,
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    gap: 6,
-    marginHorizontal: 16,
-  },
-  cardTop: {
-    flexDirection: "row",
-    alignItems: "flex-start",
     gap: 8,
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginTop: 5,
-    flexShrink: 0,
-  },
-  cardDesc: { flex: 1, fontSize: 14, fontFamily: "Inter_500Medium", lineHeight: 20 },
-  badge: {
-    borderRadius: 6,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    flexShrink: 0,
-    alignSelf: "center",
-  },
-  badgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  cardMeta: {
+  cardHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
+  severityBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    flexWrap: "wrap",
-    paddingLeft: 16,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
-  metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  metaDot: { fontSize: 12 },
+  resolvedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  severityText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+
+  cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
+
+  cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  footerLeft: { flexDirection: "row", alignItems: "center", gap: 5 },
+  footerRight: { flexDirection: "row", alignItems: "center", gap: 5, flexShrink: 1 },
+  footerText: { fontSize: 12, fontFamily: "Inter_400Regular" },
 });
