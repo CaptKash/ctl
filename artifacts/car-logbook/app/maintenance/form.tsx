@@ -172,7 +172,7 @@ export default function MaintenanceFormScreen() {
           <View style={styles.serviceFields}>
             {fromFault ? (
               <FormField
-                label="Service Description"
+                label="Description of Work Done"
                 value={correctiveAction}
                 onChangeText={setCorrectiveAction}
                 placeholder="Describe the repair or service performed…"
