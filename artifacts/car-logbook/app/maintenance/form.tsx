@@ -235,11 +235,14 @@ export default function MaintenanceFormScreen() {
             placeholder="e.g. 80.00"
             keyboardType="decimal-pad"
           />
-          <View style={[styles.totalRow, { borderTopColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={styles.totalFieldWrap}>
             <Text style={[styles.totalLabel, { color: C.textSecondary }]}>Total</Text>
-            <Text style={[styles.totalValue, { color: C.text }]}>
-              {totalCost > 0 ? `$${totalCost.toFixed(2)}` : "—"}
-            </Text>
+            <View style={[styles.totalBox, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
+              <Text style={[styles.totalValue, { color: totalCost > 0 ? C.text : C.textTertiary }]}>
+                {totalCost > 0 ? `$${totalCost.toFixed(2)}` : "—"}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -322,21 +325,24 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
-  totalRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 14,
-    paddingVertical: 16,
-    borderTopWidth: 1,
+  totalFieldWrap: {
+    marginBottom: 2,
   },
   totalLabel: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    marginBottom: 6,
+  },
+  totalBox: {
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 46,
+    paddingHorizontal: 14,
+    justifyContent: "center",
   },
   totalValue: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
   },
   photoSection: {
     gap: 10,
