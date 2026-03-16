@@ -455,6 +455,7 @@ router.post("/cars/:carId/events/complete", async (req, res) => {
 // Events (unified timeline)
 router.get("/cars/:carId/events", async (req, res) => {
   const carId = parseInt(req.params.carId);
+  const includeCompleted = req.query.includeCompleted === "true";
 
   const [maintenance, parts, insurance, dealerships, fuel, malfunctions, completions] = await Promise.all([
     db.select().from(maintenanceTable).where(eq(maintenanceTable.carId, carId)),
@@ -510,9 +511,10 @@ router.get("/cars/:carId/events", async (req, res) => {
       date: r.date,
       title: r.description,
       subtitle: r.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      completed: completedKeys.has(`malfunction-${r.id}`),
     })),
   ]
-    .filter((ev) => !completedKeys.has(`${ev.type}-${ev.id}`))
+    .filter((ev) => includeCompleted || !completedKeys.has(`${ev.type}-${ev.id}`))
     .sort((a, b) => b.date.localeCompare(a.date));
 
   res.json(events);

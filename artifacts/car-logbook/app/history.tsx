@@ -28,21 +28,17 @@ type Car = {
 
 type Event = {
   id: number;
-  type: "maintenance" | "parts" | "insurance" | "dealership" | "fuel" | "malfunction";
+  type: "maintenance" | "malfunction";
   date: string;
   title: string;
   subtitle: string;
+  completed?: boolean;
 };
 
 const EVENT_META: Record<Event["type"], { label: string; icon: React.ComponentProps<typeof Feather>["name"]; bg: string; color: string }> = {
-  malfunction: { label: "Fault",       icon: "alert-triangle", bg: "#FEE2E2", color: "#DC2626" },
-  maintenance: { label: "Maintenance", icon: "tool",           bg: "#FEF3C7", color: "#D97706" },
-  inspection:  { label: "Inspection",  icon: "clipboard",      bg: "#FEF3C7", color: "#D97706" },
-  parts:       { label: "Parts",       icon: "box",            bg: "#EDE9FE", color: "#7C3AED" },
-  insurance:   { label: "Insurance",   icon: "shield",         bg: "#EDE9FE", color: "#7C3AED" },
-  dealership:  { label: "Dealership",  icon: "map-pin",        bg: "#DBEAFE", color: "#2563EB" },
-  fuel:        { label: "Fuel",        icon: "droplet",        bg: "#D1FAE5", color: "#059669" },
-} as any;
+  malfunction: { label: "Fault",   icon: "alert-triangle", bg: "#FEE2E2", color: "#DC2626" },
+  maintenance: { label: "Repair",  icon: "tool",           bg: "#FEF3C7", color: "#D97706" },
+};
 
 function carLabel(car: Car) {
   return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
@@ -75,8 +71,11 @@ export default function HistoryScreen() {
   }, [cars]);
 
   const eventsQuery = useQuery<Event[]>({
-    queryKey: ["events", activeCar?.id],
-    queryFn: () => apiGet<Event[]>(`/cars/${activeCar!.id}/events`),
+    queryKey: ["history-events", activeCar?.id],
+    queryFn: async () => {
+      const all = await apiGet<Event[]>(`/cars/${activeCar!.id}/events?includeCompleted=true`);
+      return all.filter((e) => e.type === "malfunction" || e.type === "maintenance");
+    },
     enabled: !!activeCar,
   });
 
@@ -153,7 +152,7 @@ export default function HistoryScreen() {
         <View style={styles.centered}>
           <Feather name="clock" size={40} color={C.textTertiary} />
           <Text style={[styles.emptyTitle, { color: C.text }]}>No Events Yet</Text>
-          <Text style={[styles.emptySub, { color: C.textSecondary }]}>Faults, maintenance, and other records will appear here.</Text>
+          <Text style={[styles.emptySub, { color: C.textSecondary }]}>Logged faults and repairs will appear here.</Text>
         </View>
       ) : (
         <ScrollView
@@ -161,13 +160,21 @@ export default function HistoryScreen() {
           showsVerticalScrollIndicator={false}
         >
           {events.map((ev) => {
-            const meta = EVENT_META[ev.type] ?? { label: ev.type, icon: "circle", bg: "#F1F5F9", color: "#64748B" };
+            const meta = EVENT_META[ev.type];
             return (
               <View key={`${ev.type}-${ev.id}`} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
-                    <Feather name={meta.icon as any} size={11} color={meta.color} />
-                    <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+                  <View style={styles.badgeRow}>
+                    <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+                      <Feather name={meta.icon as any} size={11} color={meta.color} />
+                      <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+                    </View>
+                    {ev.completed && (
+                      <View style={[styles.badge, { backgroundColor: "#D1FAE5" }]}>
+                        <Feather name="check-circle" size={11} color="#059669" />
+                        <Text style={[styles.badgeText, { color: "#059669" }]}>Resolved</Text>
+                      </View>
+                    )}
                   </View>
                   <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
                 </View>
@@ -236,6 +243,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  badgeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   badge: {
     flexDirection: "row",
     alignItems: "center",
