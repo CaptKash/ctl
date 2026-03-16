@@ -41,7 +41,6 @@ export default function MalfunctionLogScreen() {
 
   const [description, setDescription] = useState("");
   const [severity, setSeverity] = useState<Severity | null>(null);
-  const [actionTaken, setActionTaken] = useState("");
   const [saving, setSaving] = useState(false);
 
   const canSave = description.trim().length > 0 && severity !== null;
@@ -55,7 +54,6 @@ export default function MalfunctionLogScreen() {
         inputMethod: "written",
         description: description.trim(),
         severity,
-        actionTaken: actionTaken.trim() || null,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
@@ -151,22 +149,6 @@ export default function MalfunctionLogScreen() {
             })}
           </View>
 
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20 }]}>
-            Action Taken{" "}
-            <Text style={[styles.optional, { color: C.textTertiary }]}>(optional)</Text>
-          </Text>
-          <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border }]}>
-            <TextInput
-              style={[styles.textArea, { color: C.text }]}
-              placeholder="What was done, or what needs to be done..."
-              placeholderTextColor={C.textTertiary}
-              value={actionTaken}
-              onChangeText={setActionTaken}
-              multiline
-              textAlignVertical="top"
-            />
-          </View>
-
           <Pressable
             onPress={handleSave}
             disabled={!canSave || saving}
@@ -234,8 +216,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginBottom: 4,
   },
-  optional: { fontSize: 11, fontFamily: "Inter_400Regular", textTransform: "none", letterSpacing: 0 },
-
   inputBox: {
     borderWidth: 1,
     borderRadius: 14,
