@@ -35,15 +35,6 @@ const eventOptions: EventOption[] = [
     available: true,
   },
   {
-    id: "maintenance",
-    title: "Repair",
-    description: "Log a service or repair",
-    icon: "tool",
-    iconBg: "#FEF3C7",
-    iconColor: "#D97706",
-    available: true,
-  },
-  {
     id: "inspection",
     title: "Inspection",
     description: "Log a regular check or inspection",
@@ -76,8 +67,6 @@ export default function AddEventScreen() {
     }
     if (option.id === "malfunction") {
       router.push("/malfunction/add");
-    } else if (option.id === "maintenance") {
-      router.push("/maintenance/add");
     } else if (option.id === "inspection") {
       router.push("/inspection/add");
     }
@@ -96,7 +85,7 @@ export default function AddEventScreen() {
       <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
         <Feather name="info" size={15} color={C.info} />
         <Text style={[styles.instructionText, { color: C.info }]}>
-          Log a fault, repair, inspection, or registration
+          Log a fault, inspection, or registration
         </Text>
       </View>
 
