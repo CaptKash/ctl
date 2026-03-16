@@ -266,7 +266,7 @@ export default function MaintenanceFormScreen() {
                 ]}
               >
                 <Feather name="camera" size={16} color={C.textSecondary} />
-                <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of the Warranty</Text>
+                <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of Warranty</Text>
               </Pressable>
             )}
           </View>
@@ -360,7 +360,7 @@ export default function MaintenanceFormScreen() {
               ]}
             >
               <Feather name="camera" size={16} color={C.textSecondary} />
-              <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of the Bill</Text>
+              <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of Bill</Text>
             </Pressable>
           )}
         </View>
