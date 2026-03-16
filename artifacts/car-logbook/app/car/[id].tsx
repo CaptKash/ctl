@@ -16,8 +16,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
-import { SectionHeader } from "@/components/ui/SectionHeader";
-import { RecordCard } from "@/components/ui/RecordCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiDelete } from "@/hooks/useApi";
@@ -38,14 +36,11 @@ type Car = {
   notes?: string | null;
 };
 
-type MalfunctionRecord = {
+type FaultRecord = {
   id: number;
   carId: number;
   date: string;
-  inputMethod: string;
   description: string;
-  odometer?: number | null;
-  phase: string;
   completed: boolean;
 };
 
@@ -55,10 +50,8 @@ type MaintenanceRecord = {
   type: string;
   description: string;
   date: string;
-  mileage?: number | null;
   cost?: number | null;
   shop?: string | null;
-  nextDueDate?: string | null;
 };
 
 type InspectionRecord = {
@@ -68,10 +61,19 @@ type InspectionRecord = {
   place?: string | null;
   results?: string | null;
   cost?: number | null;
-  requiredRepairs?: string | null;
   nextInspectionDate?: string | null;
 };
 
+type EventItem =
+  | { kind: "fault"; data: FaultRecord }
+  | { kind: "maintenance"; data: MaintenanceRecord }
+  | { kind: "inspection"; data: InspectionRecord };
+
+const EVENT_META = {
+  fault:       { label: "Fault",       icon: "alert-triangle" as const, bg: "#FEE2E2", color: "#DC2626" },
+  maintenance: { label: "Maintenance", icon: "tool" as const,           bg: "#FEF3C7", color: "#D97706" },
+  inspection:  { label: "Inspection",  icon: "clipboard" as const,      bg: "#FEF3C7", color: "#D97706" },
+};
 
 export default function CarDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -93,9 +95,9 @@ export default function CarDetailScreen() {
     queryFn: () => apiGet<Car>(`/cars/${carId}`),
   });
 
-  const faultsQuery = useQuery<MalfunctionRecord[]>({
+  const faultsQuery = useQuery<FaultRecord[]>({
     queryKey: ["malfunctions", carId],
-    queryFn: () => apiGet<MalfunctionRecord[]>(`/cars/${carId}/malfunctions`),
+    queryFn: () => apiGet<FaultRecord[]>(`/cars/${carId}/malfunctions`),
   });
 
   const maintenanceQuery = useQuery<MaintenanceRecord[]>({
@@ -107,6 +109,18 @@ export default function CarDetailScreen() {
     queryKey: ["inspections", carId],
     queryFn: () => apiGet<InspectionRecord[]>(`/cars/${carId}/inspections`),
   });
+
+  const events: EventItem[] = React.useMemo(() => {
+    const list: EventItem[] = [];
+    (faultsQuery.data ?? [])
+      .filter((r) => !r.completed)
+      .forEach((r) => list.push({ kind: "fault", data: r }));
+    (maintenanceQuery.data ?? []).forEach((r) => list.push({ kind: "maintenance", data: r }));
+    (inspectionsQuery.data ?? []).forEach((r) => list.push({ kind: "inspection", data: r }));
+    return list.sort((a, b) => b.data.date.localeCompare(a.data.date));
+  }, [faultsQuery.data, maintenanceQuery.data, inspectionsQuery.data]);
+
+  const isLoading = faultsQuery.isLoading || maintenanceQuery.isLoading || inspectionsQuery.isLoading;
 
   const confirmDelete = (path: string, queryKey: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -120,6 +134,139 @@ export default function CarDetailScreen() {
         qc.invalidateQueries({ queryKey: [queryKey, carId] });
       },
     });
+  };
+
+  const renderEvent = (ev: EventItem) => {
+    const meta = EVENT_META[ev.kind];
+    const key = `${ev.kind}-${ev.data.id}`;
+
+    if (ev.kind === "fault") {
+      const r = ev.data;
+      return (
+        <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+              <Feather name={meta.icon} size={11} color={meta.color} />
+              <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+            </View>
+            <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+          </View>
+          <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
+          <View style={styles.cardFooter}>
+            <View style={{ flex: 1 }} />
+            <View style={styles.cardActions}>
+              <Pressable
+                onPress={() => router.push({
+                  pathname: "/maintenance/form",
+                  params: { carId: String(carId), faultDescription: r.description, faultId: String(r.id) },
+                } as any)}
+                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+              >
+                <Feather name="tool" size={14} color={meta.color} />
+              </Pressable>
+              <Pressable
+                onPress={() => confirmDelete(`/cars/${carId}/malfunctions/${r.id}`, "malfunctions")}
+                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+              >
+                <Feather name="trash-2" size={14} color={meta.color} />
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      );
+    }
+
+    if (ev.kind === "maintenance") {
+      const r = ev.data;
+      return (
+        <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+              <Feather name={meta.icon} size={11} color={meta.color} />
+              <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || meta.label}</Text>
+            </View>
+            <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+          </View>
+          <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
+          {(r.shop || r.cost != null) && (
+            <View style={styles.cardMeta}>
+              {r.shop && (
+                <>
+                  <Feather name="map-pin" size={12} color={C.textTertiary} />
+                  <Text style={[styles.metaText, { color: C.textSecondary }]}>{r.shop}</Text>
+                </>
+              )}
+              {r.cost != null && (
+                <>
+                  {r.shop && <View style={styles.metaDot} />}
+                  <Text style={[styles.metaText, { color: C.textSecondary }]}>${r.cost.toFixed(2)}</Text>
+                </>
+              )}
+            </View>
+          )}
+          <View style={styles.cardFooter}>
+            <View style={{ flex: 1 }} />
+            <Pressable
+              onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
+              style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+            >
+              <Feather name="trash-2" size={14} color={meta.color} />
+            </Pressable>
+          </View>
+        </View>
+      );
+    }
+
+    if (ev.kind === "inspection") {
+      const r = ev.data;
+      return (
+        <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+              <Feather name={meta.icon} size={11} color={meta.color} />
+              <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+            </View>
+            <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+          </View>
+          {r.results && (
+            <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.results}</Text>
+          )}
+          {(r.place || r.cost != null) && (
+            <View style={styles.cardMeta}>
+              {r.place && (
+                <>
+                  <Feather name="map-pin" size={12} color={C.textTertiary} />
+                  <Text style={[styles.metaText, { color: C.textSecondary }]}>{r.place}</Text>
+                </>
+              )}
+              {r.cost != null && (
+                <>
+                  {r.place && <View style={styles.metaDot} />}
+                  <Text style={[styles.metaText, { color: C.textSecondary }]}>${r.cost.toFixed(2)}</Text>
+                </>
+              )}
+            </View>
+          )}
+          {r.nextInspectionDate && (
+            <View style={styles.cardMeta}>
+              <Feather name="calendar" size={12} color={C.textTertiary} />
+              <Text style={[styles.metaText, { color: C.textSecondary }]}>Next: {formatDate(r.nextInspectionDate)}</Text>
+            </View>
+          )}
+          <View style={styles.cardFooter}>
+            <View style={{ flex: 1 }} />
+            <Pressable
+              onPress={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
+              style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+            >
+              <Feather name="trash-2" size={14} color={meta.color} />
+            </Pressable>
+          </View>
+        </View>
+      );
+    }
+
+    return null;
   };
 
   const car = carQuery.data;
@@ -142,7 +289,6 @@ export default function CarDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 8 }]}>
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={C.text} />
@@ -157,20 +303,14 @@ export default function CarDetailScreen() {
         </View>
         <View style={styles.headerActions}>
           <Pressable
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push({ pathname: "/car/edit", params: { id: String(carId) } });
-            }}
+            onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
             hitSlop={8}
             style={[styles.headerBtn, { backgroundColor: C.backgroundTertiary }]}
           >
             <Feather name="edit-2" size={16} color={C.text} />
           </Pressable>
           <Pressable
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push({ pathname: "/report/[id]", params: { id: String(carId) } });
-            }}
+            onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report/[id]", params: { id: String(carId) } }); }}
             hitSlop={8}
             style={[styles.headerBtn, { backgroundColor: C.infoLight }]}
           >
@@ -207,114 +347,21 @@ export default function CarDetailScreen() {
         )}
       </View>
 
-      {/* Records */}
       <ScrollView
         style={styles.content}
         contentContainerStyle={[styles.contentPadding, { paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Faults */}
-        <SectionHeader title="Faults" />
-
-        {faultsQuery.isLoading ? (
-          <ActivityIndicator color={C.tint} style={{ marginTop: 16 }} />
-        ) : !faultsQuery.data || faultsQuery.data.filter((r) => !r.completed).length === 0 ? (
+        {isLoading ? (
+          <ActivityIndicator color={C.tint} style={{ marginTop: 24 }} />
+        ) : events.length === 0 ? (
           <EmptyState
-            icon="alert-triangle"
-            title="No fault records"
-            description="Faults logged from the Log Event page will appear here."
+            icon="clock"
+            title="No records yet"
+            description="Faults, maintenance, and inspections will appear here."
           />
         ) : (
-          faultsQuery.data.filter((r) => !r.completed).map((r) => (
-            <View key={r.id} style={[styles.faultCard, { backgroundColor: C.card, borderColor: "#DC2626" }]}>
-              <View style={styles.faultCardHeader}>
-                <View style={[styles.faultBadge, { backgroundColor: "#FEE2E2" }]}>
-                  <Feather name="alert-triangle" size={11} color="#DC2626" />
-                  <Text style={[styles.faultBadgeText, { color: "#DC2626" }]}>Fault</Text>
-                </View>
-                <Text style={[styles.faultDate, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
-              </View>
-              <Text style={[styles.faultDesc, { color: C.text }]} numberOfLines={3}>
-                {r.description}
-              </Text>
-              <View style={styles.faultFooter}>
-                <View style={{ flex: 1 }} />
-                <View style={styles.faultActions}>
-                  <Pressable
-                    onPress={() =>
-                      router.push({
-                        pathname: "/maintenance/form",
-                        params: { carId: String(carId), faultDescription: r.description, faultId: String(r.id) },
-                      } as any)
-                    }
-                    style={[styles.faultBtn, { backgroundColor: "#FEE2E2", borderColor: "#DC2626" }]}
-                  >
-                    <Feather name="tool" size={14} color="#DC2626" />
-                  </Pressable>
-                  <Pressable
-                    onPress={() => confirmDelete(`/cars/${carId}/malfunctions/${r.id}`, "malfunctions")}
-                    style={[styles.faultBtn, { backgroundColor: "#FEE2E2", borderColor: "#DC2626" }]}
-                  >
-                    <Feather name="trash-2" size={14} color="#DC2626" />
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          ))
-        )}
-
-        {/* Maintenance */}
-        <SectionHeader title="Maintenance" />
-
-        {maintenanceQuery.isLoading ? (
-          <ActivityIndicator color={C.tint} style={{ marginTop: 16 }} />
-        ) : !maintenanceQuery.data || maintenanceQuery.data.length === 0 ? (
-          <EmptyState
-            icon="tool"
-            title="No maintenance records"
-            description="Maintenance logged from the Log Event page will appear here."
-          />
-        ) : (
-          maintenanceQuery.data.map((r) => (
-            <RecordCard
-              key={r.id}
-              icon="tool"
-              iconColor={Colors.light.warning}
-              iconBg={Colors.light.warningLight}
-              title={r.description}
-              subtitle={`${r.type} · ${formatDate(r.date)}${r.shop ? ` · ${r.shop}` : ""}`}
-              rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
-              rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} km` : undefined}
-              onDelete={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
-            />
-          ))
-        )}
-
-        {/* Inspections */}
-        <SectionHeader title="Inspections" />
-
-        {inspectionsQuery.isLoading ? (
-          <ActivityIndicator color={C.tint} style={{ marginTop: 16 }} />
-        ) : !inspectionsQuery.data || inspectionsQuery.data.length === 0 ? (
-          <EmptyState
-            icon="clipboard"
-            title="No inspection records"
-            description="Inspections logged from the Log Event page will appear here."
-          />
-        ) : (
-          inspectionsQuery.data.map((r) => (
-            <RecordCard
-              key={r.id}
-              icon="clipboard"
-              iconColor="#D97706"
-              iconBg="#FEF3C7"
-              title={r.results ?? "Inspection"}
-              subtitle={`${formatDate(r.date)}${r.place ? ` · ${r.place}` : ""}`}
-              rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
-              rightSubtext={r.nextInspectionDate ? `Next: ${formatDate(r.nextInspectionDate)}` : undefined}
-              onDelete={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
-            />
-          ))
+          events.map(renderEvent)
         )}
       </ScrollView>
 
@@ -342,31 +389,14 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     gap: 8,
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  backBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   headerCenter: { flex: 1 },
-  carName: {
-    fontSize: 17,
-    fontFamily: "Inter_700Bold",
-  },
-  plate: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  carName: { fontSize: 17, fontFamily: "Inter_700Bold" },
+  plate: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  headerActions: { flexDirection: "row", gap: 8 },
   headerBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 34, height: 34, borderRadius: 10,
+    alignItems: "center", justifyContent: "center",
   },
   statsStrip: {
     flexDirection: "row",
@@ -382,21 +412,12 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   statItem: { alignItems: "center", gap: 2 },
-  statValue: {
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
-  },
-  statLabel: {
-    fontSize: 11,
-    fontFamily: "Inter_500Medium",
-  },
+  statValue: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  statLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
   content: { flex: 1 },
-  contentPadding: {
-    padding: 16,
-    gap: 0,
-  },
+  contentPadding: { padding: 16, gap: 0 },
 
-  faultCard: {
+  card: {
     borderRadius: 14,
     borderLeftWidth: 4,
     borderWidth: 1,
@@ -405,13 +426,13 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 10,
   },
-  faultCardHeader: {
+  cardHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 6,
   },
-  faultBadge: {
+  badge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -419,17 +440,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  faultBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  faultDate: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  faultDesc: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
-  faultFooter: { flexDirection: "row", alignItems: "center" },
-  faultActions: { flexDirection: "row", gap: 8 },
-  faultBtn: {
-    width: 30,
-    height: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
-    borderWidth: 1,
+  badgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  dateText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
+  cardMeta: { flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
+  metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  metaDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#CBD5E1", marginHorizontal: 2 },
+  cardFooter: { flexDirection: "row", alignItems: "center" },
+  cardActions: { flexDirection: "row", gap: 8 },
+  actionBtn: {
+    width: 30, height: 30,
+    alignItems: "center", justifyContent: "center",
+    borderRadius: 8, borderWidth: 1,
   },
 });
