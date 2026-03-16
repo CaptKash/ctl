@@ -79,41 +79,8 @@ export default function FaultLogScreen() {
   }, [faults]);
 
   const active = sorted.filter((f) => !f.completed);
-  const history = sorted.filter((f) => f.completed);
-  const totalCount = sorted.length;
   const openCount = active.length;
-
-  const [historyOpen, setHistoryOpen] = React.useState(false);
-
-  const renderHistoryCard = (item: FaultRecord) => {
-    const car = carLabel(item.car);
-    return (
-      <View style={[styles.card, { backgroundColor: C.card, borderColor: C.border, opacity: 0.75 }]}>
-        <View style={styles.cardHeader}>
-          <View style={[styles.resolvedBadge, { backgroundColor: "#D1FAE5" }]}>
-            <Feather name="check" size={11} color="#059669" />
-            <Text style={[styles.badgeText, { color: "#059669" }]}>Resolved</Text>
-          </View>
-          <Text style={[styles.carName, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
-        </View>
-        <Text style={[styles.cardTitle, { color: C.textSecondary }]} numberOfLines={2}>
-          {item.description}
-        </Text>
-        <View style={styles.cardFooter}>
-          <View style={styles.footerLeft}>
-            <Feather name="calendar" size={12} color={C.textTertiary} />
-            <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
-          </View>
-          <Pressable
-            onPress={() => confirmDelete(item)}
-            style={[styles.fixBtn, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}
-          >
-            <Feather name="trash-2" size={14} color={C.textTertiary} />
-          </Pressable>
-        </View>
-      </View>
-    );
-  };
+  const totalCount = sorted.length;
 
   const renderCard = ({ item }: { item: FaultRecord }) => {
     const car = carLabel(item.car);
@@ -220,32 +187,6 @@ export default function FaultLogScreen() {
             <Feather name="plus" size={15} color="#DC2626" />
             <Text style={[styles.logBtnText, { color: "#DC2626" }]}>Log Another Fault</Text>
           </Pressable>
-
-          {history.length > 0 && (
-            <View style={styles.historySection}>
-              <Pressable
-                onPress={() => setHistoryOpen((v) => !v)}
-                style={[styles.historyHeader, { backgroundColor: C.card, borderColor: C.border }]}
-              >
-                <View style={styles.historyHeaderLeft}>
-                  <View style={[styles.historyIconBox, { backgroundColor: "#D1FAE5" }]}>
-                    <Feather name="archive" size={14} color="#059669" />
-                  </View>
-                  <Text style={[styles.historyTitle, { color: C.text }]}>Fault History</Text>
-                  <View style={[styles.historyCount, { backgroundColor: "#D1FAE5" }]}>
-                    <Text style={[styles.historyCountText, { color: "#059669" }]}>{history.length}</Text>
-                  </View>
-                </View>
-                <Feather name={historyOpen ? "chevron-up" : "chevron-down"} size={18} color={C.textTertiary} />
-              </Pressable>
-
-              {historyOpen && history.map((item) => (
-                <View key={item.id} style={{ marginTop: 8 }}>
-                  {renderHistoryCard(item)}
-                </View>
-              ))}
-            </View>
-          )}
         </ScrollView>
       )}
 
@@ -333,18 +274,4 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   emptyActiveText: { fontSize: 14, fontFamily: "Inter_500Medium" },
-  historySection: { marginTop: 20 },
-  historyHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  historyHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
-  historyIconBox: { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  historyTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  historyCount: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 10 },
-  historyCountText: { fontSize: 12, fontFamily: "Inter_700Bold" },
 });
