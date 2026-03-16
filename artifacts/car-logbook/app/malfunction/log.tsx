@@ -43,7 +43,7 @@ export default function MalfunctionLogScreen() {
   const [severity, setSeverity] = useState<Severity | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const canSave = description.trim().length > 0 && severity !== null;
+  const canSave = description.trim().length > 0;
 
   const handleSave = async () => {
     if (!canSave || !carId) return;
@@ -111,7 +111,7 @@ export default function MalfunctionLogScreen() {
           </View>
 
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20 }]}>
-            Severity
+            Severity <Text style={{ textTransform: "none", letterSpacing: 0, fontSize: 11, fontFamily: "Inter_400Regular", color: C.textTertiary }}>(optional)</Text>
           </Text>
           <View style={styles.severityGrid}>
             {SEVERITIES.map((s) => {
