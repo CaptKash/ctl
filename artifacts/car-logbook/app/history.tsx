@@ -203,7 +203,7 @@ export default function HistoryScreen() {
           {items.map((ev) => {
             const meta = EVENT_META[ev.type];
             return (
-              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color, borderRightWidth: ev.completed ? 4 : 1, borderRightColor: ev.completed ? "#059669" : meta.color }]}>
+              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color, borderRightWidth: ev.completed ? 6 : 1, borderRightColor: ev.completed ? "#059669" : meta.color }]}>
                 <View style={styles.cardHeader}>
                   <View style={[styles.badge, { backgroundColor: meta.bg }]}>
                     <Feather name={meta.icon} size={11} color={meta.color} />
