@@ -143,8 +143,8 @@ export default function MalfunctionLogScreen() {
                     opacity: pressed ? 0.7 : 1,
                     borderRadius: 28,
                     borderWidth: selected ? 2 : 0,
-                    borderColor: "#9CA3AF",
-                    backgroundColor: selected ? "#9CA3AF" : "transparent",
+                    borderColor: "#4B5563",
+                    backgroundColor: "transparent",
                     padding: selected ? 4 : 6,
                   }]}
                 >
