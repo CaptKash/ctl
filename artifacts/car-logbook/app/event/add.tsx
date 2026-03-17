@@ -47,10 +47,10 @@ const eventOptions: EventOption[] = [
     id: "registration",
     title: "License / Insurance Renewal",
     description: "",
-    icon: "book-open",
+    icon: "refresh-cw",
     iconBg: "#CCFBF1",
     iconColor: "#0D9488",
-    available: false,
+    available: true,
   },
 ];
 
@@ -71,6 +71,8 @@ export default function AddEventScreen() {
       router.push({ pathname: "/malfunction/add", params });
     } else if (option.id === "inspection") {
       router.push({ pathname: "/inspection/add", params });
+    } else if (option.id === "registration") {
+      router.push({ pathname: "/renewal/add", params });
     }
   };
 
