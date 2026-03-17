@@ -85,15 +85,15 @@ export default function InspectionTypePickerScreen() {
               { backgroundColor: C.card, borderColor: C.border, opacity: pressed ? 0.85 : 1 },
             ]}
           >
-            <View style={[styles.cardIcon, { backgroundColor: "#DBEAFE" }]}>
-              <Feather name="tool" size={30} color="#2563EB" />
+            <View style={[styles.cardIcon, { backgroundColor: "#FEF9C3" }]}>
+              <Feather name="tool" size={30} color="#CA8A04" />
             </View>
             <Text style={[styles.cardTitle, { color: C.text }]}>Repair</Text>
             <Text style={[styles.cardSub, { color: C.textSecondary }]}>
               Log a vehicle repair or maintenance service
             </Text>
-            <View style={[styles.cardArrow, { backgroundColor: "#EFF6FF" }]}>
-              <Feather name="chevron-right" size={18} color="#2563EB" />
+            <View style={[styles.cardArrow, { backgroundColor: "#FEFCE8" }]}>
+              <Feather name="chevron-right" size={18} color="#CA8A04" />
             </View>
           </Pressable>
 
