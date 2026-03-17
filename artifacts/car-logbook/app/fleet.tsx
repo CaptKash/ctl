@@ -193,6 +193,8 @@ export default function FleetScreen() {
             >
               <CarCard
                 car={item}
+                accentBg="#EDE9FE"
+                accentIcon="#7C3AED"
                 onPress={() => {
                   Haptics.selectionAsync();
                   router.push({ pathname: "/car/[id]", params: { id: String(item.id) } });
