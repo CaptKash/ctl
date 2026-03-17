@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
 
   lightGridBg: {
-    backgroundColor: "#374151",
+    backgroundColor: "#4B5563",
     borderRadius: 16,
     padding: 16,
     marginTop: 8,
