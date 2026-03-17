@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -130,8 +131,8 @@ export default function MenuDashboardScreen() {
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
           ]}
         >
-          <View style={[styles.tileIcon, { backgroundColor: "#EDE9FE" }]}>
-            <Ionicons name="car-outline" size={26} color="#7C3AED" />
+          <View style={[styles.tileIcon, { backgroundColor: "#080F1E", overflow: "hidden" }]}>
+            <Image source={require("@/assets/images/icon.png")} style={{ width: 50, height: 50 }} />
           </View>
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
