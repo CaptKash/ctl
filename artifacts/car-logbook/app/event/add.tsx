@@ -46,10 +46,10 @@ const eventOptions: EventOption[] = [
   {
     id: "registration",
     title: "Registration",
-    description: "Log a registration or renewal",
-    icon: "file-text",
-    iconBg: "#EDE9FE",
-    iconColor: "#7C3AED",
+    description: "",
+    icon: "book-open",
+    iconBg: "#CCFBF1",
+    iconColor: "#0D9488",
     available: false,
   },
 ];
