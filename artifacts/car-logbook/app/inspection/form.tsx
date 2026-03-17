@@ -96,11 +96,16 @@ export default function InspectionFormScreen() {
         <View style={[styles.section, { backgroundColor: C.card }]}>
           <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Inspection Details</Text>
 
-          <DatePickerField
-            label="Date"
-            value={date}
-            onChange={setDate}
-          />
+          <View style={styles.readOnlyRow}>
+            <Text style={[styles.readOnlyLabel, { color: C.textSecondary }]}>DATE</Text>
+            <View style={styles.readOnlyValue}>
+              <Feather name="calendar" size={15} color={C.textTertiary} />
+              <Text style={[styles.readOnlyText, { color: C.text }]}>{date}</Text>
+              <View style={[styles.todayBadge, { backgroundColor: C.infoLight }]}>
+                <Text style={[styles.todayBadgeText, { color: C.info }]}>Today</Text>
+              </View>
+            </View>
+          </View>
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Place"
@@ -185,4 +190,10 @@ const styles = StyleSheet.create({
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: -4 },
   errorBox: { borderRadius: 10, padding: 14 },
   errorText: { fontSize: 14, fontFamily: "Inter_500Medium", textAlign: "center" },
+  readOnlyRow: { gap: 6 },
+  readOnlyLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.6 },
+  readOnlyValue: { flexDirection: "row", alignItems: "center", gap: 8 },
+  readOnlyText: { fontSize: 15, fontFamily: "Inter_500Medium", flex: 1 },
+  todayBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  todayBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 });
