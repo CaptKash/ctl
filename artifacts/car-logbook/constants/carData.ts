@@ -4,8 +4,9 @@ export type CarMake = {
 };
 
 export const CAR_DATA: CarMake[] = [
+  { make: "Abarth", models: ["124 Spider","500","595","695","Grande Punto","Punto Evo"] },
   { make: "Acura", models: ["ILX","Integra","MDX","NSX","RDX","RLX","TLX","TSX","ZDX"] },
-  { make: "Alfa Romeo", models: ["4C","Giulia","Giulietta","GTV","MiTo","Spider","Stelvio","Tonale"] },
+  { make: "Alfa Romeo", models: ["4C","Giulia","Giulietta","GTV","Junior","MiTo","Spider","Stelvio","Tonale"] },
   { make: "Alpine", models: ["A110","A290","A310","A610"] },
   { make: "Ariel", models: ["Atom","Nomad"] },
   { make: "Aston Martin", models: ["DB11","DB12","DBS","DBX","Rapide","Vantage","Virage","Zagato"] },
@@ -20,8 +21,10 @@ export const CAR_DATA: CarMake[] = [
       "TT","TTS","TT RS",
     ],
   },
-  { make: "BAIC", models: ["BJ40","EC3","EC5","EX3","EU5","X3","X5","X7"] },
+  { make: "Avatr", models: ["07","11","12"] },
+  { make: "BAIC", models: ["BJ40","EC3","EC5","EU5","EX3","X3","X5","X7"] },
   { make: "Bentley", models: ["Bentayga","Continental GT","Continental GTC","Flying Spur","Mulsanne"] },
+  { make: "Bestune", models: ["B70","B70S","T33","T55","T77","T99"] },
   {
     make: "BMW",
     models: [
@@ -34,8 +37,9 @@ export const CAR_DATA: CarMake[] = [
   },
   { make: "Bugatti", models: ["Chiron","Divo","Mistral","Tourbillon","Veyron"] },
   { make: "Buick", models: ["Enclave","Encore","Encore GX","Envision","LaCrosse","Regal","Verano"] },
-  { make: "BYD", models: ["Atto 2","Atto 3","Destroyer 05","Dolphin","Han","Orca","Seal","Seal U","Sealion","Song","Tang"] },
+  { make: "BYD", models: ["Atto 2","Atto 3","Destroyer 05","Dolphin","Han","Orca","Seal","Seal U","Sealion 6","Sealion 7","Song","Tang"] },
   { make: "Cadillac", models: ["ATS","CT4","CT5","CT6","Escalade","Escalade ESV","LYRIQ","OPTIQ","SRX","XT4","XT5","XT6"] },
+  { make: "Changan", models: ["CS35 Plus","CS55 Plus","CS75 Plus","CS85","CS95","Eado Plus","Lamore","UNI-K","UNI-T","UNI-V"] },
   { make: "Chery", models: ["Arrizo 5","Arrizo 6","Arrizo 8","Tiggo 4","Tiggo 7","Tiggo 8","Tiggo 9"] },
   {
     make: "Chevrolet",
@@ -53,8 +57,10 @@ export const CAR_DATA: CarMake[] = [
   { make: "Daewoo", models: ["Espero","Kalos","Lacetti","Lanos","Leganza","Matiz","Nexia","Nubira","Tacuma"] },
   { make: "Daihatsu", models: ["Charade","Copen","Gran Move","Materia","Move","Rocky","Sirion","Terios","YRV"] },
   { make: "Datsun", models: ["GO","GO+","mi-DO","on-DO","redi-GO"] },
+  { make: "Deepal", models: ["L07","S07","SL03"] },
   { make: "Dodge", models: ["Challenger","Charger","Dakota","Dart","Durango","Grand Caravan","Hornet","Journey","Neon","Ram 1500","Viper"] },
   { make: "DS Automobiles", models: ["DS 3","DS 3 Crossback","DS 4","DS 7","DS 7 Crossback","DS 9"] },
+  { make: "Exeed", models: ["LX","RX","TX","TXL","VX"] },
   {
     make: "Ferrari",
     models: [
@@ -65,6 +71,7 @@ export const CAR_DATA: CarMake[] = [
     ],
   },
   { make: "Fiat", models: ["124 Spider","500","500C","500e","500L","500X","Bravo","Doblo","Grande Panda","Panda","Punto","Tipo","Toro"] },
+  { make: "Fisker", models: ["Alaska","Ocean","PEAR"] },
   {
     make: "Ford",
     models: [
@@ -80,6 +87,7 @@ export const CAR_DATA: CarMake[] = [
   { make: "GMC", models: ["Acadia","Canyon","Envoy","Envoy XL","Jimmy","Safari","Savana","Sierra 1500","Sierra 2500HD","Sierra EV","Terrain","Yukon","Yukon XL"] },
   { make: "Great Wall Motor", models: ["Cannon","Haval H6","Jolion","Ora","Poer","Tank 300","Tank 500","Wey"] },
   { make: "Haval", models: ["H1","H2","H6","H9","Jolion","Shenshou","XY"] },
+  { make: "HiPhi", models: ["A","X","Y","Z"] },
   { make: "Holden", models: ["Astra","Barina","Captiva","Colorado","Commodore","Cruze","Malibu","Spark","Trax"] },
   {
     make: "Honda",
@@ -89,6 +97,7 @@ export const CAR_DATA: CarMake[] = [
       "Odyssey","Passport","Pilot","Prologue","Ridgeline","S2000","Shuttle","Stream","ZR-V",
     ],
   },
+  { make: "Hongqi", models: ["E-QM5","E-HS9","H5","H7","H9","HS5","HS7","L5","LS7"] },
   { make: "HUMMER", models: ["EV","EV SUV","H1","H2","H3"] },
   {
     make: "Hyundai",
@@ -102,9 +111,10 @@ export const CAR_DATA: CarMake[] = [
   { make: "Infiniti", models: ["EX","FX","G","G35","G37","JX","M","Q30","Q50","Q60","Q70","QX30","QX50","QX55","QX60","QX70","QX80"] },
   { make: "Isuzu", models: ["Amigo","Axiom","D-Max","i-Series","MU-7","MU-X","Rodeo","Trooper","VehiCROSS"] },
   { make: "JAC", models: ["E10X","J7","S2","S3","S4","S7","T8"] },
-  { make: "Jetour", models: ["Dashing","T1","T2","Traveller","X50","X70","X70 Plus","X90","X90 Plus"] },
   { make: "Jaguar", models: ["E-PACE","F-PACE","F-TYPE","I-PACE","S-TYPE","X-TYPE","XE","XF","XJ","XK"] },
   { make: "Jeep", models: ["Avenger","Cherokee","Commander","Compass","Gladiator","Grand Cherokee","Grand Cherokee 4xe","Grand Wagoneer","Renegade","Wagoneer","Wrangler","Wrangler 4xe"] },
+  { make: "Jetour", models: ["Dashing","T1","T2","Traveller","X50","X70","X70 Plus","X90","X90 Plus"] },
+  { make: "Karma", models: ["GS-6","GX-1","Revero","Revero GT"] },
   {
     make: "Kia",
     models: [
@@ -118,10 +128,14 @@ export const CAR_DATA: CarMake[] = [
   { make: "Lamborghini", models: ["Aventador","Countach","Diablo","Gallardo","Huracán","Huracán Sterrato","Murcielago","Revuelto","Urus","Urus S"] },
   { make: "Lancia", models: ["Delta","Musa","Phedra","Stratos","Thema","Ypsilon"] },
   { make: "Land Rover", models: ["Defender","Discovery","Discovery Sport","Freelander","Range Rover","Range Rover Evoque","Range Rover Sport","Range Rover Velar"] },
+  { make: "Leapmotor", models: ["C01","C10","C11","T03"] },
   { make: "Lexus", models: ["CT","ES","ES Hybrid","GS","GX","IS","LC","LS","LX","NX","NX Hybrid","RC","RX","RX Hybrid","RZ","TX","UX","UX Hybrid"] },
+  { make: "Li Auto", models: ["L6","L7","L8","L9","MEGA"] },
   { make: "Lincoln", models: ["Aviator","Aviator Plug-in Hybrid","Continental","Corsair","MKC","MKT","MKX","MKZ","Nautilus","Navigator"] },
   { make: "Lotus", models: ["Eletre","Emeya","Emira","Evija","Evora","Exige","Elise"] },
   { make: "Lucid", models: ["Air","Gravity"] },
+  { make: "Lynk & Co", models: ["01","02","03","05","06","09"] },
+  { make: "Mahindra", models: ["BE 6e","Bolero","Scorpio","Scorpio-N","Thar","XEV 9e","XUV300","XUV400","XUV700"] },
   { make: "Maserati", models: ["Ghibli","GranCabrio","GranTurismo","Grecale","Levante","MC20","Quattroporte"] },
   { make: "Mazda", models: ["2","3","3 Sport","5","6","CX-3","CX-30","CX-5","CX-50","CX-60","CX-70","CX-80","CX-90","MX-30","MX-5 Miata","MX-5 RF","RX-7","RX-8"] },
   { make: "McLaren", models: ["540C","570S","600LT","620R","650S","675LT","720S","750S","765LT","Artura","Elva","GT","P1","Senna"] },
@@ -134,10 +148,13 @@ export const CAR_DATA: CarMake[] = [
       "Maybach GLS","Maybach S-Class","Metris","S-Class","SL","SLC","SLK","Sprinter","V-Class","Vito",
     ],
   },
+  { make: "Mercury", models: ["Capri","Grand Marquis","Mariner","Milan","Montego","Mountaineer","Mystique","Sable","Villager"] },
   { make: "MG", models: ["3","4","5","6","7","Cyberster","HS","Marvel R","One","RX5","ZS","ZS EV"] },
   { make: "Mini", models: ["Aceman","Clubman","Clubvan","Convertible","Cooper","Cooper S","Countryman","Coupe","John Cooper Works","Paceman","Roadster"] },
   { make: "Mitsubishi", models: ["ASX","Colt","Eclipse Cross","Galant","L200","Lancer","Mirage","Outlander","Outlander PHEV","Outlander Sport","Pajero","Pajero Sport","RVR","Triton"] },
   { make: "Morgan", models: ["3 Wheeler","Aero 8","Plus 4","Plus 6","Roadster"] },
+  { make: "Neta", models: ["AYA","GT","N7","N9","S","V","X"] },
+  { make: "NIO", models: ["EC6","EC7","EL6","EP9","ES6","ES7","ES8","ET5","ET7"] },
   {
     make: "Nissan",
     models: [
@@ -146,24 +163,33 @@ export const CAR_DATA: CarMake[] = [
       "Patrol","Qashqai","Quest","Rogue","Rogue Sport","Sentra","Terra","Titan","Versa","X-Trail","Z",
     ],
   },
+  { make: "Oldsmobile", models: ["Alero","Aurora","Bravada","Cutlass","Intrigue","Silhouette"] },
+  { make: "OMODA", models: ["5","C5","E5"] },
   { make: "Opel", models: ["Adam","Agila","Ampera","Astra","Combo","Corsa","Crossland","Frontera","Grandland","Insignia","Meriva","Mokka","Vectra","Vivaro","Zafira"] },
   { make: "Pagani", models: ["Huayra","Huayra Roadster","Imola","Utopia","Zonda"] },
+  { make: "Perodua", models: ["Alza","Ativa","Axia","Bezza","Myvi"] },
   { make: "Peugeot", models: ["108","208","2008","308","3008","408","4008","508","508 SW","5008","e-208","e-2008","Expert","Partner","Rifter","Traveller"] },
+  { make: "Plymouth", models: ["Barracuda","Fury","GTX","Neon","Prowler","Road Runner","Voyager"] },
   { make: "Polestar", models: ["1","2","3","4","5","6"] },
   { make: "Pontiac", models: ["Firebird","G5","G6","G8","Grand Am","Grand Prix","GTO","Montana","Solstice","Sunfire","Trans Am","Vibe"] },
   { make: "Porsche", models: ["718 Boxster","718 Cayman","911","918 Spyder","Cayenne","Cayenne E-Hybrid","Macan","Macan Electric","Panamera","Panamera E-Hybrid","Taycan","Taycan Cross Turismo"] },
+  { make: "Proton", models: ["Exora","Iriz","Persona","Saga","Suprima S","X50","X70","X90"] },
   { make: "RAM", models: ["1500","1500 Classic","2500","3500","ProMaster","ProMaster City"] },
   { make: "Renault", models: ["Arkana","Austral","Captur","Clio","Duster","Espace","Kadjar","Kangoo","Koleos","Laguna","Megane","Mégane E-Tech","Rafale","Scenic","Symbol","Talisman","Trafic","Twingo","Zoe"] },
   { make: "Rivian", models: ["R1S","R1T","R2","R3"] },
+  { make: "Roewe", models: ["D7","eRX5","i5","i6","RX5","RX8"] },
   { make: "Rolls-Royce", models: ["Cullinan","Dawn","Ghost","Phantom","Spectre","Silver Shadow","Wraith"] },
   { make: "Saab", models: ["9-2X","9-3","9-4X","9-5","9-7X","900","9000"] },
+  { make: "Saturn", models: ["Aura","Ion","L-Series","Outlook","Sky","Vue"] },
   { make: "SEAT", models: ["Arona","Ateca","El-Born","Ibiza","Leon","Mii","Tarraco"] },
+  { make: "Seres", models: ["3","5","7","AITO M5","AITO M7","SF5"] },
   { make: "Škoda", models: ["Citigo","Enyaq","Enyaq Coupé","Fabia","Kamiq","Karoq","Kodiaq","Kodiaq iV","Octavia","Rapid","Scala","Superb"] },
   { make: "Smart", models: ["#1","#3","EQ Forfour","EQ Fortwo","Forfour","Fortwo"] },
   { make: "SsangYong", models: ["Actyon","Korando","Musso","Rexton","Tivoli","Torres","XLV"] },
   { make: "Subaru", models: ["Ascent","BRZ","Crosstrek","Crosstrek Hybrid","Forester","Impreza","Legacy","Outback","Solterra","WRX","XV"] },
   { make: "Suzuki", models: ["Alto","Baleno","Celerio","Ciaz","Dzire","Ertiga","Grand Vitara","Ignis","Jimny","Kizashi","S-Cross","S-Presso","Swift","SX4","Vitara","Wagon R","XL7"] },
   { make: "Tank", models: ["300","400","500","700"] },
+  { make: "Tata", models: ["Altroz","Curvv","Harrier","Nexon","Punch","Safari","Tiago","Tigor"] },
   { make: "Tesla", models: ["Cybertruck","Model 3","Model S","Model X","Model Y","Roadster","Semi"] },
   {
     make: "Toyota",
@@ -178,6 +204,7 @@ export const CAR_DATA: CarMake[] = [
       "Supra","Tacoma","Tundra","Tundra Hybrid","Urban Cruiser","Venza","Vios","Wish","Yaris","Yaris Cross",
     ],
   },
+  { make: "UAZ", models: ["Hunter","Patriot","Pickup","Profi"] },
   { make: "Vauxhall", models: ["Adam","Agila","Astra","Combo","Corsa","Crossland","Frontera","Grandland","Insignia","Meriva","Mokka","Vivaro","Zafira"] },
   {
     make: "Volkswagen",
@@ -189,8 +216,12 @@ export const CAR_DATA: CarMake[] = [
     ],
   },
   { make: "Volvo", models: ["C30","C40 Recharge","EC40","EX30","EX40","EX90","S40","S60","S60 Recharge","S90","S90 Recharge","V40","V60","V60 Recharge","V90","V90 Recharge","XC40","XC40 Recharge","XC60","XC60 Recharge","XC90","XC90 Recharge"] },
+  { make: "VOYAH", models: ["Courage","Dream","Free"] },
+  { make: "Wey", models: ["Coffee 01","Coffee 02","Mocha","Poer","Tanka"] },
   { make: "Wuling", models: ["Air EV","Almaz","Cortez","Formo","Hongguang","Mini EV"] },
+  { make: "Xpeng", models: ["G3","G6","G9","P5","P7","X9"] },
   { make: "Zeekr", models: ["001","007","009","X"] },
+  { make: "Zhiji", models: ["L6","L7","LS6","LS7"] },
 ];
 
 export const ALL_MAKES: string[] = CAR_DATA.map((c) => c.make);
