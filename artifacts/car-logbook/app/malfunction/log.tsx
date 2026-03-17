@@ -143,7 +143,7 @@ export default function MalfunctionLogScreen() {
                     opacity: pressed ? 0.7 : 1,
                     borderRadius: 28,
                     borderWidth: selected ? 2 : 0,
-                    borderColor: light.warningColor,
+                    borderColor: "#9CA3AF",
                     padding: selected ? 4 : 6,
                   }]}
                 >
