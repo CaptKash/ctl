@@ -209,7 +209,12 @@ export default function HistoryScreen() {
                     <Feather name={meta.icon} size={11} color={meta.color} />
                     <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
                   </View>
-                  <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
+                  <View style={styles.cardHeaderRight}>
+                    <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
+                    {ev.completed && (
+                      <Feather name="flag" size={14} color="#059669" />
+                    )}
+                  </View>
                 </View>
 
                 <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>{ev.title}</Text>
@@ -223,13 +228,6 @@ export default function HistoryScreen() {
                 <View style={styles.cardMeta}>
                   <Feather name="car" size={12} color={C.textTertiary} />
                   <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
-                  {ev.completed && (
-                    <>
-                      <View style={styles.metaDot} />
-                      <Feather name="check-circle" size={12} color="#059669" />
-                      <Text style={[styles.metaText, { color: "#059669" }]}>Resolved</Text>
-                    </>
-                  )}
                 </View>
               </View>
             );
@@ -283,6 +281,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  cardHeaderRight: { flexDirection: "row", alignItems: "center", gap: 6 },
   badge: {
     flexDirection: "row",
     alignItems: "center",
