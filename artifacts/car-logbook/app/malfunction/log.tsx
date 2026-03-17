@@ -133,6 +133,17 @@ export default function MalfunctionLogScreen() {
             />
           </View>
 
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Message</Text>
+          <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border, minHeight: 0 }]}>
+            <TextInput
+              style={[styles.singleInput, { color: C.text }]}
+              placeholder="e.g. Engine oil pressure low..."
+              placeholderTextColor={C.textTertiary}
+              value={customMessage}
+              onChangeText={setCustomMessage}
+            />
+          </View>
+
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Lights</Text>
           <Text style={[styles.sectionHint, { color: C.textTertiary }]}>Select any that are active</Text>
           <View style={styles.chipsWrap}>
@@ -159,17 +170,6 @@ export default function MalfunctionLogScreen() {
                 </Pressable>
               );
             })}
-          </View>
-
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Other Dashboard Message</Text>
-          <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border, minHeight: 0 }]}>
-            <TextInput
-              style={[styles.singleInput, { color: C.text }]}
-              placeholder="e.g. Engine oil pressure low..."
-              placeholderTextColor={C.textTertiary}
-              value={customMessage}
-              onChangeText={setCustomMessage}
-            />
           </View>
 
           <Pressable
