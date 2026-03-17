@@ -28,7 +28,7 @@ const eventOptions: EventOption[] = [
   {
     id: "malfunction",
     title: "Fault",
-    description: "",
+    description: "Fault / Breakdown / Damage",
     icon: "alert-triangle",
     iconBg: "#FEE2E2",
     iconColor: "#DC2626",
