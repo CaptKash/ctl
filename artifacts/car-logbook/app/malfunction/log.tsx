@@ -132,6 +132,7 @@ export default function MalfunctionLogScreen() {
 
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Lights</Text>
           <Text style={[styles.sectionHint, { color: C.textTertiary }]}>Tap any that are active</Text>
+          <View style={styles.lightGridBg}>
           <View style={styles.lightGrid}>
             {DASHBOARD_LIGHTS.map((light) => {
               const selected = selectedLights.has(light.id);
@@ -147,6 +148,7 @@ export default function MalfunctionLogScreen() {
                 </Pressable>
               );
             })}
+          </View>
           </View>
 
           <Pressable
@@ -242,12 +244,18 @@ const styles = StyleSheet.create({
     minHeight: 0,
   },
 
+  lightGridBg: {
+    backgroundColor: "#1F2937",
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+
   lightGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 18,
-    marginBottom: 4,
-    paddingVertical: 4,
     justifyContent: "center",
   },
 
