@@ -82,7 +82,7 @@ export default function InspectionFormScreen() {
             <Feather name="check-square" size={22} color="#D97706" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Add Inspection</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Log Repair / Inspection</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carTitle}</Text>
           </View>
         </View>
