@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import { apiGet } from "@/hooks/useApi";
 
-export type BottomNavTab = "dashboard" | "faults" | "history" | "settings";
+export type BottomNavTab = "dashboard" | "faults" | "history" | "settings" | "account";
 
 const TABS: {
   id: BottomNavTab;
@@ -21,6 +21,7 @@ const TABS: {
   { id: "faults",    label: "Fault Log", icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
   { id: "history",   label: "History",   icon: "clock",          route: "/history" },
   { id: "settings",  label: "Settings",  icon: "settings",       route: "/settings" },
+  { id: "account",   label: "Account",   icon: "user",           route: "/account" },
 ];
 
 type Props = { active?: BottomNavTab };
