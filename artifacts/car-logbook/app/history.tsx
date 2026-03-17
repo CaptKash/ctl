@@ -1,12 +1,9 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,7 +15,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 
-type Car = {
+type CarStub = {
   id: number;
   make: string;
   model: string;
@@ -26,21 +23,44 @@ type Car = {
   nickname?: string | null;
 };
 
-type Event = {
+type FaultRecord = {
   id: number;
-  type: "maintenance" | "malfunction";
+  carId: number;
+  description: string;
+  date: string;
+  phase: string;
+  completed: boolean;
+  car: CarStub | null;
+};
+
+type MaintenanceRecord = {
+  id: number;
+  carId: number;
+  description: string;
+  date: string;
+  type: string;
+  shop?: string | null;
+  cost?: number | null;
+  car: CarStub | null;
+};
+
+type HistoryItem = {
+  key: string;
+  type: "malfunction" | "maintenance";
   date: string;
   title: string;
   subtitle: string;
-  completed?: boolean;
+  carName: string;
+  completed: boolean;
 };
 
-const EVENT_META: Record<Event["type"], { label: string; icon: React.ComponentProps<typeof Feather>["name"]; bg: string; color: string }> = {
-  malfunction: { label: "Fault",   icon: "alert-triangle", bg: "#FEE2E2", color: "#DC2626" },
-  maintenance: { label: "Repair",  icon: "tool",           bg: "#FEF3C7", color: "#D97706" },
+const EVENT_META = {
+  malfunction: { label: "Fault",  icon: "alert-triangle" as const, bg: "#FEE2E2", color: "#DC2626" },
+  maintenance: { label: "Repair", icon: "tool"           as const, bg: "#FEF3C7", color: "#D97706" },
 };
 
-function carLabel(car: Car) {
+function carLabel(car: CarStub | null): string {
+  if (!car) return "Unknown car";
   return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
 }
 
@@ -49,37 +69,49 @@ export default function HistoryScreen() {
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
-
-  const carsQuery = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
-    onSuccess: (data) => {
-      if (data.length > 0 && selectedCarId === null) {
-        setSelectedCarId(data[0].id);
-      }
-    },
-  } as any);
-
-  const cars = carsQuery.data ?? [];
-  const activeCar = cars.find((c) => c.id === selectedCarId) ?? cars[0] ?? null;
-
-  React.useEffect(() => {
-    if (cars.length > 0 && selectedCarId === null) {
-      setSelectedCarId(cars[0].id);
-    }
-  }, [cars]);
-
-  const eventsQuery = useQuery<Event[]>({
-    queryKey: ["history-events", activeCar?.id],
-    queryFn: async () => {
-      const all = await apiGet<Event[]>(`/cars/${activeCar!.id}/events?includeCompleted=true`);
-      return all.filter((e) => e.type === "malfunction" || e.type === "maintenance");
-    },
-    enabled: !!activeCar,
+  const faultsQuery = useQuery<FaultRecord[]>({
+    queryKey: ["malfunctions-all"],
+    queryFn: () => apiGet<FaultRecord[]>("/malfunctions"),
   });
 
-  const events = eventsQuery.data ?? [];
+  const repairsQuery = useQuery<MaintenanceRecord[]>({
+    queryKey: ["maintenance-all"],
+    queryFn: () => apiGet<MaintenanceRecord[]>("/maintenance"),
+  });
+
+  const isLoading = faultsQuery.isLoading || repairsQuery.isLoading;
+
+  const items: HistoryItem[] = React.useMemo(() => {
+    const faults = (faultsQuery.data ?? []).map((r): HistoryItem => ({
+      key: `malfunction-${r.id}`,
+      type: "malfunction",
+      date: r.date,
+      title: r.description,
+      subtitle: r.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      carName: carLabel(r.car),
+      completed: r.completed,
+    }));
+
+    const repairs = (repairsQuery.data ?? []).map((r): HistoryItem => ({
+      key: `maintenance-${r.id}`,
+      type: "maintenance",
+      date: r.date,
+      title: r.description,
+      subtitle: [r.type, r.shop].filter(Boolean).join(" · "),
+      carName: carLabel(r.car),
+      completed: false,
+    }));
+
+    return [...faults, ...repairs].sort((a, b) => b.date.localeCompare(a.date));
+  }, [faultsQuery.data, repairsQuery.data]);
+
+  const totalCars = React.useMemo(() => {
+    const ids = new Set([
+      ...(faultsQuery.data ?? []).map((r) => r.carId),
+      ...(repairsQuery.data ?? []).map((r) => r.carId),
+    ]);
+    return ids.size;
+  }, [faultsQuery.data, repairsQuery.data]);
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
@@ -92,96 +124,61 @@ export default function HistoryScreen() {
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>History</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-              {activeCar ? carLabel(activeCar) : "Select a car"}
+              {isLoading ? "Loading…" : `${items.length} record${items.length !== 1 ? "s" : ""}${totalCars > 1 ? ` · ${totalCars} cars` : ""}`}
             </Text>
           </View>
-          {activeCar && (
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({ pathname: "/report/[id]", params: { id: String(activeCar.id) } });
-              }}
-              style={[styles.reportBtn, { backgroundColor: "#D1FAE5" }]}
-            >
-              <Feather name="file-text" size={15} color="#059669" />
-              <Text style={[styles.reportBtnText, { color: "#059669" }]}>Report</Text>
-            </Pressable>
-          )}
         </View>
       </View>
 
-      {/* Car selector */}
-      {cars.length > 1 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.carChips}
-        >
-          {cars.map((car) => {
-            const selected = car.id === activeCar?.id;
-            return (
-              <Pressable
-                key={car.id}
-                onPress={() => { Haptics.selectionAsync(); setSelectedCarId(car.id); }}
-                style={[
-                  styles.carChip,
-                  { backgroundColor: selected ? C.tint : C.card, borderColor: selected ? C.tint : C.border },
-                ]}
-              >
-                <Text style={[styles.carChipText, { color: selected ? "#fff" : C.text }]} numberOfLines={1}>
-                  {carLabel(car)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      )}
-
-      {/* Events list */}
-      {carsQuery.isLoading || eventsQuery.isLoading ? (
+      {/* List */}
+      {isLoading ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={C.tint} />
         </View>
-      ) : cars.length === 0 ? (
-        <View style={styles.centered}>
-          <Feather name="car" size={40} color={C.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: C.text }]}>No Cars Added</Text>
-          <Text style={[styles.emptySub, { color: C.textSecondary }]}>Add a car from the dashboard to see its history.</Text>
-        </View>
-      ) : events.length === 0 ? (
+      ) : items.length === 0 ? (
         <View style={styles.centered}>
           <Feather name="clock" size={40} color={C.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: C.text }]}>No Events Yet</Text>
-          <Text style={[styles.emptySub, { color: C.textSecondary }]}>Logged faults and repairs will appear here.</Text>
+          <Text style={[styles.emptyTitle, { color: C.text }]}>No History Yet</Text>
+          <Text style={[styles.emptySub, { color: C.textSecondary }]}>
+            Logged faults and repairs will appear here automatically.
+          </Text>
         </View>
       ) : (
         <ScrollView
           contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 100 }]}
           showsVerticalScrollIndicator={false}
         >
-          {events.map((ev) => {
+          {items.map((ev) => {
             const meta = EVENT_META[ev.type];
             return (
-              <View key={`${ev.type}-${ev.id}`} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
                 <View style={styles.cardHeader}>
                   <View style={[styles.badge, { backgroundColor: meta.bg }]}>
-                    <Feather name={meta.icon as any} size={11} color={meta.color} />
+                    <Feather name={meta.icon} size={11} color={meta.color} />
                     <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
                   </View>
                   <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
                 </View>
+
                 <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>{ev.title}</Text>
+
                 {ev.subtitle ? (
                   <View style={styles.cardMeta}>
                     <Text style={[styles.metaText, { color: C.textSecondary }]} numberOfLines={1}>{ev.subtitle}</Text>
                   </View>
                 ) : null}
-                {ev.completed && (
-                  <View style={styles.cardMeta}>
-                    <Feather name="check-circle" size={12} color="#059669" />
-                    <Text style={[styles.metaText, { color: "#059669" }]}>Resolved</Text>
-                  </View>
-                )}
+
+                <View style={styles.cardMeta}>
+                  <Feather name="car" size={12} color={C.textTertiary} />
+                  <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
+                  {ev.completed && (
+                    <>
+                      <View style={styles.metaDot} />
+                      <Feather name="check-circle" size={12} color="#059669" />
+                      <Text style={[styles.metaText, { color: "#059669" }]}>Resolved</Text>
+                    </>
+                  )}
+                </View>
               </View>
             );
           })}
@@ -205,30 +202,6 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
-  reportBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  reportBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-
-  carChips: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-    flexDirection: "row",
-  },
-  carChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  carChipText: { fontSize: 13, fontFamily: "Inter_500Medium" },
-
   centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 32 },
   emptyTitle: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
   emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
@@ -256,4 +229,5 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
   cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  metaDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: "#CBD5E1" },
 });
