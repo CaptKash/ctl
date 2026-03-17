@@ -248,6 +248,7 @@ const styles = StyleSheet.create({
     gap: 18,
     marginBottom: 4,
     paddingVertical: 4,
+    justifyContent: "center",
   },
 
   saveBtn: {
