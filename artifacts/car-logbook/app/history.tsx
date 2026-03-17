@@ -356,5 +356,5 @@ const styles = StyleSheet.create({
   cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   metaDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: "#CBD5E1" },
-  iconsRowBg: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
+  iconsRowBg: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", alignSelf: "flex-start", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
 });

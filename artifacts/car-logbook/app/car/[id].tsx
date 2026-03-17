@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   metaDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#CBD5E1", marginHorizontal: 2 },
   cardFooter: { flexDirection: "row", alignItems: "center" },
   cardActions: { flexDirection: "row", gap: 8 },
-  iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
+  iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", alignSelf: "flex-start", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
   actionBtn: {
     width: 30, height: 30,
     alignItems: "center", justifyContent: "center",
