@@ -227,7 +227,7 @@ export default function HistoryScreen() {
                   </View>
                   {ev.completed && (
                     <View style={styles.resolvedTag}>
-                      <Feather name="check-circle" size={12} color="#059669" />
+                      <Feather name="check-circle" size={14} color="#059669" />
                       <Text style={styles.resolvedText}>Resolved</Text>
                     </View>
                   )}
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   resolvedTag: { flexDirection: "row", alignItems: "center", gap: 4 },
-  resolvedText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#059669" },
+  resolvedText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#059669" },
   badge: {
     flexDirection: "row",
     alignItems: "center",
