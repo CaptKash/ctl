@@ -133,27 +133,31 @@ export default function MalfunctionLogScreen() {
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Lights</Text>
           <Text style={[styles.sectionHint, { color: C.textTertiary }]}>Tap any that are active</Text>
           <View style={styles.lightGridBg}>
-          {[
-            DASHBOARD_LIGHTS.filter((l) => l.warningColor === "#FF1744"),
-            DASHBOARD_LIGHTS.filter((l) => l.warningColor !== "#FF1744"),
-          ].map((row, rowIdx) => (
-            <View key={rowIdx} style={[styles.lightGrid, rowIdx === 0 && { marginBottom: 12 }]}>
-              {row.map((light) => {
-                const selected = selectedLights.has(light.id);
-                return (
-                  <Pressable
-                    key={light.id}
-                    onPress={() => toggleLight(light.id)}
-                    style={({ pressed }) => [{
-                      opacity: pressed ? 0.4 : selected ? 1 : 0.5,
-                    }]}
-                  >
-                    <DashboardIcon id={light.id} color={light.warningColor} size={42} />
-                  </Pressable>
-                );
-              })}
-            </View>
-          ))}
+          {(() => {
+            const sorted = [
+              ...DASHBOARD_LIGHTS.filter((l) => l.warningColor === "#FF1744"),
+              ...DASHBOARD_LIGHTS.filter((l) => l.warningColor !== "#FF1744"),
+            ];
+            const rows = [sorted.slice(0, 6), sorted.slice(6)];
+            return rows.map((row, rowIdx) => (
+              <View key={rowIdx} style={[styles.lightGrid, rowIdx === 0 && { marginBottom: 12 }]}>
+                {row.map((light) => {
+                  const selected = selectedLights.has(light.id);
+                  return (
+                    <Pressable
+                      key={light.id}
+                      onPress={() => toggleLight(light.id)}
+                      style={({ pressed }) => [{
+                        opacity: pressed ? 0.4 : selected ? 1 : 0.5,
+                      }]}
+                    >
+                      <DashboardIcon id={light.id} color={light.warningColor} size={42} />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ));
+          })()}
           </View>
 
           <Pressable
@@ -259,9 +263,10 @@ const styles = StyleSheet.create({
 
   lightGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 18,
+    flexWrap: "nowrap",
+    gap: 10,
     justifyContent: "center",
+    alignItems: "center",
   },
 
   saveBtn: {
