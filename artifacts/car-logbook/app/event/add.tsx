@@ -28,7 +28,7 @@ const eventOptions: EventOption[] = [
   {
     id: "malfunction",
     title: "Fault",
-    description: "Log a breakdown or fault",
+    description: "",
     icon: "alert-triangle",
     iconBg: "#FEE2E2",
     iconColor: "#DC2626",
@@ -117,9 +117,11 @@ export default function AddEventScreen() {
             </View>
             <View style={styles.optionBody}>
               <Text style={[styles.optionTitle, { color: C.text }]}>{option.title}</Text>
-              <Text style={[styles.optionDesc, { color: C.textSecondary }]}>
-                {option.description}
-              </Text>
+              {option.description ? (
+                <Text style={[styles.optionDesc, { color: C.textSecondary }]}>
+                  {option.description}
+                </Text>
+              ) : null}
             </View>
             {option.available ? (
               <View style={[styles.goBtn, { backgroundColor: C.tint }]}>
