@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import * as Haptics from "expo-haptics";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -46,6 +48,7 @@ type MaintenanceRecord = {
 
 type HistoryItem = {
   key: string;
+  carId: number;
   type: "malfunction" | "maintenance";
   date: string;
   title: string;
@@ -69,6 +72,8 @@ export default function HistoryScreen() {
   const C = Colors.light;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
+
   const faultsQuery = useQuery<FaultRecord[]>({
     queryKey: ["malfunctions-all"],
     queryFn: () => apiGet<FaultRecord[]>("/malfunctions"),
@@ -81,9 +86,10 @@ export default function HistoryScreen() {
 
   const isLoading = faultsQuery.isLoading || repairsQuery.isLoading;
 
-  const items: HistoryItem[] = React.useMemo(() => {
+  const allItems: HistoryItem[] = React.useMemo(() => {
     const faults = (faultsQuery.data ?? []).map((r): HistoryItem => ({
       key: `malfunction-${r.id}`,
+      carId: r.carId,
       type: "malfunction",
       date: r.date,
       title: r.description,
@@ -94,6 +100,7 @@ export default function HistoryScreen() {
 
     const repairs = (repairsQuery.data ?? []).map((r): HistoryItem => ({
       key: `maintenance-${r.id}`,
+      carId: r.carId,
       type: "maintenance",
       date: r.date,
       title: r.description,
@@ -105,13 +112,24 @@ export default function HistoryScreen() {
     return [...faults, ...repairs].sort((a, b) => b.date.localeCompare(a.date));
   }, [faultsQuery.data, repairsQuery.data]);
 
-  const totalCars = React.useMemo(() => {
-    const ids = new Set([
-      ...(faultsQuery.data ?? []).map((r) => r.carId),
-      ...(repairsQuery.data ?? []).map((r) => r.carId),
-    ]);
-    return ids.size;
+  // Unique cars that have records
+  const cars: CarStub[] = React.useMemo(() => {
+    const map = new Map<number, CarStub>();
+    [...(faultsQuery.data ?? []), ...(repairsQuery.data ?? [])].forEach((r) => {
+      if (r.car && !map.has(r.carId)) map.set(r.carId, r.car);
+    });
+    return Array.from(map.values());
   }, [faultsQuery.data, repairsQuery.data]);
+
+  const items = selectedCarId == null
+    ? allItems
+    : allItems.filter((ev) => ev.carId === selectedCarId);
+
+  const headerSub = isLoading
+    ? "Loading…"
+    : selectedCarId == null
+      ? `${allItems.length} record${allItems.length !== 1 ? "s" : ""}${cars.length > 1 ? ` · ${cars.length} cars` : ""}`
+      : carLabel(cars.find((c) => c.id === selectedCarId) ?? null);
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
@@ -123,12 +141,46 @@ export default function HistoryScreen() {
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>History</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-              {isLoading ? "Loading…" : `${items.length} record${items.length !== 1 ? "s" : ""}${totalCars > 1 ? ` · ${totalCars} cars` : ""}`}
-            </Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>{headerSub}</Text>
           </View>
         </View>
       </View>
+
+      {/* Car selector chips */}
+      {!isLoading && cars.length > 1 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chips}
+        >
+          <Pressable
+            onPress={() => { Haptics.selectionAsync(); setSelectedCarId(null); }}
+            style={[
+              styles.chip,
+              { backgroundColor: selectedCarId == null ? C.tint : C.card, borderColor: selectedCarId == null ? C.tint : C.border },
+            ]}
+          >
+            <Text style={[styles.chipText, { color: selectedCarId == null ? "#fff" : C.text }]}>All</Text>
+          </Pressable>
+          {cars.map((car) => {
+            const active = car.id === selectedCarId;
+            return (
+              <Pressable
+                key={car.id}
+                onPress={() => { Haptics.selectionAsync(); setSelectedCarId(car.id); }}
+                style={[
+                  styles.chip,
+                  { backgroundColor: active ? C.tint : C.card, borderColor: active ? C.tint : C.border },
+                ]}
+              >
+                <Text style={[styles.chipText, { color: active ? "#fff" : C.text }]} numberOfLines={1}>
+                  {carLabel(car)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
 
       {/* List */}
       {isLoading ? (
@@ -202,6 +254,21 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
+
+  chips: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+    flexDirection: "row",
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  chipText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+
   centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 32 },
   emptyTitle: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
   emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
