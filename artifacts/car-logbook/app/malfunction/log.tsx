@@ -25,6 +25,7 @@ export default function MalfunctionLogScreen() {
   const { carId, carName } = useLocalSearchParams<{ carId: string; carName: string }>();
 
   const [description, setDescription] = useState("");
+  const [dashboardMessage, setDashboardMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
   const canSave = description.trim().length > 0;
@@ -37,6 +38,7 @@ export default function MalfunctionLogScreen() {
         date: new Date().toISOString().split("T")[0],
         inputMethod: "written",
         description: description.trim(),
+        dashboardMessage: dashboardMessage.trim() || null,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
@@ -96,6 +98,18 @@ export default function MalfunctionLogScreen() {
               value={description}
               onChangeText={setDescription}
               multiline
+              textAlignVertical="top"
+            />
+          </View>
+
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Message</Text>
+          <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border, minHeight: 0 }]}>
+            <TextInput
+              style={[styles.textArea, { color: C.text, minHeight: 0 }]}
+              placeholder="e.g. Engine oil pressure low, Check engine..."
+              placeholderTextColor={C.textTertiary}
+              value={dashboardMessage}
+              onChangeText={setDashboardMessage}
               textAlignVertical="top"
             />
           </View>
