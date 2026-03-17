@@ -31,7 +31,7 @@ export default function MalfunctionLogScreen() {
   const [customMessage, setCustomMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const canSave = description.trim().length > 0;
+  const canSave = description.trim().length > 0 || customMessage.trim().length > 0 || selectedLights.size > 0;
 
   const toggleLight = (light: string) => {
     Haptics.selectionAsync();
@@ -45,16 +45,19 @@ export default function MalfunctionLogScreen() {
   const handleSave = async () => {
     if (!canSave || !carId) return;
     setSaving(true);
-    const selectedLabels = DASHBOARD_LIGHTS
+    const selectedIds = DASHBOARD_LIGHTS
       .filter((l) => selectedLights.has(l.id))
-      .map((l) => l.label);
-    const parts = [...selectedLabels, customMessage.trim()].filter(Boolean);
-    const dashboardMessage = parts.length > 0 ? parts.join(", ") : null;
+      .map((l) => l.id);
+    const dashboardMessage = selectedIds.length > 0 ? selectedIds.join(",") : null;
+    const descParts = [description.trim(), customMessage.trim()].filter(Boolean);
+    const finalDescription = descParts.length > 0
+      ? descParts.join(" — ")
+      : selectedIds.map((id) => DASHBOARD_LIGHTS.find((l) => l.id === id)?.label).filter(Boolean).join(", ");
     try {
       await apiPost(`/cars/${carId}/malfunctions`, {
         date: new Date().toISOString().split("T")[0],
         inputMethod: "written",
-        description: description.trim(),
+        description: finalDescription,
         dashboardMessage,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
