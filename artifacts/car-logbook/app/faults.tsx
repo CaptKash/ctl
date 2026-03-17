@@ -35,7 +35,7 @@ type FaultRecord = {
   description: string;
   severity?: string | null;
   completed: boolean;
-  dashboard_message?: string | null;
+  dashboardMessage?: string | null;
   car: Car | null;
 };
 
@@ -100,8 +100,8 @@ export default function FaultLogScreen() {
           {item.description}
         </Text>
 
-        {!!item.dashboard_message && (() => {
-          const ids = item.dashboard_message.split(",").map((s) => s.trim()).filter(Boolean);
+        {!!item.dashboardMessage && (() => {
+          const ids = item.dashboardMessage.split(",").map((s) => s.trim()).filter(Boolean);
           const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
           if (!lights.length) return null;
           return (

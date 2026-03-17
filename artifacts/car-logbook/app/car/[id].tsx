@@ -43,7 +43,7 @@ type FaultRecord = {
   date: string;
   description: string;
   completed: boolean;
-  dashboard_message?: string | null;
+  dashboardMessage?: string | null;
 };
 
 type MaintenanceRecord = {
@@ -154,8 +154,8 @@ export default function CarDetailScreen() {
             <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
           </View>
           <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
-          {!!r.dashboard_message && (() => {
-            const ids = r.dashboard_message.split(",").map((s) => s.trim()).filter(Boolean);
+          {!!r.dashboardMessage && (() => {
+            const ids = r.dashboardMessage.split(",").map((s) => s.trim()).filter(Boolean);
             const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
             if (!lights.length) return null;
             return (
