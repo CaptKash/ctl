@@ -244,7 +244,7 @@ export default function HistoryScreen() {
                   return (
                     <View style={styles.iconsRowBg}>
                       {lights.map((l) => (
-                        <DashboardIcon key={l.id} id={l.id} size={20} />
+                        <DashboardIcon key={l.id} id={l.id} color={l.warningColor} size={20} />
                       ))}
                     </View>
                   );
