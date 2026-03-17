@@ -1,9 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -16,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { formatDate } from "@/lib/dateUtils";
 import { apiDelete, apiGet } from "@/hooks/useApi";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
@@ -59,6 +59,11 @@ export default function FaultLogScreen() {
     queryFn: () => apiGet<FaultRecord[]>("/malfunctions"),
   });
 
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    onConfirm: () => void;
+  }>({ visible: false, onConfirm: () => {} });
+
   const deleteMutation = useMutation({
     mutationFn: ({ carId, id }: { carId: number; id: number }) =>
       apiDelete(`/cars/${carId}/malfunctions/${id}`),
@@ -66,14 +71,13 @@ export default function FaultLogScreen() {
   });
 
   const confirmDelete = (item: FaultRecord) => {
-    Alert.alert("Delete Fault", "Remove this fault log permanently?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => deleteMutation.mutate({ carId: item.carId, id: item.id }),
+    setConfirmModal({
+      visible: true,
+      onConfirm: async () => {
+        setConfirmModal((s) => ({ ...s, visible: false }));
+        deleteMutation.mutate({ carId: item.carId, id: item.id });
       },
-    ]);
+    });
   };
 
   const sorted = React.useMemo(() => {
@@ -213,6 +217,14 @@ export default function FaultLogScreen() {
         </ScrollView>
       )}
 
+      <ConfirmModal
+        visible={confirmModal.visible}
+        title="Delete Fault"
+        message="This fault record will be permanently deleted."
+        confirmLabel="Delete"
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal((s) => ({ ...s, visible: false }))}
+      />
       <BottomNav active="faults" />
     </View>
   );
