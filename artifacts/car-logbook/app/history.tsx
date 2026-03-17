@@ -67,6 +67,53 @@ function carLabel(car: CarStub | null): string {
   return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
 }
 
+function generateReport(items: HistoryItem[], filterLabel: string) {
+  const now = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  const rows = items.map((ev) => {
+    const type = ev.type === "malfunction" ? "Fault" : "Repair";
+    const status = ev.type === "malfunction" ? (ev.completed ? "Resolved" : "Active") : "—";
+    return `<tr>
+      <td>${formatDate(ev.date)}</td>
+      <td><span class="badge ${ev.type}">${type}</span></td>
+      <td>${ev.title}</td>
+      <td>${ev.subtitle || "—"}</td>
+      <td>${ev.carName}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join("");
+
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
+  <title>CTL History Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; padding: 40px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .meta { color: #6b7280; font-size: 13px; margin-bottom: 28px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 12px; background: #f3f4f6; color: #374151; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .malfunction { background: #FEE2E2; color: #DC2626; }
+    .maintenance  { background: #FEF3C7; color: #D97706; }
+    @media print { body { padding: 20px; } }
+  </style></head><body>
+  <h1>CTL History Report</h1>
+  <div class="meta">Generated ${now} &nbsp;·&nbsp; Filter: ${filterLabel} &nbsp;·&nbsp; ${items.length} record${items.length !== 1 ? "s" : ""}</div>
+  <table>
+    <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Details</th><th>Car</th><th>Status</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <script>window.onload = () => window.print();</script>
+  </body></html>`;
+
+  if (Platform.OS === "web" && typeof window !== "undefined") {
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  }
+}
+
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
@@ -143,6 +190,21 @@ export default function HistoryScreen() {
             <Text style={[styles.headerTitle, { color: C.text }]}>History</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>{headerSub}</Text>
           </View>
+          {!isLoading && items.length > 0 && (
+            <Pressable
+              onPress={() => {
+                Haptics.selectionAsync();
+                const filterLabel = selectedCarId == null
+                  ? "All Cars"
+                  : carLabel(cars.find((c) => c.id === selectedCarId) ?? null);
+                generateReport(items, filterLabel);
+              }}
+              style={({ pressed }) => [styles.reportBtn, { opacity: pressed ? 0.75 : 1 }]}
+            >
+              <Feather name="file-text" size={13} color="#059669" />
+              <Text style={styles.reportBtnText}>Report</Text>
+            </Pressable>
+          )}
         </View>
       </View>
 
@@ -255,6 +317,18 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   headerText: { flex: 1 },
+  reportBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#D1FAE5",
+    borderRadius: 10,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: "#6EE7B7",
+  },
+  reportBtnText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#059669" },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
