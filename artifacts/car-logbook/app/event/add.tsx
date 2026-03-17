@@ -36,8 +36,8 @@ const eventOptions: EventOption[] = [
   },
   {
     id: "inspection",
-    title: "Inspection",
-    description: "Log a regular check or inspection",
+    title: "Repair / Inspection",
+    description: "",
     icon: "clipboard",
     iconBg: "#FEF3C7",
     iconColor: "#D97706",
