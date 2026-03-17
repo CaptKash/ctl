@@ -45,7 +45,7 @@ const eventOptions: EventOption[] = [
   },
   {
     id: "registration",
-    title: "Registration",
+    title: "License / Insurance Renewal",
     description: "",
     icon: "book-open",
     iconBg: "#CCFBF1",
