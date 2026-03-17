@@ -227,18 +227,9 @@ export default function MenuDashboardScreen() {
             const dueDate = formatDate(item.nextDueDate);
 
             return (
-              <Pressable
+              <View
                 key={`${item.itemKind}-${item.id}`}
-                onPress={() =>
-                  router.push({
-                    pathname: "/car/[id]",
-                    params: { id: String(item.carId) },
-                  })
-                }
-                style={({ pressed }) => [
-                  styles.eventCard,
-                  { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.92 : 1 },
-                ]}
+                style={[styles.eventCard, { backgroundColor: C.card, shadowColor: C.shadow }]}
               >
                 <View style={[styles.urgencyBar, { backgroundColor: color }]} />
                 <View style={styles.eventCardBody}>
@@ -253,40 +244,39 @@ export default function MenuDashboardScreen() {
                   <Text style={[styles.eventCardDesc, { color: C.textSecondary }]} numberOfLines={2}>
                     {item.description}
                   </Text>
-                  <View style={styles.eventCardMeta}>
-                    <Ionicons name="car-outline" size={13} color={C.textTertiary} />
-                    <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                      {item.year} {item.make} {item.model}
-                    </Text>
-                    <Feather name="calendar" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
-                    <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                      {dueDate}
-                    </Text>
-                    {item.nextDueMileage != null && (
-                      <>
-                        <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
-                        <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                          {item.nextDueMileage.toLocaleString()} km
-                        </Text>
-                      </>
-                    )}
+                  <View style={styles.eventCardBottom}>
+                    <View style={styles.eventCardMeta}>
+                      <Ionicons name="car-outline" size={13} color={C.textTertiary} />
+                      <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
+                        {item.year} {item.make} {item.model}
+                      </Text>
+                      <Feather name="calendar" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                      <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
+                        {dueDate}
+                      </Text>
+                      {item.nextDueMileage != null && (
+                        <>
+                          <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                          <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
+                            {item.nextDueMileage.toLocaleString()} km
+                          </Text>
+                        </>
+                      )}
+                    </View>
+                    <Pressable
+                      onPress={() => handleAddToCalendar(item)}
+                      hitSlop={8}
+                      style={[styles.calBtn, { backgroundColor: "#DBEAFE" }]}
+                    >
+                      {calendarLoading === `${item.itemKind}-${item.id}` ? (
+                        <ActivityIndicator size={13} color="#2563EB" />
+                      ) : (
+                        <Feather name="calendar" size={14} color="#2563EB" />
+                      )}
+                    </Pressable>
                   </View>
                 </View>
-                <View style={styles.cardActions}>
-                  <Pressable
-                    onPress={() => handleAddToCalendar(item)}
-                    hitSlop={8}
-                    style={[styles.calBtn, { backgroundColor: C.tint + "12" }]}
-                  >
-                    {calendarLoading === `${item.itemKind}-${item.id}` ? (
-                      <ActivityIndicator size={13} color={C.tint} />
-                    ) : (
-                      <Feather name="calendar" size={14} color={C.tint} />
-                    )}
-                  </Pressable>
-                  <Feather name="chevron-right" size={16} color={C.textTertiary} />
-                </View>
-              </Pressable>
+              </View>
             );
           })
         )}
@@ -419,21 +409,15 @@ const styles = StyleSheet.create({
   urgencyBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   urgencyText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
   eventCardDesc: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  eventCardMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
+  eventCardBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 4 },
+  eventCardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  cardActions: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingRight: 12,
-    paddingLeft: 4,
-  },
   calBtn: {
     width: 30,
     height: 30,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    marginLeft: 8,
   },
 });
