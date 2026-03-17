@@ -106,7 +106,7 @@ export default function AddFaultSelectCarScreen() {
           showsVerticalScrollIndicator={false}
         >
           {cars.map((car) => (
-            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} accentBg="#FEE2E2" accentIcon="#DC2626" />
+            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} />
           ))}
         </ScrollView>
       )}

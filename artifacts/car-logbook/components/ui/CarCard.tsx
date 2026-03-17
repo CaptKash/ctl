@@ -1,4 +1,4 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
   Image,
@@ -25,29 +25,7 @@ type Props = {
   car: Car;
   onPress: () => void;
   onLogEvent?: () => void;
-  accentBg?: string;
-  accentIcon?: string;
 };
-
-const CAR_COLORS: Record<string, string> = {
-  red: "#EF4444",
-  blue: "#3B82F6",
-  green: "#10B981",
-  black: "#1F2937",
-  white: "#F9FAFB",
-  silver: "#9CA3AF",
-  gray: "#6B7280",
-  grey: "#6B7280",
-  yellow: "#F59E0B",
-  orange: "#F97316",
-  brown: "#92400E",
-  purple: "#8B5CF6",
-};
-
-function getCarColor(color?: string | null): string {
-  if (!color) return "#6B7280";
-  return CAR_COLORS[color.toLowerCase()] ?? "#6B7280";
-}
 
 function getFirstPhoto(photos?: string | null): string | null {
   if (!photos) return null;
@@ -59,11 +37,9 @@ function getFirstPhoto(photos?: string | null): string | null {
   }
 }
 
-export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Props) {
+export function CarCard({ car, onPress, onLogEvent }: Props) {
   const C = Colors.light;
   const firstPhoto = getFirstPhoto(car.photos);
-  const thumbBg = accentBg ?? C.infoLight;
-  const thumbIcon = accentIcon ?? C.info;
 
   return (
     <Pressable
@@ -73,19 +49,12 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
         { backgroundColor: C.card, opacity: pressed ? 0.92 : 1, shadowColor: C.shadow },
       ]}
     >
-      {/* Thumbnail */}
-      <View style={[styles.iconContainer, { backgroundColor: thumbBg }]}>
-        {firstPhoto ? (
+      {/* Thumbnail — only shown when a photo exists */}
+      {firstPhoto && (
+        <View style={styles.iconContainer}>
           <Image source={{ uri: firstPhoto }} style={styles.photo} resizeMode="cover" />
-        ) : (
-          <>
-            <Ionicons name="car-outline" size={32} color={thumbIcon} />
-            {car.color && (
-              <View style={[styles.colorDot, { backgroundColor: getCarColor(car.color) }]} />
-            )}
-          </>
-        )}
-      </View>
+        </View>
+      )}
 
       {/* Info */}
       <View style={styles.info}>
