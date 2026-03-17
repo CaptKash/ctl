@@ -4,7 +4,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -20,9 +19,6 @@ import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
-const COLS = 4;
-const SCREEN_W = Dimensions.get("window").width;
-const TILE_SIZE = Math.floor((SCREEN_W - 40 - (COLS - 1) * 10) / COLS);
 
 export default function MalfunctionLogScreen() {
   const insets = useSafeAreaInsets();
@@ -140,32 +136,13 @@ export default function MalfunctionLogScreen() {
             {DASHBOARD_LIGHTS.map((light) => {
               const selected = selectedLights.has(light.id);
               const iconColor = selected ? light.warningColor : C.textTertiary;
-              const bgColor = selected ? "#1C1C1E" : C.card;
               return (
                 <Pressable
                   key={light.id}
                   onPress={() => toggleLight(light.id)}
-                  style={[
-                    styles.lightTile,
-                    {
-                      width: TILE_SIZE,
-                      backgroundColor: bgColor,
-                      borderColor: selected ? light.warningColor : C.border,
-                    },
-                  ]}
+                  style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
                 >
-                  <View style={styles.lightIconWrap}>
-                    <DashboardIcon id={light.id} color={iconColor} size={30} />
-                  </View>
-                  <Text
-                    style={[
-                      styles.lightLabel,
-                      { color: selected ? light.warningColor : C.textSecondary },
-                    ]}
-                    numberOfLines={2}
-                  >
-                    {light.label}
-                  </Text>
+                  <DashboardIcon id={light.id} color={iconColor} size={42} />
                 </Pressable>
               );
             })}
@@ -267,27 +244,9 @@ const styles = StyleSheet.create({
   lightGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 18,
     marginBottom: 4,
-  },
-  lightTile: {
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-    alignItems: "center",
-    gap: 6,
-  },
-  lightIconWrap: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 34,
-  },
-  lightLabel: {
-    fontSize: 10,
-    fontFamily: "Inter_500Medium",
-    textAlign: "center",
-    lineHeight: 13,
+    paddingVertical: 4,
   },
 
   saveBtn: {
