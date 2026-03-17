@@ -205,9 +205,17 @@ export default function HistoryScreen() {
             return (
               <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
-                    <Feather name={meta.icon} size={11} color={meta.color} />
-                    <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+                  <View style={styles.badgeRow}>
+                    <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+                      <Feather name={meta.icon} size={11} color={meta.color} />
+                      <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+                    </View>
+                    {ev.completed && (
+                      <View style={styles.resolvedTag}>
+                        <Feather name="check-circle" size={14} color="#059669" />
+                        <Text style={styles.resolvedText}>Resolved</Text>
+                      </View>
+                    )}
                   </View>
                   <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
                 </View>
@@ -220,17 +228,9 @@ export default function HistoryScreen() {
                   </View>
                 ) : null}
 
-                <View style={styles.cardFooter}>
-                  <View style={styles.cardMeta}>
-                    <Feather name="car" size={12} color={C.textTertiary} />
-                    <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
-                  </View>
-                  {ev.completed && (
-                    <View style={styles.resolvedTag}>
-                      <Feather name="check-circle" size={14} color="#059669" />
-                      <Text style={styles.resolvedText}>Resolved</Text>
-                    </View>
-                  )}
+                <View style={styles.cardMeta}>
+                  <Feather name="car" size={12} color={C.textTertiary} />
+                  <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
                 </View>
               </View>
             );
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  badgeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   resolvedTag: { flexDirection: "row", alignItems: "center", gap: 4 },
   resolvedText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#059669" },
   badge: {
