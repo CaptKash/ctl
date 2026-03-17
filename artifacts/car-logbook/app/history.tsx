@@ -261,10 +261,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   chip: {
+    height: 34,
     paddingHorizontal: 14,
-    paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   chipText: { fontSize: 13, fontFamily: "Inter_500Medium" },
 
