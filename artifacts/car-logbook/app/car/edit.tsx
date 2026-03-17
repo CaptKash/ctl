@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from "react-native";
@@ -35,6 +36,7 @@ type Car = {
   nickname?: string | null;
   color?: string | null;
   mileage?: number | null;
+  isElectric?: boolean | null;
   licensePlate?: string | null;
   licenseValidUntil?: string | null;
   vin?: string | null;
@@ -69,6 +71,9 @@ export default function EditCarScreen() {
   const [insuredWith, setInsuredWith] = useState("");
   const [insuredUntil, setInsuredUntil] = useState("");
 
+  // Electric
+  const [isElectric, setIsElectric] = useState(false);
+
   // Photos & Notes
   const [photos, setPhotos] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
@@ -92,6 +97,7 @@ export default function EditCarScreen() {
       setVin(car.vin ?? "");
       setInsuredWith(car.insuredWith ?? "");
       setInsuredUntil(car.insuredUntil ?? "");
+      setIsElectric(car.isElectric ?? false);
       setNotes(car.notes ?? "");
       try {
         setPhotos(car.photos ? JSON.parse(car.photos) : []);
@@ -123,6 +129,7 @@ export default function EditCarScreen() {
         vin: vin.trim() || undefined,
         insuredWith: insuredWith.trim() || undefined,
         insuredUntil: insuredUntil.trim() || undefined,
+        isElectric,
         notes: notes.trim() || undefined,
         photos: photos.length > 0 ? JSON.stringify(photos) : undefined,
       }),
@@ -230,6 +237,28 @@ export default function EditCarScreen() {
             placeholder="e.g. 45000"
             keyboardType="number-pad"
           />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleLeft}>
+              <View style={[styles.evBadge, { backgroundColor: isElectric ? "#D1FAE5" : C.backgroundTertiary }]}>
+                <Text style={{ fontSize: 16 }}>⚡</Text>
+              </View>
+              <View>
+                <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle</Text>
+                <Text style={[styles.toggleSub, { color: C.textSecondary }]}>
+                  {isElectric ? "EV — no fuel records" : "Combustion or hybrid"}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={isElectric}
+              onValueChange={setIsElectric}
+              trackColor={{ false: C.border, true: "#34D399" }}
+              thumbColor={isElectric ? "#059669" : "#fff"}
+            />
+          </View>
         </View>
 
         {/* License */}
@@ -364,5 +393,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Inter_500Medium",
     textAlign: "center",
+  },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 4,
+  },
+  toggleLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  evBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toggleLabel: {
+    fontSize: 15,
+    fontFamily: "Inter_600SemiBold",
+  },
+  toggleSub: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    marginTop: 2,
   },
 });

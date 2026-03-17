@@ -36,6 +36,7 @@ export const carsTable = pgTable("cars", {
   insuredWith: text("insured_with"),
   insuredUntil: text("insured_until"),
   mileage: integer("mileage"),
+  isElectric: boolean("is_electric").default(false).notNull(),
   notes: text("notes"),
   photos: text("photos"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
