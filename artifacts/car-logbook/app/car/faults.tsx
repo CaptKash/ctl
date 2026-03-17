@@ -162,7 +162,10 @@ export default function FaultsScreen() {
               iconColor="#DC2626"
               iconBg="#FEE2E2"
               title={r.description}
-              subtitle={`${INPUT_METHOD_LABELS[r.inputMethod] ?? r.inputMethod} · ${PHASE_LABELS[r.phase] ?? r.phase}`}
+              subtitle={[
+                INPUT_METHOD_LABELS[r.inputMethod] ?? r.inputMethod,
+                r.phase ? (PHASE_LABELS[r.phase] ?? r.phase) : null,
+              ].filter(Boolean).join(" · ")}
               rightText={formatDate(r.date)}
               rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} km` : undefined}
               onDelete={() => setConfirmId(r.id)}

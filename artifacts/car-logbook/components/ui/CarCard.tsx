@@ -93,7 +93,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
           {car.make} {car.model}
         </Text>
         <Text style={[styles.sub, { color: C.textSecondary }]} numberOfLines={1}>
-          {[car.nickname, String(car.year)].filter(Boolean).join("  |  ")}
+          {[car.nickname, car.year != null ? String(car.year) : null].filter(Boolean).join("  |  ")}
         </Text>
         {(car.licensePlate || car.mileage != null) && (
           <Text style={[styles.detail, { color: C.textTertiary }]} numberOfLines={1}>
