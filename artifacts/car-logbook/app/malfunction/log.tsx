@@ -140,7 +140,7 @@ export default function MalfunctionLogScreen() {
                   key={light.id}
                   onPress={() => toggleLight(light.id)}
                   style={({ pressed }) => [{
-                    opacity: pressed ? 0.5 : selected ? 1 : 0.7,
+                    opacity: pressed ? 0.4 : selected ? 1 : 0.5,
                   }]}
                 >
                   <DashboardIcon id={light.id} color={light.warningColor} size={42} />
