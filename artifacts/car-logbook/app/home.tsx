@@ -171,7 +171,7 @@ export default function MenuDashboardScreen() {
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>Log Event</Text>
             <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              Log a malfunction, maintenance, or registration
+              Log a fault, a repair, or a new registration
             </Text>
           </View>
           <View style={styles.tileArrow}>
