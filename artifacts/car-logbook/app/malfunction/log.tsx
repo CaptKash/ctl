@@ -49,15 +49,15 @@ export default function MalfunctionLogScreen() {
       .filter((l) => selectedLights.has(l.id))
       .map((l) => l.id);
     const dashboardMessage = selectedIds.length > 0 ? selectedIds.join(",") : null;
-    const descParts = [description.trim(), customMessage.trim()].filter(Boolean);
-    const finalDescription = descParts.length > 0
-      ? descParts.join(" — ")
-      : selectedIds.map((id) => DASHBOARD_LIGHTS.find((l) => l.id === id)?.label).filter(Boolean).join(", ");
+    const finalDescription = description.trim() ||
+      selectedIds.map((id) => DASHBOARD_LIGHTS.find((l) => l.id === id)?.label).filter(Boolean).join(", ") ||
+      customMessage.trim();
     try {
       await apiPost(`/cars/${carId}/malfunctions`, {
         date: new Date().toISOString().split("T")[0],
         inputMethod: "written",
         description: finalDescription,
+        warningMessage: customMessage.trim() || null,
         dashboardMessage,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

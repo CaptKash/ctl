@@ -44,6 +44,7 @@ type FaultRecord = {
   description: string;
   completed: boolean;
   dashboardMessage?: string | null;
+  warningMessage?: string | null;
 };
 
 type MaintenanceRecord = {
@@ -154,6 +155,12 @@ export default function CarDetailScreen() {
             <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
           </View>
           <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
+          {!!r.warningMessage && (
+            <Text style={[styles.warningMsgText, { color: C.textSecondary }]} numberOfLines={2}>
+              <Text style={styles.warningMsgLabel}>Dashboard message: </Text>
+              {r.warningMessage}
+            </Text>
+          )}
           {!!r.dashboardMessage && (() => {
             const ids = r.dashboardMessage.split(",").map((s) => s.trim()).filter(Boolean);
             const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
@@ -467,6 +474,8 @@ const styles = StyleSheet.create({
   metaDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#CBD5E1", marginHorizontal: 2 },
   cardFooter: { flexDirection: "row", alignItems: "center" },
   cardActions: { flexDirection: "row", gap: 8 },
+  warningMsgText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  warningMsgLabel: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
   iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", alignSelf: "flex-start", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
   actionBtn: {
     width: 30, height: 30,

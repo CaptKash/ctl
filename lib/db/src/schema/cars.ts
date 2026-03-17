@@ -165,6 +165,7 @@ export const malfunctionsTable = pgTable("malfunctions_records", {
   severity: text("severity"),
   actionTaken: text("action_taken"),
   dashboardMessage: text("dashboard_message"),
+  warningMessage: text("warning_message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -176,6 +177,7 @@ export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable)
     severity: z.enum(["critical", "major", "minor", "cosmetic"]).nullable().optional(),
     actionTaken: z.string().nullable().optional(),
     dashboardMessage: z.string().nullable().optional(),
+    warningMessage: z.string().nullable().optional(),
   });
 export type InsertMalfunction = z.infer<typeof insertMalfunctionSchema>;
 export type MalfunctionRecord = typeof malfunctionsTable.$inferSelect;

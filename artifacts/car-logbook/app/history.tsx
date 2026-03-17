@@ -35,6 +35,7 @@ type FaultRecord = {
   phase: string;
   completed: boolean;
   dashboardMessage?: string | null;
+  warningMessage?: string | null;
   car: CarStub | null;
 };
 
@@ -59,6 +60,7 @@ type HistoryItem = {
   carName: string;
   completed: boolean;
   dashboardMessage?: string | null;
+  warningMessage?: string | null;
 };
 
 const EVENT_META = {
@@ -101,6 +103,7 @@ export default function HistoryScreen() {
       carName: carLabel(r.car),
       completed: r.completed,
       dashboardMessage: r.dashboardMessage,
+      warningMessage: r.warningMessage,
     }));
 
     const repairs = (repairsQuery.data ?? []).map((r): HistoryItem => ({
@@ -237,6 +240,13 @@ export default function HistoryScreen() {
 
                 <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>{ev.title}</Text>
 
+                {ev.type === "malfunction" && !!ev.warningMessage && (
+                  <Text style={[styles.warningMsgText, { color: C.textSecondary }]} numberOfLines={2}>
+                    <Text style={styles.warningMsgLabel}>Dashboard message: </Text>
+                    {ev.warningMessage}
+                  </Text>
+                )}
+
                 {ev.type === "malfunction" && !!ev.dashboardMessage && (() => {
                   const ids = ev.dashboardMessage.split(",").map((s) => s.trim()).filter(Boolean);
                   const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
@@ -356,5 +366,7 @@ const styles = StyleSheet.create({
   cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   metaDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: "#CBD5E1" },
+  warningMsgText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  warningMsgLabel: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
   iconsRowBg: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", alignSelf: "flex-start", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
 });

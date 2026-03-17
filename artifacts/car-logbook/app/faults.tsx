@@ -36,6 +36,7 @@ type FaultRecord = {
   severity?: string | null;
   completed: boolean;
   dashboardMessage?: string | null;
+  warningMessage?: string | null;
   car: Car | null;
 };
 
@@ -99,6 +100,13 @@ export default function FaultLogScreen() {
         <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>
           {item.description}
         </Text>
+
+        {!!item.warningMessage && (
+          <Text style={[styles.warningMsgText, { color: C.textSecondary }]} numberOfLines={2}>
+            <Text style={styles.warningMsgLabel}>Dashboard message: </Text>
+            {item.warningMessage}
+          </Text>
+        )}
 
         {!!item.dashboardMessage && (() => {
           const ids = item.dashboardMessage.split(",").map((s) => s.trim()).filter(Boolean);
@@ -289,5 +297,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   emptyActiveText: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  warningMsgText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  warningMsgLabel: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
   iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", alignSelf: "flex-start", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
 });
