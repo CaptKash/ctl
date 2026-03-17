@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SelectField } from "@/components/ui/SelectField";
@@ -214,11 +215,11 @@ export default function AddCarScreen() {
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
-          <FormField
+          <DatePickerField
             label="Valid Until"
             value={licenseValidUntil}
-            onChangeText={setLicenseValidUntil}
-            placeholder="YYYY-MM-DD"
+            onChange={setLicenseValidUntil}
+            placeholder="Select expiry date…"
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
@@ -242,11 +243,11 @@ export default function AddCarScreen() {
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
-          <FormField
+          <DatePickerField
             label="Insured Until"
             value={insuredUntil}
-            onChangeText={setInsuredUntil}
-            placeholder="YYYY-MM-DD"
+            onChange={setInsuredUntil}
+            placeholder="Select expiry date…"
           />
         </View>
 
