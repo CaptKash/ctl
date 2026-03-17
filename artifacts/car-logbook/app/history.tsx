@@ -151,6 +151,7 @@ export default function HistoryScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={styles.chipsBar}
           contentContainerStyle={styles.chips}
         >
           <Pressable
@@ -197,6 +198,7 @@ export default function HistoryScreen() {
         </View>
       ) : (
         <ScrollView
+          style={styles.listScroll}
           contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 100 }]}
           showsVerticalScrollIndicator={false}
         >
@@ -243,6 +245,8 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  chipsBar: { flexShrink: 0, flexGrow: 0, height: 54 },
+  listScroll: { flex: 1 },
   header: {
     paddingHorizontal: 20,
     paddingBottom: 14,
