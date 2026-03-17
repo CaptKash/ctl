@@ -203,7 +203,7 @@ export default function HistoryScreen() {
           {items.map((ev) => {
             const meta = EVENT_META[ev.type];
             return (
-              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color, borderRightWidth: ev.completed ? 10 : 1, borderRightColor: ev.completed ? "#059669" : meta.color }]}>
+              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
                 <View style={styles.cardHeader}>
                   <View style={[styles.badge, { backgroundColor: meta.bg }]}>
                     <Feather name={meta.icon} size={11} color={meta.color} />
@@ -220,9 +220,17 @@ export default function HistoryScreen() {
                   </View>
                 ) : null}
 
-                <View style={styles.cardMeta}>
-                  <Feather name="car" size={12} color={C.textTertiary} />
-                  <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
+                <View style={styles.cardFooter}>
+                  <View style={styles.cardMeta}>
+                    <Feather name="car" size={12} color={C.textTertiary} />
+                    <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
+                  </View>
+                  {ev.completed && (
+                    <View style={styles.resolvedTag}>
+                      <Feather name="check-circle" size={12} color="#059669" />
+                      <Text style={styles.resolvedText}>Resolved</Text>
+                    </View>
+                  )}
                 </View>
               </View>
             );
@@ -276,6 +284,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  resolvedTag: { flexDirection: "row", alignItems: "center", gap: 4 },
+  resolvedText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#059669" },
   badge: {
     flexDirection: "row",
     alignItems: "center",
