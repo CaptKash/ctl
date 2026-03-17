@@ -1,10 +1,11 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -35,6 +36,7 @@ type Car = {
   insuredUntil?: string | null;
   mileage?: number | null;
   notes?: string | null;
+  photos?: string | null;
 };
 
 type FaultRecord = {
@@ -315,9 +317,17 @@ export default function CarDetailScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="truck" size={22} color="#2563EB" />
-          </View>
+          {(() => {
+            let firstPhoto: string | null = null;
+            try { firstPhoto = car.photos ? JSON.parse(car.photos)[0] ?? null : null; } catch {}
+            return firstPhoto ? (
+              <Image source={{ uri: firstPhoto }} style={styles.iconBox} />
+            ) : (
+              <View style={[styles.iconBox, { backgroundColor: "#EDE9FE" }]}>
+                <Ionicons name="car-outline" size={26} color="#7C3AED" />
+              </View>
+            );
+          })()}
           <View style={styles.headerText}>
             <Text style={[styles.carName, { color: C.text }]} numberOfLines={1}>
               {car.nickname ?? `${car.year} ${car.make} ${car.model}`}
@@ -414,7 +424,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   headerText: { flex: 1 },
   backBtn: {},
   carName: { fontSize: 17, fontFamily: "Inter_700Bold" },
