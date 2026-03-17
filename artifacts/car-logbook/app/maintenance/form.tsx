@@ -197,7 +197,7 @@ export default function MaintenanceFormScreen() {
             <Feather name="tool" size={22} color="#D97706" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Add Maintenance Log</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>{(fromFault || preType === "Repair") ? "Add Repair Log" : "Add Maintenance Log"}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carTitle}</Text>
           </View>
         </View>
