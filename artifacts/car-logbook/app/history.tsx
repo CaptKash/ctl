@@ -87,7 +87,7 @@ export default function HistoryScreen() {
       type: "malfunction",
       date: r.date,
       title: r.description,
-      subtitle: r.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      subtitle: (r.phase ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       carName: carLabel(r.car),
       completed: r.completed,
     }));

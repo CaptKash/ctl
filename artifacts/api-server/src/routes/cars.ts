@@ -510,7 +510,7 @@ router.get("/cars/:carId/events", async (req, res) => {
       type: "malfunction" as const,
       date: r.date,
       title: r.description,
-      subtitle: r.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      subtitle: (r.phase ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       completed: completedKeys.has(`malfunction-${r.id}`),
     })),
   ]
