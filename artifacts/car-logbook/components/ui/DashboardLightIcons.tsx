@@ -15,18 +15,18 @@ export interface DashboardLightConfig {
 }
 
 export const DASHBOARD_LIGHTS: DashboardLightConfig[] = [
-  { id: "checkEngine", label: "Check Engine", warningColor: "#D97706" },
+  { id: "checkEngine", label: "Check Engine", warningColor: "#EAB308" },
   { id: "oil", label: "Oil Pressure", warningColor: "#DC2626" },
-  { id: "battery", label: "Battery", warningColor: "#D97706" },
+  { id: "battery", label: "Battery", warningColor: "#EAB308" },
   { id: "temp", label: "Engine Temp", warningColor: "#DC2626" },
-  { id: "abs", label: "ABS", warningColor: "#D97706" },
-  { id: "airbag", label: "Airbag / SRS", warningColor: "#D97706" },
+  { id: "abs", label: "ABS", warningColor: "#EAB308" },
+  { id: "airbag", label: "Airbag / SRS", warningColor: "#EAB308" },
   { id: "brake", label: "Brake System", warningColor: "#DC2626" },
-  { id: "tpms", label: "Tyre Pressure", warningColor: "#D97706" },
-  { id: "fuel", label: "Fuel Low", warningColor: "#D97706" },
-  { id: "service", label: "Service Due", warningColor: "#D97706" },
-  { id: "stability", label: "Stability / ESP", warningColor: "#D97706" },
-  { id: "steering", label: "Power Steering", warningColor: "#D97706" },
+  { id: "tpms", label: "Tyre Pressure", warningColor: "#EAB308" },
+  { id: "fuel", label: "Fuel Low", warningColor: "#EAB308" },
+  { id: "service", label: "Service Due", warningColor: "#EAB308" },
+  { id: "stability", label: "Stability / ESP", warningColor: "#EAB308" },
+  { id: "steering", label: "Power Steering", warningColor: "#EAB308" },
 ];
 
 const SW = 1.0;
