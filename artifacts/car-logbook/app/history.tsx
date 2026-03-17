@@ -290,7 +290,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    transform: [{ rotate: "-6deg" }],
     opacity: 0.85,
   },
   resolvedStampText: {
