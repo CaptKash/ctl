@@ -228,7 +228,6 @@ export default function HistoryScreen() {
                 ) : null}
 
                 <View style={styles.cardMeta}>
-                  <Feather name="car" size={12} color={C.textTertiary} />
                   <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
                 </View>
               </View>
