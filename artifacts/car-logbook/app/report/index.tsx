@@ -1,6 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -63,7 +65,7 @@ function carLabel(car: CarStub | null): string {
   return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
 }
 
-function openReport(items: HistoryItem[], filterLabel: string) {
+function buildHtml(items: HistoryItem[], filterLabel: string): string {
   const now = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   const rows = items.map((ev) => {
     const type = ev.type === "malfunction" ? "Fault" : "Repair";
@@ -78,7 +80,7 @@ function openReport(items: HistoryItem[], filterLabel: string) {
     </tr>`;
   }).join("");
 
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
   <title>CTL History Report</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -100,12 +102,35 @@ function openReport(items: HistoryItem[], filterLabel: string) {
     <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Details</th><th>Car</th><th>Status</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
-  <script>window.onload = () => window.print();</script>
   </body></html>`;
+}
 
-  if (Platform.OS === "web" && typeof window !== "undefined") {
-    const blob = new Blob([html], { type: "text/html" });
-    window.open(URL.createObjectURL(blob), "_blank");
+async function openReport(items: HistoryItem[], filterLabel: string) {
+  const html = buildHtml(items, filterLabel);
+
+  if (Platform.OS === "web") {
+    if (typeof document !== "undefined") {
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ctl-history-report.html";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+    }
+  } else {
+    try {
+      const { uri } = await Print.printToFileAsync({ html });
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "CTL History Report" });
+      } else {
+        await Print.printAsync({ html });
+      }
+    } catch {
+      await Print.printAsync({ html });
+    }
   }
 }
 
@@ -173,13 +198,13 @@ export default function ReportScreen() {
 
   const canGenerate = (includeFaults || includeRepairs) && filteredItems.length > 0;
 
-  function handleGenerate() {
+  async function handleGenerate() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const carPart = selectedCarId == null ? "All Cars" : carLabel(cars.find((c) => c.id === selectedCarId) ?? null);
     const typePart = includeFaults && includeRepairs ? "Faults & Repairs"
       : includeFaults ? "Faults only"
       : "Repairs only";
-    openReport(filteredItems, `${carPart} · ${typePart}`);
+    await openReport(filteredItems, `${carPart} · ${typePart}`);
   }
 
   return (

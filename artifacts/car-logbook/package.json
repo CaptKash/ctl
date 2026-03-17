@@ -58,6 +58,8 @@
     "@react-native-community/datetimepicker": "8.4.4",
     "expo-calendar": "^55.0.9",
     "expo-local-authentication": "^55.0.8",
-    "expo-secure-store": "^55.0.8"
+    "expo-print": "^55.0.8",
+    "expo-secure-store": "^55.0.8",
+    "expo-sharing": "^55.0.11"
   }
 }
