@@ -102,6 +102,7 @@ export const CAR_DATA: CarMake[] = [
   { make: "Infiniti", models: ["EX","FX","G","G35","G37","JX","M","Q30","Q50","Q60","Q70","QX30","QX50","QX55","QX60","QX70","QX80"] },
   { make: "Isuzu", models: ["Amigo","Axiom","D-Max","i-Series","MU-7","MU-X","Rodeo","Trooper","VehiCROSS"] },
   { make: "JAC", models: ["E10X","J7","S2","S3","S4","S7","T8"] },
+  { make: "Jetour", models: ["Dashing","T1","T2","Traveller","X50","X70","X70 Plus","X90","X90 Plus"] },
   { make: "Jaguar", models: ["E-PACE","F-PACE","F-TYPE","I-PACE","S-TYPE","X-TYPE","XE","XF","XJ","XK"] },
   { make: "Jeep", models: ["Avenger","Cherokee","Commander","Compass","Gladiator","Grand Cherokee","Grand Cherokee 4xe","Grand Wagoneer","Renegade","Wagoneer","Wrangler","Wrangler 4xe"] },
   {
