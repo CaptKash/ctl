@@ -203,18 +203,13 @@ export default function HistoryScreen() {
           {items.map((ev) => {
             const meta = EVENT_META[ev.type];
             return (
-              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color, borderRightWidth: ev.completed ? 4 : 1, borderRightColor: ev.completed ? "#059669" : meta.color }]}>
                 <View style={styles.cardHeader}>
                   <View style={[styles.badge, { backgroundColor: meta.bg }]}>
                     <Feather name={meta.icon} size={11} color={meta.color} />
                     <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
                   </View>
-                  <View style={styles.cardHeaderRight}>
-                    <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
-                    {ev.completed && (
-                      <Feather name="flag" size={14} color="#059669" />
-                    )}
-                  </View>
+                  <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
                 </View>
 
                 <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>{ev.title}</Text>
@@ -281,7 +276,6 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  cardHeaderRight: { flexDirection: "row", alignItems: "center", gap: 6 },
   badge: {
     flexDirection: "row",
     alignItems: "center",
