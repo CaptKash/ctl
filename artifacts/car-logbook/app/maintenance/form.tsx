@@ -36,6 +36,7 @@ type Car = {
 };
 
 const MAINTENANCE_TYPES = [
+  "Repair",
   "Oil Change",
   "Tyre Rotation",
   "Tyre Replacement",
@@ -50,7 +51,7 @@ const MAINTENANCE_TYPES = [
 ];
 
 export default function MaintenanceFormScreen() {
-  const { carId: carIdParam, faultDescription, faultId: faultIdParam } = useLocalSearchParams<{ carId: string; faultDescription?: string; faultId?: string }>();
+  const { carId: carIdParam, faultDescription, faultId: faultIdParam, preType } = useLocalSearchParams<{ carId: string; faultDescription?: string; faultId?: string; preType?: string }>();
   const faultId = faultIdParam ? parseInt(faultIdParam) : null;
   const carId = parseInt(carIdParam ?? "0");
   const insets = useSafeAreaInsets();
@@ -60,7 +61,7 @@ export default function MaintenanceFormScreen() {
 
   // Service details
   const fromFault = Boolean(faultDescription);
-  const [type, setType] = useState(fromFault ? "Repair" : "");
+  const [type, setType] = useState(fromFault ? "Repair" : (preType ?? ""));
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [correctiveAction, setCorrectiveAction] = useState("");
   // Workshop details

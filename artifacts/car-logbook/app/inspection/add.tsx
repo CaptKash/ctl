@@ -45,14 +45,14 @@ export default function AddInspectionSelectCarScreen() {
     if (preselectedCarId && cars) {
       const car = cars.find((c) => String(c.id) === preselectedCarId);
       if (car) {
-        router.replace({ pathname: "/inspection/form", params: { carId: String(car.id) } });
+        router.replace({ pathname: "/inspection/type", params: { carId: String(car.id) } });
       }
     }
   }, [preselectedCarId, cars]);
 
   const handleSelectCar = (car: Car) => {
     Haptics.selectionAsync();
-    router.push({ pathname: "/inspection/form", params: { carId: String(car.id) } });
+    router.push({ pathname: "/inspection/type", params: { carId: String(car.id) } });
   };
 
   return (
