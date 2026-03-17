@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Dimensions,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,25 +18,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
+import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
-const DASHBOARD_LIGHTS = [
-  "Check Engine",
-  "Oil Pressure",
-  "Battery / Charging",
-  "Engine Temperature",
-  "ABS",
-  "Airbag / SRS",
-  "Brake System",
-  "Traction Control",
-  "Stability Control",
-  "Tire Pressure (TPMS)",
-  "Power Steering",
-  "Service Required",
-  "Transmission Temp",
-  "Fuel Low",
-  "4WD / AWD",
-  "Coolant Level",
-];
+const COLS = 4;
+const SCREEN_W = Dimensions.get("window").width;
+const TILE_SIZE = Math.floor((SCREEN_W - 40 - (COLS - 1) * 10) / COLS);
 
 export default function MalfunctionLogScreen() {
   const insets = useSafeAreaInsets();
@@ -62,7 +49,10 @@ export default function MalfunctionLogScreen() {
   const handleSave = async () => {
     if (!canSave || !carId) return;
     setSaving(true);
-    const parts = [...selectedLights, customMessage.trim()].filter(Boolean);
+    const selectedLabels = DASHBOARD_LIGHTS
+      .filter((l) => selectedLights.has(l.id))
+      .map((l) => l.label);
+    const parts = [...selectedLabels, customMessage.trim()].filter(Boolean);
     const dashboardMessage = parts.length > 0 ? parts.join(", ") : null;
     try {
       await apiPost(`/cars/${carId}/malfunctions`, {
@@ -145,27 +135,36 @@ export default function MalfunctionLogScreen() {
           </View>
 
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Lights</Text>
-          <Text style={[styles.sectionHint, { color: C.textTertiary }]}>Select any that are active</Text>
-          <View style={styles.chipsWrap}>
+          <Text style={[styles.sectionHint, { color: C.textTertiary }]}>Tap any that are active</Text>
+          <View style={styles.lightGrid}>
             {DASHBOARD_LIGHTS.map((light) => {
-              const selected = selectedLights.has(light);
+              const selected = selectedLights.has(light.id);
+              const iconColor = selected ? light.warningColor : C.textTertiary;
+              const bgColor = selected ? "#1C1C1E" : C.card;
               return (
                 <Pressable
-                  key={light}
-                  onPress={() => toggleLight(light)}
+                  key={light.id}
+                  onPress={() => toggleLight(light.id)}
                   style={[
-                    styles.chip,
+                    styles.lightTile,
                     {
-                      backgroundColor: selected ? "#FEE2E2" : C.card,
-                      borderColor: selected ? "#DC2626" : C.border,
+                      width: TILE_SIZE,
+                      backgroundColor: bgColor,
+                      borderColor: selected ? light.warningColor : C.border,
                     },
                   ]}
                 >
-                  {selected && (
-                    <Feather name="check" size={12} color="#DC2626" />
-                  )}
-                  <Text style={[styles.chipText, { color: selected ? "#DC2626" : C.text }]}>
-                    {light}
+                  <View style={styles.lightIconWrap}>
+                    <DashboardIcon id={light.id} color={iconColor} size={30} />
+                  </View>
+                  <Text
+                    style={[
+                      styles.lightLabel,
+                      { color: selected ? light.warningColor : C.textSecondary },
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {light.label}
                   </Text>
                 </Pressable>
               );
@@ -265,24 +264,30 @@ const styles = StyleSheet.create({
     minHeight: 0,
   },
 
-  chipsWrap: {
+  lightGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 10,
     marginBottom: 4,
   },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
+  lightTile: {
+    borderRadius: 12,
     borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    gap: 6,
   },
-  chipText: {
-    fontSize: 13,
+  lightIconWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 34,
+  },
+  lightLabel: {
+    fontSize: 10,
     fontFamily: "Inter_500Medium",
+    textAlign: "center",
+    lineHeight: 13,
   },
 
   saveBtn: {
