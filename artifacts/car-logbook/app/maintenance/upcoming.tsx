@@ -109,17 +109,8 @@ export default function UpcomingEventsScreen() {
             const dueDate = formatDate(item.nextDueDate);
 
             return (
-              <Pressable
-                onPress={() =>
-                  router.push({
-                    pathname: "/car/[id]",
-                    params: { id: String(item.carId) },
-                  })
-                }
-                style={({ pressed }) => [
-                  styles.card,
-                  { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.92 : 1 },
-                ]}
+              <View
+                style={[styles.card, { backgroundColor: C.card, shadowColor: C.shadow }]}
               >
                 <View style={[styles.urgencyBar, { backgroundColor: color }]} />
                 <View style={styles.cardBody}>
@@ -134,27 +125,31 @@ export default function UpcomingEventsScreen() {
                   <Text style={[styles.cardDesc, { color: C.textSecondary }]} numberOfLines={2}>
                     {item.description}
                   </Text>
-                  <View style={styles.cardMeta}>
-                    <Ionicons name="car-outline" size={13} color={C.textTertiary} />
-                    <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
-                      {item.year} {item.make} {item.model}
-                    </Text>
-                    <Feather name="calendar" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
-                    <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
-                      {dueDate}
-                    </Text>
-                    {item.nextDueMileage != null && (
-                      <>
-                        <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
-                        <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
-                          {item.nextDueMileage.toLocaleString()} km
-                        </Text>
-                      </>
-                    )}
+                  <View style={styles.cardBottom}>
+                    <View style={styles.cardMeta}>
+                      <Ionicons name="car-outline" size={13} color={C.textTertiary} />
+                      <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
+                        {item.year} {item.make} {item.model}
+                      </Text>
+                      <Feather name="calendar" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                      <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
+                        {dueDate}
+                      </Text>
+                      {item.nextDueMileage != null && (
+                        <>
+                          <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                          <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
+                            {item.nextDueMileage.toLocaleString()} km
+                          </Text>
+                        </>
+                      )}
+                    </View>
+                    <View style={[styles.calBtn, { backgroundColor: "#DBEAFE" }]}>
+                      <Feather name="calendar" size={15} color="#2563EB" />
+                    </View>
                   </View>
                 </View>
-                <Feather name="chevron-right" size={16} color={C.textTertiary} style={{ alignSelf: "center" }} />
-              </Pressable>
+              </View>
             );
           }}
         />
@@ -207,6 +202,8 @@ const styles = StyleSheet.create({
   urgencyBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   urgencyText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
   cardDesc: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  cardMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
+  cardBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 4 },
+  cardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   cardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  calBtn: { width: 30, height: 30, borderRadius: 8, alignItems: "center", justifyContent: "center", marginLeft: 8 },
 });
