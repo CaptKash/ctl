@@ -15,6 +15,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useAuth } from "@/context/AuthContext";
 import { apiGet } from "@/hooks/useApi";
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
@@ -29,6 +31,7 @@ function NavRow({
   subtitle,
   onPress,
   badge,
+  danger,
 }: {
   icon: React.ComponentProps<typeof Feather>["name"];
   iconColor: string;
@@ -37,6 +40,7 @@ function NavRow({
   subtitle?: string;
   onPress?: () => void;
   badge?: string;
+  danger?: boolean;
 }) {
   return (
     <Pressable
@@ -51,12 +55,12 @@ function NavRow({
         <Feather name={icon} size={16} color={iconColor} />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>{label}</Text>
+        <Text style={[styles.rowTitle, { color: danger ? C.danger : C.text }]}>{label}</Text>
         {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }]}>{subtitle}</Text> : null}
       </View>
       {badge ? (
-        <View style={[styles.pill, { backgroundColor: C.tint + "18" }]}>
-          <Text style={[styles.pillText, { color: C.tint }]}>{badge}</Text>
+        <View style={[styles.pill, { backgroundColor: danger ? "#FEE2E2" : C.tint + "18" }]}>
+          <Text style={[styles.pillText, { color: danger ? C.danger : C.tint }]}>{badge}</Text>
         </View>
       ) : onPress ? (
         <Feather name="chevron-right" size={16} color={C.textTertiary} />
@@ -116,6 +120,9 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  const { user, logout, biometricAvailable, biometricEnrolled, enableBiometric, disableBiometric } = useAuth();
+  const [biometricLoading, setBiometricLoading] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [distanceKm, setDistanceKm] = useState(true);
   const [eventReminders, setEventReminders] = useState(false);
   const [licenseAlerts, setLicenseAlerts] = useState(false);
@@ -125,6 +132,20 @@ export default function SettingsScreen() {
     queryFn: () => apiGet<Car[]>("/cars"),
     staleTime: 30_000,
   });
+
+  const handleBiometricToggle = async (value: boolean) => {
+    setBiometricLoading(true);
+    try {
+      if (value) await enableBiometric();
+      else await disableBiometric();
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
+
+  const initials = user?.name
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
 
   const fleetLabel = cars.length === 0
     ? "No vehicles registered"
@@ -141,7 +162,7 @@ export default function SettingsScreen() {
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Settings</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>App preferences & configuration</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Account & preferences</Text>
           </View>
         </View>
       </View>
@@ -150,22 +171,46 @@ export default function SettingsScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Vehicles */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>VEHICLES</Text>
+        {/* Profile card */}
+        <View style={[styles.profileCard, { backgroundColor: C.card }]}>
+          <View style={[styles.avatar, { backgroundColor: C.tint }]}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={[styles.profileName, { color: C.text }]}>{user?.name ?? "—"}</Text>
+            <Text style={[styles.profileEmail, { color: C.textSecondary }]}>{user?.email ?? "—"}</Text>
+          </View>
+          <View style={[styles.statBubble, { backgroundColor: C.tint + "15" }]}>
+            <Text style={[styles.statValue, { color: C.tint }]}>{cars.length}</Text>
+            <Text style={[styles.statLabel, { color: C.tint }]}>cars</Text>
+          </View>
+        </View>
+
+        {/* Account */}
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ACCOUNT</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <NavRow
-            icon="truck"
+            icon="edit-2"
             iconColor="#2563EB"
             iconBg="#DBEAFE"
-            label="Manage Fleet"
+            label="Edit Profile"
+            subtitle="Update name or email"
+            badge="Soon"
+          />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <NavRow
+            icon="truck"
+            iconColor="#7C3AED"
+            iconBg="#EDE9FE"
+            label="My Fleet"
             subtitle={fleetLabel}
             onPress={() => router.push("/fleet")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <NavRow
             icon="plus-circle"
-            iconColor="#7C3AED"
-            iconBg="#EDE9FE"
+            iconColor="#059669"
+            iconBg="#D1FAE5"
             label="Add New Vehicle"
             subtitle="Register a car, bike or van"
             onPress={() => router.push("/car/add")}
@@ -243,6 +288,33 @@ export default function SettingsScreen() {
           />
         </View>
 
+        {/* Security */}
+        {biometricAvailable && (
+          <>
+            <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>SECURITY</Text>
+            <View style={[styles.card, { backgroundColor: C.card }]}>
+              <View style={styles.row}>
+                <View style={[styles.rowIcon, { backgroundColor: "#D1FAE5" }]}>
+                  <Feather name="shield" size={16} color="#059669" />
+                </View>
+                <View style={styles.rowBody}>
+                  <Text style={[styles.rowTitle, { color: C.text }]}>Biometric Login</Text>
+                  <Text style={[styles.rowSub, { color: C.textSecondary }]}>
+                    {biometricEnrolled ? "Face ID or fingerprint enabled" : "Use Face ID or fingerprint"}
+                  </Text>
+                </View>
+                <Switch
+                  value={biometricEnrolled}
+                  onValueChange={handleBiometricToggle}
+                  disabled={biometricLoading}
+                  trackColor={{ true: "#059669", false: C.border }}
+                  thumbColor="#fff"
+                />
+              </View>
+            </View>
+          </>
+        )}
+
         {/* About */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ABOUT</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
@@ -273,9 +345,48 @@ export default function SettingsScreen() {
             badge="Soon"
           />
         </View>
+
+        {/* Sign out + danger */}
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>SESSION</Text>
+        <View style={[styles.card, { backgroundColor: C.card }]}>
+          <NavRow
+            icon="log-out"
+            iconColor="#DC2626"
+            iconBg="#FEE2E2"
+            label="Sign Out"
+            subtitle="You'll need to log in again"
+            onPress={() => setShowSignOutModal(true)}
+            danger
+          />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <NavRow
+            icon="trash-2"
+            iconColor="#DC2626"
+            iconBg="#FEE2E2"
+            label="Delete Account"
+            subtitle="Permanently erase all data"
+            badge="Soon"
+            danger
+          />
+        </View>
+
+        <Text style={[styles.version, { color: C.textTertiary }]}>CTL v1.0.0</Text>
       </ScrollView>
 
       <BottomNav active="settings" />
+
+      <ConfirmModal
+        visible={showSignOutModal}
+        title="Sign Out"
+        message="Are you sure you want to sign out of CTL?"
+        confirmLabel="Sign Out"
+        onConfirm={async () => {
+          setShowSignOutModal(false);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          await logout();
+        }}
+        onCancel={() => setShowSignOutModal(false)}
+      />
     </View>
   );
 }
@@ -294,6 +405,35 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
   content: { padding: 20, gap: 8 },
+
+  profileCard: {
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    marginBottom: 4,
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  avatarText: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff" },
+  profileInfo: { flex: 1 },
+  profileName: { fontSize: 16, fontFamily: "Inter_700Bold" },
+  profileEmail: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
+  statBubble: {
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  statValue: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  statLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
 
   sectionLabel: {
     fontSize: 11,
@@ -333,5 +473,12 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: 11,
     fontFamily: "Inter_600SemiBold",
+  },
+  version: {
+    textAlign: "center",
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    marginTop: 8,
+    marginBottom: 4,
   },
 });
