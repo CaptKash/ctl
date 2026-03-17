@@ -117,6 +117,8 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
+    position: "relative",
+    overflow: "hidden",
   },
   displayText: {
     flex: 1,
