@@ -36,20 +36,23 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
         <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>
         <View style={[styles.field, { backgroundColor: C.backgroundSecondary, borderColor: C.border }]}>
           <Feather name="calendar" size={16} color={C.textTertiary} />
-          <Text style={[styles.displayText, { color: value ? C.text : C.textTertiary }]}>
-            {display || placeholder}
-          </Text>
           <input
             type="date"
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
             style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0,
+              flex: 1,
+              border: "none",
+              background: "transparent",
+              fontSize: 15,
+              fontFamily: "Inter_400Regular, system-ui, sans-serif",
+              color: value ? "#111827" : "#9CA3AF",
+              outline: "none",
               cursor: "pointer",
+              padding: 0,
+              minWidth: 0,
               width: "100%",
-              height: "100%",
             }}
           />
         </View>
