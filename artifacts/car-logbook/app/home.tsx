@@ -182,7 +182,7 @@ export default function MenuDashboardScreen() {
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/repair-history");
+            router.push("/report");
           }}
           style={({ pressed }) => [
             styles.tile,
@@ -195,7 +195,7 @@ export default function MenuDashboardScreen() {
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>Generate Report</Text>
             <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              View full repair history
+              Export faults &amp; repair history
             </Text>
           </View>
           <View style={styles.tileArrow}>
