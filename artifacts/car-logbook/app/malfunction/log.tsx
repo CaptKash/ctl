@@ -148,10 +148,10 @@ export default function MalfunctionLogScreen() {
                       key={light.id}
                       onPress={() => toggleLight(light.id)}
                       style={({ pressed }) => [{
-                        opacity: pressed ? 0.6 : 1,
+                        opacity: pressed ? 0.5 : selected ? 1 : 0.75,
                         borderRadius: 30,
                         borderWidth: selected ? 2 : 0,
-                        borderColor: "#F97316",
+                        borderColor: "#D1D5DB",
                         padding: selected ? 3 : 5,
                       }]}
                     >
