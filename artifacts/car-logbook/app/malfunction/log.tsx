@@ -135,14 +135,13 @@ export default function MalfunctionLogScreen() {
           <View style={styles.lightGrid}>
             {DASHBOARD_LIGHTS.map((light) => {
               const selected = selectedLights.has(light.id);
-              const iconColor = selected ? light.warningColor : C.textTertiary;
               return (
                 <Pressable
                   key={light.id}
                   onPress={() => toggleLight(light.id)}
-                  style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+                  style={({ pressed }) => [{ opacity: pressed ? 0.5 : selected ? 1 : 0.28 }]}
                 >
-                  <DashboardIcon id={light.id} color={iconColor} size={42} />
+                  <DashboardIcon id={light.id} color={light.warningColor} size={42} />
                 </Pressable>
               );
             })}
