@@ -96,8 +96,16 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
-      <View style={[styles.header, { paddingTop: topPad + 16, borderBottomColor: C.border }]}>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Settings</Text>
+      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
+        <View style={styles.headerRow}>
+          <View style={[styles.iconBox, { backgroundColor: "#F3F4F6" }]}>
+            <Feather name="settings" size={22} color="#6B7280" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Settings</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>App preferences</Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView
@@ -159,14 +167,15 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  headerTitle: {
-    fontSize: 32,
-    fontFamily: "Inter_700Bold",
-  },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
+  headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
   content: {
     padding: 20,
     gap: 8,

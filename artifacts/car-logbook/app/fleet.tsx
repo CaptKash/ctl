@@ -127,20 +127,28 @@ export default function FleetScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
-      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border }]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color={C.text} />
-        </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>My Fleet</Text>
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/car/add");
-          }}
-          style={[styles.addBtn, { backgroundColor: C.tint }]}
-        >
-          <Feather name="plus" size={20} color="#fff" />
-        </Pressable>
+      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+            <Feather name="arrow-left" size={22} color={C.text} />
+          </Pressable>
+          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="truck" size={22} color="#2563EB" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.headerTitle, { color: C.text }]}>My Fleet</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>All vehicles</Text>
+          </View>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push("/car/add");
+            }}
+            style={[styles.addBtn, { backgroundColor: C.tint }]}
+          >
+            <Feather name="plus" size={20} color="#fff" />
+          </Pressable>
+        </View>
       </View>
 
       {isLoading ? (
@@ -216,21 +224,17 @@ export default function FleetScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingBottom: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
+  backBtn: {},
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontFamily: "Inter_700Bold",
   },
   addBtn: {

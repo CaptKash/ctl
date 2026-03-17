@@ -289,33 +289,38 @@ export default function CarDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
-      <View style={[styles.header, { paddingTop: topPad + 8 }]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color={C.text} />
-        </Pressable>
-        <View style={styles.headerCenter}>
-          <Text style={[styles.carName, { color: C.text }]} numberOfLines={1}>
-            {car.nickname ?? `${car.year} ${car.make} ${car.model}`}
-          </Text>
-          <Text style={[styles.plate, { color: C.textSecondary }]} numberOfLines={1}>
-            {car.nickname ? `${car.year} ${car.make} ${car.model}` : car.licensePlate ?? ""}
-          </Text>
-        </View>
-        <View style={styles.headerActions}>
-          <Pressable
-            onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
-            hitSlop={8}
-            style={[styles.headerBtn, { backgroundColor: C.backgroundTertiary }]}
-          >
-            <Feather name="edit-2" size={16} color={C.text} />
+      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+            <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <Pressable
-            onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report/[id]", params: { id: String(carId) } }); }}
-            hitSlop={8}
-            style={[styles.headerBtn, { backgroundColor: C.infoLight }]}
-          >
-            <Feather name="file-text" size={16} color={C.info} />
-          </Pressable>
+          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="truck" size={22} color="#2563EB" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.carName, { color: C.text }]} numberOfLines={1}>
+              {car.nickname ?? `${car.year} ${car.make} ${car.model}`}
+            </Text>
+            <Text style={[styles.plate, { color: C.textSecondary }]} numberOfLines={1}>
+              {car.nickname ? `${car.year} ${car.make} ${car.model}` : car.licensePlate ?? ""}
+            </Text>
+          </View>
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
+              hitSlop={8}
+              style={[styles.headerBtn, { backgroundColor: C.backgroundTertiary }]}
+            >
+              <Feather name="edit-2" size={16} color={C.text} />
+            </Pressable>
+            <Pressable
+              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report/[id]", params: { id: String(carId) } }); }}
+              hitSlop={8}
+              style={[styles.headerBtn, { backgroundColor: C.infoLight }]}
+            >
+              <Feather name="file-text" size={16} color={C.info} />
+            </Pressable>
+          </View>
         </View>
       </View>
 
@@ -383,14 +388,14 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  headerCenter: { flex: 1 },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  backBtn: {},
   carName: { fontSize: 17, fontFamily: "Inter_700Bold" },
   plate: { fontSize: 13, fontFamily: "Inter_500Medium" },
   headerActions: { flexDirection: "row", gap: 8 },

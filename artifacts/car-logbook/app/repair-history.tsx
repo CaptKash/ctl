@@ -55,15 +55,19 @@ export default function RepairHistoryScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
-      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border }]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color={C.text} />
-        </Pressable>
-        <View style={styles.headerCenter}>
-          <Text style={[styles.headerTitle, { color: C.text }]}>Repair History</Text>
-          <Text style={[styles.headerSub, { color: C.textSecondary }]}>All maintenance logs</Text>
+      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+            <Feather name="arrow-left" size={22} color={C.text} />
+          </Pressable>
+          <View style={[styles.iconBox, { backgroundColor: "#FEF3C7" }]}>
+            <Feather name="tool" size={22} color="#D97706" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Repair History</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>All maintenance logs</Text>
+          </View>
         </View>
-        <View style={{ width: 38 }} />
       </View>
 
       {isLoading ? (
@@ -149,17 +153,16 @@ export default function RepairHistoryScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingBottom: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    gap: 8,
   },
-  backBtn: { width: 38, alignItems: "flex-start" },
-  headerCenter: { flex: 1, alignItems: "center" },
-  headerTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
-  headerSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  backBtn: {},
+  headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
+  headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
   centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 32 },
   emptyTitle: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
   emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },

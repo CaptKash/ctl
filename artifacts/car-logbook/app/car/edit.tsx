@@ -147,12 +147,19 @@ export default function EditCarScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: C.backgroundSecondary }]}>
-      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border }]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
-          <Feather name="x" size={22} color={C.text} />
-        </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Edit Car</Text>
-        <View style={{ width: 36 }} />
+      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+            <Feather name="arrow-left" size={22} color={C.text} />
+          </Pressable>
+          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="edit-2" size={22} color="#2563EB" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Edit Car</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Update vehicle details</Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView
@@ -316,21 +323,17 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  backBtn: {},
+  headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontFamily: "Inter_700Bold",
   },
   form: {
