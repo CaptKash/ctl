@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Animated,
   FlatList,
-  Image,
   Platform,
   Pressable,
   RefreshControl,
@@ -133,8 +132,8 @@ export default function FleetScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#080F1E", overflow: "hidden" }]}>
-            <Image source={require("@/assets/images/icon.png")} style={{ width: 44, height: 44 }} />
+          <View style={[styles.iconBox, { backgroundColor: "#EDE9FE" }]}>
+            <Ionicons name="car-outline" size={26} color="#7C3AED" />
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>My Fleet</Text>
