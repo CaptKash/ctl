@@ -1,4 +1,4 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   Image,
@@ -79,7 +79,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
           <Image source={{ uri: firstPhoto }} style={styles.photo} resizeMode="cover" />
         ) : (
           <>
-            <MaterialCommunityIcons name="car-side" size={32} color={thumbIcon} />
+            <Ionicons name="car-outline" size={32} color={thumbIcon} />
             {car.color && (
               <View style={[styles.colorDot, { backgroundColor: getCarColor(car.color) }]} />
             )}

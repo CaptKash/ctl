@@ -1,4 +1,4 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -131,7 +131,7 @@ export default function MenuDashboardScreen() {
           ]}
         >
           <View style={[styles.tileIcon, { backgroundColor: "#EDE9FE" }]}>
-            <MaterialCommunityIcons name="car-side" size={26} color="#7C3AED" />
+            <Ionicons name="car-outline" size={26} color="#7C3AED" />
           </View>
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
@@ -254,7 +254,7 @@ export default function MenuDashboardScreen() {
                     {item.description}
                   </Text>
                   <View style={styles.eventCardMeta}>
-                    <MaterialCommunityIcons name="car-side" size={13} color={C.textTertiary} />
+                    <Ionicons name="car-outline" size={13} color={C.textTertiary} />
                     <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
                       {item.year} {item.make} {item.model}
                     </Text>

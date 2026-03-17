@@ -1,4 +1,4 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState, useCallback, useEffect } from "react";
@@ -280,7 +280,7 @@ export default function LoginScreen() {
                   { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.card },
                 ]}
               >
-                <MaterialCommunityIcons name="fingerprint" size={24} color={C.tint} />
+                <Ionicons name="finger-print-outline" size={24} color={C.tint} />
                 <Text style={[styles.biometricText, { color: C.text }]}>
                   Sign in with Biometrics
                 </Text>

@@ -1,4 +1,4 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React from "react";
@@ -128,7 +128,7 @@ export default function UpcomingEventsScreen() {
                     {item.description}
                   </Text>
                   <View style={styles.cardMeta}>
-                    <MaterialCommunityIcons name="car-side" size={13} color={C.textTertiary} />
+                    <Ionicons name="car-outline" size={13} color={C.textTertiary} />
                     <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
                       {item.year} {item.make} {item.model}
                     </Text>
