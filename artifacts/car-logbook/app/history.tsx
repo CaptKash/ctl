@@ -202,7 +202,7 @@ export default function HistoryScreen() {
               style={({ pressed }) => [styles.reportBtn, { opacity: pressed ? 0.75 : 1 }]}
             >
               <Feather name="file-text" size={13} color="#059669" />
-              <Text style={styles.reportBtnText}>Report</Text>
+              <Text style={styles.reportBtnText}>Generate Report</Text>
             </Pressable>
           )}
         </View>
