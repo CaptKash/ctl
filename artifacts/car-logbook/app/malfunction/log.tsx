@@ -144,7 +144,7 @@ export default function MalfunctionLogScreen() {
                     borderRadius: 28,
                     borderWidth: selected ? 2 : 0,
                     borderColor: "#9CA3AF",
-                    backgroundColor: selected ? "#F3F4F6" : "transparent",
+                    backgroundColor: selected ? "#9CA3AF" : "transparent",
                     padding: selected ? 4 : 6,
                   }]}
                 >
