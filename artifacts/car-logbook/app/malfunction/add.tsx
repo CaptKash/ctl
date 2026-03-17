@@ -72,7 +72,7 @@ export default function AddFaultSelectCarScreen() {
             <Feather name="alert-triangle" size={22} color="#DC2626" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Add Fault</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Log Fault</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>Select a vehicle</Text>
           </View>
         </View>
