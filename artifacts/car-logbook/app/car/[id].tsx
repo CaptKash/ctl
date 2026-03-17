@@ -19,6 +19,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiDelete } from "@/hooks/useApi";
+import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
 type Car = {
   id: number;
@@ -42,6 +43,7 @@ type FaultRecord = {
   date: string;
   description: string;
   completed: boolean;
+  dashboard_message?: string | null;
 };
 
 type MaintenanceRecord = {
@@ -152,6 +154,18 @@ export default function CarDetailScreen() {
             <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
           </View>
           <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
+          {!!r.dashboard_message && (() => {
+            const ids = r.dashboard_message.split(",").map((s) => s.trim()).filter(Boolean);
+            const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
+            if (!lights.length) return null;
+            return (
+              <View style={styles.iconsRow}>
+                {lights.map((l) => (
+                  <DashboardIcon key={l.id} id={l.id} color={l.warningColor} size={20} />
+                ))}
+              </View>
+            );
+          })()}
           <View style={styles.cardFooter}>
             <View style={{ flex: 1 }} />
             <View style={styles.cardActions}>
@@ -453,6 +467,7 @@ const styles = StyleSheet.create({
   metaDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#CBD5E1", marginHorizontal: 2 },
   cardFooter: { flexDirection: "row", alignItems: "center" },
   cardActions: { flexDirection: "row", gap: 8 },
+  iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center" },
   actionBtn: {
     width: 30, height: 30,
     alignItems: "center", justifyContent: "center",

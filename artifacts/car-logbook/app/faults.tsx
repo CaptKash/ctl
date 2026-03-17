@@ -18,6 +18,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/dateUtils";
 import { apiDelete, apiGet } from "@/hooks/useApi";
+import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
 type Car = {
   id: number;
@@ -34,6 +35,7 @@ type FaultRecord = {
   description: string;
   severity?: string | null;
   completed: boolean;
+  dashboard_message?: string | null;
   car: Car | null;
 };
 
@@ -97,6 +99,19 @@ export default function FaultLogScreen() {
         <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>
           {item.description}
         </Text>
+
+        {!!item.dashboard_message && (() => {
+          const ids = item.dashboard_message.split(",").map((s) => s.trim()).filter(Boolean);
+          const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
+          if (!lights.length) return null;
+          return (
+            <View style={styles.iconsRow}>
+              {lights.map((l) => (
+                <DashboardIcon key={l.id} id={l.id} color={l.warningColor} size={20} />
+              ))}
+            </View>
+          );
+        })()}
 
         <View style={styles.cardFooter}>
           <View style={styles.footerLeft}>
@@ -274,4 +289,5 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   emptyActiveText: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center" },
 });
