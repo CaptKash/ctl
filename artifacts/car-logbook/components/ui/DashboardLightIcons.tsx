@@ -29,7 +29,7 @@ export const DASHBOARD_LIGHTS: DashboardLightConfig[] = [
   { id: "steering", label: "Power Steering", warningColor: "#FFE000" },
 ];
 
-const SW = 1.0;
+const SW = 1.5;
 
 interface IconProps {
   color: string;
