@@ -201,7 +201,7 @@ export default function HistoryScreen() {
               }}
               style={({ pressed }) => [styles.reportBtn, { opacity: pressed ? 0.75 : 1 }]}
             >
-              <Feather name="file-text" size={13} color="#059669" />
+              <Feather name="file-text" size={13} color="#fff" />
               <Text style={styles.reportBtnText}>Generate Report</Text>
             </Pressable>
           )}
@@ -321,14 +321,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "#D1FAE5",
+    backgroundColor: "#059669",
     borderRadius: 10,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    borderWidth: 1,
-    borderColor: "#6EE7B7",
+    paddingHorizontal: 13,
+    paddingVertical: 9,
   },
-  reportBtnText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#059669" },
+  reportBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
