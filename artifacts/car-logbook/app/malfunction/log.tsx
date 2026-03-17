@@ -18,6 +18,25 @@ import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
 
+const DASHBOARD_LIGHTS = [
+  "Check Engine",
+  "Oil Pressure",
+  "Battery / Charging",
+  "Engine Temperature",
+  "ABS",
+  "Airbag / SRS",
+  "Brake System",
+  "Traction Control",
+  "Stability Control",
+  "Tire Pressure (TPMS)",
+  "Power Steering",
+  "Service Required",
+  "Transmission Temp",
+  "Fuel Low",
+  "4WD / AWD",
+  "Coolant Level",
+];
+
 export default function MalfunctionLogScreen() {
   const insets = useSafeAreaInsets();
   const C = Colors.light;
@@ -25,20 +44,32 @@ export default function MalfunctionLogScreen() {
   const { carId, carName } = useLocalSearchParams<{ carId: string; carName: string }>();
 
   const [description, setDescription] = useState("");
-  const [dashboardMessage, setDashboardMessage] = useState("");
+  const [selectedLights, setSelectedLights] = useState<Set<string>>(new Set());
+  const [customMessage, setCustomMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
   const canSave = description.trim().length > 0;
 
+  const toggleLight = (light: string) => {
+    Haptics.selectionAsync();
+    setSelectedLights((prev) => {
+      const next = new Set(prev);
+      next.has(light) ? next.delete(light) : next.add(light);
+      return next;
+    });
+  };
+
   const handleSave = async () => {
     if (!canSave || !carId) return;
     setSaving(true);
+    const parts = [...selectedLights, customMessage.trim()].filter(Boolean);
+    const dashboardMessage = parts.length > 0 ? parts.join(", ") : null;
     try {
       await apiPost(`/cars/${carId}/malfunctions`, {
         date: new Date().toISOString().split("T")[0],
         inputMethod: "written",
         description: description.trim(),
-        dashboardMessage: dashboardMessage.trim() || null,
+        dashboardMessage,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
@@ -102,15 +133,42 @@ export default function MalfunctionLogScreen() {
             />
           </View>
 
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Message</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Lights</Text>
+          <Text style={[styles.sectionHint, { color: C.textTertiary }]}>Select any that are active</Text>
+          <View style={styles.chipsWrap}>
+            {DASHBOARD_LIGHTS.map((light) => {
+              const selected = selectedLights.has(light);
+              return (
+                <Pressable
+                  key={light}
+                  onPress={() => toggleLight(light)}
+                  style={[
+                    styles.chip,
+                    {
+                      backgroundColor: selected ? "#FEE2E2" : C.card,
+                      borderColor: selected ? "#DC2626" : C.border,
+                    },
+                  ]}
+                >
+                  {selected && (
+                    <Feather name="check" size={12} color="#DC2626" />
+                  )}
+                  <Text style={[styles.chipText, { color: selected ? "#DC2626" : C.text }]}>
+                    {light}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Other Dashboard Message</Text>
           <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border, minHeight: 0 }]}>
             <TextInput
-              style={[styles.textArea, { color: C.text, minHeight: 0 }]}
-              placeholder="e.g. Engine oil pressure low, Check engine..."
+              style={[styles.singleInput, { color: C.text }]}
+              placeholder="e.g. Engine oil pressure low..."
               placeholderTextColor={C.textTertiary}
-              value={dashboardMessage}
-              onChangeText={setDashboardMessage}
-              textAlignVertical="top"
+              value={customMessage}
+              onChangeText={setCustomMessage}
             />
           </View>
 
@@ -182,6 +240,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginBottom: 4,
   },
+  sectionHint: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    marginBottom: 8,
+    marginTop: -6,
+  },
   inputBox: {
     borderWidth: 1,
     borderRadius: 14,
@@ -193,6 +257,32 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     lineHeight: 22,
     minHeight: 90,
+  },
+  singleInput: {
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 22,
+    minHeight: 0,
+  },
+
+  chipsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 4,
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  chipText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
   },
 
   saveBtn: {
