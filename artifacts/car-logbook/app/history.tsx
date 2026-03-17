@@ -17,6 +17,7 @@ import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
+import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
 type CarStub = {
   id: number;
@@ -33,6 +34,7 @@ type FaultRecord = {
   date: string;
   phase: string;
   completed: boolean;
+  dashboardMessage?: string | null;
   car: CarStub | null;
 };
 
@@ -56,6 +58,7 @@ type HistoryItem = {
   subtitle: string;
   carName: string;
   completed: boolean;
+  dashboardMessage?: string | null;
 };
 
 const EVENT_META = {
@@ -97,6 +100,7 @@ export default function HistoryScreen() {
       subtitle: (r.phase ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       carName: carLabel(r.car),
       completed: r.completed,
+      dashboardMessage: r.dashboardMessage,
     }));
 
     const repairs = (repairsQuery.data ?? []).map((r): HistoryItem => ({
@@ -233,6 +237,19 @@ export default function HistoryScreen() {
 
                 <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>{ev.title}</Text>
 
+                {ev.type === "malfunction" && !!ev.dashboardMessage && (() => {
+                  const ids = ev.dashboardMessage.split(",").map((s) => s.trim()).filter(Boolean);
+                  const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
+                  if (!lights.length) return null;
+                  return (
+                    <View style={styles.iconsRowBg}>
+                      {lights.map((l) => (
+                        <DashboardIcon key={l.id} id={l.id} size={20} />
+                      ))}
+                    </View>
+                  );
+                })()}
+
                 {ev.subtitle ? (
                   <View style={styles.cardMeta}>
                     <Text style={[styles.metaText, { color: C.textSecondary }]} numberOfLines={1}>{ev.subtitle}</Text>
@@ -339,4 +356,5 @@ const styles = StyleSheet.create({
   cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   metaDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: "#CBD5E1" },
+  iconsRowBg: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
 });

@@ -289,5 +289,5 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   emptyActiveText: { fontSize: 14, fontFamily: "Inter_500Medium" },
-  iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center" },
+  iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
 });
