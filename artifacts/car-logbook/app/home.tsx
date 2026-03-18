@@ -1,5 +1,4 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -75,6 +74,8 @@ export default function MenuDashboardScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { user, isAuthenticated } = useAuth();
   const [calendarLoading, setCalendarLoading] = useState<string | null>(null);
+  const [activeCarIndex, setActiveCarIndex] = useState(0);
+  const CHIP_WIDTH = 170;
 
   const handleAddToCalendar = async (item: UpcomingItem) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -180,6 +181,11 @@ export default function MenuDashboardScreen() {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.carList}
                   onStartShouldSetResponder={() => true}
+                  scrollEventThrottle={16}
+                  onScroll={(e) => {
+                    const idx = Math.round(e.nativeEvent.contentOffset.x / CHIP_WIDTH);
+                    setActiveCarIndex(Math.max(0, Math.min(idx, fleetCount - 1)));
+                  }}
                 >
                   {cars.map((car) => {
                     let firstPhoto: string | null = null;
@@ -212,13 +218,19 @@ export default function MenuDashboardScreen() {
                   })}
                 </ScrollView>
                 {fleetCount > 1 && (
-                  <LinearGradient
-                    colors={["transparent", C.card]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.carListFade}
-                    pointerEvents="none"
-                  />
+                  <View style={styles.dotRow}>
+                    {cars.map((_, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          styles.dot,
+                          i === activeCarIndex
+                            ? { backgroundColor: C.tint, width: 16 }
+                            : { backgroundColor: C.border, width: 6 },
+                        ]}
+                      />
+                    ))}
+                  </View>
                 )}
               </View>
             </>
@@ -444,15 +456,10 @@ const styles = StyleSheet.create({
   },
 
   carListDivider: { height: StyleSheet.hairlineWidth, marginTop: 14, marginBottom: 12 },
-  carListWrap: { position: "relative" },
-  carListFade: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 48,
-  },
+  carListWrap: { gap: 10 },
   carList: { gap: 10, paddingBottom: 2 },
+  dotRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 5 },
+  dot: { height: 6, borderRadius: 3 },
   carChip: {
     flexDirection: "row",
     alignItems: "center",
