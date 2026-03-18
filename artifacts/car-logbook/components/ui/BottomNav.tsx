@@ -18,7 +18,7 @@ const TABS: {
   activeColor?: string;
 }[] = [
   { id: "dashboard", label: "Dashboard", icon: "grid",           route: "/home" },
-  { id: "faults",    label: "Fault Log", icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
+  { id: "faults",    label: "Active Faults", icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
   { id: "history",   label: "History",   icon: "clock",          route: "/history" },
   { id: "settings",  label: "Settings",  icon: "settings",       route: "/settings" },
 ];
