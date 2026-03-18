@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -311,7 +312,7 @@ export default function CarDetailScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: C.background }]}>
+    <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
@@ -416,7 +417,7 @@ export default function CarDetailScreen() {
         destructive
       />
       <BottomNav />
-    </View>
+    </SwipeBackView>
   );
 }
 

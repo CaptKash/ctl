@@ -19,6 +19,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 
 import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
@@ -187,7 +188,7 @@ export default function MaintenanceFormScreen() {
     : type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
 
   return (
-    <View style={[styles.container, { backgroundColor: C.backgroundSecondary }]}>
+    <SwipeBackView style={{ backgroundColor: C.backgroundSecondary }}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
@@ -400,7 +401,7 @@ export default function MaintenanceFormScreen() {
         />
       </ScrollView>
       <BottomNav />
-    </View>
+    </SwipeBackView>
   );
 }
 

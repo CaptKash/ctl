@@ -16,6 +16,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { formatDate } from "@/lib/dateUtils";
@@ -120,7 +121,7 @@ export default function FaultsScreen() {
     : "Car";
 
   return (
-    <View style={[styles.container, { backgroundColor: C.background }]}>
+    <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
@@ -271,7 +272,7 @@ export default function FaultsScreen() {
         destructive
       />
       <BottomNav />
-    </View>
+    </SwipeBackView>
   );
 }
 

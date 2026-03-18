@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { apiPost } from "@/hooks/useApi";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
@@ -72,6 +73,7 @@ export default function MalfunctionLogScreen() {
   };
 
   return (
+    <SwipeBackView>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -198,6 +200,7 @@ export default function MalfunctionLogScreen() {
         <BottomNav />
       </View>
     </KeyboardAvoidingView>
+    </SwipeBackView>
   );
 }
 

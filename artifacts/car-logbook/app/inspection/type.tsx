@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { apiGet } from "@/hooks/useApi";
 
 type Car = {
@@ -50,7 +51,7 @@ export default function InspectionTypePickerScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: C.background }]}>
+    <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
           <Pressable
@@ -119,7 +120,7 @@ export default function InspectionTypePickerScreen() {
       </View>
 
       <BottomNav />
-    </View>
+    </SwipeBackView>
   );
 }
 

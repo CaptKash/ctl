@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -91,7 +92,7 @@ export default function AddCarScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   return (
-    <View style={[styles.container, { backgroundColor: C.backgroundSecondary }]}>
+    <SwipeBackView style={{ backgroundColor: C.backgroundSecondary }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
@@ -285,7 +286,7 @@ export default function AddCarScreen() {
         />
       </ScrollView>
       <BottomNav />
-    </View>
+    </SwipeBackView>
   );
 }
 

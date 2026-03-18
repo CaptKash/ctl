@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
 import { StatCard } from "@/components/ui/StatCard";
 import { RecordCard } from "@/components/ui/RecordCard";
@@ -86,7 +87,7 @@ export default function ReportScreen() {
   const { car } = report;
 
   return (
-    <View style={[styles.container, { backgroundColor: C.background }]}>
+    <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: C.tint }]}>
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color="#fff" />
@@ -221,7 +222,7 @@ export default function ReportScreen() {
         )}
       </ScrollView>
       <BottomNav />
-    </View>
+    </SwipeBackView>
   );
 }
 
