@@ -270,14 +270,14 @@ export default function MaintenanceFormScreen() {
                   placeholder="Select a type of service…"
                   required
                 />
-                {type === "Other" && (
+                {type !== "" && (
                   <FormField
                     label="Description"
                     value={correctiveAction}
                     onChangeText={setCorrectiveAction}
-                    placeholder="Describe the service…"
+                    placeholder={type === "Other" ? "Describe the service performed…" : "Add any notes or details about this service…"}
                     multiline
-                    required
+                    required={type === "Other"}
                   />
                 )}
               </>
