@@ -141,8 +141,8 @@ export default function ReportScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId: carIdParam } = useLocalSearchParams<{ carId?: string }>();
 
-  const [selectedCarIds, setSelectedCarIds] = useState<Set<number>>(
-    carIdParam ? new Set([parseInt(carIdParam)]) : new Set()
+  const [selectedCarIds, setSelectedCarIds] = useState<number[]>(
+    carIdParam ? [parseInt(carIdParam)] : []
   );
   const [includeFaults, setIncludeFaults] = useState(true);
   const [includeRepairs, setIncludeRepairs] = useState(true);
@@ -193,24 +193,22 @@ export default function ReportScreen() {
     return Array.from(map.values());
   }, [faultsQuery.data, repairsQuery.data]);
 
-  const allSelected = selectedCarIds.size === 0;
+  const allSelected = selectedCarIds.length === 0;
 
   function toggleCar(id: number) {
     Haptics.selectionAsync();
-    setSelectedCarIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
-      return next;
-    });
+    setSelectedCarIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   }
 
   function selectAll() {
     Haptics.selectionAsync();
-    setSelectedCarIds(new Set());
+    setSelectedCarIds([]);
   }
 
   const filteredItems = allItems.filter((ev) => {
-    if (!allSelected && !selectedCarIds.has(ev.carId)) return false;
+    if (!allSelected && !selectedCarIds.includes(ev.carId)) return false;
     if (!includeFaults && ev.type === "malfunction") return false;
     if (!includeRepairs && ev.type === "maintenance") return false;
     return true;
@@ -223,11 +221,11 @@ export default function ReportScreen() {
     let carPart: string;
     if (allSelected) {
       carPart = "All Vehicles";
-    } else if (selectedCarIds.size === 1) {
-      const [id] = Array.from(selectedCarIds);
+    } else if (selectedCarIds.length === 1) {
+      const [id] = selectedCarIds;
       carPart = carLabel(cars.find((c) => c.id === id) ?? null);
     } else {
-      carPart = `${selectedCarIds.size} Vehicles`;
+      carPart = `${selectedCarIds.length} Vehicles`;
     }
     const typePart = includeFaults && includeRepairs ? "Faults & Repairs"
       : includeFaults ? "Faults only"
@@ -280,7 +278,7 @@ export default function ReportScreen() {
               </View>
             </Pressable>
             {cars.map((car, i) => {
-              const checked = selectedCarIds.has(car.id);
+              const checked = selectedCarIds.includes(car.id);
               return (
                 <Pressable
                   key={car.id}
