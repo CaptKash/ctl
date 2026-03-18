@@ -14,9 +14,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ctl.carlogbook"
     },
-    "android": {},
+    "android": {
+      "package": "com.ctl.carlogbook"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
