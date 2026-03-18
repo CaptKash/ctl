@@ -93,9 +93,6 @@ export default function InspectionTypePickerScreen() {
             <Text style={[styles.cardSub, { color: C.textSecondary }]}>
               Log a vehicle repair or maintenance service
             </Text>
-            <View style={[styles.cardArrow, { backgroundColor: "#FEFCE8" }]}>
-              <Feather name="chevron-right" size={18} color="#CA8A04" />
-            </View>
           </Pressable>
 
           <Pressable
@@ -112,9 +109,6 @@ export default function InspectionTypePickerScreen() {
             <Text style={[styles.cardSub, { color: C.textSecondary }]}>
               Log a formal vehicle inspection or roadworthiness check
             </Text>
-            <View style={[styles.cardArrow, { backgroundColor: "#FFFBEB" }]}>
-              <Feather name="chevron-right" size={18} color="#D97706" />
-            </View>
           </Pressable>
         </View>
       </View>
