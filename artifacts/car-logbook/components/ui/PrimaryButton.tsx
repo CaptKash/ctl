@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
 
 type Props = {
@@ -7,14 +8,19 @@ type Props = {
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  variant?: "primary" | "danger" | "ghost";
+  variant?: "primary" | "danger" | "danger-light" | "ghost";
+  icon?: React.ComponentProps<typeof Feather>["name"];
 };
 
-export function PrimaryButton({ label, onPress, loading, disabled, variant = "primary" }: Props) {
+export function PrimaryButton({ label, onPress, loading, disabled, variant = "primary", icon }: Props) {
   const C = Colors.light;
   const bgColor =
-    variant === "danger" ? C.danger : variant === "ghost" ? "transparent" : C.tint;
-  const textColor = variant === "ghost" ? C.tint : "#fff";
+    variant === "danger" ? C.danger :
+    variant === "danger-light" ? "#FEE2E2" :
+    variant === "ghost" ? "transparent" : C.tint;
+  const textColor =
+    variant === "ghost" ? C.tint :
+    variant === "danger-light" ? "#DC2626" : "#fff";
   const borderColor = variant === "ghost" ? C.tint : bgColor;
 
   return (
@@ -34,7 +40,10 @@ export function PrimaryButton({ label, onPress, loading, disabled, variant = "pr
       {loading ? (
         <ActivityIndicator color={textColor} />
       ) : (
-        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+        <View style={styles.inner}>
+          {icon && <Feather name={icon} size={17} color={textColor} />}
+          <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+        </View>
       )}
     </Pressable>
   );
@@ -47,6 +56,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
+  },
+  inner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   label: {
     fontSize: 16,

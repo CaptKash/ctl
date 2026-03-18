@@ -211,7 +211,8 @@ export default function FaultLogScreen() {
           <PrimaryButton
             label="Log Another Fault"
             onPress={() => router.push("/malfunction/add" as any)}
-            variant="danger"
+            variant="danger-light"
+            icon="plus"
           />
         </ScrollView>
       )}
