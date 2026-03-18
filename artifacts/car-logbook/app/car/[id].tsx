@@ -393,8 +393,10 @@ export default function CarDetailScreen() {
         ) : events.length === 0 ? (
           <EmptyState
             icon="clock"
-            title="No records yet"
+            title="No events yet"
             description="Faults, maintenance, and inspections will appear here."
+            actionLabel="Log Event"
+            onAction={() => router.push({ pathname: "/event/add", params: { carId: String(carId) } })}
           />
         ) : (
           events.map(renderEvent)
