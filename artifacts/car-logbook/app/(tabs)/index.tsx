@@ -10,6 +10,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -40,6 +41,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
 
   const promptBiometricEnrollment = useCallback(() => {
     if (Platform.OS === "web") return;
@@ -84,7 +86,7 @@ export default function LoginScreen() {
         "/auth/login",
         { email: email.trim(), password },
       );
-      await login(res.token, res.user);
+      await login(res.token, res.user, rememberMe);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       if (biometricAvailable && !biometricEnrolled) {
@@ -192,6 +194,25 @@ export default function LoginScreen() {
             </View>
           </View>
 
+          <Pressable
+            style={styles.rememberRow}
+            onPress={() => setRememberMe((v) => !v)}
+            hitSlop={8}
+          >
+            <View>
+              <Text style={[styles.rememberLabel, { color: C.text }]}>Remember me</Text>
+              <Text style={[styles.rememberSub, { color: C.textSecondary }]}>
+                Stay signed in after closing the app
+              </Text>
+            </View>
+            <Switch
+              value={rememberMe}
+              onValueChange={setRememberMe}
+              trackColor={{ false: C.border, true: C.tint }}
+              thumbColor="#fff"
+            />
+          </Pressable>
+
           <PrimaryButton
             label="Sign In"
             onPress={handleLogin}
@@ -236,6 +257,8 @@ export default function LoginScreen() {
               <Text style={[styles.signupLink, { color: C.tint }]}>Sign up</Text>
             </Pressable>
           </View>
+
+          <Text style={[styles.versionText, { color: C.textTertiary }]}>CTL v1.0.0</Text>
         </ScrollView>
       </View>
 
@@ -300,4 +323,15 @@ const styles = StyleSheet.create({
   signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
   signupText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   signupLink: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+
+  rememberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  rememberLabel: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  rememberSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+
+  versionText: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center" },
 });

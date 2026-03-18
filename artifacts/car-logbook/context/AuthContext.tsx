@@ -21,7 +21,7 @@ type AuthContextType = {
   isLoading: boolean;
   biometricAvailable: boolean;
   biometricEnrolled: boolean;
-  login: (token: string, user: AuthUser) => Promise<void>;
+  login: (token: string, user: AuthUser, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   enableBiometric: () => Promise<void>;
   disableBiometric: () => Promise<void>;
@@ -114,12 +114,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const login = async (newToken: string, newUser: AuthUser) => {
+  const login = async (newToken: string, newUser: AuthUser, rememberMe = true) => {
     queryClient.clear();
-    await Promise.all([
-      secureSet(TOKEN_KEY, newToken),
-      secureSet(USER_KEY, JSON.stringify(newUser)),
-    ]);
+    if (rememberMe) {
+      await Promise.all([
+        secureSet(TOKEN_KEY, newToken),
+        secureSet(USER_KEY, JSON.stringify(newUser)),
+      ]);
+    }
     setToken(newToken);
     setUser(newUser);
   };
