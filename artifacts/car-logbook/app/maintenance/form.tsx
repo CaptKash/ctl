@@ -93,7 +93,7 @@ export default function MaintenanceFormScreen() {
 
   // Service details
   const fromFault = Boolean(faultDescription);
-  const [type, setType] = useState(fromFault ? "Repair" : (preType ?? ""));
+  const [type, setType] = useState(preType ?? "");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [correctiveAction, setCorrectiveAction] = useState("");
   // Workshop details
@@ -267,7 +267,7 @@ export default function MaintenanceFormScreen() {
                   value={type}
                   onSelect={setType}
                   options={MAINTENANCE_TYPES}
-                  placeholder="Select service type…"
+                  placeholder="Select a type of service…"
                   required
                 />
                 {type === "Other" && (
