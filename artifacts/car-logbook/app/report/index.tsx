@@ -46,7 +46,12 @@ type MaintenanceRecord = {
   date: string;
   type: string;
   shop?: string | null;
+  shopAddress?: string | null;
+  shopPhone?: string | null;
   cost?: number | null;
+  costOfParts?: number | null;
+  laborCost?: number | null;
+  warrantyPeriod?: string | null;
   car: CarStub | null;
 };
 
@@ -57,6 +62,7 @@ type InspectionRecord = {
   place?: string | null;
   results?: string | null;
   cost?: number | null;
+  nextInspectionDate?: string | null;
   car: CarStub | null;
 };
 
@@ -66,9 +72,21 @@ type HistoryItem = {
   type: "malfunction" | "maintenance" | "inspection";
   date: string;
   title: string;
-  subtitle: string;
   carName: string;
   completed: boolean;
+  // fault
+  phase?: string | null;
+  // repair
+  serviceType?: string | null;
+  correctiveAction?: string | null;
+  shop?: string | null;
+  shopAddress?: string | null;
+  warrantyPeriod?: string | null;
+  cost?: number | null;
+  // inspection
+  results?: string | null;
+  place?: string | null;
+  nextInspectionDate?: string | null;
 };
 
 function carLabel(car: CarStub | null): string {
@@ -76,44 +94,87 @@ function carLabel(car: CarStub | null): string {
   return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
 }
 
+function field(label: string, value: string | null | undefined) {
+  if (!value) return "";
+  return `<div class="field"><div class="fl">${label}</div><div class="fv">${value}</div></div>`;
+}
+
 function buildHtml(items: HistoryItem[], filterLabel: string): string {
   const now = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-  const rows = items.map((ev) => {
-    const type = ev.type === "malfunction" ? "Fault" : ev.type === "inspection" ? "Inspection" : "Repair";
-    const status = ev.type === "malfunction" ? (ev.completed ? "Resolved" : "Active") : "—";
-    return `<tr>
-      <td>${formatDate(ev.date)}</td>
-      <td><span class="badge ${ev.type}">${type}</span></td>
-      <td>${ev.title}</td>
-      <td>${ev.subtitle || "—"}</td>
-      <td>${ev.carName}</td>
-      <td>${status}</td>
-    </tr>`;
+
+  const cards = items.map((ev) => {
+    const typeLabel = ev.type === "malfunction" ? "Fault" : ev.type === "inspection" ? "Inspection" : "Repair";
+    let titleHtml = "";
+    let fieldsHtml = "";
+
+    if (ev.type === "malfunction") {
+      titleHtml = ev.title;
+      const statusClass = ev.completed ? "resolved" : "active";
+      const statusText = ev.completed ? "Resolved" : "Active";
+      fieldsHtml = `
+        <div class="field"><div class="fl">Status</div><div class="fv status-${statusClass}">${statusText}</div></div>
+        ${ev.phase ? field("Phase", ev.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())) : ""}
+      `;
+    } else if (ev.type === "maintenance") {
+      titleHtml = ev.serviceType ?? ev.title;
+      fieldsHtml = `
+        ${ev.correctiveAction && ev.correctiveAction !== ev.serviceType ? field("Description", ev.correctiveAction) : ""}
+        ${field("Shop", ev.shop)}
+        ${ev.shopAddress ? field("Address", ev.shopAddress) : ""}
+        ${ev.cost != null ? field("Cost", `$${ev.cost.toFixed(2)}`) : ""}
+        ${field("Warranty", ev.warrantyPeriod)}
+      `;
+    } else {
+      titleHtml = ev.results ? `Result: ${ev.results}` : "Inspection";
+      fieldsHtml = `
+        ${field("Inspection Center", ev.place)}
+        ${ev.cost != null ? field("Cost", `$${ev.cost.toFixed(2)}`) : ""}
+        ${ev.nextInspectionDate ? field("Next Inspection", formatDate(ev.nextInspectionDate)) : ""}
+      `;
+    }
+
+    return `
+    <div class="card">
+      <div class="card-header">
+        <span class="date">${formatDate(ev.date)}</span>
+        <span class="car">${ev.carName}</span>
+        <span class="badge ${ev.type}">${typeLabel}</span>
+      </div>
+      <div class="card-body">
+        <div class="record-title">${titleHtml}</div>
+        <div class="fields">${fieldsHtml}</div>
+      </div>
+    </div>`;
   }).join("");
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
-  <title>CTL History Report</title>
+  <title>CTL Report</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; padding: 40px; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; padding: 40px; background: #f9fafb; }
+    h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
     .meta { color: #6b7280; font-size: 13px; margin-bottom: 28px; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { text-align: left; padding: 8px 12px; background: #f3f4f6; color: #374151; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
-    td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .card-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
+    .date { font-size: 13px; color: #6b7280; min-width: 90px; }
+    .car { font-size: 13px; font-weight: 600; color: #374151; flex: 1; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
     .malfunction { background: #FEE2E2; color: #DC2626; }
     .maintenance  { background: #FEF3C7; color: #D97706; }
     .inspection   { background: #CCFBF1; color: #0D9488; }
-    @media print { body { padding: 20px; } }
+    .card-body { padding: 12px 16px; }
+    .record-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 10px; }
+    .fields { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+    .field { min-width: 140px; }
+    .fl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #9ca3af; margin-bottom: 2px; }
+    .fv { font-size: 13px; color: #374151; }
+    .status-resolved { color: #059669; font-weight: 600; }
+    .status-active { color: #DC2626; font-weight: 600; }
+    @media print { body { padding: 20px; background: #fff; } }
   </style></head><body>
   <h1>CTL History Report</h1>
   <div class="meta">Generated ${now} &nbsp;·&nbsp; ${filterLabel} &nbsp;·&nbsp; ${items.length} record${items.length !== 1 ? "s" : ""}</div>
-  <table>
-    <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Details</th><th>Car</th><th>Status</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
+  ${cards}
   </body></html>`;
 }
 
@@ -191,9 +252,9 @@ export default function ReportScreen() {
       type: "malfunction",
       date: r.date,
       title: r.description,
-      subtitle: (r.phase ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       carName: carLabel(r.car),
       completed: r.completed,
+      phase: r.phase,
     }));
 
     const repairs = (repairsQuery.data ?? []).map((r): HistoryItem => ({
@@ -202,9 +263,14 @@ export default function ReportScreen() {
       type: "maintenance",
       date: r.date,
       title: r.description,
-      subtitle: [r.type, r.shop].filter(Boolean).join(" · "),
       carName: carLabel(r.car),
       completed: false,
+      serviceType: r.type,
+      correctiveAction: r.description,
+      shop: r.shop,
+      shopAddress: r.shopAddress,
+      cost: r.cost ?? (r.costOfParts ?? 0) + (r.laborCost ?? 0) || null,
+      warrantyPeriod: r.warrantyPeriod,
     }));
 
     const inspections = (inspectionsQuery.data ?? []).map((r): HistoryItem => ({
@@ -212,10 +278,13 @@ export default function ReportScreen() {
       carId: r.carId,
       type: "inspection",
       date: r.date,
-      title: r.results ? `Inspection — ${r.results}` : "Inspection",
-      subtitle: r.place ?? "",
+      title: r.results ?? "Inspection",
       carName: carLabel(r.car),
       completed: false,
+      results: r.results,
+      place: r.place,
+      cost: r.cost,
+      nextInspectionDate: r.nextInspectionDate,
     }));
 
     return [...faults, ...repairs, ...inspections].sort((a, b) => b.date.localeCompare(a.date));
