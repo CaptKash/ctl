@@ -285,6 +285,80 @@ export default function MenuDashboardScreen() {
           </View>
         </Pressable>
 
+        <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Tools</Text>
+
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/repair-history");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#F3F4F6" }]}>
+            <Feather name="tool" size={24} color="#374151" />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Repair History</Text>
+            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              View all past repairs &amp; work
+            </Text>
+          </View>
+          <View style={styles.tileArrow}>
+            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/maintenance/upcoming");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#FEF3C7" }]}>
+            <Feather name="calendar" size={24} color="#D97706" />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Upcoming Maintenance</Text>
+            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              Scheduled services &amp; reminders
+            </Text>
+          </View>
+          <View style={styles.tileArrow}>
+            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/fleet");
+          }}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+          ]}
+        >
+          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="truck" size={24} color="#1A56DB" />
+          </View>
+          <View style={styles.tileBody}>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Manage Fleet</Text>
+            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              Add or edit your vehicles
+            </Text>
+          </View>
+          <View style={styles.tileArrow}>
+            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          </View>
+        </Pressable>
+
         <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>
           Upcoming Events
         </Text>
