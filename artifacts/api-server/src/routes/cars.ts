@@ -378,25 +378,35 @@ router.delete("/cars/:carId/fuel/:recordId", async (req, res) => {
 });
 
 // All maintenance logs across all cars
-router.get("/maintenance", async (_req, res) => {
+router.get("/maintenance", async (req, res) => {
+  const userId = req.user!.id;
   const [records, cars] = await Promise.all([
-    db.select().from(maintenanceTable).orderBy(desc(maintenanceTable.date)),
-    db.select().from(carsTable),
+    db
+      .select({ record: maintenanceTable })
+      .from(maintenanceTable)
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.userId, userId)))
+      .orderBy(desc(maintenanceTable.date)),
+    db.select().from(carsTable).where(eq(carsTable.userId, userId)),
   ]);
   const carsMap = new Map(cars.map((c) => [c.id, c]));
-  res.json(records.map((r) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
+  res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
 });
 
 // All faults across all cars
-router.get("/malfunctions", async (_req, res) => {
+router.get("/malfunctions", async (req, res) => {
+  const userId = req.user!.id;
   const [records, completions, cars] = await Promise.all([
-    db.select().from(malfunctionsTable).orderBy(desc(malfunctionsTable.createdAt)),
+    db
+      .select({ record: malfunctionsTable })
+      .from(malfunctionsTable)
+      .innerJoin(carsTable, and(eq(malfunctionsTable.carId, carsTable.id), eq(carsTable.userId, userId)))
+      .orderBy(desc(malfunctionsTable.createdAt)),
     db.select().from(eventCompletionsTable).where(eq(eventCompletionsTable.recordType, "malfunction")),
-    db.select().from(carsTable),
+    db.select().from(carsTable).where(eq(carsTable.userId, userId)),
   ]);
   const completedIds = new Set(completions.map((c) => c.recordId));
   const carsMap = new Map(cars.map((c) => [c.id, c]));
-  res.json(records.map((r) => ({
+  res.json(records.map(({ record: r }) => ({
     ...r,
     completed: completedIds.has(r.id),
     car: carsMap.get(r.carId) ?? null,
