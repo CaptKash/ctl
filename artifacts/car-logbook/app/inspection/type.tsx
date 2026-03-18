@@ -42,7 +42,7 @@ export default function InspectionTypePickerScreen() {
 
   const handleRepair = () => {
     Haptics.selectionAsync();
-    router.push({ pathname: "/maintenance/form", params: { carId, preType: "Repair" } });
+    router.push({ pathname: "/maintenance/form", params: { carId } });
   };
 
   const handleInspection = () => {
