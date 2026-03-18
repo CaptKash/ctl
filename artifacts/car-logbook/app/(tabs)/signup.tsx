@@ -89,24 +89,24 @@ export default function SignupScreen() {
             </Text>
           </View>
 
-          {/* Heading */}
-          <View style={styles.welcomeBlock}>
-            <Text style={[styles.welcomeTitle, { color: C.text }]}>Create account</Text>
-            <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
-              Start logging your fleet's full service history
-            </Text>
-          </View>
-
-          {/* Error */}
-          {error !== "" && (
-            <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
-              <Feather name="alert-circle" size={15} color={C.danger} />
-              <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
-            </View>
-          )}
-
           {/* Form */}
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
+            {/* Heading */}
+            <View style={styles.welcomeBlock}>
+              <Text style={[styles.welcomeTitle, { color: C.text }]}>Create account</Text>
+              <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
+                Start logging your fleet's full service history
+              </Text>
+            </View>
+
+            {/* Error */}
+            {error !== "" && (
+              <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+                <Feather name="alert-circle" size={15} color={C.danger} />
+                <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+              </View>
+            )}
+
             {/* Name */}
             <View style={styles.fieldGroup}>
               <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Full Name</Text>
