@@ -232,9 +232,10 @@ export default function SettingsScreen() {
             iconColor="#0891B2"
             iconBg="#CFFAFE"
             label="Distance Unit"
-            subtitle={distanceKm ? "Kilometres (km)" : "Miles (mi)"}
+            subtitle="Kilometres (km)"
             value={distanceKm}
             onChange={setDistanceKm}
+            comingSoon
           />
         </View>
 
