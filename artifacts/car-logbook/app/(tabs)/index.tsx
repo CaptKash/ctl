@@ -171,21 +171,23 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          <View style={styles.welcomeBlock}>
-            <Text style={[styles.welcomeTitle, { color: C.text }]}>Sign in</Text>
-            <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
-              Access your fleet and service records
-            </Text>
-          </View>
-
-          {error !== "" && (
-            <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
-              <Feather name="alert-circle" size={15} color={C.danger} />
-              <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
-            </View>
-          )}
-
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
+            <View style={styles.welcomeBlock}>
+              <Text style={[styles.welcomeTitle, { color: C.text }]}>Sign in</Text>
+              <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
+                Access your fleet and service records
+              </Text>
+            </View>
+
+            {error !== "" && (
+              <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+                <Feather name="alert-circle" size={15} color={C.danger} />
+                <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+              </View>
+            )}
+
+            <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
+
             <View style={styles.fieldGroup}>
               <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Email</Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
