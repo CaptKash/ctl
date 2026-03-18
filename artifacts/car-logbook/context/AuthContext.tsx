@@ -8,6 +8,23 @@ const TOKEN_KEY = "ctl_auth_token";
 const USER_KEY = "ctl_auth_user";
 const BIOMETRIC_ENABLED_KEY = "ctl_biometric_enabled";
 
+const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+  : "/api";
+
+async function verifyTokenWithServer(token: string): Promise<AuthUser | null> {
+  try {
+    const res = await fetch(`${BASE_URL}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.user ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export type AuthUser = {
   id: number;
   name: string;
@@ -99,13 +116,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const [storedToken, storedUser] = await Promise.all([
-          secureGet(TOKEN_KEY),
-          secureGet(USER_KEY),
-        ]);
-        if (storedToken && storedUser) {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+        const storedToken = await secureGet(TOKEN_KEY);
+        if (storedToken) {
+          const serverUser = await verifyTokenWithServer(storedToken);
+          if (serverUser) {
+            setToken(storedToken);
+            setUser(serverUser);
+          } else {
+            await Promise.all([
+              secureDelete(TOKEN_KEY),
+              secureDelete(USER_KEY),
+              secureDelete(BIOMETRIC_ENABLED_KEY),
+            ]);
+            setBiometricEnrolled(false);
+          }
         }
       } catch { /* ignore */ }
       finally {
@@ -131,9 +155,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await Promise.all([
       secureDelete(TOKEN_KEY),
       secureDelete(USER_KEY),
+      secureDelete(BIOMETRIC_ENABLED_KEY),
     ]);
     setToken(null);
     setUser(null);
+    setBiometricEnrolled(false);
   };
 
   const enableBiometric = async () => {
@@ -157,14 +183,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (result.success) {
-        const [storedToken, storedUser] = await Promise.all([
-          secureGet(TOKEN_KEY),
-          secureGet(USER_KEY),
-        ]);
-        if (storedToken && storedUser) {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
-          return true;
+        const storedToken = await secureGet(TOKEN_KEY);
+        if (storedToken) {
+          const serverUser = await verifyTokenWithServer(storedToken);
+          if (serverUser) {
+            setToken(storedToken);
+            setUser(serverUser);
+            return true;
+          }
+          await Promise.all([
+            secureDelete(TOKEN_KEY),
+            secureDelete(USER_KEY),
+            secureDelete(BIOMETRIC_ENABLED_KEY),
+          ]);
+          setBiometricEnrolled(false);
         }
       }
       return false;
