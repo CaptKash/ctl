@@ -247,8 +247,8 @@ export default function MenuDashboardScreen() {
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
           ]}
         >
-          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="plus-circle" size={24} color={C.tint} />
+          <View style={[styles.tileIcon, { backgroundColor: "#FEE2E2" }]}>
+            <Feather name="plus-circle" size={24} color="#DC2626" />
           </View>
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>Log Event</Text>
