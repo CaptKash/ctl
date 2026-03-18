@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -173,42 +174,53 @@ export default function MenuDashboardScreen() {
           {fleetCount > 0 && cars && (
             <>
               <View style={[styles.carListDivider, { backgroundColor: C.borderLight }]} />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.carList}
-                onStartShouldSetResponder={() => true}
-              >
-                {cars.map((car) => {
-                  let firstPhoto: string | null = null;
-                  try { firstPhoto = car.photos ? JSON.parse(car.photos)[0] ?? null : null; } catch {}
-                  const label = car.nickname ?? `${car.year} ${car.make}`;
-                  const sub = car.nickname ? `${car.year} ${car.make} ${car.model}` : car.model;
-                  return (
-                    <Pressable
-                      key={car.id}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        router.push(`/car/${car.id}`);
-                      }}
-                      style={[styles.carChip, { backgroundColor: C.backgroundTertiary }]}
-                    >
-                      {firstPhoto ? (
-                        <Image source={{ uri: firstPhoto }} style={styles.carChipPhoto} />
-                      ) : (
-                        <View style={[styles.carChipPhotoPlaceholder, { backgroundColor: "#DBEAFE" }]}>
-                          <Ionicons name="car-outline" size={18} color={C.tint} />
+              <View style={styles.carListWrap}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.carList}
+                  onStartShouldSetResponder={() => true}
+                >
+                  {cars.map((car) => {
+                    let firstPhoto: string | null = null;
+                    try { firstPhoto = car.photos ? JSON.parse(car.photos)[0] ?? null : null; } catch {}
+                    const label = car.nickname ?? `${car.year} ${car.make}`;
+                    const sub = car.nickname ? `${car.year} ${car.make} ${car.model}` : car.model;
+                    return (
+                      <Pressable
+                        key={car.id}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          router.push(`/car/${car.id}`);
+                        }}
+                        style={[styles.carChip, { backgroundColor: C.backgroundTertiary }]}
+                      >
+                        {firstPhoto ? (
+                          <Image source={{ uri: firstPhoto }} style={styles.carChipPhoto} />
+                        ) : (
+                          <View style={[styles.carChipPhotoPlaceholder, { backgroundColor: "#DBEAFE" }]}>
+                            <Ionicons name="car-outline" size={18} color={C.tint} />
+                          </View>
+                        )}
+                        <View style={styles.carChipBody}>
+                          <Text style={[styles.carChipName, { color: C.text }]} numberOfLines={1}>{label}</Text>
+                          <Text style={[styles.carChipSub, { color: C.textSecondary }]} numberOfLines={1}>{sub}</Text>
                         </View>
-                      )}
-                      <View style={styles.carChipBody}>
-                        <Text style={[styles.carChipName, { color: C.text }]} numberOfLines={1}>{label}</Text>
-                        <Text style={[styles.carChipSub, { color: C.textSecondary }]} numberOfLines={1}>{sub}</Text>
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+                {fleetCount > 1 && (
+                  <LinearGradient
+                    colors={["transparent", C.card]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.carListFade}
+                    pointerEvents="none"
+                  />
+                )}
+              </View>
             </>
           )}
         </Pressable>
@@ -432,6 +444,14 @@ const styles = StyleSheet.create({
   },
 
   carListDivider: { height: StyleSheet.hairlineWidth, marginTop: 14, marginBottom: 12 },
+  carListWrap: { position: "relative" },
+  carListFade: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 48,
+  },
   carList: { gap: 10, paddingBottom: 2 },
   carChip: {
     flexDirection: "row",
