@@ -1,22 +1,26 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 
 type Props = {
-  icon: keyof typeof Feather.glyphMap;
+  icon?: keyof typeof Feather.glyphMap;
+  ionIcon?: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
   actionLabel?: string;
   onAction?: () => void;
 };
 
-export function EmptyState({ icon, title, description, actionLabel, onAction }: Props) {
+export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction }: Props) {
   const C = Colors.light;
   return (
     <View style={styles.container}>
       <View style={[styles.iconBox, { backgroundColor: C.backgroundTertiary }]}>
-        <Feather name={icon} size={32} color={C.textTertiary} />
+        {ionIcon
+          ? <Ionicons name={ionIcon} size={32} color={C.textTertiary} />
+          : <Feather name={icon!} size={32} color={C.textTertiary} />
+        }
       </View>
       <Text style={[styles.title, { color: C.text }]}>{title}</Text>
       <Text style={[styles.desc, { color: C.textSecondary }]}>{description}</Text>

@@ -168,7 +168,7 @@ export default function FleetScreen() {
           }
           ListEmptyComponent={
             <EmptyState
-              icon="truck"
+              ionIcon="car-outline"
               title="No cars yet"
               description="Add your first car to start logging maintenance, fuel, insurance, and more."
               actionLabel="Add Car"
