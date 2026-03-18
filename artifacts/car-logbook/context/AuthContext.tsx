@@ -155,11 +155,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await Promise.all([
       secureDelete(TOKEN_KEY),
       secureDelete(USER_KEY),
-      secureDelete(BIOMETRIC_ENABLED_KEY),
     ]);
     setToken(null);
     setUser(null);
-    setBiometricEnrolled(false);
   };
 
   const enableBiometric = async () => {
