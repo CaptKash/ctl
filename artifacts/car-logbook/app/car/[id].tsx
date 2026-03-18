@@ -346,7 +346,7 @@ export default function CarDetailScreen() {
               <Feather name="edit-2" size={16} color={C.text} />
             </Pressable>
             <Pressable
-              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report/[id]", params: { id: String(carId) } }); }}
+              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report", params: { carId: String(carId) } }); }}
               hitSlop={8}
               style={[styles.headerBtn, { backgroundColor: C.infoLight }]}
             >
