@@ -83,8 +83,8 @@ export default function AddEventScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="plus-circle" size={22} color="#2563EB" />
+          <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
+            <Feather name="plus-circle" size={22} color="#DC2626" />
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Log Event</Text>
