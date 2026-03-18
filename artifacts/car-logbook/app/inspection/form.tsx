@@ -137,6 +137,22 @@ export default function InspectionFormScreen() {
               })}
             </View>
           </View>
+          {(results === "Marginal" || results === "Fail") && (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push({
+                  pathname: "/malfunction/log",
+                  params: { carId: String(carId), carName: carQuery.data?.nickname ?? carQuery.data?.make ?? "" },
+                });
+              }}
+              style={({ pressed }) => [styles.logFaultBtn, { opacity: pressed ? 0.8 : 1 }]}
+            >
+              <Feather name="alert-triangle" size={15} color="#DC2626" />
+              <Text style={styles.logFaultText}>Log a fault from this inspection</Text>
+              <Feather name="chevron-right" size={15} color="#DC2626" />
+            </Pressable>
+          )}
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Cost"
@@ -223,4 +239,19 @@ const styles = StyleSheet.create({
   resultBtnFirst: { borderTopLeftRadius: 10, borderBottomLeftRadius: 10 },
   resultBtnLast: { borderTopRightRadius: 10, borderBottomRightRadius: 10 },
   resultBtnText: { fontSize: 14 },
+  logFaultBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#FEE2E2",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  logFaultText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: "#DC2626",
+  },
 });
