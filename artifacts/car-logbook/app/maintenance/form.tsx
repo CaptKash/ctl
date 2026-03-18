@@ -282,6 +282,17 @@ export default function MaintenanceFormScreen() {
                 )}
               </>
             )}
+          </View>
+        </View>
+
+        <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
+
+        {/* Warranty */}
+        <View style={[styles.costCard, { backgroundColor: C.card }]}>
+          <View style={styles.costHeader}>
+            <Text style={[styles.costTitle, { color: C.text }]}>Warranty</Text>
+          </View>
+          <View style={styles.serviceFields}>
             <FormField
               label="Warranty Period"
               value={warrantyPeriod}
