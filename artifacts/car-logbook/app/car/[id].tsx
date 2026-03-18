@@ -397,6 +397,7 @@ export default function CarDetailScreen() {
             description="Faults, maintenance, and inspections will appear here."
             actionLabel="Log Event"
             onAction={() => router.push({ pathname: "/event/add", params: { carId: String(carId) } })}
+            btnColor="#DC2626"
           />
         ) : (
           events.map(renderEvent)

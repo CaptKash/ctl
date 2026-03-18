@@ -10,10 +10,12 @@ type Props = {
   description: string;
   actionLabel?: string;
   onAction?: () => void;
+  btnColor?: string;
 };
 
-export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction }: Props) {
+export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction, btnColor }: Props) {
   const C = Colors.light;
+  const resolvedBtnColor = btnColor ?? C.tint;
   return (
     <View style={styles.container}>
       <View style={[styles.iconBox, { backgroundColor: C.backgroundTertiary }]}>
@@ -27,7 +29,7 @@ export function EmptyState({ icon, ionIcon, title, description, actionLabel, onA
       {actionLabel && onAction && (
         <Pressable
           onPress={onAction}
-          style={({ pressed }) => [styles.btn, { backgroundColor: C.tint, opacity: pressed ? 0.85 : 1 }]}
+          style={({ pressed }) => [styles.btn, { backgroundColor: resolvedBtnColor, opacity: pressed ? 0.85 : 1 }]}
         >
           <Text style={styles.btnText}>{actionLabel}</Text>
         </Pressable>
@@ -62,14 +64,16 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   btn: {
-    marginTop: 4,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
+    marginTop: 8,
+    paddingHorizontal: 36,
+    paddingVertical: 16,
+    borderRadius: 14,
+    minWidth: 200,
+    alignItems: "center",
   },
   btnText: {
     color: "#fff",
     fontFamily: "Inter_600SemiBold",
-    fontSize: 15,
+    fontSize: 16,
   },
 });
