@@ -110,13 +110,33 @@ export default function InspectionFormScreen() {
             placeholder="e.g. City Inspection Centre"
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Results"
-            value={results}
-            onChangeText={setResults}
-            placeholder="e.g. Passed, Failed, Conditional pass…"
-            multiline
-          />
+          <View style={styles.resultField}>
+            <Text style={[styles.resultLabel, { color: C.textSecondary }]}>Results</Text>
+            <View style={[styles.resultBtnRow, { borderColor: C.border }]}>
+              {(["Pass", "Marginal", "Failed"] as const).map((option, i) => {
+                const active = results === option;
+                const color = option === "Pass" ? "#059669" : option === "Marginal" ? "#D97706" : "#DC2626";
+                const bgActive = option === "Pass" ? "#D1FAE5" : option === "Marginal" ? "#FEF3C7" : "#FEE2E2";
+                return (
+                  <Pressable
+                    key={option}
+                    onPress={() => { Haptics.selectionAsync(); setResults(active ? "" : option); }}
+                    style={[
+                      styles.resultBtn,
+                      { backgroundColor: active ? bgActive : C.backgroundSecondary },
+                      i === 0 && styles.resultBtnFirst,
+                      i === 2 && styles.resultBtnLast,
+                      i < 2 && { borderRightWidth: 1, borderRightColor: C.border },
+                    ]}
+                  >
+                    <Text style={[styles.resultBtnText, { color: active ? color : C.textSecondary, fontFamily: active ? "Inter_600SemiBold" : "Inter_400Regular" }]}>
+                      {option}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
             label="Cost"
@@ -186,4 +206,21 @@ const styles = StyleSheet.create({
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: -4 },
   errorBox: { borderRadius: 10, padding: 14 },
   errorText: { fontSize: 14, fontFamily: "Inter_500Medium", textAlign: "center" },
+  resultField: { gap: 8 },
+  resultLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  resultBtnRow: {
+    flexDirection: "row",
+    borderWidth: 1,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  resultBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  resultBtnFirst: { borderTopLeftRadius: 10, borderBottomLeftRadius: 10 },
+  resultBtnLast: { borderTopRightRadius: 10, borderBottomRightRadius: 10 },
+  resultBtnText: { fontSize: 14 },
 });
