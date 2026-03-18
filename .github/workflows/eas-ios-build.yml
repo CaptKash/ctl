@@ -41,4 +41,11 @@ jobs:
           APPLE_ASC_API_KEY_ID: ${{ secrets.APPLE_ASC_API_KEY_ID }}
           APPLE_ASC_API_KEY_ISSUER_ID: ${{ secrets.APPLE_ASC_API_KEY_ISSUER_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: eas build --platform ios --profile preview --non-interactive --no-wait
+        run: |
+          echo "=== Working directory ==="
+          pwd
+          echo "=== EAS version ==="
+          eas --version
+          echo "=== EAS build start ==="
+          eas build --platform ios --profile preview --non-interactive --no-wait 2>&1
+          echo "=== Done ==="
