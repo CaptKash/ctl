@@ -131,8 +131,8 @@ export default function MenuDashboardScreen() {
             fleetCount === 0 && { borderWidth: 2, borderColor: "#7C3AED" },
           ]}
         >
-          <View style={[styles.tileIcon, { backgroundColor: "#EDE9FE" }]}>
-            <Ionicons name="car-outline" size={26} color="#7C3AED" />
+          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
+            <Ionicons name="car-outline" size={26} color={C.tint} />
           </View>
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
