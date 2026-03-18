@@ -261,17 +261,6 @@ export default function SettingsScreen() {
             onChange={setEventReminders}
             comingSoon
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <ToggleRow
-            icon="shield"
-            iconColor="#EF4444"
-            iconBg="#FEE2E2"
-            label="License & Insurance Alerts"
-            subtitle="Reminders before expiry dates"
-            value={licenseAlerts}
-            onChange={setLicenseAlerts}
-            comingSoon
-          />
         </View>
 
         {/* About */}
