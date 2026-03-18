@@ -141,11 +141,17 @@ export default function ReportScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId: carIdParam } = useLocalSearchParams<{ carId?: string }>();
 
+  const parsedCarIdParam = carIdParam ? parseInt(carIdParam) : null;
   const [selectedCarIds, setSelectedCarIds] = useState<number[]>(
-    carIdParam ? [parseInt(carIdParam)] : []
+    parsedCarIdParam && !isNaN(parsedCarIdParam) ? [parsedCarIdParam] : []
   );
   const [includeFaults, setIncludeFaults] = useState(true);
   const [includeRepairs, setIncludeRepairs] = useState(true);
+
+  const carsQuery = useQuery<CarStub[]>({
+    queryKey: ["cars"],
+    queryFn: () => apiGet<CarStub[]>("/cars"),
+  });
 
   const faultsQuery = useQuery<FaultRecord[]>({
     queryKey: ["malfunctions-all"],
@@ -157,7 +163,9 @@ export default function ReportScreen() {
     queryFn: () => apiGet<MaintenanceRecord[]>("/maintenance"),
   });
 
-  const isLoading = faultsQuery.isLoading || repairsQuery.isLoading;
+  const isLoading = carsQuery.isLoading || faultsQuery.isLoading || repairsQuery.isLoading;
+
+  const cars: CarStub[] = carsQuery.data ?? [];
 
   const allItems: HistoryItem[] = React.useMemo(() => {
     const faults = (faultsQuery.data ?? []).map((r): HistoryItem => ({
@@ -183,14 +191,6 @@ export default function ReportScreen() {
     }));
 
     return [...faults, ...repairs].sort((a, b) => b.date.localeCompare(a.date));
-  }, [faultsQuery.data, repairsQuery.data]);
-
-  const cars: CarStub[] = React.useMemo(() => {
-    const map = new Map<number, CarStub>();
-    [...(faultsQuery.data ?? []), ...(repairsQuery.data ?? [])].forEach((r) => {
-      if (r.car && !map.has(r.carId)) map.set(r.carId, r.car);
-    });
-    return Array.from(map.values());
   }, [faultsQuery.data, repairsQuery.data]);
 
   const allSelected = selectedCarIds.length === 0;
