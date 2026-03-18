@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import {
   FlatList,
+  Keyboard,
   Modal,
   Pressable,
   StyleSheet,
@@ -43,6 +44,7 @@ export function SelectField({
   }, [options, search]);
 
   const handleSelect = (item: string) => {
+    Keyboard.dismiss();
     onSelect(item);
     setOpen(false);
     setSearch("");
@@ -102,7 +104,6 @@ export function SelectField({
                 placeholderTextColor={C.textTertiary}
                 value={search}
                 onChangeText={setSearch}
-                autoFocus
                 clearButtonMode="while-editing"
               />
             </View>
