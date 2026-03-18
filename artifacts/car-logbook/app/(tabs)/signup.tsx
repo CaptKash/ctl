@@ -3,7 +3,6 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import { LogoMark } from "@/components/ui/LogoMark";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost } from "@/hooks/useApi";
@@ -83,13 +83,7 @@ export default function SignupScreen() {
         >
           {/* Brand */}
           <View style={styles.brand}>
-            <View style={[styles.logoBox, { backgroundColor: "#080F1E" }]}>
-              <Image
-                source={require("@/assets/images/icon.png")}
-                style={styles.logo}
-                resizeMode="cover"
-              />
-            </View>
+            <LogoMark size={80} />
             <Text style={[styles.appName, { color: C.text }]}>CTL</Text>
             <Text style={[styles.appTagline, { color: C.textSecondary }]}>
               Car Technical Log
