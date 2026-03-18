@@ -10,7 +10,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -21,6 +20,41 @@ import { LogoMark } from "@/components/ui/LogoMark";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost } from "@/hooks/useApi";
+
+function ToggleSwitch({ value, onValueChange }: { value: boolean; onValueChange: (v: boolean) => void }) {
+  return (
+    <Pressable
+      onPress={() => onValueChange(!value)}
+      style={[
+        toggleStyles.track,
+        { backgroundColor: value ? "#1A56DB" : "#D1D5DB" },
+      ]}
+      hitSlop={8}
+    >
+      <View style={[toggleStyles.thumb, { transform: [{ translateX: value ? 20 : 2 }] }]} />
+    </Pressable>
+  );
+}
+
+const toggleStyles = StyleSheet.create({
+  track: {
+    width: 44,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: "center",
+  },
+  thumb: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+});
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -205,12 +239,7 @@ export default function LoginScreen() {
                 Stay signed in after closing the app
               </Text>
             </View>
-            <Switch
-              value={rememberMe}
-              onValueChange={setRememberMe}
-              trackColor={{ false: C.border, true: C.tint }}
-              thumbColor="#fff"
-            />
+            <ToggleSwitch value={rememberMe} onValueChange={setRememberMe} />
           </Pressable>
 
           <PrimaryButton
