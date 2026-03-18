@@ -3,6 +3,7 @@ import {
   FlatList,
   Keyboard,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -44,10 +45,10 @@ export function SelectField({
   }, [options, search]);
 
   const handleSelect = (item: string) => {
-    Keyboard.dismiss();
     onSelect(item);
     setOpen(false);
     setSearch("");
+    Keyboard.dismiss();
   };
 
   return (
@@ -80,7 +81,7 @@ export function SelectField({
         </Pressable>
       </View>
 
-      <Modal visible={open} animationType="slide" presentationStyle="pageSheet">
+      <Modal visible={open} animationType="slide" presentationStyle={Platform.OS === "ios" ? "pageSheet" : undefined}>
         <View style={[styles.modal, { backgroundColor: C.background }]}>
           {/* Header */}
           <View style={[styles.modalHeader, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
