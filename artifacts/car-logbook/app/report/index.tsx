@@ -50,10 +50,20 @@ type MaintenanceRecord = {
   car: CarStub | null;
 };
 
+type InspectionRecord = {
+  id: number;
+  carId: number;
+  date: string;
+  place?: string | null;
+  results?: string | null;
+  cost?: number | null;
+  car: CarStub | null;
+};
+
 type HistoryItem = {
   key: string;
   carId: number;
-  type: "malfunction" | "maintenance";
+  type: "malfunction" | "maintenance" | "inspection";
   date: string;
   title: string;
   subtitle: string;
@@ -69,7 +79,7 @@ function carLabel(car: CarStub | null): string {
 function buildHtml(items: HistoryItem[], filterLabel: string): string {
   const now = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   const rows = items.map((ev) => {
-    const type = ev.type === "malfunction" ? "Fault" : "Repair";
+    const type = ev.type === "malfunction" ? "Fault" : ev.type === "inspection" ? "Inspection" : "Repair";
     const status = ev.type === "malfunction" ? (ev.completed ? "Resolved" : "Active") : "—";
     return `<tr>
       <td>${formatDate(ev.date)}</td>
@@ -95,6 +105,7 @@ function buildHtml(items: HistoryItem[], filterLabel: string): string {
     .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
     .malfunction { background: #FEE2E2; color: #DC2626; }
     .maintenance  { background: #FEF3C7; color: #D97706; }
+    .inspection   { background: #CCFBF1; color: #0D9488; }
     @media print { body { padding: 20px; } }
   </style></head><body>
   <h1>CTL History Report</h1>
@@ -147,6 +158,7 @@ export default function ReportScreen() {
   );
   const [includeFaults, setIncludeFaults] = useState(true);
   const [includeRepairs, setIncludeRepairs] = useState(true);
+  const [includeInspections, setIncludeInspections] = useState(true);
 
   const carsQuery = useQuery<CarStub[]>({
     queryKey: ["cars"],
@@ -163,7 +175,12 @@ export default function ReportScreen() {
     queryFn: () => apiGet<MaintenanceRecord[]>("/maintenance"),
   });
 
-  const isLoading = carsQuery.isLoading || faultsQuery.isLoading || repairsQuery.isLoading;
+  const inspectionsQuery = useQuery<InspectionRecord[]>({
+    queryKey: ["inspections-all"],
+    queryFn: () => apiGet<InspectionRecord[]>("/inspections"),
+  });
+
+  const isLoading = carsQuery.isLoading || faultsQuery.isLoading || repairsQuery.isLoading || inspectionsQuery.isLoading;
 
   const cars: CarStub[] = carsQuery.data ?? [];
 
@@ -190,8 +207,19 @@ export default function ReportScreen() {
       completed: false,
     }));
 
-    return [...faults, ...repairs].sort((a, b) => b.date.localeCompare(a.date));
-  }, [faultsQuery.data, repairsQuery.data]);
+    const inspections = (inspectionsQuery.data ?? []).map((r): HistoryItem => ({
+      key: `inspection-${r.id}`,
+      carId: r.carId,
+      type: "inspection",
+      date: r.date,
+      title: r.results ? `Inspection — ${r.results}` : "Inspection",
+      subtitle: r.place ?? "",
+      carName: carLabel(r.car),
+      completed: false,
+    }));
+
+    return [...faults, ...repairs, ...inspections].sort((a, b) => b.date.localeCompare(a.date));
+  }, [faultsQuery.data, repairsQuery.data, inspectionsQuery.data]);
 
   const allSelected = selectedCarIds.length === 0;
 
@@ -211,10 +239,11 @@ export default function ReportScreen() {
     if (!allSelected && !selectedCarIds.includes(ev.carId)) return false;
     if (!includeFaults && ev.type === "malfunction") return false;
     if (!includeRepairs && ev.type === "maintenance") return false;
+    if (!includeInspections && ev.type === "inspection") return false;
     return true;
   });
 
-  const canGenerate = (includeFaults || includeRepairs) && filteredItems.length > 0;
+  const canGenerate = (includeFaults || includeRepairs || includeInspections) && filteredItems.length > 0;
 
   async function handleGenerate() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -313,7 +342,7 @@ export default function ReportScreen() {
             </Pressable>
             <Pressable
               onPress={() => { Haptics.selectionAsync(); setIncludeRepairs((v) => !v); }}
-              style={styles.optionRow}
+              style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
             >
               <View style={styles.optionLeft}>
                 <View style={[styles.typeDot, { backgroundColor: "#FEF3C7" }]}>
@@ -323,6 +352,20 @@ export default function ReportScreen() {
               </View>
               <View style={[styles.checkbox, { borderColor: includeRepairs ? "#059669" : C.border, backgroundColor: includeRepairs ? "#059669" : "transparent" }]}>
                 {includeRepairs && <Feather name="check" size={12} color="#fff" />}
+              </View>
+            </Pressable>
+            <Pressable
+              onPress={() => { Haptics.selectionAsync(); setIncludeInspections((v) => !v); }}
+              style={styles.optionRow}
+            >
+              <View style={styles.optionLeft}>
+                <View style={[styles.typeDot, { backgroundColor: "#CCFBF1" }]}>
+                  <Feather name="clipboard" size={12} color="#0D9488" />
+                </View>
+                <Text style={[styles.optionText, { color: C.text }]}>Inspections</Text>
+              </View>
+              <View style={[styles.checkbox, { borderColor: includeInspections ? "#059669" : C.border, backgroundColor: includeInspections ? "#059669" : "transparent" }]}>
+                {includeInspections && <Feather name="check" size={12} color="#fff" />}
               </View>
             </Pressable>
           </View>

@@ -413,6 +413,21 @@ router.get("/malfunctions", async (req, res) => {
   })));
 });
 
+// All inspections across all cars
+router.get("/inspections", async (req, res) => {
+  const userId = req.user!.id;
+  const [records, cars] = await Promise.all([
+    db
+      .select({ record: inspectionsTable })
+      .from(inspectionsTable)
+      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.userId, userId)))
+      .orderBy(desc(inspectionsTable.createdAt)),
+    db.select().from(carsTable).where(eq(carsTable.userId, userId)),
+  ]);
+  const carsMap = new Map(cars.map((c) => [c.id, c]));
+  res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
+});
+
 // Malfunctions
 router.get("/cars/:carId/malfunctions", async (req, res) => {
   const carId = parseInt(req.params.carId);
