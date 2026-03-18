@@ -27,8 +27,8 @@ const queryClient = new QueryClient({
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <Stack screenOptions={{ headerShown: false, gestureEnabled: true }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false, gestureEnabled: false }} />
       <Stack.Screen name="home" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="fleet" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="car/[id]" options={{ headerShown: false, presentation: "card" }} />
@@ -39,6 +39,12 @@ function RootLayoutNav() {
       <Stack.Screen name="malfunction/log" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="maintenance/upcoming" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="maintenance/add" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="inspection/add" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="inspection/form" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="inspection/type" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="renewal/add" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="renewal/form" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="repair-history" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="account" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />
     </Stack>
