@@ -220,12 +220,12 @@ export default function ReportScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     let carPart: string;
     if (allSelected) {
-      carPart = "All Vehicles";
+      carPart = "All Cars";
     } else if (selectedCarIds.length === 1) {
       const [id] = selectedCarIds;
       carPart = carLabel(cars.find((c) => c.id === id) ?? null);
     } else {
-      carPart = `${selectedCarIds.length} Vehicles`;
+      carPart = `${selectedCarIds.length} Cars`;
     }
     const typePart = includeFaults && includeRepairs ? "Faults & Repairs"
       : includeFaults ? "Faults only"
@@ -265,14 +265,14 @@ export default function ReportScreen() {
         <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}>
 
           {/* Car filter */}
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>VEHICLES</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>CARS</Text>
           <View style={[styles.section, { backgroundColor: C.card, borderColor: C.border }]}>
-            {/* All Vehicles toggle */}
+            {/* All Cars toggle */}
             <Pressable
               onPress={selectAll}
               style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: cars.length > 0 ? StyleSheet.hairlineWidth : 0 }]}
             >
-              <Text style={[styles.optionText, { color: C.text }]}>All Vehicles</Text>
+              <Text style={[styles.optionText, { color: C.text }]}>All Cars</Text>
               <View style={[styles.checkbox, { borderColor: allSelected ? "#059669" : C.border, backgroundColor: allSelected ? "#059669" : "transparent" }]}>
                 {allSelected && <Feather name="check" size={12} color="#fff" />}
               </View>
