@@ -93,13 +93,6 @@ export default function AddEventScreen() {
         </View>
       </View>
 
-      <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
-        <Feather name="info" size={15} color={C.info} />
-        <Text style={[styles.instructionText, { color: C.info }]}>
-          Log a fault, inspection, or registration
-        </Text>
-      </View>
-
       <View style={styles.list}>
         {eventOptions.map((option) => (
           <Pressable
