@@ -27,7 +27,7 @@ export function PrimaryButton({ label, onPress, loading, disabled, variant = "pr
           backgroundColor: bgColor,
           borderColor,
           borderWidth: variant === "ghost" ? 1.5 : 0,
-          opacity: pressed || disabled ? 0.8 : 1,
+          opacity: disabled ? 0.6 : pressed ? 0.9 : 1,
         },
       ]}
     >
