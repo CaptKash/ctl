@@ -384,6 +384,7 @@ export default function SettingsScreen() {
           setShowSignOutModal(false);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           await logout();
+          router.replace("/(tabs)");
         }}
         onCancel={() => setShowSignOutModal(false)}
       />
