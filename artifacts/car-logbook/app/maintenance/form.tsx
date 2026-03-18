@@ -335,36 +335,6 @@ export default function MaintenanceFormScreen() {
 
         <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
 
-        {/* Repair Shop */}
-        <View style={[styles.costCard, { backgroundColor: C.card }]}>
-          <View style={styles.costHeader}>
-            <Text style={[styles.costTitle, { color: C.text }]}>Repair Shop</Text>
-          </View>
-          <View style={styles.serviceFields}>
-            <FormField
-              label="Shop Name"
-              value={shopName}
-              onChangeText={setShopName}
-              placeholder="e.g. City Auto Service"
-            />
-            <FormField
-              label="Address"
-              value={shopAddress}
-              onChangeText={setShopAddress}
-              placeholder="e.g. 12 Main St, Springfield"
-            />
-            <FormField
-              label="Phone"
-              value={shopPhone}
-              onChangeText={setShopPhone}
-              placeholder="e.g. +1 555 000 1234"
-              keyboardType="phone-pad"
-            />
-          </View>
-        </View>
-
-        <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
-
         {/* Cost */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
           <View style={styles.costHeader}>
@@ -424,6 +394,36 @@ export default function MaintenanceFormScreen() {
               <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of Bill</Text>
             </Pressable>
           )}
+        </View>
+
+        <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
+
+        {/* Repair Shop */}
+        <View style={[styles.costCard, { backgroundColor: C.card }]}>
+          <View style={styles.costHeader}>
+            <Text style={[styles.costTitle, { color: C.text }]}>Repair Shop</Text>
+          </View>
+          <View style={styles.serviceFields}>
+            <FormField
+              label="Shop Name"
+              value={shopName}
+              onChangeText={setShopName}
+              placeholder="e.g. City Auto Service"
+            />
+            <FormField
+              label="Address"
+              value={shopAddress}
+              onChangeText={setShopAddress}
+              placeholder="e.g. 12 Main St, Springfield"
+            />
+            <FormField
+              label="Phone"
+              value={shopPhone}
+              onChangeText={setShopPhone}
+              placeholder="e.g. +1 555 000 1234"
+              keyboardType="phone-pad"
+            />
+          </View>
         </View>
 
         {mutation.isError && (
