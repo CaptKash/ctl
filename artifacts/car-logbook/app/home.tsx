@@ -128,7 +128,7 @@ export default function MenuDashboardScreen() {
           style={({ pressed }) => [
             styles.tile,
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-            fleetCount === 0 && { borderWidth: 2, borderColor: "#7C3AED" },
+            fleetCount === 0 && { borderWidth: 2, borderColor: C.tint },
           ]}
         >
           <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
