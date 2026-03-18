@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { formatDate } from "@/lib/dateUtils";
 import { apiDelete, apiGet } from "@/hooks/useApi";
+import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
 type Car = {
@@ -207,13 +208,11 @@ export default function FaultLogScreen() {
             ))
           )}
 
-          <Pressable
+          <PrimaryButton
+            label="Log Another Fault"
             onPress={() => router.push("/malfunction/add" as any)}
-            style={[styles.logBtn, { borderColor: "#DC2626" }]}
-          >
-            <Feather name="plus" size={15} color="#DC2626" />
-            <Text style={[styles.logBtnText, { color: "#DC2626" }]}>Log Another Fault</Text>
-          </Pressable>
+            variant="danger"
+          />
         </ScrollView>
       )}
 
@@ -242,18 +241,6 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
-  logBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    marginTop: 16,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
-  },
-  logBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   listContent: { padding: 16 },
 
