@@ -130,8 +130,6 @@ export default function MenuDashboardScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Quick Actions</Text>
-
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -236,6 +234,8 @@ export default function MenuDashboardScreen() {
             </>
           )}
         </Pressable>
+
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Quick Actions</Text>
 
         <Pressable
           onPress={() => {
