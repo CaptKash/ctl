@@ -141,7 +141,9 @@ export default function ReportScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId: carIdParam } = useLocalSearchParams<{ carId?: string }>();
 
-  const [selectedCarId, setSelectedCarId] = useState<number | null>(carIdParam ? parseInt(carIdParam) : null);
+  const [selectedCarIds, setSelectedCarIds] = useState<Set<number>>(
+    carIdParam ? new Set([parseInt(carIdParam)]) : new Set()
+  );
   const [includeFaults, setIncludeFaults] = useState(true);
   const [includeRepairs, setIncludeRepairs] = useState(true);
 
@@ -191,8 +193,24 @@ export default function ReportScreen() {
     return Array.from(map.values());
   }, [faultsQuery.data, repairsQuery.data]);
 
+  const allSelected = selectedCarIds.size === 0;
+
+  function toggleCar(id: number) {
+    Haptics.selectionAsync();
+    setSelectedCarIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  }
+
+  function selectAll() {
+    Haptics.selectionAsync();
+    setSelectedCarIds(new Set());
+  }
+
   const filteredItems = allItems.filter((ev) => {
-    if (selectedCarId != null && ev.carId !== selectedCarId) return false;
+    if (!allSelected && !selectedCarIds.has(ev.carId)) return false;
     if (!includeFaults && ev.type === "malfunction") return false;
     if (!includeRepairs && ev.type === "maintenance") return false;
     return true;
@@ -202,7 +220,15 @@ export default function ReportScreen() {
 
   async function handleGenerate() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const carPart = selectedCarId == null ? "All Cars" : carLabel(cars.find((c) => c.id === selectedCarId) ?? null);
+    let carPart: string;
+    if (allSelected) {
+      carPart = "All Vehicles";
+    } else if (selectedCarIds.size === 1) {
+      const [id] = Array.from(selectedCarIds);
+      carPart = carLabel(cars.find((c) => c.id === id) ?? null);
+    } else {
+      carPart = `${selectedCarIds.size} Vehicles`;
+    }
     const typePart = includeFaults && includeRepairs ? "Faults & Repairs"
       : includeFaults ? "Faults only"
       : "Repairs only";
@@ -241,25 +267,33 @@ export default function ReportScreen() {
         <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}>
 
           {/* Car filter */}
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>VEHICLE</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>VEHICLES</Text>
           <View style={[styles.section, { backgroundColor: C.card, borderColor: C.border }]}>
+            {/* All Vehicles toggle */}
             <Pressable
-              onPress={() => { Haptics.selectionAsync(); setSelectedCarId(null); }}
+              onPress={selectAll}
               style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: cars.length > 0 ? StyleSheet.hairlineWidth : 0 }]}
             >
               <Text style={[styles.optionText, { color: C.text }]}>All Vehicles</Text>
-              {selectedCarId == null && <Feather name="check" size={16} color="#059669" />}
+              <View style={[styles.checkbox, { borderColor: allSelected ? "#059669" : C.border, backgroundColor: allSelected ? "#059669" : "transparent" }]}>
+                {allSelected && <Feather name="check" size={12} color="#fff" />}
+              </View>
             </Pressable>
-            {cars.map((car, i) => (
-              <Pressable
-                key={car.id}
-                onPress={() => { Haptics.selectionAsync(); setSelectedCarId(car.id); }}
-                style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: i < cars.length - 1 ? StyleSheet.hairlineWidth : 0 }]}
-              >
-                <Text style={[styles.optionText, { color: C.text }]}>{carLabel(car)}</Text>
-                {selectedCarId === car.id && <Feather name="check" size={16} color="#059669" />}
-              </Pressable>
-            ))}
+            {cars.map((car, i) => {
+              const checked = selectedCarIds.has(car.id);
+              return (
+                <Pressable
+                  key={car.id}
+                  onPress={() => toggleCar(car.id)}
+                  style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: i < cars.length - 1 ? StyleSheet.hairlineWidth : 0 }]}
+                >
+                  <Text style={[styles.optionText, { color: C.text }]}>{carLabel(car)}</Text>
+                  <View style={[styles.checkbox, { borderColor: checked ? "#059669" : C.border, backgroundColor: checked ? "#059669" : "transparent" }]}>
+                    {checked && <Feather name="check" size={12} color="#fff" />}
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
 
           {/* Record types */}
