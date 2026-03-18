@@ -205,15 +205,6 @@ export default function SettingsScreen() {
             subtitle="Update name or email"
             badge="Soon"
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <NavRow
-            icon="plus-circle"
-            iconColor="#059669"
-            iconBg="#D1FAE5"
-            label="Add New Vehicle"
-            subtitle="Register a car, bike or van"
-            onPress={() => router.push("/car/add")}
-          />
         </View>
 
         {/* Records */}
