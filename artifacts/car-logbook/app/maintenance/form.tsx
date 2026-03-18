@@ -229,7 +229,7 @@ export default function MaintenanceFormScreen() {
             <Feather name="tool" size={22} color="#D97706" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>{(fromFault || preType === "Repair") ? "Add Repair Log" : "Add Maintenance Log"}</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Add Repair Log</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carTitle}</Text>
           </View>
         </View>
@@ -435,7 +435,7 @@ export default function MaintenanceFormScreen() {
         )}
 
         <PrimaryButton
-          label="Save Maintenance Log"
+          label="Save Repair Log"
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
