@@ -84,8 +84,7 @@ export default function SignupScreen() {
           {/* Brand */}
           <View style={styles.brand}>
             <LogoMark size={80} />
-            <Text style={[styles.appName, { color: C.text }]}>CTL</Text>
-            <Text style={[styles.appTagline, { color: C.textSecondary }]}>
+            <Text style={[styles.appTagline, { color: C.text }]}>
               Car Technical Log
             </Text>
           </View>
@@ -254,7 +253,7 @@ const styles = StyleSheet.create({
   logoBox: { width: 80, height: 80, borderRadius: 20, overflow: "hidden", marginBottom: 4 },
   logo: { width: 80, height: 80 },
   appName: { fontSize: 32, fontFamily: "Inter_700Bold" },
-  appTagline: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  appTagline: { fontSize: 18, fontFamily: "Inter_600SemiBold", marginTop: 6 },
 
   welcomeBlock: { gap: 6 },
   welcomeTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
