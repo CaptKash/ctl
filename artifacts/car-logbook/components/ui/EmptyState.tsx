@@ -11,12 +11,14 @@ type Props = {
   actionLabel?: string;
   onAction?: () => void;
   btnColor?: string;
+  btnTextColor?: string;
   btnIcon?: keyof typeof Feather.glyphMap;
 };
 
-export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction, btnColor, btnIcon }: Props) {
+export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction, btnColor, btnTextColor, btnIcon }: Props) {
   const C = Colors.light;
   const resolvedBtnColor = btnColor ?? C.tint;
+  const resolvedBtnTextColor = btnTextColor ?? "#fff";
   return (
     <View style={styles.container}>
       <View style={[styles.iconBox, { backgroundColor: C.backgroundTertiary }]}>
@@ -32,8 +34,8 @@ export function EmptyState({ icon, ionIcon, title, description, actionLabel, onA
           onPress={onAction}
           style={({ pressed }) => [styles.btn, { backgroundColor: resolvedBtnColor, opacity: pressed ? 0.85 : 1 }]}
         >
-          {btnIcon && <Feather name={btnIcon} size={18} color="#fff" />}
-          <Text style={styles.btnText}>{actionLabel}</Text>
+          {btnIcon && <Feather name={btnIcon} size={18} color={resolvedBtnTextColor} />}
+          <Text style={[styles.btnText, { color: resolvedBtnTextColor }]}>{actionLabel}</Text>
         </Pressable>
       )}
     </View>
@@ -77,7 +79,6 @@ const styles = StyleSheet.create({
     minWidth: 200,
   },
   btnText: {
-    color: "#fff",
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
   },
