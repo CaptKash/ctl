@@ -20,35 +20,49 @@ import {
   insertInspectionSchema,
 } from "@workspace/db";
 import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
+import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
+router.use(requireAuth);
+
 // Cars
-router.get("/cars", async (_req, res) => {
-  const cars = await db.select().from(carsTable).orderBy(desc(carsTable.createdAt));
+router.get("/cars", async (req, res) => {
+  const userId = req.user!.id;
+  const cars = await db
+    .select()
+    .from(carsTable)
+    .where(eq(carsTable.userId, userId))
+    .orderBy(desc(carsTable.createdAt));
   res.json(cars);
 });
 
 router.post("/cars", async (req, res) => {
+  const userId = req.user!.id;
   const body = insertCarSchema.parse(req.body);
-  const [car] = await db.insert(carsTable).values(body).returning();
+  const [car] = await db.insert(carsTable).values({ ...body, userId }).returning();
   res.status(201).json(car);
 });
 
 router.get("/cars/:carId", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const [car] = await db.select().from(carsTable).where(eq(carsTable.id, carId));
+  const userId = req.user!.id;
+  const [car] = await db
+    .select()
+    .from(carsTable)
+    .where(and(eq(carsTable.id, carId), eq(carsTable.userId, userId)));
   if (!car) return res.status(404).json({ error: "Car not found" });
   res.json(car);
 });
 
 router.put("/cars/:carId", async (req, res) => {
   const carId = parseInt(req.params.carId);
+  const userId = req.user!.id;
   const body = insertCarSchema.parse(req.body);
   const [car] = await db
     .update(carsTable)
     .set({ ...body, updatedAt: new Date() })
-    .where(eq(carsTable.id, carId))
+    .where(and(eq(carsTable.id, carId), eq(carsTable.userId, userId)))
     .returning();
   if (!car) return res.status(404).json({ error: "Car not found" });
   res.json(car);
@@ -56,12 +70,14 @@ router.put("/cars/:carId", async (req, res) => {
 
 router.delete("/cars/:carId", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  await db.delete(carsTable).where(eq(carsTable.id, carId));
+  const userId = req.user!.id;
+  await db.delete(carsTable).where(and(eq(carsTable.id, carId), eq(carsTable.userId, userId)));
   res.json({ success: true });
 });
 
-// Upcoming maintenance (all cars)
-router.get("/maintenance/upcoming", async (_req, res) => {
+// Upcoming maintenance (user's cars only)
+router.get("/maintenance/upcoming", async (req, res) => {
+  const userId = req.user!.id;
   const [maintenanceRecords, cars, inspectionRecords] = await Promise.all([
     db
       .select({
@@ -77,10 +93,10 @@ router.get("/maintenance/upcoming", async (_req, res) => {
         nickname: carsTable.nickname,
       })
       .from(maintenanceTable)
-      .innerJoin(carsTable, eq(maintenanceTable.carId, carsTable.id))
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.userId, userId)))
       .where(isNotNull(maintenanceTable.nextDueDate))
       .orderBy(asc(maintenanceTable.nextDueDate)),
-    db.select().from(carsTable),
+    db.select().from(carsTable).where(eq(carsTable.userId, userId)),
     db
       .select({
         id: inspectionsTable.id,
@@ -93,7 +109,7 @@ router.get("/maintenance/upcoming", async (_req, res) => {
         nickname: carsTable.nickname,
       })
       .from(inspectionsTable)
-      .innerJoin(carsTable, eq(inspectionsTable.carId, carsTable.id))
+      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.userId, userId)))
       .where(isNotNull(inspectionsTable.nextInspectionDate)),
   ]);
 

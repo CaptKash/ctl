@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Platform } from "react-native";
@@ -73,6 +74,7 @@ async function secureDelete(key: string): Promise<void> {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (newToken: string, newUser: AuthUser) => {
+    queryClient.clear();
     await Promise.all([
       secureSet(TOKEN_KEY, newToken),
       secureSet(USER_KEY, JSON.stringify(newUser)),
@@ -122,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    queryClient.clear();
     await Promise.all([
       secureDelete(TOKEN_KEY),
       secureDelete(USER_KEY),

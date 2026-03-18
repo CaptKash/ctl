@@ -25,6 +25,7 @@ export const passwordResetTokensTable = pgTable("password_reset_tokens", {
 
 export const carsTable = pgTable("cars", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
   make: text("make").notNull(),
   model: text("model").notNull(),
   year: integer("year").notNull(),
@@ -43,7 +44,7 @@ export const carsTable = pgTable("cars", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertCarSchema = createInsertSchema(carsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCarSchema = createInsertSchema(carsTable).omit({ id: true, createdAt: true, updatedAt: true, userId: true });
 export type InsertCar = z.infer<typeof insertCarSchema>;
 export type Car = typeof carsTable.$inferSelect;
 
