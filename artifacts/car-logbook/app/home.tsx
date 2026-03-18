@@ -287,77 +287,20 @@ export default function MenuDashboardScreen() {
 
         <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Tools</Text>
 
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/repair-history");
-          }}
-          style={({ pressed }) => [
-            styles.tile,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <View style={[styles.tileIcon, { backgroundColor: "#F3F4F6" }]}>
-            <Feather name="tool" size={24} color="#374151" />
+        <View style={[styles.tile, { backgroundColor: C.card, shadowColor: C.shadow, opacity: 0.7 }]}>
+          <View style={[styles.tileIcon, { backgroundColor: "#ECFDF5" }]}>
+            <Feather name="droplet" size={24} color="#059669" />
           </View>
           <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Repair History</Text>
+            <Text style={[styles.tileTitle, { color: C.text }]}>Fuel Consumption</Text>
             <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              View all past repairs &amp; work
+              Track &amp; monitor fuel usage
             </Text>
           </View>
-          <View style={styles.tileArrow}>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          <View style={[styles.comingSoonBadge]}>
+            <Text style={[styles.comingSoonText]}>Soon</Text>
           </View>
-        </Pressable>
-
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/maintenance/upcoming");
-          }}
-          style={({ pressed }) => [
-            styles.tile,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <View style={[styles.tileIcon, { backgroundColor: "#FEF3C7" }]}>
-            <Feather name="calendar" size={24} color="#D97706" />
-          </View>
-          <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Upcoming Maintenance</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              Scheduled services &amp; reminders
-            </Text>
-          </View>
-          <View style={styles.tileArrow}>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
-          </View>
-        </Pressable>
-
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/fleet");
-          }}
-          style={({ pressed }) => [
-            styles.tile,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
-          ]}
-        >
-          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="truck" size={24} color="#1A56DB" />
-          </View>
-          <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Manage Fleet</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              Add or edit your vehicles
-            </Text>
-          </View>
-          <View style={styles.tileArrow}>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
-          </View>
-        </Pressable>
+        </View>
 
         <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>
           Upcoming Events
@@ -527,6 +470,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+  },
+  comingSoonBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+  },
+  comingSoonText: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: "#6B7280",
   },
 
   carListDivider: { height: StyleSheet.hairlineWidth, marginTop: 14, marginBottom: 12 },
