@@ -193,7 +193,7 @@ export default function SettingsScreen() {
             icon="star"
             iconColor="#92400E"
             iconBg="#FEF3C7"
-            label="Upgrade to CTL Pro"
+            label="Upgrade to CTL Fleet"
             subtitle="Unlimited vehicles, cloud sync & more"
             badge="Soon"
           />
