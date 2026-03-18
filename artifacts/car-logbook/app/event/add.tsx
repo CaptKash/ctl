@@ -121,9 +121,7 @@ export default function AddEventScreen() {
               ) : null}
             </View>
             {option.available ? (
-              <View style={[styles.goBtn, { backgroundColor: C.tint }]}>
-                <Feather name="chevron-right" size={16} color="#fff" />
-              </View>
+              <Feather name="chevron-right" size={20} color={C.textTertiary} />
             ) : (
               <View style={[styles.comingSoonBadge, { backgroundColor: C.backgroundTertiary }]}>
                 <Text style={[styles.comingSoonText, { color: C.textTertiary }]}>Soon</Text>
