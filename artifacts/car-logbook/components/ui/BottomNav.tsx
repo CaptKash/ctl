@@ -65,7 +65,7 @@ export default function BottomNav({ active }: Props) {
             <View style={[styles.iconWrap, isActive && { backgroundColor: (tab.activeColor ?? C.tint) + "15" }]}>
               <Feather
                 name={tab.icon}
-                size={18}
+                size={24}
                 color={isActive ? (tab.activeColor ?? C.tint) : C.textTertiary}
               />
               {showDot && <View style={styles.dot} />}
@@ -99,9 +99,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   iconWrap: {
-    width: 32,
-    height: 28,
-    borderRadius: 8,
+    width: 40,
+    height: 34,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
