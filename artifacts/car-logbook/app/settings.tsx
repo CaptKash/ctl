@@ -177,23 +177,6 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Upgrade banner */}
-        <Pressable
-          style={({ pressed }) => [styles.upgradeBanner, { opacity: pressed ? 0.88 : 1 }]}
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
-        >
-          <View style={styles.upgradeCrown}>
-            <Feather name="star" size={18} color="#92400E" />
-          </View>
-          <View style={styles.upgradeBody}>
-            <Text style={styles.upgradeTitle}>Upgrade to CTL Pro</Text>
-            <Text style={styles.upgradeSub}>Unlimited vehicles, cloud sync & priority support</Text>
-          </View>
-          <View style={styles.upgradePill}>
-            <Text style={styles.upgradePillText}>Soon</Text>
-          </View>
-        </Pressable>
-
         {/* Account */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ACCOUNT</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
@@ -203,6 +186,15 @@ export default function SettingsScreen() {
             iconBg="#DBEAFE"
             label="Edit Profile"
             subtitle="Update name or email"
+            badge="Soon"
+          />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <NavRow
+            icon="star"
+            iconColor="#92400E"
+            iconBg="#FEF3C7"
+            label="Upgrade to CTL Pro"
+            subtitle="Unlimited vehicles, cloud sync & more"
             badge="Soon"
           />
         </View>
