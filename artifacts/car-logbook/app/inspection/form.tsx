@@ -113,7 +113,7 @@ export default function InspectionFormScreen() {
           <View style={styles.resultField}>
             <Text style={[styles.resultLabel, { color: C.textSecondary }]}>Results</Text>
             <View style={[styles.resultBtnRow, { borderColor: C.border }]}>
-              {(["Pass", "Marginal", "Failed"] as const).map((option, i) => {
+              {(["Pass", "Marginal", "Fail"] as const).map((option, i) => {
                 const active = results === option;
                 const color = option === "Pass" ? "#059669" : option === "Marginal" ? "#D97706" : "#DC2626";
                 const bgActive = option === "Pass" ? "#D1FAE5" : option === "Marginal" ? "#FEF3C7" : "#FEE2E2";
