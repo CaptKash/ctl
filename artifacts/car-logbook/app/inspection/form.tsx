@@ -41,7 +41,6 @@ export default function InspectionFormScreen() {
   const [place, setPlace] = useState("");
   const [results, setResults] = useState("");
   const [cost, setCost] = useState("");
-  const [requiredRepairs, setRequiredRepairs] = useState("");
   const [nextInspectionDate, setNextInspectionDate] = useState("");
 
   const carQuery = useQuery<Car>({
@@ -57,7 +56,6 @@ export default function InspectionFormScreen() {
         place: place.trim() || undefined,
         results: results.trim() || undefined,
         cost: cost ? parseFloat(cost) : undefined,
-        requiredRepairs: requiredRepairs.trim() || undefined,
         nextInspectionDate: nextInspectionDate.trim() || undefined,
       }),
     onSuccess: () => {
@@ -160,14 +158,6 @@ export default function InspectionFormScreen() {
             onChangeText={setCost}
             placeholder="e.g. 75.00"
             keyboardType="decimal-pad"
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <FormField
-            label="Required Repairs"
-            value={requiredRepairs}
-            onChangeText={setRequiredRepairs}
-            placeholder="List any repairs flagged during inspection…"
-            multiline
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <DatePickerField
