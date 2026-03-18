@@ -18,7 +18,11 @@
       "bundleIdentifier": "com.ctl.carlogbook"
     },
     "android": {
-      "package": "com.ctl.carlogbook"
+      "package": "com.ctl.carlogbook",
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ]
     },
     "web": {
       "favicon": "./assets/images/icon.png"
@@ -43,6 +47,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2984157c-0a32-485b-8b48-1048d72a1520"
+      }
+    },
+    "owner": "mkashour"
   }
 }
