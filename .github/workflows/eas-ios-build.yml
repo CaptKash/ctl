@@ -26,14 +26,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-          packager: pnpm
-          eas-cache: false
-          expo-cache: false
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
 
       - name: Write Apple API Key
         run: |
@@ -47,4 +41,4 @@ jobs:
           APPLE_ASC_API_KEY_ID: ${{ secrets.APPLE_ASC_API_KEY_ID }}
           APPLE_ASC_API_KEY_ISSUER_ID: ${{ secrets.APPLE_ASC_API_KEY_ISSUER_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: eas build --platform ios --profile preview --non-interactive
+        run: eas build --platform ios --profile preview --non-interactive --no-wait
