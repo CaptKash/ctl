@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   scroll: { paddingHorizontal: 24, gap: 18 },
 
-  brand: { alignItems: "center", gap: 10, paddingBottom: 4 },
+  brand: { alignItems: "center", gap: 10, paddingBottom: 24 },
   logoBox: { width: 80, height: 80, borderRadius: 20, overflow: "hidden", marginBottom: 4 },
   logo: { width: 80, height: 80 },
   appName: { fontSize: 32, fontFamily: "Inter_700Bold" },
