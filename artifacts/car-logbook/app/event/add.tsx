@@ -104,7 +104,7 @@ export default function AddEventScreen() {
                 backgroundColor: C.card,
                 shadowColor: C.shadow,
                 borderWidth: 1,
-                borderColor: option.iconBg,
+                borderColor: C.border,
                 opacity: pressed ? 0.9 : 1,
               },
             ]}
