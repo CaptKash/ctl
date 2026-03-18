@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -21,7 +22,16 @@ import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
 import { addToCalendar } from "@/lib/addToCalendar";
 
-type Car = { id: number };
+type Car = {
+  id: number;
+  make: string;
+  model: string;
+  year: number;
+  nickname?: string | null;
+  color?: string | null;
+  licensePlate?: string | null;
+  photos?: string | null;
+};
 type UpcomingItem = {
   id: number;
   carId: number;
@@ -127,33 +137,80 @@ export default function MenuDashboardScreen() {
           }}
           style={({ pressed }) => [
             styles.tile,
+            styles.tileColumn,
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
             fleetCount === 0 && { borderWidth: 2, borderColor: C.tint },
           ]}
         >
-          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
-            <Ionicons name="car-outline" size={26} color={C.tint} />
+          {/* Header row */}
+          <View style={styles.tileRow}>
+            <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
+              <Ionicons name="car-outline" size={26} color={C.tint} />
+            </View>
+            <View style={styles.tileBody}>
+              <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
+              <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+                {fleetCount === 0
+                  ? "No cars registered yet"
+                  : `${fleetCount} car${fleetCount === 1 ? "" : "s"} registered`}
+              </Text>
+            </View>
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/car/add");
+              }}
+              hitSlop={6}
+              style={[styles.addCarChip, { backgroundColor: C.tint }]}
+            >
+              <Feather name="plus" size={13} color="#fff" />
+              <Text style={styles.addCarChipText}>Add Car</Text>
+            </Pressable>
           </View>
-          <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              {fleetCount === 0
-                ? "No cars registered yet"
-                : `${fleetCount} car${fleetCount === 1 ? "" : "s"} registered`}
-            </Text>
-          </View>
-          <Pressable
-            onPress={(e) => {
-              e.stopPropagation();
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push("/car/add");
-            }}
-            hitSlop={6}
-            style={[styles.addCarChip, { backgroundColor: C.tint }]}
-          >
-            <Feather name="plus" size={13} color="#fff" />
-            <Text style={styles.addCarChipText}>Add Car</Text>
-          </Pressable>
+
+          {/* Car list */}
+          {fleetCount > 0 && cars && (
+            <>
+              <View style={[styles.carListDivider, { backgroundColor: C.borderLight }]} />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.carList}
+                onStartShouldSetResponder={() => true}
+              >
+                {cars.map((car) => {
+                  let firstPhoto: string | null = null;
+                  try { firstPhoto = car.photos ? JSON.parse(car.photos)[0] ?? null : null; } catch {}
+                  const label = car.nickname ?? `${car.year} ${car.make}`;
+                  const sub = car.nickname ? `${car.year} ${car.make} ${car.model}` : car.model;
+                  return (
+                    <Pressable
+                      key={car.id}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        router.push(`/car/${car.id}`);
+                      }}
+                      style={[styles.carChip, { backgroundColor: C.backgroundTertiary }]}
+                    >
+                      {firstPhoto ? (
+                        <Image source={{ uri: firstPhoto }} style={styles.carChipPhoto} />
+                      ) : (
+                        <View style={[styles.carChipPhotoPlaceholder, { backgroundColor: "#DBEAFE" }]}>
+                          <Ionicons name="car-outline" size={18} color={C.tint} />
+                        </View>
+                      )}
+                      <View style={styles.carChipBody}>
+                        <Text style={[styles.carChipName, { color: C.text }]} numberOfLines={1}>{label}</Text>
+                        <Text style={[styles.carChipSub, { color: C.textSecondary }]} numberOfLines={1}>{sub}</Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </>
+          )}
         </Pressable>
 
         <Pressable
@@ -330,14 +387,24 @@ const styles = StyleSheet.create({
   tile: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 14,
     borderRadius: 18,
     padding: 18,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 8,
     elevation: 3,
-    gap: 14,
     minHeight: 80,
+  },
+  tileColumn: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 0,
+  },
+  tileRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
   },
   tileIcon: {
     width: 50,
@@ -363,6 +430,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
+  carListDivider: { height: StyleSheet.hairlineWidth, marginTop: 14, marginBottom: 12 },
+  carList: { gap: 10, paddingBottom: 2 },
+  carChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    gap: 10,
+    minWidth: 140,
+    maxWidth: 200,
+  },
+  carChipPhoto: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: "#e5e7eb",
+  },
+  carChipPhotoPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  carChipBody: { flex: 1, gap: 2 },
+  carChipName: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  carChipSub: { fontSize: 12, fontFamily: "Inter_400Regular" },
 
   addCarChip: {
     flexDirection: "row",
