@@ -306,9 +306,9 @@ const styles = StyleSheet.create({
   appName: { fontSize: 32, fontFamily: "Inter_700Bold" },
   appTagline: { fontSize: 18, fontFamily: "Inter_600SemiBold", marginTop: 6 },
 
-  welcomeBlock: { gap: 6 },
-  welcomeTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
-  welcomeSub: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
+  welcomeBlock: { gap: 6, alignItems: "center" },
+  welcomeTitle: { fontSize: 22, fontFamily: "Inter_700Bold", textAlign: "center" },
+  welcomeSub: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20, textAlign: "center" },
 
   errorBox: {
     flexDirection: "row",
