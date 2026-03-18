@@ -132,8 +132,8 @@ export default function FleetScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#EDE9FE" }]}>
-            <Ionicons name="car-outline" size={26} color="#7C3AED" />
+          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
+            <Ionicons name="car-outline" size={26} color={C.tint} />
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>My Fleet</Text>
@@ -193,8 +193,8 @@ export default function FleetScreen() {
             >
               <CarCard
                 car={item}
-                accentBg="#EDE9FE"
-                accentIcon="#7C3AED"
+                accentBg="#DBEAFE"
+                accentIcon="#1A56DB"
                 onPress={() => {
                   Haptics.selectionAsync();
                   router.push({ pathname: "/car/[id]", params: { id: String(item.id) } });

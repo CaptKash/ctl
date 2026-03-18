@@ -323,8 +323,8 @@ export default function CarDetailScreen() {
             return firstPhoto ? (
               <Image source={{ uri: firstPhoto }} style={styles.iconBox} />
             ) : (
-              <View style={[styles.iconBox, { backgroundColor: "#EDE9FE" }]}>
-                <Ionicons name="car-outline" size={26} color="#7C3AED" />
+              <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
+                <Ionicons name="car-outline" size={26} color="#1A56DB" />
               </View>
             );
           })()}

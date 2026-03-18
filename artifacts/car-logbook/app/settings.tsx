@@ -191,8 +191,8 @@ export default function SettingsScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <NavRow
             icon="truck"
-            iconColor="#7C3AED"
-            iconBg="#EDE9FE"
+            iconColor="#1A56DB"
+            iconBg="#DBEAFE"
             label="My Fleet"
             subtitle={fleetLabel}
             onPress={() => router.push("/fleet")}
