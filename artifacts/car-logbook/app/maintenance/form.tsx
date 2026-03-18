@@ -444,13 +444,7 @@ export default function MaintenanceFormScreen() {
         {/* Next Inspection */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
           <View style={styles.costHeader}>
-            <View style={[styles.costIconBox, { backgroundColor: "#CCFBF1" }]}>
-              <Feather name="calendar" size={16} color="#0D9488" />
-            </View>
-            <View>
-              <Text style={[styles.costTitle, { color: C.text }]}>Next Inspection</Text>
-              <Text style={[styles.costSubtitle, { color: C.textSecondary }]}>Optional — adds to upcoming events</Text>
-            </View>
+            <Text style={[styles.costTitle, { color: C.text }]}>Next Inspection</Text>
           </View>
           <View style={styles.serviceFields}>
             <DatePickerField
