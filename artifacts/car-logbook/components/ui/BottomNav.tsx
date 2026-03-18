@@ -89,18 +89,28 @@ export default function BottomNav({ active }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 8,
+    borderTopWidth: 1,
+    paddingTop: 6,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+      },
+      android: { elevation: 12 },
+      web: { boxShadow: "0 -2px 10px rgba(0,0,0,0.08)" } as any,
+    }),
   },
   tab: {
     flex: 1,
     alignItems: "center",
-    gap: 2,
-    paddingHorizontal: 2,
+    gap: 1,
+    paddingHorizontal: 0,
   },
   iconWrap: {
     width: 40,
-    height: 34,
+    height: 32,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
