@@ -111,6 +111,9 @@ export default function MaintenanceFormScreen() {
   const [billPhotos, setBillPhotos] = useState<string[]>([]);
   const [warrantyPhotos, setWarrantyPhotos] = useState<string[]>([]);
 
+  // Next inspection
+  const [nextInspectionDate, setNextInspectionDate] = useState("");
+
   const totalCost = (parseFloat(costOfParts) || 0) + (parseFloat(laborCost) || 0);
 
   const pickBillPhoto = async (useCamera: boolean) => {
@@ -203,10 +206,20 @@ export default function MaintenanceFormScreen() {
           });
         } catch (_) {}
       }
+      if (nextInspectionDate.trim()) {
+        try {
+          await apiPost(`/cars/${carId}/inspections`, {
+            carId,
+            date: new Date().toISOString().split("T")[0],
+            nextInspectionDate: nextInspectionDate.trim(),
+          });
+        } catch (_) {}
+      }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["maintenance", carId] });
       qc.invalidateQueries({ queryKey: ["events", carId] });
       qc.invalidateQueries({ queryKey: ["malfunctions-all"] });
+      qc.invalidateQueries({ queryKey: ["upcoming"] });
       router.replace({ pathname: "/car/[id]", params: { id: String(carId) } });
     },
   });
@@ -426,6 +439,28 @@ export default function MaintenanceFormScreen() {
           </View>
         </View>
 
+        <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
+
+        {/* Next Inspection */}
+        <View style={[styles.costCard, { backgroundColor: C.card }]}>
+          <View style={styles.costHeader}>
+            <View style={[styles.costIconBox, { backgroundColor: "#CCFBF1" }]}>
+              <Feather name="calendar" size={16} color="#0D9488" />
+            </View>
+            <View>
+              <Text style={[styles.costTitle, { color: C.text }]}>Next Inspection</Text>
+              <Text style={[styles.costSubtitle, { color: C.textSecondary }]}>Optional — adds to upcoming events</Text>
+            </View>
+          </View>
+          <View style={styles.serviceFields}>
+            <DatePickerField
+              label="Next Inspection Date"
+              value={nextInspectionDate}
+              onChange={setNextInspectionDate}
+            />
+          </View>
+        </View>
+
         {mutation.isError && (
           <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
             <Text style={[styles.errorText, { color: C.danger }]}>
@@ -495,6 +530,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  costIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   costRow: {
     flexDirection: "row",
@@ -524,6 +569,11 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     textTransform: "uppercase",
     letterSpacing: 0.6,
+  },
+  costSubtitle: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    marginTop: 1,
   },
   totalFieldWrap: {
     marginBottom: 2,
