@@ -73,12 +73,6 @@ export default function AddInspectionSelectCarScreen() {
         </View>
       </View>
 
-      <View style={[styles.instruction, { backgroundColor: C.infoLight }]}>
-        <Feather name="info" size={15} color={C.info} />
-        <Text style={[styles.instructionText, { color: C.info }]}>
-          Select the vehicle to log an inspection for
-        </Text>
-      </View>
 
       {isLoading ? (
         <View style={styles.center}>
