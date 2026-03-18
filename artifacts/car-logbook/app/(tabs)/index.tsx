@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -21,8 +20,6 @@ import { LogoMark } from "@/components/ui/LogoMark";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost } from "@/hooks/useApi";
-
-type ForgotStep = "email" | "sent" | "reset";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -43,16 +40,6 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const [forgotVisible, setForgotVisible] = useState(false);
-  const [forgotStep, setForgotStep] = useState<ForgotStep>("email");
-  const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotLoading, setForgotLoading] = useState(false);
-  const [forgotError, setForgotError] = useState("");
-  const [resetToken, setResetToken] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [resetLoading, setResetLoading] = useState(false);
-  const [resetError, setResetError] = useState("");
 
   const promptBiometricEnrollment = useCallback(() => {
     if (Platform.OS === "web") return;
@@ -122,48 +109,6 @@ export default function LoginScreen() {
       router.replace("/home");
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
-  };
-
-  const openForgotModal = () => {
-    setForgotEmail(email.trim());
-    setForgotStep("email");
-    setForgotError("");
-    setResetToken("");
-    setNewPassword("");
-    setResetError("");
-    setForgotVisible(true);
-  };
-
-  const handleForgotSubmit = async () => {
-    if (!forgotEmail.trim()) return;
-    setForgotLoading(true);
-    setForgotError("");
-    try {
-      await apiPost("/auth/forgot-password", { email: forgotEmail.trim() });
-      setForgotStep("sent");
-    } catch (err: unknown) {
-      setForgotError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setForgotLoading(false);
-    }
-  };
-
-  const handleResetSubmit = async () => {
-    if (!resetToken.trim() || !newPassword) return;
-    setResetLoading(true);
-    setResetError("");
-    try {
-      const res = await apiPost<{ message: string }>("/auth/reset-password", {
-        token: resetToken.trim(),
-        newPassword,
-      });
-      Alert.alert("Success", res.message);
-      setForgotVisible(false);
-    } catch (err: unknown) {
-      setResetError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setResetLoading(false);
     }
   };
 
@@ -247,10 +192,6 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <Pressable style={styles.forgotRow} hitSlop={8} onPress={openForgotModal}>
-            <Text style={[styles.forgotText, { color: C.tint }]}>Forgot password?</Text>
-          </Pressable>
-
           <PrimaryButton
             label="Sign In"
             onPress={handleLogin}
@@ -298,153 +239,6 @@ export default function LoginScreen() {
         </ScrollView>
       </View>
 
-      {/* Forgot Password Modal */}
-      <Modal
-        visible={forgotVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setForgotVisible(false)}
-      >
-        <View style={[styles.modalContainer, { backgroundColor: C.background }]}>
-          <View style={[styles.modalHeader, { paddingTop: Platform.OS === "web" ? 16 : insets.top + 8 }]}>
-            <Pressable onPress={() => setForgotVisible(false)} hitSlop={10}>
-              <Feather name="x" size={22} color={C.text} />
-            </Pressable>
-            <Text style={[styles.modalTitle, { color: C.text }]}>
-              {forgotStep === "reset" ? "Reset Password" : "Forgot Password"}
-            </Text>
-            <View style={{ width: 22 }} />
-          </View>
-
-          <ScrollView
-            contentContainerStyle={styles.modalBody}
-            keyboardShouldPersistTaps="handled"
-          >
-            {forgotStep === "email" && (
-              <>
-                <Text style={[styles.modalDesc, { color: C.textSecondary }]}>
-                  Enter your email address and we'll send you instructions to reset your password.
-                </Text>
-
-                {forgotError !== "" && (
-                  <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
-                    <Feather name="alert-circle" size={15} color={C.danger} />
-                    <Text style={[styles.errorText, { color: C.danger }]}>{forgotError}</Text>
-                  </View>
-                )}
-
-                <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
-                  <Feather name="mail" size={16} color={C.textSecondary} />
-                  <TextInput
-                    style={[styles.input, { color: C.text }]}
-                    placeholder="you@example.com"
-                    placeholderTextColor={C.textTertiary}
-                    value={forgotEmail}
-                    onChangeText={(t) => { setForgotEmail(t); setForgotError(""); }}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    onSubmitEditing={handleForgotSubmit}
-                  />
-                </View>
-
-                <PrimaryButton
-                  label="Send Reset Instructions"
-                  onPress={handleForgotSubmit}
-                  loading={forgotLoading}
-                  disabled={!forgotEmail.trim() || forgotLoading}
-                />
-              </>
-            )}
-
-            {forgotStep === "sent" && (
-              <>
-                <View style={styles.sentIcon}>
-                  <Feather name="check-circle" size={48} color={C.success} />
-                </View>
-                <Text style={[styles.sentTitle, { color: C.text }]}>Check your email</Text>
-                <Text style={[styles.modalDesc, { color: C.textSecondary, textAlign: "center" }]}>
-                  If an account with that email exists, you'll receive reset instructions shortly.
-                </Text>
-                <PrimaryButton
-                  label="I Have a Reset Code"
-                  onPress={() => setForgotStep("reset")}
-                />
-                <Pressable
-                  onPress={() => setForgotVisible(false)}
-                  style={styles.backToLogin}
-                >
-                  <Text style={[styles.backToLoginText, { color: C.tint }]}>Back to Sign In</Text>
-                </Pressable>
-              </>
-            )}
-
-            {forgotStep === "reset" && (
-              <>
-                <Text style={[styles.modalDesc, { color: C.textSecondary }]}>
-                  Enter the reset code from your email and choose a new password.
-                </Text>
-
-                {resetError !== "" && (
-                  <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
-                    <Feather name="alert-circle" size={15} color={C.danger} />
-                    <Text style={[styles.errorText, { color: C.danger }]}>{resetError}</Text>
-                  </View>
-                )}
-
-                <View style={styles.fieldGroup}>
-                  <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Reset Code</Text>
-                  <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
-                    <Feather name="key" size={16} color={C.textSecondary} />
-                    <TextInput
-                      style={[styles.input, { color: C.text }]}
-                      placeholder="Paste your reset code"
-                      placeholderTextColor={C.textTertiary}
-                      value={resetToken}
-                      onChangeText={(t) => { setResetToken(t); setResetError(""); }}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                  <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>
-                    New Password <Text style={{ color: C.textTertiary, fontSize: 11 }}>(min 6 chars)</Text>
-                  </Text>
-                  <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
-                    <Feather name="lock" size={16} color={C.textSecondary} />
-                    <TextInput
-                      style={[styles.input, { color: C.text }]}
-                      placeholder="••••••••"
-                      placeholderTextColor={C.textTertiary}
-                      value={newPassword}
-                      onChangeText={(t) => { setNewPassword(t); setResetError(""); }}
-                      secureTextEntry
-                      autoCapitalize="none"
-                    />
-                  </View>
-                </View>
-
-                <PrimaryButton
-                  label="Reset Password"
-                  onPress={handleResetSubmit}
-                  loading={resetLoading}
-                  disabled={!resetToken.trim() || newPassword.length < 6 || resetLoading}
-                />
-
-                <Pressable
-                  onPress={() => setForgotStep("sent")}
-                  style={styles.backToLogin}
-                >
-                  <Text style={[styles.backToLoginText, { color: C.tint }]}>Back</Text>
-                </Pressable>
-              </>
-            )}
-          </ScrollView>
-        </View>
-      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -488,9 +282,6 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular" },
   sep: { height: StyleSheet.hairlineWidth },
 
-  forgotRow: { alignItems: "flex-end" },
-  forgotText: { fontSize: 13, fontFamily: "Inter_500Medium" },
-
   orRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   orLine: { flex: 1, height: StyleSheet.hairlineWidth },
   orText: { fontSize: 13, fontFamily: "Inter_400Regular" },
@@ -509,22 +300,4 @@ const styles = StyleSheet.create({
   signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
   signupText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   signupLink: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-
-  modalContainer: { flex: 1 },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    gap: 12,
-  },
-  modalTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
-  modalBody: { paddingHorizontal: 24, gap: 18, paddingBottom: 40 },
-  modalDesc: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
-
-  sentIcon: { alignItems: "center", paddingTop: 16 },
-  sentTitle: { fontSize: 20, fontFamily: "Inter_700Bold", textAlign: "center" },
-  backToLogin: { alignItems: "center", paddingVertical: 8 },
-  backToLoginText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });

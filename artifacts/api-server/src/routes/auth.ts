@@ -1,10 +1,9 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { db } from "@workspace/db";
-import { usersTable, passwordResetTokensTable } from "@workspace/db";
-import { eq, and, isNull, gt } from "drizzle-orm";
+import { usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
@@ -111,85 +110,6 @@ router.get("/auth/me", async (req, res) => {
   }
 });
 
-router.post("/auth/forgot-password", async (req, res) => {
-  try {
-    const { email } = req.body as { email?: string };
-
-    if (!email?.trim()) {
-      return res.status(400).json({ error: "Email is required." });
-    }
-
-    const [user] = await db
-      .select({ id: usersTable.id, email: usersTable.email })
-      .from(usersTable)
-      .where(eq(usersTable.email, email.toLowerCase().trim()))
-      .limit(1);
-
-    if (user) {
-      const resetToken = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-      await db.insert(passwordResetTokensTable).values({
-        userId: user.id,
-        token: resetToken,
-        expiresAt,
-      });
-
-      console.log(`[PASSWORD RESET] Reset link for ${user.email}: https://app.example.com/reset-password?token=${resetToken}`);
-    }
-
-    res.json({ message: "If an account with that email exists, reset instructions have been sent." });
-  } catch (err) {
-    console.error("Forgot password error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
-  }
-});
-
-router.post("/auth/reset-password", async (req, res) => {
-  try {
-    const { token, newPassword } = req.body as { token?: string; newPassword?: string };
-
-    if (!token?.trim() || !newPassword) {
-      return res.status(400).json({ error: "Token and new password are required." });
-    }
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters." });
-    }
-
-    const [resetRecord] = await db
-      .select()
-      .from(passwordResetTokensTable)
-      .where(
-        and(
-          eq(passwordResetTokensTable.token, token.trim()),
-          isNull(passwordResetTokensTable.usedAt),
-          gt(passwordResetTokensTable.expiresAt, new Date()),
-        ),
-      )
-      .limit(1);
-
-    if (!resetRecord) {
-      return res.status(400).json({ error: "Invalid or expired reset token." });
-    }
-
-    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-
-    await db
-      .update(usersTable)
-      .set({ passwordHash })
-      .where(eq(usersTable.id, resetRecord.userId));
-
-    await db
-      .update(passwordResetTokensTable)
-      .set({ usedAt: new Date() })
-      .where(eq(passwordResetTokensTable.id, resetRecord.id));
-
-    res.json({ message: "Password has been reset successfully. You can now sign in." });
-  } catch (err) {
-    console.error("Reset password error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
-  }
-});
 
 router.delete("/auth/account", requireAuth, async (req, res) => {
   try {

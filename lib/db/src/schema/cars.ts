@@ -14,14 +14,6 @@ export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof usersTable.$inferSelect;
 
-export const passwordResetTokensTable = pgTable("password_reset_tokens", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
-  token: text("token").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  usedAt: timestamp("used_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
 
 export const carsTable = pgTable("cars", {
   id: serial("id").primaryKey(),
