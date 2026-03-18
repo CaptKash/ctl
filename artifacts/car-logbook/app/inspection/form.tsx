@@ -104,7 +104,7 @@ export default function InspectionFormScreen() {
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
-            label="Place"
+            label="Inspection Center"
             value={place}
             onChangeText={setPlace}
             placeholder="e.g. City Inspection Centre"
