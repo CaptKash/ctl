@@ -188,16 +188,45 @@ export default function SettingsScreen() {
             subtitle="Update name or email"
             badge="Soon"
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <NavRow
-            icon="star"
-            iconColor="#92400E"
-            iconBg="#FEF3C7"
-            label="Upgrade to CTL Fleet"
-            subtitle="Unlimited vehicles, cloud sync & more"
-            badge="Soon"
-          />
         </View>
+
+        {/* CTL Fleet upgrade card */}
+        <Pressable
+          style={({ pressed }) => [styles.fleetCard, { opacity: pressed ? 0.92 : 1 }]}
+          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+        >
+          <View style={styles.fleetHeader}>
+            <View style={styles.fleetIconWrap}>
+              <Feather name="star" size={16} color="#92400E" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.fleetTitle}>CTL Fleet</Text>
+              <Text style={styles.fleetTagline}>Manage every vehicle without limits</Text>
+            </View>
+            <View style={styles.fleetBadge}>
+              <Text style={styles.fleetBadgeText}>Coming Soon</Text>
+            </View>
+          </View>
+
+          <View style={styles.fleetFeatures}>
+            {[
+              "Unlimited vehicles per account",
+              "Cloud backup & cross-device sync",
+              "Advanced reports & analytics",
+              "Priority support",
+            ].map((f) => (
+              <View key={f} style={styles.fleetFeatureRow}>
+                <Feather name="check-circle" size={13} color="#D97706" />
+                <Text style={styles.fleetFeatureText}>{f}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.fleetCta}>
+            <Text style={styles.fleetCtaText}>Get Early Access</Text>
+            <Feather name="arrow-right" size={14} color="#92400E" />
+          </View>
+        </Pressable>
 
         {/* Records */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>RECORDS</Text>
@@ -458,6 +487,83 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     marginTop: 8,
     marginBottom: 4,
+  },
+
+  fleetCard: {
+    borderRadius: 16,
+    backgroundColor: "#FFFBEB",
+    borderWidth: 1.5,
+    borderColor: "#FCD34D",
+    overflow: "hidden",
+    marginBottom: 4,
+  },
+  fleetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 16,
+    paddingBottom: 12,
+  },
+  fleetIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: "#FEF3C7",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  fleetTitle: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    color: "#78350F",
+  },
+  fleetTagline: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: "#B45309",
+    marginTop: 1,
+  },
+  fleetBadge: {
+    backgroundColor: "#FDE68A",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 20,
+  },
+  fleetBadgeText: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    color: "#92400E",
+  },
+  fleetFeatures: {
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    gap: 7,
+  },
+  fleetFeatureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  fleetFeatureText: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "#78350F",
+  },
+  fleetCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#FDE68A",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#FCD34D",
+  },
+  fleetCtaText: {
+    fontSize: 14,
+    fontFamily: "Inter_700Bold",
+    color: "#92400E",
   },
 
   upgradeBanner: {
