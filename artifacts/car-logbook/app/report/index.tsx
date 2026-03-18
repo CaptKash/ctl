@@ -269,7 +269,7 @@ export default function ReportScreen() {
       correctiveAction: r.description,
       shop: r.shop,
       shopAddress: r.shopAddress,
-      cost: r.cost ?? (r.costOfParts ?? 0) + (r.laborCost ?? 0) || null,
+      cost: r.cost != null ? r.cost : ((r.costOfParts ?? 0) + (r.laborCost ?? 0)) || null,
       warrantyPeriod: r.warrantyPeriod,
     }));
 
