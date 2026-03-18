@@ -9,12 +9,12 @@ import {
   Image,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -248,7 +248,7 @@ export default function MaintenanceFormScreen() {
         </View>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollViewCompat
         contentContainerStyle={[styles.form, { paddingBottom: insets.bottom + 40 }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -469,7 +469,7 @@ export default function MaintenanceFormScreen() {
           loading={mutation.isPending}
           disabled={!canSubmit}
         />
-      </ScrollView>
+      </KeyboardAwareScrollViewCompat>
       <BottomNav />
     </SwipeBackView>
   );

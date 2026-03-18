@@ -4,10 +4,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -17,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
+import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { apiPost } from "@/hooks/useApi";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
@@ -74,10 +73,6 @@ export default function MalfunctionLogScreen() {
 
   return (
     <SwipeBackView>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
       <View style={[styles.container, { backgroundColor: C.background }]}>
         <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
           <View style={styles.headerRow}>
@@ -103,7 +98,7 @@ export default function MalfunctionLogScreen() {
           </View>
         )}
 
-        <ScrollView
+        <KeyboardAwareScrollViewCompat
           contentContainerStyle={[
             styles.form,
             { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 40 },
@@ -196,10 +191,9 @@ export default function MalfunctionLogScreen() {
               </>
             )}
           </Pressable>
-        </ScrollView>
+        </KeyboardAwareScrollViewCompat>
         <BottomNav />
       </View>
-    </KeyboardAvoidingView>
     </SwipeBackView>
   );
 }

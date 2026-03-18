@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import {
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
+import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -125,7 +125,7 @@ export default function RenewalFormScreen() {
         </View>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollViewCompat
         contentContainerStyle={[styles.form, { paddingBottom: insets.bottom + 40 }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -239,7 +239,7 @@ export default function RenewalFormScreen() {
           loading={mutation.isPending}
           disabled={!canSubmit || !car}
         />
-      </ScrollView>
+      </KeyboardAwareScrollViewCompat>
       <BottomNav />
     </SwipeBackView>
   );

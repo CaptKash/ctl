@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import {
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -15,6 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
+import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -108,7 +108,7 @@ export default function AddCarScreen() {
         </View>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollViewCompat
         contentContainerStyle={[
           styles.form,
           { paddingBottom: insets.bottom + 40 },
@@ -284,7 +284,7 @@ export default function AddCarScreen() {
           loading={mutation.isPending}
           disabled={!canSubmit}
         />
-      </ScrollView>
+      </KeyboardAwareScrollViewCompat>
       <BottomNav />
     </SwipeBackView>
   );
