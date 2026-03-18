@@ -177,6 +177,23 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Upgrade banner */}
+        <Pressable
+          style={({ pressed }) => [styles.upgradeBanner, { opacity: pressed ? 0.88 : 1 }]}
+          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+        >
+          <View style={styles.upgradeCrown}>
+            <Feather name="star" size={18} color="#92400E" />
+          </View>
+          <View style={styles.upgradeBody}>
+            <Text style={styles.upgradeTitle}>Upgrade to CTL Pro</Text>
+            <Text style={styles.upgradeSub}>Unlimited vehicles, cloud sync & priority support</Text>
+          </View>
+          <View style={styles.upgradePill}>
+            <Text style={styles.upgradePillText}>Soon</Text>
+          </View>
+        </Pressable>
+
         {/* Account */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ACCOUNT</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
@@ -187,15 +204,6 @@ export default function SettingsScreen() {
             label="Edit Profile"
             subtitle="Update name or email"
             badge="Soon"
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <NavRow
-            icon="truck"
-            iconColor="#1A56DB"
-            iconBg="#DBEAFE"
-            label="My Fleet"
-            subtitle={fleetLabel}
-            onPress={() => router.push("/fleet")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <NavRow
@@ -467,5 +475,49 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     marginTop: 8,
     marginBottom: 4,
+  },
+
+  upgradeBanner: {
+    borderRadius: 16,
+    backgroundColor: "#FFFBEB",
+    borderWidth: 1.5,
+    borderColor: "#FCD34D",
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 4,
+  },
+  upgradeCrown: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#FEF3C7",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  upgradeBody: { flex: 1 },
+  upgradeTitle: {
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
+    color: "#92400E",
+  },
+  upgradeSub: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: "#B45309",
+    marginTop: 2,
+  },
+  upgradePill: {
+    backgroundColor: "#FDE68A",
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 20,
+  },
+  upgradePillText: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    color: "#92400E",
   },
 });
