@@ -11,9 +11,10 @@ type Props = {
   actionLabel?: string;
   onAction?: () => void;
   btnColor?: string;
+  btnIcon?: keyof typeof Feather.glyphMap;
 };
 
-export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction, btnColor }: Props) {
+export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction, btnColor, btnIcon }: Props) {
   const C = Colors.light;
   const resolvedBtnColor = btnColor ?? C.tint;
   return (
@@ -31,6 +32,7 @@ export function EmptyState({ icon, ionIcon, title, description, actionLabel, onA
           onPress={onAction}
           style={({ pressed }) => [styles.btn, { backgroundColor: resolvedBtnColor, opacity: pressed ? 0.85 : 1 }]}
         >
+          {btnIcon && <Feather name={btnIcon} size={18} color="#fff" />}
           <Text style={styles.btnText}>{actionLabel}</Text>
         </Pressable>
       )}
@@ -64,12 +66,15 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   btn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
     marginTop: 8,
     paddingHorizontal: 36,
     paddingVertical: 16,
     borderRadius: 14,
     minWidth: 200,
-    alignItems: "center",
   },
   btnText: {
     color: "#fff",

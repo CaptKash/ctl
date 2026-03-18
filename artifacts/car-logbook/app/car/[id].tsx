@@ -398,6 +398,7 @@ export default function CarDetailScreen() {
             actionLabel="Log Event"
             onAction={() => router.push({ pathname: "/event/add", params: { carId: String(carId) } })}
             btnColor="#DC2626"
+            btnIcon="plus-circle"
           />
         ) : (
           events.map(renderEvent)
