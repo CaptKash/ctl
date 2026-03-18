@@ -222,10 +222,6 @@ export default function SettingsScreen() {
             ))}
           </View>
 
-          <View style={styles.fleetCta}>
-            <Text style={styles.fleetCtaText}>Get Early Access</Text>
-            <Feather name="arrow-right" size={14} color="#92400E" />
-          </View>
         </Pressable>
 
         {/* Records */}
