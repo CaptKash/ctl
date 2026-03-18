@@ -244,7 +244,7 @@ export default function MenuDashboardScreen() {
           }}
           style={({ pressed }) => [
             styles.tile,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 2, borderColor: "#DC2626" },
           ]}
         >
           <View style={[styles.tileIcon, { backgroundColor: "#FEE2E2" }]}>
