@@ -224,37 +224,6 @@ export default function SettingsScreen() {
 
         </Pressable>
 
-        {/* Records */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>RECORDS</Text>
-        <View style={[styles.card, { backgroundColor: C.card }]}>
-          <NavRow
-            icon="file-text"
-            iconColor="#059669"
-            iconBg="#D1FAE5"
-            label="Generate Report"
-            subtitle="Export faults & repair history"
-            onPress={() => router.push("/report")}
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <NavRow
-            icon="clock"
-            iconColor="#D97706"
-            iconBg="#FEF3C7"
-            label="Repair History"
-            subtitle="Browse all logged maintenance"
-            onPress={() => router.push("/repair-history")}
-          />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <NavRow
-            icon="alert-triangle"
-            iconColor="#DC2626"
-            iconBg="#FEE2E2"
-            label="Fault Log"
-            subtitle="View all reported faults"
-            onPress={() => router.push("/faults")}
-          />
-        </View>
-
         {/* Preferences */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>PREFERENCES</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
