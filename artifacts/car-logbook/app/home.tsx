@@ -288,8 +288,8 @@ export default function MenuDashboardScreen() {
         <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Tools</Text>
 
         <View style={[styles.tile, { backgroundColor: C.card, shadowColor: C.shadow, opacity: 0.7 }]}>
-          <View style={[styles.tileIcon, { backgroundColor: "#ECFDF5" }]}>
-            <Feather name="droplet" size={24} color="#059669" />
+          <View style={[styles.tileIcon, { backgroundColor: "#F3F4F6" }]}>
+            <Feather name="droplet" size={24} color="#9CA3AF" />
           </View>
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>Fuel Consumption</Text>
