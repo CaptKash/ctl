@@ -1,12 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
-import * as LocalAuthentication from "expo-local-authentication";
 import { Platform } from "react-native";
 
 const TOKEN_KEY = "ctl_auth_token";
 const USER_KEY = "ctl_auth_user";
-const BIOMETRIC_ENABLED_KEY = "ctl_biometric_enabled";
 
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -36,13 +34,8 @@ type AuthContextType = {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  biometricAvailable: boolean;
-  biometricEnrolled: boolean;
   login: (token: string, user: AuthUser, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
-  enableBiometric: () => Promise<void>;
-  disableBiometric: () => Promise<void>;
-  authenticateWithBiometric: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -50,13 +43,8 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   isAuthenticated: false,
   isLoading: true,
-  biometricAvailable: false,
-  biometricEnrolled: false,
   login: async () => {},
   logout: async () => {},
-  enableBiometric: async () => {},
-  disableBiometric: async () => {},
-  authenticateWithBiometric: async () => false,
 });
 
 async function secureGet(key: string): Promise<string | null> {
@@ -95,27 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricEnrolled, setBiometricEnrolled] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        if (Platform.OS !== "web") {
-          const compatible = await LocalAuthentication.hasHardwareAsync();
-          const enrolled = await LocalAuthentication.isEnrolledAsync();
-          setBiometricAvailable(compatible && enrolled);
-        }
-
-        const bioEnabled = await secureGet(BIOMETRIC_ENABLED_KEY);
-        const isBiometricEnabled = bioEnabled === "true" && Platform.OS !== "web";
-        setBiometricEnrolled(isBiometricEnabled);
-
-        if (isBiometricEnabled) {
-          setIsLoading(false);
-          return;
-        }
-
         const storedToken = await secureGet(TOKEN_KEY);
         if (storedToken) {
           const serverUser = await verifyTokenWithServer(storedToken);
@@ -126,9 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await Promise.all([
               secureDelete(TOKEN_KEY),
               secureDelete(USER_KEY),
-              secureDelete(BIOMETRIC_ENABLED_KEY),
             ]);
-            setBiometricEnrolled(false);
           }
         }
       } catch { /* ignore */ }
@@ -160,49 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const enableBiometric = async () => {
-    await secureSet(BIOMETRIC_ENABLED_KEY, "true");
-    setBiometricEnrolled(true);
-  };
-
-  const disableBiometric = async () => {
-    await secureDelete(BIOMETRIC_ENABLED_KEY);
-    setBiometricEnrolled(false);
-  };
-
-  const authenticateWithBiometric = async (): Promise<boolean> => {
-    if (Platform.OS === "web") return false;
-    try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Sign in to CTL",
-        cancelLabel: "Cancel",
-        fallbackLabel: "Use password",
-        disableDeviceFallback: false,
-      });
-
-      if (result.success) {
-        const storedToken = await secureGet(TOKEN_KEY);
-        if (storedToken) {
-          const serverUser = await verifyTokenWithServer(storedToken);
-          if (serverUser) {
-            setToken(storedToken);
-            setUser(serverUser);
-            return true;
-          }
-          await Promise.all([
-            secureDelete(TOKEN_KEY),
-            secureDelete(USER_KEY),
-            secureDelete(BIOMETRIC_ENABLED_KEY),
-          ]);
-          setBiometricEnrolled(false);
-        }
-      }
-      return false;
-    } catch {
-      return false;
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -210,13 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         isAuthenticated: !!token,
         isLoading,
-        biometricAvailable,
-        biometricEnrolled,
         login,
         logout,
-        enableBiometric,
-        disableBiometric,
-        authenticateWithBiometric,
       }}
     >
       {children}

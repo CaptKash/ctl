@@ -120,8 +120,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const { user, logout, biometricAvailable, biometricEnrolled, enableBiometric, disableBiometric } = useAuth();
-  const [biometricLoading, setBiometricLoading] = useState(false);
+  const { user, logout } = useAuth();
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -134,16 +133,6 @@ export default function SettingsScreen() {
     queryFn: () => apiGet<Car[]>("/cars"),
     staleTime: 30_000,
   });
-
-  const handleBiometricToggle = async (value: boolean) => {
-    setBiometricLoading(true);
-    try {
-      if (value) await enableBiometric();
-      else await disableBiometric();
-    } finally {
-      setBiometricLoading(false);
-    }
-  };
 
   const initials = user?.name
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -289,33 +278,6 @@ export default function SettingsScreen() {
             comingSoon
           />
         </View>
-
-        {/* Security */}
-        {biometricAvailable && (
-          <>
-            <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>SECURITY</Text>
-            <View style={[styles.card, { backgroundColor: C.card }]}>
-              <View style={styles.row}>
-                <View style={[styles.rowIcon, { backgroundColor: "#D1FAE5" }]}>
-                  <Feather name="shield" size={16} color="#059669" />
-                </View>
-                <View style={styles.rowBody}>
-                  <Text style={[styles.rowTitle, { color: C.text }]}>Biometric Login</Text>
-                  <Text style={[styles.rowSub, { color: C.textSecondary }]}>
-                    {biometricEnrolled ? "Face ID or fingerprint enabled" : "Use Face ID or fingerprint"}
-                  </Text>
-                </View>
-                <Switch
-                  value={biometricEnrolled}
-                  onValueChange={handleBiometricToggle}
-                  disabled={biometricLoading}
-                  trackColor={{ true: "#059669", false: C.border }}
-                  thumbColor="#fff"
-                />
-              </View>
-            </View>
-          </>
-        )}
 
         {/* About */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ABOUT</Text>

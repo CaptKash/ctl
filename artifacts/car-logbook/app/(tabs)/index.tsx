@@ -1,10 +1,9 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -64,10 +63,6 @@ export default function LoginScreen() {
     login,
     isAuthenticated,
     isLoading: authLoading,
-    biometricAvailable,
-    biometricEnrolled,
-    authenticateWithBiometric,
-    enableBiometric,
   } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -76,23 +71,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
-
-  const promptBiometricEnrollment = useCallback(() => {
-    if (Platform.OS === "web") return;
-    Alert.alert(
-      "Enable Biometric Sign-In?",
-      "Use Face ID or Touch ID to sign in faster next time.",
-      [
-        { text: "Skip", style: "cancel" },
-        {
-          text: "Enable",
-          onPress: async () => {
-            await enableBiometric();
-          },
-        },
-      ],
-    );
-  }, [enableBiometric]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -122,11 +100,6 @@ export default function LoginScreen() {
       );
       await login(res.token, res.user, rememberMe);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-      if (biometricAvailable && !biometricEnrolled) {
-        promptBiometricEnrollment();
-      }
-
       router.replace("/home");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Login failed. Please check your credentials.";
@@ -136,19 +109,6 @@ export default function LoginScreen() {
       setLoading(false);
     }
   };
-
-  const handleBiometricLogin = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const success = await authenticateWithBiometric();
-    if (success) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace("/home");
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
-  };
-
-  const showBiometricButton = biometricAvailable && biometricEnrolled;
 
   return (
     <KeyboardAvoidingView
@@ -251,29 +211,6 @@ export default function LoginScreen() {
             disabled={!canSubmit || loading}
           />
 
-          {showBiometricButton && (
-            <>
-              <View style={styles.orRow}>
-                <View style={[styles.orLine, { backgroundColor: C.border }]} />
-                <Text style={[styles.orText, { color: C.textTertiary }]}>or</Text>
-                <View style={[styles.orLine, { backgroundColor: C.border }]} />
-              </View>
-
-              <Pressable
-                onPress={handleBiometricLogin}
-                style={({ pressed }) => [
-                  styles.biometricBtn,
-                  { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.card },
-                ]}
-              >
-                <Ionicons name="finger-print-outline" size={24} color={C.tint} />
-                <Text style={[styles.biometricText, { color: C.text }]}>
-                  Sign in with Biometrics
-                </Text>
-              </Pressable>
-            </>
-          )}
-
           <View style={styles.signupRow}>
             <Text style={[styles.signupText, { color: C.textSecondary }]}>
               Don't have an account?{" "}
@@ -335,21 +272,6 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular" },
   sep: { height: StyleSheet.hairlineWidth },
-
-  orRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  orLine: { flex: 1, height: StyleSheet.hairlineWidth },
-  orText: { fontSize: 13, fontFamily: "Inter_400Regular" },
-
-  biometricBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 14,
-    gap: 10,
-  },
-  biometricText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
 
   signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
   signupText: { fontSize: 14, fontFamily: "Inter_400Regular" },
