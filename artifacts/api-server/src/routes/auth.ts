@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { db } from "@workspace/db";
 import { usersTable, passwordResetTokensTable } from "@workspace/db";
 import { eq, and, isNull, gt } from "drizzle-orm";
+import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
@@ -186,6 +187,16 @@ router.post("/auth/reset-password", async (req, res) => {
     res.json({ message: "Password has been reset successfully. You can now sign in." });
   } catch (err) {
     console.error("Reset password error:", err);
+    res.status(500).json({ error: "Something went wrong. Please try again." });
+  }
+});
+
+router.delete("/auth/account", requireAuth, async (req, res) => {
+  try {
+    await db.delete(usersTable).where(eq(usersTable.id, req.user!.id));
+    res.json({ message: "Account deleted successfully." });
+  } catch (err) {
+    console.error("Delete account error:", err);
     res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });

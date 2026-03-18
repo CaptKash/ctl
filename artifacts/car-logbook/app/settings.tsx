@@ -17,7 +17,7 @@ import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
-import { apiGet } from "@/hooks/useApi";
+import { apiGet, apiDelete } from "@/hooks/useApi";
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
 
@@ -123,6 +123,8 @@ export default function SettingsScreen() {
   const { user, logout, biometricAvailable, biometricEnrolled, enableBiometric, disableBiometric } = useAuth();
   const [biometricLoading, setBiometricLoading] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [distanceKm, setDistanceKm] = useState(true);
   const [eventReminders, setEventReminders] = useState(false);
   const [licenseAlerts, setLicenseAlerts] = useState(false);
@@ -365,7 +367,7 @@ export default function SettingsScreen() {
             iconBg="#FEE2E2"
             label="Delete Account"
             subtitle="Permanently erase all data"
-            badge="Soon"
+            onPress={() => setShowDeleteModal(true)}
             danger
           />
         </View>
@@ -387,6 +389,28 @@ export default function SettingsScreen() {
           router.replace("/(tabs)");
         }}
         onCancel={() => setShowSignOutModal(false)}
+      />
+
+      <ConfirmModal
+        visible={showDeleteModal}
+        title="Delete Account"
+        message={`This will permanently delete your account, all your vehicles, and every record associated with them. This cannot be undone.`}
+        confirmLabel={deleteLoading ? "Deleting…" : "Delete Everything"}
+        confirmStyle="destructive"
+        onConfirm={async () => {
+          if (deleteLoading) return;
+          setDeleteLoading(true);
+          try {
+            await apiDelete("/auth/account");
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            await logout();
+            router.replace("/(tabs)");
+          } catch {
+            setDeleteLoading(false);
+            setShowDeleteModal(false);
+          }
+        }}
+        onCancel={() => { if (!deleteLoading) setShowDeleteModal(false); }}
       />
     </View>
   );
