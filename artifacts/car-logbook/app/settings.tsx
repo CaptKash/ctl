@@ -227,6 +227,15 @@ export default function SettingsScreen() {
         {/* Preferences */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>PREFERENCES</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
+          <NavRow
+            icon="sun"
+            iconColor="#D97706"
+            iconBg="#FEF3C7"
+            label="Theme"
+            subtitle="Light"
+            badge="Soon"
+          />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <ToggleRow
             icon="navigation"
             iconColor="#0891B2"
