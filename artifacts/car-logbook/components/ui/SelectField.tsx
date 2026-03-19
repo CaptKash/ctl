@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -58,8 +59,9 @@ export function SelectField({
           {label}
           {required && <Text style={{ color: C.danger }}> *</Text>}
         </Text>
-        <Pressable
+        <TouchableOpacity
           onPress={() => !disabled && setOpen(true)}
+          activeOpacity={0.7}
           style={[
             styles.trigger,
             {
@@ -78,7 +80,7 @@ export function SelectField({
             {value || placeholder}
           </Text>
           <Feather name="chevron-down" size={17} color={C.textSecondary} />
-        </Pressable>
+        </TouchableOpacity>
       </View>
 
       <Modal visible={open} animationType="slide" presentationStyle={Platform.OS === "ios" ? "pageSheet" : undefined}>
@@ -86,13 +88,13 @@ export function SelectField({
           {/* Header */}
           <View style={[styles.modalHeader, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
             <Text style={[styles.modalTitle, { color: C.text }]}>{label}</Text>
-            <Pressable
+            <TouchableOpacity
               onPress={() => { setOpen(false); setSearch(""); }}
-              hitSlop={12}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               style={styles.closeBtn}
             >
               <Feather name="x" size={20} color={C.textSecondary} />
-            </Pressable>
+            </TouchableOpacity>
           </View>
 
           {/* Search */}
@@ -114,18 +116,18 @@ export function SelectField({
           <FlatList
             data={filtered}
             keyExtractor={(item) => item}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps="always"
             contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
             renderItem={({ item }) => (
-              <Pressable
+              <TouchableOpacity
                 onPress={() => handleSelect(item)}
-                style={({ pressed }) => [
+                activeOpacity={0.6}
+                style={[
                   styles.option,
                   {
-                    backgroundColor: pressed ? C.backgroundTertiary : C.backgroundSecondary,
+                    backgroundColor: item === value ? C.infoLight : C.backgroundSecondary,
                     borderBottomColor: C.borderLight,
                   },
-                  item === value && { backgroundColor: C.infoLight },
                 ]}
               >
                 <Text
@@ -139,7 +141,7 @@ export function SelectField({
                 {item === value && (
                   <Feather name="check" size={16} color={C.tint} />
                 )}
-              </Pressable>
+              </TouchableOpacity>
             )}
             ListEmptyComponent={
               <View style={styles.empty}>
