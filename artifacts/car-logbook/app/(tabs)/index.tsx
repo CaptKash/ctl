@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -188,6 +189,14 @@ export default function LoginScreen() {
                 </Pressable>
               </View>
             </View>
+
+            <Pressable
+              onPress={() => Alert.alert("Forgot Password", "Password reset is coming soon. Please contact support for now.")}
+              hitSlop={8}
+              style={styles.forgotBtn}
+            >
+              <Text style={[styles.forgotText, { color: C.tint }]}>Forgot password?</Text>
+            </Pressable>
           </View>
 
           <Pressable
@@ -276,6 +285,9 @@ const styles = StyleSheet.create({
   signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
   signupText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   signupLink: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+
+  forgotBtn: { alignSelf: "flex-end" },
+  forgotText: { fontSize: 13, fontFamily: "Inter_500Medium" },
 
   rememberRow: {
     flexDirection: "row",
