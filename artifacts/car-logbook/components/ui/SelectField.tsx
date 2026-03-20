@@ -83,7 +83,14 @@ export function SelectField({
         </TouchableOpacity>
       </View>
 
-      <Modal visible={open} animationType="slide" presentationStyle={Platform.OS === "ios" ? "pageSheet" : undefined}>
+      <Modal
+        visible={open}
+        animationType={Platform.OS === "ios" ? "slide" : "fade"}
+        presentationStyle={Platform.OS === "ios" ? "pageSheet" : undefined}
+        onRequestClose={() => { setOpen(false); setSearch(""); }}
+        hardwareAccelerated
+        statusBarTranslucent={Platform.OS === "android"}
+      >
         <View style={[styles.modal, { backgroundColor: C.background }]}>
           {/* Header */}
           <View style={[styles.modalHeader, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
