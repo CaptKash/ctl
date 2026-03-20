@@ -4,7 +4,6 @@ import {
   Keyboard,
   Modal,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -12,8 +11,10 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import Colors from "@/constants/colors";
+import { registerPicker } from "@/components/ui/selectPickerStore";
 
 type Props = {
   label: string;
@@ -45,6 +46,19 @@ export function SelectField({
     return options.filter((o) => o.toLowerCase().includes(q));
   }, [options, search]);
 
+  const handleOpen = () => {
+    if (disabled) return;
+    if (Platform.OS === "android") {
+      Keyboard.dismiss();
+      registerPicker(label, options, value, (selected) => {
+        onSelect(selected);
+      });
+      router.push("/select-picker");
+    } else {
+      setOpen(true);
+    }
+  };
+
   const handleSelect = (item: string) => {
     onSelect(item);
     setOpen(false);
@@ -60,7 +74,7 @@ export function SelectField({
           {required && <Text style={{ color: C.danger }}> *</Text>}
         </Text>
         <TouchableOpacity
-          onPress={() => !disabled && setOpen(true)}
+          onPress={handleOpen}
           activeOpacity={0.7}
           style={[
             styles.trigger,
@@ -83,81 +97,71 @@ export function SelectField({
         </TouchableOpacity>
       </View>
 
-      <Modal
-        visible={open}
-        animationType={Platform.OS === "ios" ? "slide" : "fade"}
-        presentationStyle={Platform.OS === "ios" ? "pageSheet" : undefined}
-        onRequestClose={() => { setOpen(false); setSearch(""); }}
-        hardwareAccelerated
-        statusBarTranslucent={Platform.OS === "android"}
-      >
-        <View style={[styles.modal, { backgroundColor: C.background }]}>
-          {/* Header */}
-          <View style={[styles.modalHeader, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
-            <Text style={[styles.modalTitle, { color: C.text }]}>{label}</Text>
-            <TouchableOpacity
-              onPress={() => { setOpen(false); setSearch(""); }}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              style={styles.closeBtn}
-            >
-              <Feather name="x" size={20} color={C.textSecondary} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Search */}
-          <View style={[styles.searchRow, { borderBottomColor: C.border }]}>
-            <View style={[styles.searchBox, { backgroundColor: C.backgroundTertiary }]}>
-              <Feather name="search" size={16} color={C.textSecondary} style={{ marginRight: 8 }} />
-              <TextInput
-                style={[styles.searchInput, { color: C.text }]}
-                placeholder={`Search ${label.toLowerCase()}…`}
-                placeholderTextColor={C.textTertiary}
-                value={search}
-                onChangeText={setSearch}
-                clearButtonMode="while-editing"
-              />
-            </View>
-          </View>
-
-          {/* List */}
-          <FlatList
-            data={filtered}
-            keyExtractor={(item) => item}
-            keyboardShouldPersistTaps="always"
-            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
-            renderItem={({ item }) => (
+      {Platform.OS === "ios" && (
+        <Modal
+          visible={open}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => { setOpen(false); setSearch(""); }}
+        >
+          <View style={[styles.modal, { backgroundColor: C.background }]}>
+            <View style={[styles.modalHeader, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
+              <Text style={[styles.modalTitle, { color: C.text }]}>{label}</Text>
               <TouchableOpacity
-                onPress={() => handleSelect(item)}
-                activeOpacity={0.6}
-                style={[
-                  styles.option,
-                  {
-                    backgroundColor: item === value ? C.infoLight : C.backgroundSecondary,
-                    borderBottomColor: C.borderLight,
-                  },
-                ]}
+                onPress={() => { setOpen(false); setSearch(""); }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                style={styles.closeBtn}
               >
-                <Text
+                <Feather name="x" size={20} color={C.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.searchRow, { borderBottomColor: C.border }]}>
+              <View style={[styles.searchBox, { backgroundColor: C.backgroundTertiary }]}>
+                <Feather name="search" size={16} color={C.textSecondary} style={{ marginRight: 8 }} />
+                <TextInput
+                  style={[styles.searchInput, { color: C.text }]}
+                  placeholder={`Search ${label.toLowerCase()}…`}
+                  placeholderTextColor={C.textTertiary}
+                  value={search}
+                  onChangeText={setSearch}
+                  clearButtonMode="while-editing"
+                />
+              </View>
+            </View>
+
+            <FlatList
+              data={filtered}
+              keyExtractor={(item) => item}
+              keyboardShouldPersistTaps="always"
+              contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handleSelect(item)}
+                  activeOpacity={0.6}
                   style={[
-                    styles.optionText,
-                    { color: item === value ? C.tint : C.text },
+                    styles.option,
+                    {
+                      backgroundColor: item === value ? C.infoLight : C.backgroundSecondary,
+                      borderBottomColor: C.borderLight,
+                    },
                   ]}
                 >
-                  {item}
-                </Text>
-                {item === value && (
-                  <Feather name="check" size={16} color={C.tint} />
-                )}
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <View style={styles.empty}>
-                <Text style={{ color: C.textSecondary }}>No results for "{search}"</Text>
-              </View>
-            }
-          />
-        </View>
-      </Modal>
+                  <Text style={[styles.optionText, { color: item === value ? C.tint : C.text }]}>
+                    {item}
+                  </Text>
+                  {item === value && <Feather name="check" size={16} color={C.tint} />}
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={
+                <View style={styles.empty}>
+                  <Text style={{ color: C.textSecondary }}>No results for "{search}"</Text>
+                </View>
+              }
+            />
+          </View>
+        </Modal>
+      )}
     </>
   );
 }
@@ -187,12 +191,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   modalTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
-  closeBtn: {
-    width: 34,
-    height: 34,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  closeBtn: { width: 34, height: 34, alignItems: "center", justifyContent: "center" },
 
   searchRow: {
     paddingHorizontal: 16,

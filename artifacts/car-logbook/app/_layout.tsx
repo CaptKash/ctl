@@ -47,6 +47,7 @@ function RootLayoutNav() {
       <Stack.Screen name="repair-history" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="account" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="select-picker" options={{ headerShown: false, presentation: "card" }} />
     </Stack>
   );
 }
