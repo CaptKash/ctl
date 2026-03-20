@@ -1,0 +1,42 @@
+Last login: Wed Mar 18 13:50:25 on ttys000
+kash@Mohammeds-MacBook-Pro ~ % cd ~/ctl/artifacts/car-logbook && npx eas-cli submit --platform ios --latest
+
+Selected build uses "preview" build profile but a submit profile with the same name is missing in eas.json. Using default ("production") profile
+Ensuring your app exists on App Store Connect. This step can be skipped by
+providing ascAppId in the submit profile. Learn more:
+https://expo.fyi/asc-app-id
+
+› Log in to your Apple Developer account to continue
+✔ Apple ID: … mkashour.apple@gmail.com
+› Restoring session /Users/kash/.app-store/auth/mkashour.apple@gmail.com/cookie
+› Session expired Local session
+(node:71601) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+› Using password for mkashour.apple@gmail.com from your local Keychain
+  Learn more: https://docs.expo.dev/distribution/security#keychain
+✔ Logged in New session
+› Team Mohammed Kashour (7TU3WQ845C)
+› Provider Mohammed Kashour (128673711)
+
+✔ Bundle identifier registered com.ctl.carlogbook
+✔ Prepared App Store Connect for CTL com.ctl.carlogbook
+Looking up credentials configuration for com.ctl.carlogbook...
+✔ App Store Connect API Key already set up.
+Using Api Key ID: 32329XPJH4 (CTL iOS Build Key)
+
+ASC App ID:                 6760766535
+Project ID:                 2984157c-0a32-485b-8b48-1048d72a1520
+App Store Connect API Key:  
+    Key Name  :  CTL iOS Build Key
+    Key ID    :  32329XPJH4
+    Key Source:  EAS servers
+Build:                      
+    Build ID    :  a9d963ab-8e25-4c3f-bdbc-3766c51af250
+    Build Date  :  3/20/2026, 9:38:08 AM
+    App Version :  1.0.0
+    Build number:  1
+
+✔ Scheduled iOS submission
+
+Submission details: https://expo.dev/accounts/mkashour/projects/car-logbook/submissions/6e5f626f-03a1-4529-86a1-da26964356ab
+
