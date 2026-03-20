@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = {
   photos: string[];
@@ -20,7 +20,7 @@ type Props = {
 };
 
 export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
-  const C = Colors.light;
+  const C = useColors();
 
   const pickImage = async (useCamera: boolean) => {
     const permission = useCamera

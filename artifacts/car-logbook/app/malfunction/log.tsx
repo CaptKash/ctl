@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
@@ -22,7 +22,7 @@ import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightI
 
 export default function MalfunctionLogScreen() {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId, carName } = useLocalSearchParams<{ carId: string; carName: string }>();
 

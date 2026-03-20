@@ -4,12 +4,12 @@ import { SymbolView } from "expo-symbols";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 export default function TabLayout() {
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
-  const C = Colors.light;
+  const C = useColors();
 
   return (
     <Tabs

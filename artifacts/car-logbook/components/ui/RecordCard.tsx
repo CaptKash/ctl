@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = {
   icon: keyof typeof Feather.glyphMap;
@@ -33,7 +33,7 @@ export function RecordCard({
   onDelete,
   onComplete,
 }: Props) {
-  const C = Colors.light;
+  const C = useColors();
 
   return (
     <Pressable

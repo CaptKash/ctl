@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
@@ -21,7 +21,7 @@ import { apiPost } from "@/hooks/useApi";
 
 export default function SignupScreen() {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { login } = useAuth();
 

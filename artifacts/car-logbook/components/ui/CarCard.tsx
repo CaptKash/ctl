@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Car = {
   id: number;
@@ -60,7 +60,7 @@ function getFirstPhoto(photos?: string | null): string | null {
 }
 
 export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   const firstPhoto = getFirstPhoto(car.photos);
   const thumbBg = accentBg ?? C.infoLight;
   const thumbIcon = accentIcon ?? C.info;

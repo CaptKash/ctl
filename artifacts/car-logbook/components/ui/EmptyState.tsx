@@ -1,7 +1,7 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = {
   icon?: keyof typeof Feather.glyphMap;
@@ -16,7 +16,7 @@ type Props = {
 };
 
 export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction, btnColor, btnTextColor, btnIcon }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   const resolvedBtnColor = btnColor ?? C.tint;
   const resolvedBtnTextColor = btnTextColor ?? "#fff";
   return (

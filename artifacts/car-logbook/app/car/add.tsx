@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
@@ -31,7 +31,7 @@ const YEARS = Array.from({ length: CURRENT_YEAR - 1980 + 1 }, (_, i) =>
 
 export default function AddCarScreen() {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const qc = useQueryClient();
 
   // Basic Info

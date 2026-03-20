@@ -9,19 +9,18 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import Colors from "@/constants/colors";
 import BottomNav from "@/components/ui/BottomNav";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
+import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
-
-const C = Colors.light;
 
 function NavRow({
   icon,
@@ -42,6 +41,7 @@ function NavRow({
   badge?: string;
   danger?: boolean;
 }) {
+  const C = useColors();
   return (
     <Pressable
       onPress={() => {
@@ -59,7 +59,7 @@ function NavRow({
         {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }]}>{subtitle}</Text> : null}
       </View>
       {badge ? (
-        <View style={[styles.pill, { backgroundColor: danger ? "#FEE2E2" : C.tint + "18" }]}>
+        <View style={[styles.pill, { backgroundColor: danger ? C.dangerLight : C.tint + "18" }]}>
           <Text style={[styles.pillText, { color: danger ? C.danger : C.tint }]}>{badge}</Text>
         </View>
       ) : onPress ? (
@@ -88,6 +88,7 @@ function ToggleRow({
   onChange: (v: boolean) => void;
   comingSoon?: boolean;
 }) {
+  const C = useColors();
   return (
     <View style={styles.row}>
       <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
@@ -116,7 +117,54 @@ function ToggleRow({
   );
 }
 
+const THEME_OPTIONS: { value: ThemePreference; label: string; icon: React.ComponentProps<typeof Feather>["name"] }[] = [
+  { value: "light", label: "Light", icon: "sun" },
+  { value: "dark", label: "Dark", icon: "moon" },
+  { value: "system", label: "System", icon: "smartphone" },
+];
+
+function ThemeRow() {
+  const C = useColors();
+  const { preference, setPreference } = useTheme();
+
+  return (
+    <View style={styles.row}>
+      <View style={[styles.rowIcon, { backgroundColor: "#FEF3C7" }]}>
+        <Feather name="sun" size={16} color="#D97706" />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={[styles.rowTitle, { color: C.text }]}>Theme</Text>
+      </View>
+      <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
+        {THEME_OPTIONS.map((opt) => {
+          const active = preference === opt.value;
+          return (
+            <TouchableOpacity
+              key={opt.value}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setPreference(opt.value);
+              }}
+              style={[
+                styles.segmentBtn,
+                active && { backgroundColor: C.tint },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Feather name={opt.icon} size={13} color={active ? "#fff" : C.textSecondary} />
+              <Text style={[styles.segmentText, { color: active ? "#fff" : C.textSecondary }]}>
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export default function SettingsScreen() {
+  const C = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -126,7 +174,6 @@ export default function SettingsScreen() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [distanceKm, setDistanceKm] = useState(true);
   const [eventReminders, setEventReminders] = useState(false);
-  const [licenseAlerts, setLicenseAlerts] = useState(false);
 
   const { data: cars = [] } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -148,8 +195,8 @@ export default function SettingsScreen() {
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
-          <View style={[styles.iconBox, { backgroundColor: "#F3F4F6" }]}>
-            <Feather name="settings" size={22} color="#6B7280" />
+          <View style={[styles.iconBox, { backgroundColor: C.backgroundTertiary }]}>
+            <Feather name="settings" size={22} color={C.textSecondary} />
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Settings</Text>
@@ -207,7 +254,6 @@ export default function SettingsScreen() {
               <Text style={styles.fleetBadgeText}>Coming Soon</Text>
             </View>
           </View>
-
           <View style={styles.fleetFeatures}>
             {[
               "Unlimited vehicles per account",
@@ -221,20 +267,12 @@ export default function SettingsScreen() {
               </View>
             ))}
           </View>
-
         </Pressable>
 
         {/* Preferences */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>PREFERENCES</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
-          <NavRow
-            icon="sun"
-            iconColor="#D97706"
-            iconBg="#FEF3C7"
-            label="Theme"
-            subtitle="Light"
-            badge="Soon"
-          />
+          <ThemeRow />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <ToggleRow
             icon="navigation"
@@ -267,8 +305,8 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ABOUT</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <View style={styles.row}>
-            <View style={[styles.rowIcon, { backgroundColor: "#F3F4F6" }]}>
-              <Feather name="info" size={16} color="#6B7280" />
+            <View style={[styles.rowIcon, { backgroundColor: C.backgroundTertiary }]}>
+              <Feather name="info" size={16} color={C.textSecondary} />
             </View>
             <View style={styles.rowBody}>
               <Text style={[styles.rowTitle, { color: C.text }]}>App Version</Text>
@@ -340,7 +378,7 @@ export default function SettingsScreen() {
       <ConfirmModal
         visible={showDeleteModal}
         title="Delete Account"
-        message={`This will permanently delete your account, all your vehicles, and every record associated with them. This cannot be undone.`}
+        message="This will permanently delete your account, all your vehicles, and every record associated with them. This cannot be undone."
         confirmLabel={deleteLoading ? "Deleting…" : "Delete Everything"}
         confirmStyle="destructive"
         onConfirm={async () => {
@@ -441,10 +479,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 20,
   },
-  pillText: {
-    fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
-  },
+  pillText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
   version: {
     textAlign: "center",
     fontSize: 12,
@@ -452,6 +487,21 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 4,
   },
+
+  segmented: {
+    flexDirection: "row",
+    borderRadius: 10,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  segmentBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  segmentText: { fontSize: 12, fontFamily: "Inter_500Medium" },
 
   fleetCard: {
     borderRadius: 16,
@@ -477,100 +527,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  fleetTitle: {
-    fontSize: 16,
-    fontFamily: "Inter_700Bold",
-    color: "#78350F",
-  },
-  fleetTagline: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    color: "#B45309",
-    marginTop: 1,
-  },
-  fleetBadge: {
-    backgroundColor: "#FDE68A",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
-  },
-  fleetBadgeText: {
-    fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
-    color: "#92400E",
-  },
-  fleetFeatures: {
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-    gap: 7,
-  },
-  fleetFeatureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  fleetFeatureText: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    color: "#78350F",
-  },
-  fleetCta: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: "#FDE68A",
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#FCD34D",
-  },
-  fleetCtaText: {
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
-    color: "#92400E",
-  },
-
-  upgradeBanner: {
-    borderRadius: 16,
-    backgroundColor: "#FFFBEB",
-    borderWidth: 1.5,
-    borderColor: "#FCD34D",
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 4,
-  },
-  upgradeCrown: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#FEF3C7",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  upgradeBody: { flex: 1 },
-  upgradeTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_700Bold",
-    color: "#92400E",
-  },
-  upgradeSub: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    color: "#B45309",
-    marginTop: 2,
-  },
-  upgradePill: {
-    backgroundColor: "#FDE68A",
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: 20,
-  },
-  upgradePillText: {
-    fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
-    color: "#92400E",
-  },
+  fleetTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#78350F" },
+  fleetTagline: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#B45309", marginTop: 1 },
+  fleetBadge: { backgroundColor: "#FDE68A", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
+  fleetBadgeText: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#92400E" },
+  fleetFeatures: { paddingHorizontal: 16, paddingBottom: 14, gap: 7 },
+  fleetFeatureRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  fleetFeatureText: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#78350F" },
 });

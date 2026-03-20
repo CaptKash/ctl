@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
@@ -75,7 +75,7 @@ function carLabel(car: CarStub | null): string {
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);

@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import { registerPicker } from "@/components/ui/selectPickerStore";
 
 type Props = {
@@ -35,7 +35,7 @@ export function SelectField({
   required,
   disabled,
 }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");

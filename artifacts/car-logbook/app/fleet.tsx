@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { CarCard } from "@/components/ui/CarCard";
@@ -38,7 +38,7 @@ type Car = {
 
 export default function FleetScreen() {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const qc = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const topPad = Platform.OS === "web" ? 67 : insets.top;

@@ -6,7 +6,7 @@ import {
   TextInputProps,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = TextInputProps & {
   label: string;
@@ -14,7 +14,7 @@ type Props = TextInputProps & {
 };
 
 export function FormField({ label, required, multiline, style, ...rest }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   return (
     <View style={styles.container}>
       <Text style={[styles.label, { color: C.textSecondary }]}>

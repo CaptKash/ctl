@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import { formatDate, toISODate } from "@/lib/dateUtils";
 
 type Props = {
@@ -19,7 +19,7 @@ type Props = {
 };
 
 export function DatePickerField({ label, value, onChange, placeholder = "Select date" }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   const [show, setShow] = useState(false);
 
   const dateObj = value ? new Date(value + "T12:00:00") : new Date();

@@ -1,7 +1,7 @@
 import React from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = {
   label: string;
@@ -13,7 +13,7 @@ type Props = {
 };
 
 export function PrimaryButton({ label, onPress, loading, disabled, variant = "primary", icon }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   const bgColor =
     variant === "danger" ? C.danger :
     variant === "danger-light" ? "#FEE2E2" :

@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { DatePickerField } from "@/components/ui/DatePickerField";
@@ -61,7 +61,7 @@ export default function MaintenanceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -170,8 +170,8 @@ export default function MaintenanceScreen() {
             <RecordCard
               key={r.id}
               icon="tool"
-              iconColor={Colors.light.warning}
-              iconBg={Colors.light.warningLight}
+              iconColor={useColors().warning}
+              iconBg={useColors().warningLight}
               title={r.description}
               subtitle={`${r.type} · ${formatDate(r.date)}${r.shop ? ` · ${r.shop}` : ""}`}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}

@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = {
   visible: boolean;
@@ -27,7 +27,7 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   const isDestructive = confirmStyle === "destructive";
 
   return (

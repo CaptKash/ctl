@@ -12,7 +12,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
+import type { ColorScheme } from "@/constants/colors";
 import { formatDate } from "@/lib/dateUtils";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -38,7 +39,7 @@ function daysFromNow(dateStr: string): number {
   return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function urgencyColor(days: number, C: typeof Colors.light): string {
+function urgencyColor(days: number, C: ColorScheme): string {
   if (days < 0) return C.danger;
   if (days <= 7) return "#F97316";
   if (days <= 30) return C.warning;
@@ -54,7 +55,7 @@ function urgencyLabel(days: number): string {
 
 export default function UpcomingEventsScreen() {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const { data: records, isLoading } = useQuery<UpcomingRecord[]>({

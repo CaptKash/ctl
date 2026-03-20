@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = {
   icon: keyof typeof Feather.glyphMap;
@@ -12,7 +12,7 @@ type Props = {
 };
 
 export function StatCard({ icon, iconColor, iconBg, label, value }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   return (
     <View style={[styles.card, { backgroundColor: C.card }]}>
       <View style={[styles.iconBox, { backgroundColor: iconBg }]}>

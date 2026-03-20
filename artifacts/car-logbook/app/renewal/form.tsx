@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
@@ -44,7 +44,7 @@ export default function RenewalFormScreen() {
   const { carId: carIdParam } = useLocalSearchParams<{ carId: string }>();
   const carId = parseInt(carIdParam ?? "0");
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 

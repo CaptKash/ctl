@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { apiGet } from "@/hooks/useApi";
 
@@ -27,7 +27,7 @@ type Car = {
 
 export default function ReportsScreen() {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
 
   const { data: cars, isLoading } = useQuery<Car[]>({
     queryKey: ["cars"],

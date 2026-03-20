@@ -10,11 +10,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import { getPickerState, resolvePickerSelection } from "@/components/ui/selectPickerStore";
 
 export default function SelectPickerScreen() {
-  const C = Colors.light;
+  const C = useColors();
   const insets = useSafeAreaInsets();
   const { label, options, value } = getPickerState();
   const [search, setSearch] = useState("");

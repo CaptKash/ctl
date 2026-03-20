@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
@@ -85,7 +85,7 @@ export default function CarDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 

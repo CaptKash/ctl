@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 type Props = {
   title: string;
@@ -9,7 +9,7 @@ type Props = {
 };
 
 export function SectionHeader({ title, actionLabel, onAction }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   return (
     <View style={styles.row}>
       <Text style={[styles.title, { color: C.text }]}>{title}</Text>

@@ -11,7 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 
 const { height: SCREEN_H } = Dimensions.get("window");
 
@@ -23,7 +23,7 @@ type Props = {
 };
 
 export function BottomSheet({ visible, onClose, title, children }: Props) {
-  const C = Colors.light;
+  const C = useColors();
   const slideAnim = useRef(new Animated.Value(SCREEN_H)).current;
 
   useEffect(() => {

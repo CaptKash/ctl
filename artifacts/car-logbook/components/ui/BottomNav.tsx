@@ -5,7 +5,7 @@ import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import Colors from "@/constants/colors";
+import { useColors } from "@/context/ThemeContext";
 import { apiGet } from "@/hooks/useApi";
 
 export type BottomNavTab = "dashboard" | "faults" | "history" | "settings";
@@ -27,7 +27,7 @@ type Props = { active?: BottomNavTab };
 
 export default function BottomNav({ active }: Props) {
   const insets = useSafeAreaInsets();
-  const C = Colors.light;
+  const C = useColors();
   const bottomPad = Platform.OS === "web" ? 8 : insets.bottom > 0 ? insets.bottom : 8;
 
   const { data: faults } = useQuery<{ id: number; completed: boolean }[]>({
