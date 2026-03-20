@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
-import { LogoMark } from "@/components/ui/LogoMark";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost } from "@/hooks/useApi";
@@ -73,22 +72,26 @@ export default function SignupScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={[styles.container, { backgroundColor: C.background }]}>
+
+        {/* ── Brand hero ─────────────────────────────────────────────── */}
+        <View style={[styles.hero, { paddingTop: topPad + 28 }]}>
+          <View style={styles.heroAccent} />
+          <Text style={styles.heroTitle}>CTL</Text>
+          <View style={styles.heroLines}>
+            <View style={styles.heroLineLong} />
+            <View style={styles.heroLineShort} />
+          </View>
+          <Text style={styles.heroTagline}>Car Technical Log</Text>
+        </View>
+
         <ScrollView
           contentContainerStyle={[
             styles.scroll,
-            { paddingTop: topPad + 24, paddingBottom: insets.bottom + 48 },
+            { paddingTop: 24, paddingBottom: insets.bottom + 48 },
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Brand */}
-          <View style={styles.brand}>
-            <LogoMark size={80} />
-            <Text style={[styles.appTagline, { color: C.text }]}>
-              Car Technical Log
-            </Text>
-          </View>
-
           {/* Form */}
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
             {/* Heading */}
@@ -249,11 +252,54 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { paddingHorizontal: 24, gap: 18 },
 
-  brand: { alignItems: "center", gap: 10, paddingBottom: 4 },
-  logoBox: { width: 80, height: 80, borderRadius: 20, overflow: "hidden", marginBottom: 4 },
-  logo: { width: 80, height: 80 },
-  appName: { fontSize: 32, fontFamily: "Inter_700Bold" },
-  appTagline: { fontSize: 18, fontFamily: "Inter_600SemiBold", marginTop: 6 },
+  // ── Hero ──────────────────────────────────────────────────────────────────
+  hero: {
+    backgroundColor: "#0F2D5E",
+    paddingHorizontal: 28,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    overflow: "hidden",
+  },
+  heroAccent: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 160,
+    height: 160,
+    backgroundColor: "#071A40",
+    borderBottomLeftRadius: 999,
+  },
+  heroTitle: {
+    fontSize: 72,
+    fontFamily: "Inter_700Bold",
+    color: "#FFFFFF",
+    lineHeight: 76,
+  },
+  heroLines: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 6,
+  },
+  heroLineLong: {
+    height: 5,
+    width: 90,
+    backgroundColor: "#1D4ED8",
+    borderRadius: 3,
+  },
+  heroLineShort: {
+    height: 5,
+    width: 38,
+    backgroundColor: "#0891B2",
+    borderRadius: 3,
+  },
+  heroTagline: {
+    fontSize: 18,
+    fontFamily: "Inter_600SemiBold",
+    color: "#93C5FD",
+    marginTop: 10,
+  },
 
   welcomeBlock: { gap: 6 },
   welcomeTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
