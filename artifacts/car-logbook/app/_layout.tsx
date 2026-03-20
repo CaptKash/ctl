@@ -17,6 +17,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { NotificationSyncer } from "@/components/NotificationSyncer";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -78,6 +79,7 @@ export default function RootLayout() {
               <AppProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <KeyboardProvider>
+                    <NotificationSyncer />
                     <RootLayoutNav />
                   </KeyboardProvider>
                 </GestureHandlerRootView>
