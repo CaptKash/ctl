@@ -6,3 +6,9 @@ id = "Nt8KmQJPMXX0hIpC0sP62"
 uri = "file://artifacts/car-logbook/assets/images/icon.png"
 type = "image"
 title = "CTL Logo — Jeep Commander"
+
+[[outputs]]
+id = "ad-WH02NwsNeTblH8hCmK"
+uri = "file://CTL_App_Documentation.pdf"
+type = "pdf"
+title = "CTL — Car Technical Log · Technical Documentation v1.0"
