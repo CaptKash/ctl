@@ -1,5 +1,10 @@
 # Car Logbook
 
+## Development Rules
+
+- **Cross-platform first**: Every feature must be built and verified to work on both iOS and Android before it is considered done. Never ship a feature that only works on one platform.
+- **SelectField on Android**: Uses navigation (`/select-picker` screen) instead of Modal — Modals are unreliable on Android 15+. iOS uses Modal slide-up sheet.
+
 ## Overview
 
 A mobile logbook app for car owners — similar to an aviation logbook but for vehicles. Users can track multiple cars with full maintenance, parts, fuel, insurance, and dealership records. Includes comprehensive report generation.
