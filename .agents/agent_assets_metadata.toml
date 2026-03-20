@@ -12,3 +12,21 @@ id = "ad-WH02NwsNeTblH8hCmK"
 uri = "file://CTL_App_Documentation.pdf"
 type = "pdf"
 title = "CTL — Car Technical Log · Technical Documentation v1.0"
+
+[[outputs]]
+id = "ULi_g3I5TZUmeYzwexKKj"
+uri = "file://CTL_Icon_1024.png"
+type = "image"
+title = "App Icon — 1024×1024 (iOS App Store + source)"
+
+[[outputs]]
+id = "p84gKb6fJw1GCPwe2Ongg"
+uri = "file://CTL_Icon_512.png"
+type = "image"
+title = "App Icon — 512×512 (Google Play Store listing)"
+
+[[outputs]]
+id = "WInmcKacHOOhsAjg-qt-D"
+uri = "file://CTL_Logo_Wide.png"
+type = "image"
+title = "CTL Logo — Wide (1600×600, for marketing / splash)"
