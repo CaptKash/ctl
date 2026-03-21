@@ -23,7 +23,11 @@
     },
     "android": {
       "package": "com.ctl.carlogbook",
-      "versionCode": 2,
+      "versionCode": 3,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0F2D5E"
+      },
       "permissions": [
         "android.permission.READ_CALENDAR",
         "android.permission.WRITE_CALENDAR",
