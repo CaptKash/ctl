@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { View, type ViewStyle } from "react-native";
+import { Platform, View, type ViewStyle } from "react-native";
 import React from "react";
 
 type Props = {
@@ -9,6 +9,10 @@ type Props = {
 };
 
 export function SwipeBackView({ children, style }: Props) {
+  if (Platform.OS === "android") {
+    return <View style={[{ flex: 1 }, style]}>{children}</View>;
+  }
+
   const pan = Gesture.Pan()
     .runOnJS(true)
     .activeOffsetX([15, 999])
