@@ -80,8 +80,17 @@ export default function SignupScreen() {
           styles.hero,
           { paddingTop: topPad + 28 },
           isDark
-            ? { backgroundColor: "#0F2D5E", borderBottomWidth: 0 }
-            : { backgroundColor: "#F0F6FF", borderBottomWidth: 1, borderBottomColor: "#DBEAFE" },
+            ? { backgroundColor: "#0F2D5E" }
+            : {
+                backgroundColor: "#F0F6FF",
+                borderBottomWidth: 2,
+                borderBottomColor: "#93C5FD",
+                shadowColor: "#1D4ED8",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.12,
+                shadowRadius: 8,
+                elevation: 6,
+              },
         ]}>
           <View style={[
             styles.heroAccent,
