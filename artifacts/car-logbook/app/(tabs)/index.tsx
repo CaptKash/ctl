@@ -15,7 +15,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/context/ThemeContext";
+import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost } from "@/hooks/useApi";
@@ -58,6 +58,8 @@ const toggleStyles = StyleSheet.create({
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const {
     login,
@@ -118,15 +120,25 @@ export default function LoginScreen() {
       <View style={[styles.container, { backgroundColor: C.background }]}>
 
         {/* ── Brand hero ─────────────────────────────────────────────── */}
-        <View style={[styles.hero, { paddingTop: topPad + 28 }]}>
-          {/* Dark diagonal accent */}
-          <View style={styles.heroAccent} />
-          <Text style={styles.heroTitle}>CTL</Text>
+        <View style={[
+          styles.hero,
+          { paddingTop: topPad + 28 },
+          isDark
+            ? { backgroundColor: "#0F2D5E", borderBottomWidth: 0 }
+            : { backgroundColor: "#F0F6FF", borderBottomWidth: 1, borderBottomColor: "#DBEAFE" },
+        ]}>
+          <View style={[
+            styles.heroAccent,
+            { backgroundColor: isDark ? "#071A40" : "#DBEAFE" },
+          ]} />
+          <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
           <View style={styles.heroLines}>
             <View style={styles.heroLineLong} />
             <View style={styles.heroLineShort} />
           </View>
-          <Text style={styles.heroTagline}>Car Technical Log</Text>
+          <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
+            Car Technical Log
+          </Text>
         </View>
 
         {/* ── Form ───────────────────────────────────────────────────── */}
