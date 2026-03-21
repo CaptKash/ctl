@@ -12,9 +12,11 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Polygon } from "react-native-svg";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
@@ -61,6 +63,7 @@ export default function LoginScreen() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { width: screenW } = useWindowDimensions();
   const {
     login,
     isAuthenticated,
@@ -126,9 +129,9 @@ export default function LoginScreen() {
           isDark
             ? { backgroundColor: "#0F2D5E" }
             : {
-                backgroundColor: "#EDF1F8",
+                backgroundColor: "#FFFFFF",
                 borderBottomWidth: 2,
-                borderBottomColor: "#C5D4E8",
+                borderBottomColor: "#B8CADD",
                 shadowColor: "#1D4ED8",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.08,
@@ -136,10 +139,17 @@ export default function LoginScreen() {
                 elevation: 4,
               },
         ]}>
-          <View style={[
-            styles.heroAccent,
-            { backgroundColor: isDark ? "#071A40" : "#DDE5F0" },
-          ]} />
+          <Svg
+            width={screenW}
+            height={250}
+            style={{ position: "absolute", top: 0, left: 0 }}
+            pointerEvents="none"
+          >
+            <Polygon
+              points={`${Math.round(screenW * 0.57)},0 ${screenW},0 ${screenW},250 ${Math.round(screenW * 0.57)},155`}
+              fill={isDark ? "#071A40" : "#DBEAFE"}
+            />
+          </Svg>
           <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
           <View style={styles.heroLines}>
             <View style={styles.heroLineLong} />
