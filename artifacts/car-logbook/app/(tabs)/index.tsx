@@ -126,19 +126,19 @@ export default function LoginScreen() {
           isDark
             ? { backgroundColor: "#0F2D5E" }
             : {
-                backgroundColor: "#F0F6FF",
+                backgroundColor: "#F7FBFF",
                 borderBottomWidth: 2,
-                borderBottomColor: "#93C5FD",
+                borderBottomColor: "#BFDBFE",
                 shadowColor: "#1D4ED8",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.12,
+                shadowOpacity: 0.08,
                 shadowRadius: 8,
-                elevation: 6,
+                elevation: 4,
               },
         ]}>
           <View style={[
             styles.heroAccent,
-            { backgroundColor: isDark ? "#071A40" : "#DBEAFE" },
+            { backgroundColor: isDark ? "#071A40" : "#E8F3FF" },
           ]} />
           <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
           <View style={styles.heroLines}>
