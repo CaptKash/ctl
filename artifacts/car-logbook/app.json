@@ -23,6 +23,7 @@
     },
     "android": {
       "package": "com.ctl.carlogbook",
+      "versionCode": 2,
       "permissions": [
         "android.permission.READ_CALENDAR",
         "android.permission.WRITE_CALENDAR",

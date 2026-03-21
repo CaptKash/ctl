@@ -53,7 +53,7 @@ export default function SelectPickerScreen() {
             placeholderTextColor={C.textTertiary}
             value={search}
             onChangeText={setSearch}
-            autoFocus
+            autoFocus={false}
           />
         </View>
       </View>
@@ -62,6 +62,10 @@ export default function SelectPickerScreen() {
         data={filtered}
         keyExtractor={(item) => item}
         keyboardShouldPersistTaps="always"
+        keyboardDismissMode="on-drag"
+        initialNumToRender={30}
+        maxToRenderPerBatch={30}
+        windowSize={10}
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         renderItem={({ item }) => (
           <TouchableOpacity
