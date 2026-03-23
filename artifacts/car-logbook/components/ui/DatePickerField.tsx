@@ -2,6 +2,7 @@ import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/dat
 import { Feather } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
+  Keyboard,
   Platform,
   Pressable,
   StyleSheet,
@@ -64,7 +65,10 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
     <View style={styles.wrapper}>
       <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>
       <Pressable
-        onPress={() => setShow((s) => !s)}
+        onPress={() => {
+          Keyboard.dismiss();
+          setShow((s) => !s);
+        }}
         style={({ pressed }) => [
           styles.field,
           {
