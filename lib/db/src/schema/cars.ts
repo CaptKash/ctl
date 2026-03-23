@@ -1,4 +1,5 @@
-import { pgTable, serial, text, integer, real, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, real, boolean, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -14,6 +15,16 @@ export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof usersTable.$inferSelect;
 
+export const passwordResetTokensTable = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  token: uuid("token").notNull().default(sql`gen_random_uuid()`),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => [unique("prt_token_unique").on(t.token)]);
+
+export type PasswordResetToken = typeof passwordResetTokensTable.$inferSelect;
 
 export const carsTable = pgTable("cars", {
   id: serial("id").primaryKey(),

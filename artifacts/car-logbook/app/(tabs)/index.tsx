@@ -4,7 +4,6 @@ import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -228,7 +227,10 @@ export default function LoginScreen() {
             </View>
 
             <Pressable
-              onPress={() => Alert.alert("Forgot Password", "Password reset is coming soon. Please contact support for now.")}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/forgot-password");
+              }}
               hitSlop={8}
               style={styles.forgotBtn}
             >
