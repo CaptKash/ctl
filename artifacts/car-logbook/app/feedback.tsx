@@ -16,7 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
 import { apiPost } from "@/hooks/useApi";
-import SwipeBackView from "@/components/ui/SwipeBackView";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 
 const CATEGORIES = [
   { id: "Bug Report",        icon: "alert-circle" as const,  color: "#DC2626", bg: "#FEE2E2" },
