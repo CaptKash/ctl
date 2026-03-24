@@ -326,7 +326,7 @@ export default function SettingsScreen() {
             iconBg="#EDE9FE"
             label="Send Feedback"
             subtitle="Help us improve CTL"
-            badge="Soon"
+            onPress={() => router.push("/feedback")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <NavRow
