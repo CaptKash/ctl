@@ -232,12 +232,15 @@ router.get("/reset-password", (_req, res) => {
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Reset Password – CTL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,sans-serif;background:#F3F4F6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#F3F4F6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
     .card{background:#fff;border-radius:20px;padding:40px 32px;max-width:420px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08)}
     .logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
-    .logo-text{font-size:28px;font-weight:800;color:#0F2D5E;letter-spacing:-1px}
+    .logo-text{font-size:28px;font-weight:800;color:#0F2D5E;letter-spacing:-1px;font-family:'Inter',sans-serif}
     .logo-lines{display:flex;gap:4px;align-items:center}
     .line-blue{width:36px;height:4px;background:#1D4ED8;border-radius:2px}
     .line-teal{width:16px;height:4px;background:#0891B2;border-radius:2px}
