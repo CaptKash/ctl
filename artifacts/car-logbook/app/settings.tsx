@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import BottomNav from "@/components/ui/BottomNav";
@@ -19,6 +21,10 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
 import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { apiGet, apiDelete } from "@/hooks/useApi";
+
+const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/privacy`
+  : "/privacy";
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
 
@@ -328,7 +334,7 @@ export default function SettingsScreen() {
             iconColor="#6B7280"
             iconBg="#F3F4F6"
             label="Privacy Policy"
-            badge="Soon"
+            onPress={() => Linking.openURL(PRIVACY_URL)}
           />
         </View>
 
