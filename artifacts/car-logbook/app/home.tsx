@@ -286,23 +286,6 @@ export default function MenuDashboardScreen() {
           </View>
         </Pressable>
 
-        <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Tools</Text>
-
-        <View style={[styles.tile, { backgroundColor: C.card, shadowColor: C.shadow, opacity: 0.7 }]}>
-          <View style={[styles.tileIcon, { backgroundColor: "#F3F4F6" }]}>
-            <Feather name="droplet" size={24} color="#9CA3AF" />
-          </View>
-          <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Fuel Consumption</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              Track &amp; monitor fuel usage
-            </Text>
-          </View>
-          <View style={[styles.comingSoonBadge]}>
-            <Text style={[styles.comingSoonText]}>Soon</Text>
-          </View>
-        </View>
-
         <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>
           Upcoming Events
         </Text>
@@ -472,20 +455,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  comingSoonBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-  },
-  comingSoonText: {
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-    color: "#6B7280",
-  },
-
   carListDivider: { height: StyleSheet.hairlineWidth, marginTop: 14, marginBottom: 12 },
   carListWrap: { gap: 10 },
   carList: { gap: 10, paddingBottom: 2 },
