@@ -27,3 +27,9 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+RESET_BASE_URL = "https://e4258cb0-84c7-443c-ad62-0aa669b73cb1-00-48k7an1ynz04.spock.replit.dev"
+FROM_EMAIL = "CTL App <noreply@inroomstudios.com>"
