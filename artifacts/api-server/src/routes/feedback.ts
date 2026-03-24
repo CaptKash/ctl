@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Resend } from "resend";
-import { requireAuth } from "../middlewares/auth";
+import { optionalAuth } from "../middlewares/auth";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudios.com>";
@@ -8,18 +8,23 @@ const SUPPORT_EMAIL = "mkashour.apple@gmail.com";
 
 const router = Router();
 
-router.post("/feedback", requireAuth, async (req, res) => {
+console.log("[feedback] Route loaded — using optionalAuth");
+
+router.post("/feedback", optionalAuth, async (req, res) => {
   try {
     const { category, message } = req.body as { category?: string; message?: string };
-    const user = req.user as { id: number; name: string; email: string };
 
     if (!message || message.trim().length < 5) {
       res.status(400).json({ error: "Message is too short." });
       return;
     }
 
+    const userName  = req.user?.name  ?? (req.body as Record<string, string>).name  ?? "App User";
+    const userEmail = req.user?.email ?? (req.body as Record<string, string>).email ?? null;
     const cat = category ?? "General Feedback";
-    const subject = `[CTL Feedback] ${cat} — from ${user.name}`;
+    const subject = `[CTL Feedback] ${cat} — from ${userName}`;
+
+    console.log(`[feedback] Received from ${userName}${userEmail ? ` <${userEmail}>` : ""}: ${cat}`);
 
     const feedbackHtml = `
       <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
@@ -27,7 +32,7 @@ router.post("/feedback", requireAuth, async (req, res) => {
         <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
           <tr>
             <td style="font-size:13px;color:#6B7280;padding:6px 0;width:90px">From</td>
-            <td style="font-size:14px;color:#111827">${user.name} &lt;${user.email}&gt;</td>
+            <td style="font-size:14px;color:#111827">${userName}${userEmail ? ` &lt;${userEmail}&gt;` : ""}</td>
           </tr>
           <tr>
             <td style="font-size:13px;color:#6B7280;padding:6px 0">Category</td>
@@ -47,7 +52,7 @@ router.post("/feedback", requireAuth, async (req, res) => {
             <div style="width:14px;height:4px;background:#0891B2;border-radius:2px"></div>
           </div>
         </div>
-        <h2 style="color:#111827;font-size:20px;margin:0 0 10px">Thanks for your feedback, ${user.name.split(" ")[0]}!</h2>
+        <h2 style="color:#111827;font-size:20px;margin:0 0 10px">Thanks for your feedback, ${userName.split(" ")[0]}!</h2>
         <p style="color:#6B7280;font-size:15px;line-height:1.6;margin:0 0 20px">
           We've received your message and truly appreciate you taking the time to share it with us.
           Every piece of feedback helps us make CTL better.
@@ -63,22 +68,29 @@ router.post("/feedback", requireAuth, async (req, res) => {
     `;
 
     if (resend) {
-      await Promise.all([
+      const sends = [
         resend.emails.send({
           from: FROM_EMAIL,
           to: [SUPPORT_EMAIL],
-          replyTo: user.email,
+          replyTo: userEmail ?? undefined,
           subject,
           html: feedbackHtml,
         }),
-        resend.emails.send({
-          from: FROM_EMAIL,
-          to: [user.email],
-          subject: "We got your feedback — CTL",
-          html: thankYouHtml,
-        }),
-      ]);
-      console.log(`[feedback] Sent feedback + thank you email for ${user.email}`);
+      ];
+
+      if (userEmail) {
+        sends.push(
+          resend.emails.send({
+            from: FROM_EMAIL,
+            to: [userEmail],
+            subject: "We got your feedback — CTL",
+            html: thankYouHtml,
+          })
+        );
+      }
+
+      await Promise.all(sends);
+      console.log(`[feedback] Sent via Resend to ${SUPPORT_EMAIL}${userEmail ? ` + thank you to ${userEmail}` : ""}`);
     } else {
       console.log(`[feedback] No RESEND_API_KEY — ${subject}\n${message.trim()}`);
     }
