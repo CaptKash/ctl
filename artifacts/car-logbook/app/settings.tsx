@@ -130,9 +130,9 @@ const THEME_OPTIONS: { value: ThemePreference; label: string; icon: React.Compon
   { value: "system", label: "System", icon: "smartphone" },
 ];
 
-const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string; icon: React.ComponentProps<typeof Feather>["name"] }[] = [
-  { value: "km", label: "km", icon: "map" },
-  { value: "mi", label: "mi", icon: "flag" },
+const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string }[] = [
+  { value: "km", label: "km" },
+  { value: "mi", label: "mi" },
 ];
 
 function DistanceRow() {
@@ -160,7 +160,6 @@ function DistanceRow() {
               style={[styles.segmentBtn, active && { backgroundColor: C.tint }]}
               activeOpacity={0.7}
             >
-              <Feather name={opt.icon} size={13} color={active ? "#fff" : C.textSecondary} />
               <Text style={[styles.segmentText, { color: active ? "#fff" : C.textSecondary }]}>
                 {opt.label}
               </Text>
