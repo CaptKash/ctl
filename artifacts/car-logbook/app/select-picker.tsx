@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   FlatList,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -14,17 +15,31 @@ import { useColors } from "@/context/ThemeContext";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { getPickerState, resolvePickerSelection } from "@/components/ui/selectPickerStore";
 
+const ITEM_HEIGHT = 52;
+
 export default function SelectPickerScreen() {
   const C = useColors();
   const insets = useSafeAreaInsets();
   const { label, options, value } = getPickerState();
   const [search, setSearch] = useState("");
+  const listRef = useRef<FlatList>(null);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return options;
     const q = search.trim().toLowerCase();
     return options.filter((o) => o.toLowerCase().includes(q));
   }, [options, search]);
+
+  useEffect(() => {
+    if (!value || Platform.OS === "web") return;
+    const idx = options.findIndex((o) => o === value);
+    if (idx > 2) {
+      const timer = setTimeout(() => {
+        listRef.current?.scrollToIndex({ index: idx, animated: false, viewPosition: 0.3 });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleSelect = (item: string) => {
     resolvePickerSelection(item);
@@ -60,6 +75,7 @@ export default function SelectPickerScreen() {
       </View>
 
       <FlatList
+        ref={listRef}
         data={filtered}
         keyExtractor={(item) => item}
         keyboardShouldPersistTaps="always"
@@ -67,6 +83,8 @@ export default function SelectPickerScreen() {
         initialNumToRender={30}
         maxToRenderPerBatch={30}
         windowSize={10}
+        getItemLayout={(_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
+        onScrollToIndexFailed={() => {}}
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         renderItem={({ item }) => (
           <TouchableOpacity

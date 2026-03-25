@@ -180,8 +180,10 @@ type CurrencyContextType = {
   setCurrency: (c: Currency) => Promise<void>;
 };
 
+const DEFAULT_CURRENCY = CURRENCIES.find((c) => c.code === "USD") ?? CURRENCIES[0];
+
 const CurrencyContext = createContext<CurrencyContextType>({
-  currency: CURRENCIES[0],
+  currency: DEFAULT_CURRENCY,
   setCurrency: async () => {},
 });
 
@@ -192,7 +194,7 @@ async function loadCurrency(): Promise<Currency> {
       : await SecureStore.getItemAsync(CURRENCY_KEY);
     if (code) return findCurrencyByCode(code);
   } catch {}
-  return CURRENCIES[0];
+  return DEFAULT_CURRENCY;
 }
 
 async function saveCurrency(c: Currency): Promise<void> {
@@ -206,7 +208,7 @@ async function saveCurrency(c: Currency): Promise<void> {
 }
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrencyState] = useState<Currency>(CURRENCIES[0]);
+  const [currency, setCurrencyState] = useState<Currency>(DEFAULT_CURRENCY);
 
   useEffect(() => {
     loadCurrency().then(setCurrencyState);
