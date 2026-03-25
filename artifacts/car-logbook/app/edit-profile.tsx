@@ -16,6 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/context/ThemeContext";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { apiPatch } from "@/hooks/useApi";
 
 type ProfileResponse = { user: { id: number; name: string; email: string } };
@@ -71,7 +72,7 @@ export default function EditProfileScreen() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={[styles.container, { backgroundColor: C.background }]}>
+      <SwipeBackView style={[styles.container, { backgroundColor: C.background }]}>
         {/* Header */}
         <View
           style={[
@@ -165,7 +166,7 @@ export default function EditProfileScreen() {
             Changing your email will require you to use the new address at next sign-in.
           </Text>
         </ScrollView>
-      </View>
+      </SwipeBackView>
     </KeyboardAvoidingView>
   );
 }

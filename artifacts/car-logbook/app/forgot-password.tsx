@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { apiPost } from "@/hooks/useApi";
 
 export default function ForgotPasswordScreen() {
@@ -57,7 +58,7 @@ export default function ForgotPasswordScreen() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={[styles.container, { backgroundColor: C.background }]}>
+      <SwipeBackView style={[styles.container, { backgroundColor: C.background }]}>
 
         {/* Hero */}
         <View style={[
@@ -181,7 +182,7 @@ export default function ForgotPasswordScreen() {
             </View>
           )}
         </ScrollView>
-      </View>
+      </SwipeBackView>
     </KeyboardAvoidingView>
   );
 }

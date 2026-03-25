@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/context/ThemeContext";
+import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { getPickerState, resolvePickerSelection } from "@/components/ui/selectPickerStore";
 
 export default function SelectPickerScreen() {
@@ -35,7 +36,7 @@ export default function SelectPickerScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: C.background }]}>
+    <SwipeBackView style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
         <TouchableOpacity onPress={handleClose} style={styles.closeBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
           <Feather name="arrow-left" size={22} color={C.text} />
@@ -91,7 +92,7 @@ export default function SelectPickerScreen() {
           </View>
         }
       />
-    </View>
+    </SwipeBackView>
   );
 }
 
