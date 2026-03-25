@@ -88,14 +88,6 @@ export default function ForgotPasswordScreen() {
             />
           </Svg>
 
-          <Pressable
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}
-            hitSlop={12}
-          >
-            <Feather name="arrow-left" size={22} color={isDark ? "#93C5FD" : "#1D4ED8"} />
-          </Pressable>
-
           <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
           <View style={styles.heroLines}>
             <View style={styles.heroLineLong} />
@@ -204,39 +196,34 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 28,
     overflow: "hidden",
   },
-  backBtn: {
-    marginBottom: 16,
-    alignSelf: "flex-start",
-  },
   heroTitle: {
-    fontSize: 52,
-    fontFamily: "Inter_800ExtraBold",
-    letterSpacing: -2,
+    fontSize: 72,
+    fontFamily: "Inter_700Bold",
+    lineHeight: 76,
     color: "#FFFFFF",
   },
   heroLines: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     marginTop: 6,
-    marginBottom: 8,
   },
   heroLineLong: {
-    width: 48,
-    height: 4,
+    height: 5,
+    width: 90,
     backgroundColor: "#1D4ED8",
-    borderRadius: 2,
+    borderRadius: 3,
   },
   heroLineShort: {
-    width: 20,
-    height: 4,
+    height: 5,
+    width: 38,
     backgroundColor: "#0891B2",
-    borderRadius: 2,
+    borderRadius: 3,
   },
   heroTagline: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    letterSpacing: 0.3,
+    fontSize: 18,
+    fontFamily: "Inter_600SemiBold",
+    marginTop: 10,
   },
   scroll: {
     padding: 20,
