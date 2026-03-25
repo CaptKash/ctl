@@ -17,7 +17,7 @@ import { useColors } from "@/context/ThemeContext";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
-import { apiPatch } from "@/hooks/useApi";
+import { apiPatch, apiPost } from "@/hooks/useApi";
 
 type ProfileResponse = { user: { id: number; name: string; email: string } };
 
@@ -32,6 +32,9 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetError, setResetError] = useState("");
 
   const hasChanges =
     name.trim() !== (user?.name ?? "") || email.trim() !== (user?.email ?? "");
@@ -60,6 +63,24 @@ export default function EditProfileScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (resetSent || resetLoading) return;
+    setResetError("");
+    setResetLoading(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await apiPost("/auth/forgot-password", { email: user?.email });
+      setResetSent(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not send reset email. Try again.";
+      setResetError(msg);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -166,19 +187,46 @@ export default function EditProfileScreen() {
             Changing your email will require you to use the new address at next sign-in.
           </Text>
 
-          {/* Change Password */}
+          {/* Reset Password */}
           <Pressable
-            onPress={() => router.push("/change-password")}
+            onPress={handleResetPassword}
+            disabled={resetSent || resetLoading}
             style={({ pressed }) => [
               styles.changePasswordRow,
-              { backgroundColor: C.card, opacity: pressed ? 0.7 : 1 },
+              {
+                backgroundColor: C.card,
+                opacity: pressed || resetSent || resetLoading ? 0.7 : 1,
+              },
             ]}
           >
-            <View style={[styles.changePasswordIcon, { backgroundColor: C.infoLight }]}>
-              <Feather name="lock" size={16} color={C.tint} />
+            <View
+              style={[
+                styles.changePasswordIcon,
+                { backgroundColor: resetSent ? "#D1FAE5" : C.infoLight },
+              ]}
+            >
+              <Feather
+                name={resetSent ? "check" : "lock"}
+                size={16}
+                color={resetSent ? "#059669" : C.tint}
+              />
             </View>
-            <Text style={[styles.changePasswordLabel, { color: C.text }]}>Change Password</Text>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.changePasswordLabel, { color: C.text }]}>
+                {resetLoading ? "Sending…" : "Reset Password"}
+              </Text>
+              {resetSent && (
+                <Text style={[styles.resetHint, { color: "#059669" }]}>
+                  Reset link sent to {user?.email}
+                </Text>
+              )}
+              {resetError !== "" && (
+                <Text style={[styles.resetHint, { color: C.danger }]}>{resetError}</Text>
+              )}
+            </View>
+            {!resetSent && !resetLoading && (
+              <Feather name="chevron-right" size={18} color={C.textTertiary} />
+            )}
           </Pressable>
         </ScrollView>
       </SwipeBackView>
@@ -263,5 +311,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  changePasswordLabel: { flex: 1, fontSize: 15, fontFamily: "Inter_500Medium" },
+  changePasswordLabel: { fontSize: 15, fontFamily: "Inter_500Medium" },
+  resetHint: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 });
