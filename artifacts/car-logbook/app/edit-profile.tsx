@@ -192,41 +192,32 @@ export default function EditProfileScreen() {
             onPress={handleResetPassword}
             disabled={resetSent || resetLoading}
             style={({ pressed }) => [
-              styles.changePasswordRow,
+              styles.resetBtn,
               {
-                backgroundColor: C.card,
-                opacity: pressed || resetSent || resetLoading ? 0.7 : 1,
+                borderColor: resetSent ? "#059669" : C.tint,
+                backgroundColor: resetSent ? "#D1FAE5" : C.infoLight,
+                opacity: pressed || resetLoading ? 0.7 : 1,
               },
             ]}
           >
-            <View
-              style={[
-                styles.changePasswordIcon,
-                { backgroundColor: resetSent ? "#D1FAE5" : C.infoLight },
-              ]}
-            >
-              <Feather
-                name={resetSent ? "check" : "lock"}
-                size={16}
-                color={resetSent ? "#059669" : C.tint}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.changePasswordLabel, { color: C.text }]}>
-                {resetLoading ? "Sending…" : "Reset Password"}
+            <Feather
+              name={resetSent ? "check-circle" : "lock"}
+              size={17}
+              color={resetSent ? "#059669" : C.tint}
+            />
+            <View style={{ alignItems: "center" }}>
+              <Text style={[styles.resetBtnLabel, { color: resetSent ? "#059669" : C.tint }]}>
+                {resetLoading ? "Sending…" : resetSent ? "Reset Link Sent" : "Reset Password"}
               </Text>
               {resetSent && (
                 <Text style={[styles.resetHint, { color: "#059669" }]}>
-                  Reset link sent to {user?.email}
+                  Sent to {user?.email}
                 </Text>
               )}
               {resetError !== "" && (
                 <Text style={[styles.resetHint, { color: C.danger }]}>{resetError}</Text>
               )}
             </View>
-            {!resetSent && !resetLoading && (
-              <Feather name="chevron-right" size={18} color={C.textTertiary} />
-            )}
           </Pressable>
         </ScrollView>
       </SwipeBackView>
@@ -296,21 +287,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
 
-  changePasswordRow: {
+  resetBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  changePasswordIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: "center",
     justifyContent: "center",
+    gap: 10,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
   },
-  changePasswordLabel: { fontSize: 15, fontFamily: "Inter_500Medium" },
-  resetHint: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+  resetBtnLabel: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  resetHint: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2, textAlign: "center" },
 });
