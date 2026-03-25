@@ -8,6 +8,7 @@ export const usersTable = pgTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   passwordHash: text("password_hash").notNull(),
+  country: text("country"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => [unique("users_email_unique").on(t.email)]);
 
