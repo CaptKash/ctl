@@ -36,6 +36,7 @@ type AuthContextType = {
   isLoading: boolean;
   login: (token: string, user: AuthUser, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (user: AuthUser) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -45,6 +46,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   login: async () => {},
   logout: async () => {},
+  updateUser: async () => {},
 });
 
 async function secureGet(key: string): Promise<string | null> {
@@ -129,6 +131,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const updateUser = async (updatedUser: AuthUser) => {
+    setUser(updatedUser);
+    await secureSet(USER_KEY, JSON.stringify(updatedUser));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         logout,
+        updateUser,
       }}
     >
       {children}

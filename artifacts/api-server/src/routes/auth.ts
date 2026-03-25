@@ -116,6 +116,44 @@ router.get("/auth/me", async (req, res) => {
 });
 
 
+router.patch("/auth/profile", requireAuth, async (req, res) => {
+  try {
+    const { name, email } = req.body as { name?: string; email?: string };
+
+    if (!name?.trim()) {
+      return res.status(400).json({ error: "Name is required." });
+    }
+    if (!email?.trim() || !email.includes("@")) {
+      return res.status(400).json({ error: "A valid email is required." });
+    }
+
+    const newEmail = email.toLowerCase().trim();
+    const newName = name.trim();
+
+    if (newEmail !== req.user!.email) {
+      const existing = await db
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .where(eq(usersTable.email, newEmail))
+        .limit(1);
+      if (existing.length > 0) {
+        return res.status(409).json({ error: "That email is already in use by another account." });
+      }
+    }
+
+    const [updated] = await db
+      .update(usersTable)
+      .set({ name: newName, email: newEmail })
+      .where(eq(usersTable.id, req.user!.id))
+      .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
+
+    res.json({ user: updated });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    res.status(500).json({ error: "Something went wrong. Please try again." });
+  }
+});
+
 router.delete("/auth/account", requireAuth, async (req, res) => {
   try {
     await db.delete(usersTable).where(eq(usersTable.id, req.user!.id));

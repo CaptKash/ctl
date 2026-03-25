@@ -239,7 +239,7 @@ export default function SettingsScreen() {
             iconBg="#DBEAFE"
             label="Edit Profile"
             subtitle="Update name or email"
-            badge="Soon"
+            onPress={() => router.push("/edit-profile")}
           />
         </View>
 
