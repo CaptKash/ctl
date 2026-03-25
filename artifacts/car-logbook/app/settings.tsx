@@ -130,6 +130,48 @@ const THEME_OPTIONS: { value: ThemePreference; label: string; icon: React.Compon
   { value: "system", label: "System", icon: "smartphone" },
 ];
 
+const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string; icon: React.ComponentProps<typeof Feather>["name"] }[] = [
+  { value: "km", label: "km", icon: "map" },
+  { value: "mi", label: "mi", icon: "flag" },
+];
+
+function DistanceRow() {
+  const C = useColors();
+  const { unit, setUnit } = useDistanceUnit();
+
+  return (
+    <View style={styles.row}>
+      <View style={[styles.rowIcon, { backgroundColor: "#CFFAFE" }]}>
+        <Feather name="navigation" size={16} color="#0891B2" />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={[styles.rowTitle, { color: C.text }]}>Distance Unit</Text>
+      </View>
+      <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
+        {DISTANCE_OPTIONS.map((opt) => {
+          const active = unit === opt.value;
+          return (
+            <TouchableOpacity
+              key={opt.value}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setUnit(opt.value);
+              }}
+              style={[styles.segmentBtn, active && { backgroundColor: C.tint }]}
+              activeOpacity={0.7}
+            >
+              <Feather name={opt.icon} size={13} color={active ? "#fff" : C.textSecondary} />
+              <Text style={[styles.segmentText, { color: active ? "#fff" : C.textSecondary }]}>
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 function ThemeRow() {
   const C = useColors();
   const { preference, setPreference } = useTheme();
@@ -179,7 +221,6 @@ export default function SettingsScreen() {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const { unit, setUnit } = useDistanceUnit();
   const [eventReminders, setEventReminders] = useState(false);
 
   const { data: cars = [] } = useQuery<Car[]>({
@@ -281,15 +322,7 @@ export default function SettingsScreen() {
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <ThemeRow />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-          <ToggleRow
-            icon="navigation"
-            iconColor="#0891B2"
-            iconBg="#CFFAFE"
-            label="Distance Unit"
-            subtitle={unit === "km" ? "Kilometres (km)" : "Miles (mi)"}
-            value={unit === "km"}
-            onChange={(v) => setUnit(v ? "km" : "mi")}
-          />
+          <DistanceRow />
         </View>
 
         {/* Notifications */}
