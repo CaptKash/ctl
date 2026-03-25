@@ -20,6 +20,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
 import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 
 const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
@@ -178,7 +179,7 @@ export default function SettingsScreen() {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [distanceKm, setDistanceKm] = useState(true);
+  const { unit, setUnit } = useDistanceUnit();
   const [eventReminders, setEventReminders] = useState(false);
 
   const { data: cars = [] } = useQuery<Car[]>({
@@ -285,10 +286,9 @@ export default function SettingsScreen() {
             iconColor="#0891B2"
             iconBg="#CFFAFE"
             label="Distance Unit"
-            subtitle="Kilometres (km)"
-            value={distanceKm}
-            onChange={setDistanceKm}
-            comingSoon
+            subtitle={unit === "km" ? "Kilometres (km)" : "Miles (mi)"}
+            value={unit === "km"}
+            onChange={(v) => setUnit(v ? "km" : "mi")}
           />
         </View>
 

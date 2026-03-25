@@ -21,6 +21,7 @@ import type { ColorScheme } from "@/constants/colors";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { addToCalendar } from "@/lib/addToCalendar";
 
 type Car = {
@@ -72,6 +73,7 @@ function urgencyLabel(days: number): string {
 export default function MenuDashboardScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { unit } = useDistanceUnit();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { user, isAuthenticated } = useAuth();
   const [calendarLoading, setCalendarLoading] = useState<string | null>(null);
@@ -341,7 +343,7 @@ export default function MenuDashboardScreen() {
                         <>
                           <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
                           <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                            {item.nextDueMileage.toLocaleString()} km
+                            {item.nextDueMileage.toLocaleString()} {unit}
                           </Text>
                         </>
                       )}

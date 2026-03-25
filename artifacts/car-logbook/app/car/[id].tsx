@@ -21,6 +21,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiDelete } from "@/hooks/useApi";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
 type Car = {
@@ -86,6 +87,7 @@ export default function CarDetailScreen() {
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -361,7 +363,7 @@ export default function CarDetailScreen() {
         {car.mileage != null && (
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: C.text }]}>{car.mileage.toLocaleString()}</Text>
-            <Text style={[styles.statLabel, { color: C.textSecondary }]}>km</Text>
+            <Text style={[styles.statLabel, { color: C.textSecondary }]}>{unit}</Text>
           </View>
         )}
         {car.vin && (

@@ -18,6 +18,7 @@ import { formatDate } from "@/lib/dateUtils";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { apiGet } from "@/hooks/useApi";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 
 type UpcomingRecord = {
   id: number;
@@ -56,6 +57,7 @@ function urgencyLabel(days: number): string {
 export default function UpcomingEventsScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { unit } = useDistanceUnit();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const { data: records, isLoading } = useQuery<UpcomingRecord[]>({
@@ -141,7 +143,7 @@ export default function UpcomingEventsScreen() {
                         <>
                           <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
                           <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
-                            {item.nextDueMileage.toLocaleString()} km
+                            {item.nextDueMileage.toLocaleString()} {unit}
                           </Text>
                         </>
                       )}

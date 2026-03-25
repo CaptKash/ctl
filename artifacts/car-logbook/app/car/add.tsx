@@ -21,6 +21,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SelectField } from "@/components/ui/SelectField";
 import { PhotoPicker } from "@/components/ui/PhotoPicker";
 import { apiPost } from "@/hooks/useApi";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { Feather } from "@expo/vector-icons";
 import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
 
@@ -32,6 +33,7 @@ const YEARS = Array.from({ length: CURRENT_YEAR - 1980 + 1 }, (_, i) =>
 export default function AddCarScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { unit } = useDistanceUnit();
   const qc = useQueryClient();
 
   // Basic Info
@@ -173,7 +175,7 @@ export default function AddCarScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label="Current Mileage (km)"
+            label={`Current Mileage (${unit})`}
             value={mileage}
             onChangeText={setMileage}
             placeholder="e.g. 45000"

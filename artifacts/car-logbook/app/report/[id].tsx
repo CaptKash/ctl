@@ -20,6 +20,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { StatCard } from "@/components/ui/StatCard";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { apiGet } from "@/hooks/useApi";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 
 type CarReport = {
   car: {
@@ -66,6 +67,7 @@ export default function ReportScreen() {
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { unit } = useDistanceUnit();
 
   const { data: report, isLoading } = useQuery<CarReport>({
     queryKey: ["report", carId],
@@ -112,7 +114,7 @@ export default function ReportScreen() {
           <Text style={styles.bannerValue}>${report.totalCost.toFixed(2)}</Text>
           <View style={styles.bannerRow}>
             {car.mileage != null && (
-              <Text style={styles.bannerMeta}>{car.mileage.toLocaleString()} km</Text>
+              <Text style={styles.bannerMeta}>{car.mileage.toLocaleString()} {unit}</Text>
             )}
             {report.lastMaintenance && (
               <Text style={styles.bannerMeta}>Last service: {report.lastMaintenance}</Text>
@@ -194,7 +196,7 @@ export default function ReportScreen() {
                 iconBg={C.warningLight}
                 title={item.description}
                 subtitle={item.nextDueDate ? `Due: ${formatDate(item.nextDueDate)}` : "Due soon"}
-                rightText={item.nextDueMileage != null ? `${item.nextDueMileage.toLocaleString()} km` : undefined}
+                rightText={item.nextDueMileage != null ? `${item.nextDueMileage.toLocaleString()} ${unit}` : undefined}
               />
             ))}
           </View>

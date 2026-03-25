@@ -27,6 +27,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 
 type MalfunctionRecord = {
   id: number;
@@ -59,6 +60,7 @@ export default function FaultsScreen() {
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -170,7 +172,7 @@ export default function FaultsScreen() {
                 r.phase ? (PHASE_LABELS[r.phase] ?? r.phase) : null,
               ].filter(Boolean).join(" · ")}
               rightText={formatDate(r.date)}
-              rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} km` : undefined}
+              rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} ${unit}` : undefined}
               onDelete={() => setConfirmId(r.id)}
             />
           ))
@@ -236,7 +238,7 @@ export default function FaultsScreen() {
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Odometer (km)"
+                label={`Odometer (${unit})`}
                 value={odometer}
                 onChangeText={setOdometer}
                 placeholder="e.g. 54200"

@@ -27,6 +27,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 
 type MaintenanceRecord = {
   id: number;
@@ -62,6 +63,7 @@ export default function MaintenanceScreen() {
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -175,7 +177,7 @@ export default function MaintenanceScreen() {
               title={r.description}
               subtitle={`${r.type} · ${formatDate(r.date)}${r.shop ? ` · ${r.shop}` : ""}`}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
-              rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} km` : undefined}
+              rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} ${unit}` : undefined}
               onDelete={() => setConfirmId(r.id)}
             />
           ))
@@ -226,7 +228,7 @@ export default function MaintenanceScreen() {
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Mileage (km)"
+                label={`Mileage (${unit})`}
                 value={mMileage}
                 onChangeText={setMMileage}
                 placeholder="e.g. 54200"
