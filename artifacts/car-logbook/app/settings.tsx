@@ -21,6 +21,8 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
 import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { useCurrency, CURRENCIES, currencyOption, findCurrencyByOption } from "@/context/CurrencyContext";
+import { registerPicker } from "@/components/ui/selectPickerStore";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 
 const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
@@ -134,6 +136,39 @@ const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string }[] = [
   { value: "km", label: "km" },
   { value: "mi", label: "mi" },
 ];
+
+function CurrencyRow() {
+  const C = useColors();
+  const { currency, setCurrency } = useCurrency();
+
+  const handlePress = () => {
+    registerPicker(
+      "Currency",
+      CURRENCIES.map(currencyOption),
+      currencyOption(currency),
+      (selected) => {
+        const found = findCurrencyByOption(selected);
+        if (found) setCurrency(found);
+      }
+    );
+    router.push("/select-picker");
+  };
+
+  return (
+    <TouchableOpacity style={styles.row} onPress={handlePress} activeOpacity={0.7}>
+      <View style={[styles.rowIcon, { backgroundColor: "#D1FAE5" }]}>
+        <Feather name="dollar-sign" size={16} color="#059669" />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={[styles.rowTitle, { color: C.text }]}>Currency</Text>
+        <Text style={[styles.rowSub, { color: C.textSecondary }]}>
+          {currency.code} · {currency.name}
+        </Text>
+      </View>
+      <Feather name="chevron-right" size={16} color={C.textTertiary} />
+    </TouchableOpacity>
+  );
+}
 
 function DistanceRow() {
   const C = useColors();
@@ -322,6 +357,8 @@ export default function SettingsScreen() {
           <ThemeRow />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <DistanceRow />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <CurrencyRow />
         </View>
 
         {/* Notifications */}

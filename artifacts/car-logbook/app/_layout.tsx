@@ -19,6 +19,7 @@ import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { DistanceUnitProvider } from "@/context/DistanceUnitContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
 
 SplashScreen.preventAutoHideAsync();
@@ -82,6 +83,7 @@ export default function RootLayout() {
       <ErrorBoundary>
         <ThemeProvider>
           <DistanceUnitProvider>
+          <CurrencyProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <AppProvider>
@@ -94,6 +96,7 @@ export default function RootLayout() {
               </AppProvider>
             </AuthProvider>
           </QueryClientProvider>
+          </CurrencyProvider>
           </DistanceUnitProvider>
         </ThemeProvider>
       </ErrorBoundary>
