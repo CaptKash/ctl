@@ -54,6 +54,7 @@ function RootLayoutNav() {
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="select-picker" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="edit-profile" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="change-password" options={{ headerShown: false, presentation: "card" }} />
     </Stack>
   );
 }

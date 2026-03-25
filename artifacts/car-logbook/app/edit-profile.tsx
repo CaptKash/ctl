@@ -165,6 +165,21 @@ export default function EditProfileScreen() {
           <Text style={[styles.hint, { color: C.textTertiary }]}>
             Changing your email will require you to use the new address at next sign-in.
           </Text>
+
+          {/* Change Password */}
+          <Pressable
+            onPress={() => router.push("/change-password")}
+            style={({ pressed }) => [
+              styles.changePasswordRow,
+              { backgroundColor: C.card, opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <View style={[styles.changePasswordIcon, { backgroundColor: C.infoLight }]}>
+              <Feather name="lock" size={16} color={C.tint} />
+            </View>
+            <Text style={[styles.changePasswordLabel, { color: C.text }]}>Change Password</Text>
+            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          </Pressable>
         </ScrollView>
       </SwipeBackView>
     </KeyboardAvoidingView>
@@ -232,4 +247,21 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     paddingHorizontal: 8,
   },
+
+  changePasswordRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  changePasswordIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  changePasswordLabel: { flex: 1, fontSize: 15, fontFamily: "Inter_500Medium" },
 });
