@@ -42,3 +42,9 @@ id = "KwuW0fMKUBuDWsaQD0WBt"
 uri = "file://CTL_Header_Dark.png"
 type = "image"
 title = "Sign-in Header — Dark Theme"
+
+[[outputs]]
+id = "SJ1Ihj52xzdYo_5tvB1U5"
+uri = "file://CTL_Test_Checklist.pdf"
+type = "pdf"
+title = "CTL – iOS & Android Test Checklist"
