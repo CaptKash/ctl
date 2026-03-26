@@ -66,7 +66,7 @@ function toCSV(rows: Record<string, unknown>[]): string {
     headers.map((h) => escape(toLabel(h))).join(","),
     ...rows.map((r) => headers.map((h) => escape(formatVal(r[h]))).join(",")),
   ];
-  return lines.join("\n");
+  return lines.join("\r\n");
 }
 
 function carLabel(car: Car) {
@@ -165,7 +165,7 @@ function buildCombinedCsv(car: Car, sections: Record<SectionId, unknown[]>): str
       lines.push("");
     });
 
-  return lines.join("\n");
+  return "\uFEFF" + lines.join("\r\n");
 }
 
 export default function ExportScreen() {
