@@ -4,7 +4,7 @@ import { optionalAuth } from "../middlewares/auth";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudios.com>";
-const SUPPORT_EMAIL = "mkashour.apple@gmail.com";
+const SUPPORT_EMAIL = "ctl.support@inroomstudio.com";
 
 const router = Router();
 
@@ -133,12 +133,12 @@ router.post("/suggest-tool", optionalAuth, async (req, res) => {
     if (resend) {
       await resend.emails.send({
         from: FROM_EMAIL,
-        to: ["support.ctl@inroomstudio.com"],
+        to: [SUPPORT_EMAIL],
         replyTo: userEmail ?? undefined,
         subject,
         html,
       });
-      console.log(`[suggest-tool] Sent via Resend to support.ctl@inroomstudio.com`);
+      console.log(`[suggest-tool] Sent via Resend to ${SUPPORT_EMAIL}`);
     } else {
       console.log(`[suggest-tool] No RESEND_API_KEY — ${subject}\n${suggestion.trim()}`);
     }
