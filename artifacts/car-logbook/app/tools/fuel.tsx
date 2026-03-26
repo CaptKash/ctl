@@ -289,16 +289,7 @@ export default function FuelScreen() {
         )}
 
         {/* Fill-up list */}
-        <SectionHeader
-          title="Fill-up Log"
-          actionLabel="Log Fill-up"
-          onAction={() => {
-            if (cars.length > 0) {
-              if (!fCarId) setFCarId(cars[0].id);
-              setShowAdd(true);
-            }
-          }}
-        />
+        <SectionHeader title="Fill-up Log" />
 
         {isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 24 }} />
