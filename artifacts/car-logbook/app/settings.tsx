@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Linking,
   Platform,
   Pressable,
@@ -22,7 +23,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { useCurrency, CURRENCIES, currencyOption, findCurrencyByOption } from "@/context/CurrencyContext";
+import { useEventReminders } from "@/context/EventRemindersContext";
 import { registerPicker } from "@/components/ui/selectPickerStore";
+import { requestNotificationPermissions } from "@/lib/notifications";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 
 const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
@@ -255,7 +258,22 @@ export default function SettingsScreen() {
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [eventReminders, setEventReminders] = useState(false);
+  const { enabled: remindersEnabled, setEnabled: setRemindersEnabled } = useEventReminders();
+
+  const handleRemindersToggle = async (value: boolean) => {
+    if (value) {
+      const granted = await requestNotificationPermissions();
+      if (!granted) {
+        Alert.alert(
+          "Notifications Disabled",
+          "To receive service reminders, enable notifications for CTL in your device Settings.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+    }
+    setRemindersEnabled(value);
+  };
 
   const { data: cars = [] } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -369,10 +387,9 @@ export default function SettingsScreen() {
             iconColor="#D97706"
             iconBg="#FEF3C7"
             label="Upcoming Event Reminders"
-            subtitle="Alerts before service due dates"
-            value={eventReminders}
-            onChange={setEventReminders}
-            comingSoon
+            subtitle="30d, 7d and 1d before due dates"
+            value={remindersEnabled}
+            onChange={handleRemindersToggle}
           />
         </View>
 

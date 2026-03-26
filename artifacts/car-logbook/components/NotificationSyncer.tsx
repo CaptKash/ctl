@@ -1,11 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
+import * as Notifications from "expo-notifications";
 import { useAuth } from "@/context/AuthContext";
+import { useEventReminders } from "@/context/EventRemindersContext";
 import { apiGet } from "@/hooks/useApi";
 import { syncNotifications, type NotificationEvent } from "@/lib/notifications";
 
 export function NotificationSyncer() {
   const { user } = useAuth();
+  const { enabled, loading } = useEventReminders();
   const appState = useRef<AppStateStatus>(AppState.currentState);
   const isSyncing = useRef(false);
 
@@ -22,20 +25,28 @@ export function NotificationSyncer() {
   }
 
   useEffect(() => {
-    if (user) {
-      sync();
+    if (loading) return;
+    if (!enabled) {
+      Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
+      return;
     }
-  }, [user]);
+    if (user) sync();
+  }, [user, enabled, loading]);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
-      if (appState.current.match(/inactive|background/) && nextState === "active") {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextState === "active" &&
+        enabled &&
+        !loading
+      ) {
         sync();
       }
       appState.current = nextState;
     });
     return () => sub.remove();
-  }, [user]);
+  }, [user, enabled, loading]);
 
   return null;
 }
