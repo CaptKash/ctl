@@ -25,7 +25,6 @@ import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { SectionHeader } from "@/components/ui/SectionHeader";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 
@@ -287,9 +286,6 @@ export default function FuelScreen() {
             </View>
           </View>
         )}
-
-        {/* Fill-up list */}
-        <SectionHeader title="Fill-up Log" />
 
         {isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 24 }} />
