@@ -544,14 +544,16 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   pill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
     borderRadius: 20,
-    backgroundColor: "rgba(128,128,128,0.12)",
+    backgroundColor: "#FF3B30",
+    alignSelf: "flex-start",
   },
   pillText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Inter_500Medium",
+    lineHeight: 16,
   },
   sheet: { flex: 1 },
   sheetHeader: {
