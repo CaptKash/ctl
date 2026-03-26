@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import React, { useState, useMemo } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -330,7 +331,10 @@ export default function FuelScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowAdd(false)}
       >
-        <View style={[styles.sheet, { backgroundColor: C.backgroundSecondary }]}>
+        <KeyboardAvoidingView
+          style={[styles.sheet, { backgroundColor: C.backgroundSecondary }]}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
           <View style={[styles.sheetHeader, { borderBottomColor: C.border }]}>
             <Text style={[styles.sheetTitle, { color: C.text }]}>Log Fill-up</Text>
             <Pressable onPress={() => setShowAdd(false)} hitSlop={12}>
@@ -441,7 +445,7 @@ export default function FuelScreen() {
               disabled={!canSubmit}
             />
           </ScrollView>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <ConfirmModal
