@@ -339,18 +339,24 @@ export default function NearbyServiceScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: topPad + 8, backgroundColor: C.background },
+          { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card },
         ]}
       >
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color={C.text} />
-        </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>
-          Service Centers Nearby
-        </Text>
-        <Pressable onPress={() => load()} style={styles.reloadBtn}>
-          <Feather name="refresh-cw" size={18} color={C.textSecondary} />
-        </Pressable>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
+            <Feather name="arrow-left" size={22} color={C.text} />
+          </Pressable>
+          <View style={[styles.iconBox, { backgroundColor: "#ECFDF5" }]}>
+            <Feather name="map-pin" size={22} color="#059669" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Service Centers</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Near your location</Text>
+          </View>
+          <Pressable onPress={() => load()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
+            <Feather name="refresh-cw" size={20} color={C.textSecondary} />
+          </Pressable>
+        </View>
       </View>
 
       {/* Filter pills — shown only once we have results */}
@@ -426,15 +432,15 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
 
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingBottom: 6,
-    paddingHorizontal: 16,
-    gap: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backBtn: { padding: 4 },
-  reloadBtn: { padding: 4, marginLeft: "auto" },
-  headerTitle: { fontSize: 18, fontWeight: "700", flex: 1, marginLeft: 4 },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
+  headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 1 },
 
   pillScrollView: { flexGrow: 0, alignSelf: "flex-start", width: "100%" },
   pillRow: { paddingHorizontal: 16, paddingTop: 2, paddingBottom: 10, gap: 8, flexDirection: "row", alignItems: "flex-start" },
