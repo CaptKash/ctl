@@ -72,60 +72,66 @@ function formatAddress(tags: Record<string, string>): string | undefined {
   return parts.length ? parts.join(" ") : undefined;
 }
 
+const OVERPASS_MIRRORS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
+
 async function fetchNearby(
   lat: number,
   lon: number,
   radiusM = 10000
 ): Promise<ServiceCenter[]> {
-  const query = `
-    [out:json][timeout:15];
-    (
-      node["amenity"="car_repair"](around:${radiusM},${lat},${lon});
-      node["amenity"="car_service"](around:${radiusM},${lat},${lon});
-      node["shop"="tyres"](around:${radiusM},${lat},${lon});
-      node["shop"="car_parts"](around:${radiusM},${lat},${lon});
-      way["amenity"="car_repair"](around:${radiusM},${lat},${lon});
-      way["amenity"="car_service"](around:${radiusM},${lat},${lon});
-      way["shop"="tyres"](around:${radiusM},${lat},${lon});
-    );
-    out center;
-  `;
+  const query = `[out:json][timeout:25];(node["amenity"="car_repair"](around:${radiusM},${lat},${lon});node["amenity"="car_service"](around:${radiusM},${lat},${lon});node["shop"="tyres"](around:${radiusM},${lat},${lon});node["shop"="car_parts"](around:${radiusM},${lat},${lon});way["amenity"="car_repair"](around:${radiusM},${lat},${lon});way["amenity"="car_service"](around:${radiusM},${lat},${lon});way["shop"="tyres"](around:${radiusM},${lat},${lon}););out center;`;
 
-  const resp = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    body: query,
-  });
-
-  if (!resp.ok) throw new Error("Failed to fetch nearby places");
-
-  const data = await resp.json();
-
-  const results: ServiceCenter[] = (data.elements ?? [])
-    .filter((el: any) => {
-      const elLat = el.lat ?? el.center?.lat;
-      const elLon = el.lon ?? el.center?.lon;
-      return elLat != null && elLon != null;
-    })
-    .map((el: any) => {
-      const tags: Record<string, string> = el.tags ?? {};
-      const elLat: number = el.lat ?? el.center.lat;
-      const elLon: number = el.lon ?? el.center.lon;
-      return {
-        id: el.id,
-        name: tags.name ?? "Unnamed Shop",
-        lat: elLat,
-        lon: elLon,
-        type: friendlyType(tags),
-        address: formatAddress(tags),
-        phone: tags.phone ?? tags["contact:phone"],
-        website: tags.website ?? tags["contact:website"],
-        openingHours: tags.opening_hours,
-        distanceKm: haversineKm(lat, lon, elLat, elLon),
-      };
-    })
-    .sort((a: ServiceCenter, b: ServiceCenter) => a.distanceKm - b.distanceKm);
-
-  return results;
+  let lastError = "No mirrors responded";
+  for (const mirror of OVERPASS_MIRRORS) {
+    try {
+      const resp = await fetch(mirror, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: query,
+      });
+      if (!resp.ok) {
+        lastError = `Server error ${resp.status}`;
+        continue;
+      }
+      const data = await resp.json();
+      if (!data.elements) {
+        lastError = "Unexpected response format";
+        continue;
+      }
+      const results: ServiceCenter[] = data.elements
+        .filter((el: any) => {
+          const elLat = el.lat ?? el.center?.lat;
+          const elLon = el.lon ?? el.center?.lon;
+          return elLat != null && elLon != null;
+        })
+        .map((el: any) => {
+          const tags: Record<string, string> = el.tags ?? {};
+          const elLat: number = el.lat ?? el.center.lat;
+          const elLon: number = el.lon ?? el.center.lon;
+          return {
+            id: el.id,
+            name: tags.name ?? "Unnamed Shop",
+            lat: elLat,
+            lon: elLon,
+            type: friendlyType(tags),
+            address: formatAddress(tags),
+            phone: tags.phone ?? tags["contact:phone"],
+            website: tags.website ?? tags["contact:website"],
+            openingHours: tags.opening_hours,
+            distanceKm: haversineKm(lat, lon, elLat, elLon),
+          };
+        })
+        .sort((a: ServiceCenter, b: ServiceCenter) => a.distanceKm - b.distanceKm);
+      return results;
+    } catch (e: any) {
+      lastError = e.message ?? "Network error";
+    }
+  }
+  throw new Error(lastError);
 }
 
 function openMaps(center: ServiceCenter) {
