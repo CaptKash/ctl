@@ -31,15 +31,15 @@ const FLEET_FEATURES = [
 
 const PLANS = [
   { id: "monthly", label: "Monthly", price: "$2.99", sub: "per month", highlight: false },
-  { id: "annual", label: "Annual", price: "$24.99", sub: "per year · save 30%", highlight: true },
-  { id: "lifetime", label: "Lifetime", price: "$19.99", sub: "one-time payment", highlight: false },
+  { id: "annual", label: "Annual", price: "$24.99", sub: "per year · save 30%", highlight: false },
+  { id: "lifetime", label: "Lifetime", price: "$19.99", sub: "one-time payment", highlight: true },
 ];
 
 export default function FleetUpgradeScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const topPad = Platform.OS === "web" ? 20 : insets.top;
-  const [selected, setSelected] = React.useState("annual");
+  const [selected, setSelected] = React.useState("lifetime");
 
   const handlePurchase = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
