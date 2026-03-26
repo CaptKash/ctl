@@ -369,8 +369,7 @@ export default function NearbyServiceScreen() {
                 style={[
                   styles.pill,
                   {
-                    backgroundColor: active ? "#1D4ED8" : C.card,
-                    borderColor: active ? "#1D4ED8" : C.border,
+                    backgroundColor: active ? C.tint : "rgba(128,128,128,0.12)",
                   },
                 ]}
               >
@@ -438,12 +437,11 @@ const styles = StyleSheet.create({
 
   pillRow: { paddingHorizontal: 16, paddingBottom: 8, gap: 8, flexDirection: "row" },
   pill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: 20,
-    borderWidth: 1,
   },
-  pillText: { fontSize: 11, fontWeight: "500" },
+  pillText: { fontSize: 13, fontWeight: "500" },
 
   countLabel: {
     fontSize: 12,
