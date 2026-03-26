@@ -143,6 +143,28 @@ export default function ToolsScreen() {
         </Pressable>
 
         <Pressable
+          onPress={() => isFleet ? router.push("/export" as any) : router.push("/fleet-upgrade" as any)}
+          style={({ pressed }) => [
+            styles.tool,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
+          ]}
+        >
+          <View style={[styles.toolIcon, { backgroundColor: isFleet ? "#FEF3C7" : "#F3F4F6" }]}>
+            <Feather name="download" size={24} color={isFleet ? "#D97706" : "#9CA3AF"} />
+          </View>
+          <View style={styles.toolBody}>
+            <Text style={[styles.toolTitle, { color: C.text }]}>Export Records</Text>
+            <Text style={[styles.toolSub, { color: C.textSecondary }]}>
+              Download PDF or CSV of your data
+            </Text>
+          </View>
+          {isFleet
+            ? <Feather name="chevron-right" size={18} color={C.textTertiary} />
+            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>Fleet</Text></View>
+          }
+        </Pressable>
+
+        <Pressable
           onPress={openModal}
           style={({ pressed }) => [styles.suggestCard, { opacity: pressed ? 0.85 : 1 }]}
         >

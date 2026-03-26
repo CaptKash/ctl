@@ -60,6 +60,7 @@ function RootLayoutNav() {
       <Stack.Screen name="service-costs" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="nearby-service" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="fleet-upgrade" options={{ headerShown: false, presentation: "modal" }} />
+      <Stack.Screen name="export" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="feedback" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="select-picker" options={{ headerShown: false, presentation: "card" }} />
