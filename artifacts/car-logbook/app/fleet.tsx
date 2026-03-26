@@ -56,6 +56,7 @@ export default function FleetScreen() {
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["cars"] });
+      setIsEditing(false);
     },
   });
 
