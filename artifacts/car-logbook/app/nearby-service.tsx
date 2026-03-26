@@ -358,6 +358,7 @@ export default function NearbyServiceScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={styles.pillScrollView}
           contentContainerStyle={styles.pillRow}
         >
           {allTypes.map((t) => {
@@ -435,11 +436,13 @@ const styles = StyleSheet.create({
   reloadBtn: { padding: 4, marginLeft: "auto" },
   headerTitle: { fontSize: 18, fontWeight: "700", flex: 1, marginLeft: 4 },
 
-  pillRow: { paddingHorizontal: 16, paddingTop: 2, paddingBottom: 10, gap: 8, flexDirection: "row", alignItems: "center" },
+  pillScrollView: { flexGrow: 0, alignSelf: "flex-start", width: "100%" },
+  pillRow: { paddingHorizontal: 16, paddingTop: 2, paddingBottom: 10, gap: 8, flexDirection: "row", alignItems: "flex-start" },
   pill: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    alignSelf: "flex-start",
   },
   pillText: { fontSize: 14, fontWeight: "500" },
 
