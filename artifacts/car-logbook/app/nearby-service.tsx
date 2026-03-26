@@ -434,12 +434,12 @@ const styles = StyleSheet.create({
 
   pillRow: { paddingHorizontal: 16, paddingBottom: 8, gap: 8, flexDirection: "row" },
   pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 20,
     borderWidth: 1,
   },
-  pillText: { fontSize: 13, fontWeight: "500" },
+  pillText: { fontSize: 11, fontWeight: "500" },
 
   countLabel: {
     fontSize: 12,
