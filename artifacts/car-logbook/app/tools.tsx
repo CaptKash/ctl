@@ -113,28 +113,6 @@ export default function ToolsScreen() {
           <Feather name="chevron-right" size={18} color={C.textTertiary} />
         </Pressable>
 
-        <View
-          style={[
-            styles.tool,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: 0.7 },
-          ]}
-        >
-          <View style={[styles.toolIcon, { backgroundColor: "#F3F4F6" }]}>
-            <Feather name="bar-chart-2" size={24} color="#9CA3AF" />
-          </View>
-          <View style={styles.toolBody}>
-            <Text style={[styles.toolTitle, { color: C.text }]}>
-              Mileage Log
-            </Text>
-            <Text style={[styles.toolSub, { color: C.textSecondary }]}>
-              Record and chart mileage
-            </Text>
-          </View>
-          <View style={styles.comingSoonBadge}>
-            <Text style={styles.comingSoonText}>Soon</Text>
-          </View>
-        </View>
-
         <Pressable
           onPress={openModal}
           style={({ pressed }) => [styles.suggestCard, { opacity: pressed ? 0.85 : 1 }]}
