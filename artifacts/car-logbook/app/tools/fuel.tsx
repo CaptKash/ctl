@@ -19,6 +19,7 @@ import { useColors } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
+import BottomNav from "@/components/ui/BottomNav";
 import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { SelectField } from "@/components/ui/SelectField";
@@ -483,6 +484,8 @@ export default function FuelScreen() {
         onCancel={() => setConfirmRecord(null)}
         destructive
       />
+
+      <BottomNav active="tools" />
     </SwipeBackView>
   );
 }
