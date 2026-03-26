@@ -51,7 +51,12 @@ export default function BottomNav({ active }: Props) {
     >
       {TABS.map((tab) => {
         const isActive = tab.id === active;
-        const showDot = tab.id === "faults" && hasActiveFaults;
+        const isFaultAlert = tab.id === "faults" && hasActiveFaults;
+        const iconColor = isFaultAlert
+          ? "#DC2626"
+          : isActive
+          ? (tab.activeColor ?? C.tint)
+          : C.textTertiary;
         return (
           <Pressable
             key={tab.id}
@@ -63,18 +68,17 @@ export default function BottomNav({ active }: Props) {
             style={styles.tab}
             hitSlop={4}
           >
-            <View style={[styles.iconWrap, isActive && { backgroundColor: (tab.activeColor ?? C.tint) + "15" }]}>
+            <View style={[styles.iconWrap, isActive && { backgroundColor: iconColor + "15" }]}>
               <Feather
                 name={tab.icon}
                 size={24}
-                color={isActive ? (tab.activeColor ?? C.tint) : C.textTertiary}
+                color={iconColor}
               />
-              {showDot && <View style={styles.dot} />}
             </View>
             <Text
               style={[
                 styles.label,
-                { color: isActive ? (tab.activeColor ?? C.tint) : C.textTertiary },
+                { color: iconColor },
                 isActive && styles.labelActive,
               ]}
             >
@@ -115,17 +119,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-  },
-  dot: {
-    position: "absolute",
-    top: 4,
-    right: 6,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#DC2626",
-    borderWidth: 1.5,
-    borderColor: "#FFFFFF",
   },
   label: {
     fontSize: 9,
