@@ -92,14 +92,15 @@ export default function ToolsScreen() {
           <Feather name="chevron-right" size={18} color={C.textTertiary} />
         </Pressable>
 
-        <View
-          style={[
+        <Pressable
+          onPress={() => router.push("/service-costs" as any)}
+          style={({ pressed }) => [
             styles.tool,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: 0.7 },
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: "#F3F4F6" }]}>
-            <Feather name="tool" size={24} color="#9CA3AF" />
+          <View style={[styles.toolIcon, { backgroundColor: "#F3E8FF" }]}>
+            <Feather name="dollar-sign" size={24} color="#7C3AED" />
           </View>
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
@@ -109,10 +110,8 @@ export default function ToolsScreen() {
               Analyse spending over time
             </Text>
           </View>
-          <View style={styles.comingSoonBadge}>
-            <Text style={styles.comingSoonText}>Soon</Text>
-          </View>
-        </View>
+          <Feather name="chevron-right" size={18} color={C.textTertiary} />
+        </Pressable>
 
         <View
           style={[
