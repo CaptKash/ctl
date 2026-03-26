@@ -22,6 +22,7 @@ import { DistanceUnitProvider } from "@/context/DistanceUnitContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { EventRemindersProvider } from "@/context/EventRemindersContext";
 import { CountryProvider } from "@/context/CountryContext";
+import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
 
 SplashScreen.preventAutoHideAsync();
@@ -57,6 +58,7 @@ function RootLayoutNav() {
       <Stack.Screen name="fuel" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="service-costs" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="nearby-service" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="fleet-upgrade" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="feedback" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="select-picker" options={{ headerShown: false, presentation: "card" }} />
@@ -94,12 +96,14 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <AppProvider>
+                <SubscriptionProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                   <KeyboardProvider>
                     <NotificationSyncer />
                     <RootLayoutNav />
                   </KeyboardProvider>
                 </GestureHandlerRootView>
+                </SubscriptionProvider>
               </AppProvider>
             </AuthProvider>
           </QueryClientProvider>

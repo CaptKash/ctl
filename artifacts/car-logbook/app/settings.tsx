@@ -376,7 +376,7 @@ export default function SettingsScreen() {
         {/* CTL Fleet upgrade card */}
         <Pressable
           style={({ pressed }) => [styles.fleetCard, { opacity: pressed ? 0.92 : 1 }]}
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+          onPress={() => router.push("/fleet-upgrade" as any)}
         >
           <View style={styles.fleetHeader}>
             <View style={styles.fleetIconWrap}>
@@ -386,16 +386,14 @@ export default function SettingsScreen() {
               <Text style={styles.fleetTitle}>CTL Fleet</Text>
               <Text style={styles.fleetTagline}>Manage every vehicle without limits</Text>
             </View>
-            <View style={styles.fleetBadge}>
-              <Text style={styles.fleetBadgeText}>Coming Soon</Text>
-            </View>
           </View>
           <View style={styles.fleetFeatures}>
             {[
-              "Unlimited vehicles per account",
-              "Cloud backup & cross-device sync",
-              "Advanced reports & analytics",
-              "Priority support",
+              "Unlimited vehicles",
+              "Fuel Consumption analytics",
+              "Service Cost Tracker",
+              "PDF & CSV export",
+              "All current & future tools",
             ].map((f) => (
               <View key={f} style={styles.fleetFeatureRow}>
                 <Feather name="check-circle" size={13} color="#D97706" />

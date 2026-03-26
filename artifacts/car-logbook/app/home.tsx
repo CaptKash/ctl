@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import type { ColorScheme } from "@/constants/colors";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
@@ -94,6 +95,8 @@ export default function MenuDashboardScreen() {
     }
   };
 
+  const { isFleet, FREE_CAR_LIMIT } = useSubscription();
+
   const { data: cars } = useQuery<Car[]>({
     queryKey: ["cars"],
     queryFn: () => apiGet<Car[]>("/cars"),
@@ -162,7 +165,11 @@ export default function MenuDashboardScreen() {
               onPress={(e) => {
                 e.stopPropagation();
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push("/car/add");
+                if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
+                  router.push("/fleet-upgrade" as any);
+                } else {
+                  router.push("/car/add");
+                }
               }}
               hitSlop={6}
               style={[styles.addCarChip, { backgroundColor: C.tint }]}

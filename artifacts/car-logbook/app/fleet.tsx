@@ -17,6 +17,7 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { CarCard } from "@/components/ui/CarCard";
@@ -46,10 +47,22 @@ export default function FleetScreen() {
   const swipeableRefs = useRef<Map<number, Swipeable>>(new Map());
   const openRowId = useRef<number | null>(null);
 
+  const { isFleet, FREE_CAR_LIMIT } = useSubscription();
+
   const { data: cars, isLoading } = useQuery<Car[]>({
     queryKey: ["cars"],
     queryFn: () => apiGet<Car[]>("/cars"),
   });
+
+  const handleAddCar = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setIsEditing(false);
+    if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
+      router.push("/fleet-upgrade" as any);
+    } else {
+      router.push("/car/add");
+    }
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/cars/${id}`),
@@ -152,11 +165,7 @@ export default function FleetScreen() {
             <Feather name="minus" size={20} color={isEditing ? "#fff" : "#DC2626"} />
           </Pressable>
           <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setIsEditing(false);
-              router.push("/car/add");
-            }}
+            onPress={handleAddCar}
             style={[styles.addBtn, { backgroundColor: C.tint }]}
           >
             <Feather name="plus" size={20} color="#fff" />
@@ -185,7 +194,7 @@ export default function FleetScreen() {
               title="No cars yet"
               description="Add your first car to start logging maintenance, fuel, insurance, and more."
               actionLabel="Add Car"
-              onAction={() => router.push("/car/add")}
+              onAction={handleAddCar}
             />
           }
           renderItem={({ item }) => (

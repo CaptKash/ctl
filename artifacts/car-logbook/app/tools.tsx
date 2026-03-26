@@ -17,12 +17,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useColors } from "@/context/ThemeContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { apiPost } from "@/hooks/useApi";
 
 export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { isFleet } = useSubscription();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -72,14 +74,14 @@ export default function ToolsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Pressable
-          onPress={() => router.push("/fuel" as any)}
+          onPress={() => isFleet ? router.push("/fuel" as any) : router.push("/fleet-upgrade" as any)}
           style={({ pressed }) => [
             styles.tool,
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="droplet" size={24} color="#2563EB" />
+          <View style={[styles.toolIcon, { backgroundColor: isFleet ? "#DBEAFE" : "#F3F4F6" }]}>
+            <Feather name="droplet" size={24} color={isFleet ? "#2563EB" : "#9CA3AF"} />
           </View>
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
@@ -89,18 +91,21 @@ export default function ToolsScreen() {
               Track &amp; monitor fuel usage
             </Text>
           </View>
-          <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          {isFleet
+            ? <Feather name="chevron-right" size={18} color={C.textTertiary} />
+            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>Fleet</Text></View>
+          }
         </Pressable>
 
         <Pressable
-          onPress={() => router.push("/service-costs" as any)}
+          onPress={() => isFleet ? router.push("/service-costs" as any) : router.push("/fleet-upgrade" as any)}
           style={({ pressed }) => [
             styles.tool,
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: "#F3E8FF" }]}>
-            <Feather name="dollar-sign" size={24} color="#7C3AED" />
+          <View style={[styles.toolIcon, { backgroundColor: isFleet ? "#F3E8FF" : "#F3F4F6" }]}>
+            <Feather name="dollar-sign" size={24} color={isFleet ? "#7C3AED" : "#9CA3AF"} />
           </View>
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
@@ -110,7 +115,10 @@ export default function ToolsScreen() {
               Analyse spending over time
             </Text>
           </View>
-          <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          {isFleet
+            ? <Feather name="chevron-right" size={18} color={C.textTertiary} />
+            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>Fleet</Text></View>
+          }
         </Pressable>
 
         <Pressable
@@ -281,6 +289,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter_600SemiBold",
     color: "#6B7280",
+  },
+  fleetBadge: {
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 20,
+    backgroundColor: "#FEF3C7",
+  },
+  fleetBadgeText: {
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    color: "#92400E",
   },
   suggestCard: {
     flexDirection: "row",
