@@ -22,10 +22,11 @@ import { DistanceUnitProvider } from "@/context/DistanceUnitContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { EventRemindersProvider } from "@/context/EventRemindersContext";
 import { CountryProvider } from "@/context/CountryContext";
-import { SubscriptionProvider } from "@/context/SubscriptionContext";
+import { SubscriptionProvider, initializeRevenueCat } from "@/lib/revenuecat";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
 
 SplashScreen.preventAutoHideAsync();
+initializeRevenueCat();
 
 const queryClient = new QueryClient({
   defaultOptions: {

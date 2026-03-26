@@ -3,6 +3,8 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -12,6 +14,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
+import { useSubscription } from "@/lib/revenuecat";
+import { PurchasesPackage } from "react-native-purchases";
 
 const FREE_FEATURES = [
   "Up to 2 vehicles",
@@ -29,21 +33,82 @@ const FLEET_FEATURES = [
   { icon: "bell" as const, label: "Priority reminders" },
 ];
 
-const PLANS = [
-  { id: "monthly", label: "Monthly", price: "$2.99", sub: "per month", highlight: false },
-  { id: "annual", label: "Annual", price: "$24.99", sub: "per year · save 30%", highlight: false },
-  { id: "lifetime", label: "Lifetime", price: "$19.99", sub: "one-time payment", highlight: true },
-];
+const PACKAGE_ORDER = ["$rc_monthly", "$rc_annual", "$rc_lifetime"];
+const PACKAGE_META: Record<string, { label: string; sub: string; highlight: boolean }> = {
+  "$rc_monthly": { label: "Monthly", sub: "per month", highlight: false },
+  "$rc_annual": { label: "Annual", sub: "per year · save 30%", highlight: false },
+  "$rc_lifetime": { label: "Lifetime", sub: "one-time payment", highlight: true },
+};
 
 export default function FleetUpgradeScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const topPad = Platform.OS === "web" ? 20 : insets.top;
-  const [selected, setSelected] = React.useState("lifetime");
 
-  const handlePurchase = () => {
+  const { offerings, isLoading, purchase, isPurchasing, restore, isRestoring, isFleet } = useSubscription();
+  const [selectedId, setSelectedId] = React.useState("$rc_lifetime");
+  const [confirmPkg, setConfirmPkg] = React.useState<PurchasesPackage | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const availablePackages: PurchasesPackage[] = offerings?.current?.availablePackages ?? [];
+
+  const orderedPackages = PACKAGE_ORDER
+    .map((id) => availablePackages.find((p) => p.identifier === id))
+    .filter(Boolean) as PurchasesPackage[];
+
+  const selectedPkg = orderedPackages.find((p) => p.identifier === selectedId) ?? orderedPackages[0];
+
+  const handleGetFleet = async () => {
+    if (!selectedPkg) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setError(null);
+    if (__DEV__) {
+      setConfirmPkg(selectedPkg);
+    } else {
+      await executePurchase(selectedPkg);
+    }
   };
+
+  const executePurchase = async (pkg: PurchasesPackage) => {
+    try {
+      await purchase(pkg);
+      router.back();
+    } catch (e: any) {
+      if (!e.userCancelled) {
+        setError(e.message ?? "Purchase failed. Please try again.");
+      }
+    }
+  };
+
+  const handleRestore = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setError(null);
+    try {
+      await restore();
+    } catch (e: any) {
+      setError("Restore failed. Please try again.");
+    }
+  };
+
+  if (isFleet) {
+    return (
+      <View style={[styles.screen, { backgroundColor: C.background, alignItems: "center", justifyContent: "center" }]}>
+        <View style={styles.heroIconWrap}>
+          <Feather name="check-circle" size={32} color="#D97706" />
+        </View>
+        <Text style={[styles.heroTitle, { color: C.text, marginTop: 16 }]}>You're on CTL Fleet!</Text>
+        <Text style={[styles.heroSub, { color: C.textSecondary, marginTop: 8 }]}>
+          Enjoy unlimited vehicles and all premium tools.
+        </Text>
+        <Pressable
+          onPress={() => router.back()}
+          style={[styles.ctaBtn, { marginTop: 32 }]}
+        >
+          <Text style={styles.ctaBtnText}>Back</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: C.background }]}>
@@ -51,7 +116,6 @@ export default function FleetUpgradeScreen() {
         contentContainerStyle={[styles.content, { paddingTop: topPad + 12 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Close button */}
         <Pressable
           onPress={() => router.back()}
           style={[styles.closeBtn, { backgroundColor: C.card }]}
@@ -60,7 +124,6 @@ export default function FleetUpgradeScreen() {
           <Feather name="x" size={18} color={C.textSecondary} />
         </Pressable>
 
-        {/* Hero */}
         <View style={styles.hero}>
           <View style={styles.heroIconWrap}>
             <Feather name="star" size={28} color="#92400E" />
@@ -71,7 +134,6 @@ export default function FleetUpgradeScreen() {
           </Text>
         </View>
 
-        {/* Comparison */}
         <View style={[styles.comparisonCard, { backgroundColor: C.card }]}>
           <View style={styles.comparisonCol}>
             <Text style={[styles.comparisonHeader, { color: C.textSecondary }]}>Free</Text>
@@ -94,56 +156,133 @@ export default function FleetUpgradeScreen() {
           </View>
         </View>
 
-        {/* Plans */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>CHOOSE A PLAN</Text>
-        {PLANS.map((plan) => {
-          const active = selected === plan.id;
-          return (
-            <Pressable
-              key={plan.id}
-              onPress={() => {
-                setSelected(plan.id);
-                Haptics.selectionAsync();
-              }}
-              style={[
-                styles.planCard,
-                {
-                  backgroundColor: C.card,
-                  borderColor: active ? "#D97706" : C.border,
-                  borderWidth: active ? 2 : 1,
-                },
-              ]}
-            >
-              {plan.highlight && (
-                <View style={styles.popularBadge}>
-                  <Text style={styles.popularText}>Best Value</Text>
-                </View>
-              )}
-              <View style={[styles.planRadio, { borderColor: active ? "#D97706" : C.textTertiary }]}>
-                {active && <View style={styles.planRadioInner} />}
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.planLabel, { color: C.text }]}>{plan.label}</Text>
-                <Text style={[styles.planSub, { color: C.textSecondary }]}>{plan.sub}</Text>
-              </View>
-              <Text style={[styles.planPrice, { color: C.text }]}>{plan.price}</Text>
-            </Pressable>
-          );
-        })}
 
-        {/* CTA */}
+        {isLoading ? (
+          <View style={styles.loadingRow}>
+            <ActivityIndicator color={C.tint} />
+            <Text style={[styles.loadingText, { color: C.textSecondary }]}>Loading plans...</Text>
+          </View>
+        ) : orderedPackages.length === 0 ? (
+          <Text style={[styles.loadingText, { color: C.textSecondary, textAlign: "center" }]}>
+            Plans unavailable. Please try again later.
+          </Text>
+        ) : (
+          orderedPackages.map((pkg) => {
+            const meta = PACKAGE_META[pkg.identifier] ?? { label: pkg.identifier, sub: "", highlight: false };
+            const active = selectedId === pkg.identifier;
+            const price = pkg.product.priceString;
+            const sub = meta.sub;
+            return (
+              <Pressable
+                key={pkg.identifier}
+                onPress={() => {
+                  setSelectedId(pkg.identifier);
+                  Haptics.selectionAsync();
+                }}
+                style={[
+                  styles.planCard,
+                  {
+                    backgroundColor: C.card,
+                    borderColor: active ? "#D97706" : C.border,
+                    borderWidth: active ? 2 : 1,
+                  },
+                ]}
+              >
+                {meta.highlight && (
+                  <View style={styles.popularBadge}>
+                    <Text style={styles.popularText}>Best Value</Text>
+                  </View>
+                )}
+                <View style={[styles.planRadio, { borderColor: active ? "#D97706" : C.textTertiary }]}>
+                  {active && <View style={styles.planRadioInner} />}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.planLabel, { color: C.text }]}>{meta.label}</Text>
+                  <Text style={[styles.planSub, { color: C.textSecondary }]}>{sub}</Text>
+                </View>
+                <Text style={[styles.planPrice, { color: C.text }]}>{price}</Text>
+              </Pressable>
+            );
+          })
+        )}
+
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+
         <Pressable
-          onPress={handlePurchase}
-          style={({ pressed }) => [styles.ctaBtn, { opacity: pressed ? 0.85 : 1 }]}
+          onPress={handleGetFleet}
+          disabled={isPurchasing || isLoading || orderedPackages.length === 0}
+          style={({ pressed }) => [
+            styles.ctaBtn,
+            { opacity: pressed || isPurchasing ? 0.75 : 1 },
+          ]}
         >
-          <Text style={styles.ctaBtnText}>Get CTL Fleet</Text>
-          <Text style={styles.ctaBtnSub}>Payments coming soon</Text>
+          {isPurchasing ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.ctaBtnText}>Get CTL Fleet</Text>
+          )}
+        </Pressable>
+
+        <Pressable
+          onPress={handleRestore}
+          disabled={isRestoring}
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, alignSelf: "center" })}
+        >
+          <Text style={[styles.restoreText, { color: C.textSecondary }]}>
+            {isRestoring ? "Restoring..." : "Restore Purchases"}
+          </Text>
         </Pressable>
 
         <Text style={[styles.legalText, { color: C.textTertiary }]}>
-          Subscription auto-renews. Cancel anytime in App Store settings.
+          Subscriptions auto-renew. Cancel anytime in App Store / Play Store settings.
         </Text>
       </ScrollView>
+
+      {/* Test mode confirmation modal */}
+      <Modal
+        visible={!!confirmPkg}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmPkg(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: C.card }]}>
+            <Text style={[styles.modalTitle, { color: C.text }]}>Test Purchase</Text>
+            <Text style={[styles.modalBody, { color: C.textSecondary }]}>
+              You are in development mode. This will simulate purchasing{" "}
+              <Text style={{ fontFamily: "Inter_600SemiBold", color: C.text }}>
+                {confirmPkg ? (PACKAGE_META[confirmPkg.identifier]?.label ?? confirmPkg.identifier) : ""}
+              </Text>{" "}
+              for{" "}
+              <Text style={{ fontFamily: "Inter_600SemiBold", color: C.text }}>
+                {confirmPkg?.product.priceString}
+              </Text>{" "}
+              using the RevenueCat test store.
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable
+                onPress={() => setConfirmPkg(null)}
+                style={[styles.modalBtn, { backgroundColor: C.background }]}
+              >
+                <Text style={[styles.modalBtnText, { color: C.textSecondary }]}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={async () => {
+                  const pkg = confirmPkg;
+                  setConfirmPkg(null);
+                  if (pkg) await executePurchase(pkg);
+                }}
+                style={[styles.modalBtn, { backgroundColor: "#D97706" }]}
+              >
+                <Text style={[styles.modalBtnText, { color: "#fff" }]}>Confirm Purchase</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -193,6 +332,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
+  loadingRow: { flexDirection: "row", alignItems: "center", gap: 10, justifyContent: "center", paddingVertical: 16 },
+  loadingText: { fontSize: 14, fontFamily: "Inter_400Regular" },
+
   planCard: {
     borderRadius: 14,
     padding: 16,
@@ -236,10 +378,43 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 4,
-    gap: 2,
+    minHeight: 52,
+    justifyContent: "center",
   },
   ctaBtnText: { fontSize: 17, fontFamily: "Inter_700Bold", color: "#fff" },
-  ctaBtnSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.75)" },
+
+  restoreText: { fontSize: 13, fontFamily: "Inter_400Regular", paddingVertical: 4 },
+
+  errorText: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "#DC2626",
+    textAlign: "center",
+  },
 
   legalText: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center" },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  modalCard: {
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    gap: 16,
+  },
+  modalTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  modalBody: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 22 },
+  modalActions: { flexDirection: "row", gap: 10 },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });

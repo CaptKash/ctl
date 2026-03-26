@@ -20,6 +20,7 @@ runButton = "Project"
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
+integrations = ["revenuecat:1.0.0"]
 
 [postMerge]
 path = "scripts/post-merge.sh"
@@ -33,3 +34,10 @@ channel = "stable-25_05"
 [userenv.shared]
 RESET_BASE_URL = "https://e4258cb0-84c7-443c-ad62-0aa669b73cb1-00-48k7an1ynz04.spock.replit.dev"
 FROM_EMAIL = "CTL App <ctl.support@inroomstudio.com>"
+EXPO_PUBLIC_REVENUECAT_TEST_API_KEY = "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ"
+EXPO_PUBLIC_REVENUECAT_IOS_API_KEY = "appl_LRjDIRTvidTYYIqipELDpvRAyjX"
+EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY = "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
+REVENUECAT_PROJECT_ID = "proj5607bee1"
+REVENUECAT_TEST_STORE_APP_ID = "app58d0059e08"
+REVENUECAT_APPLE_APP_STORE_APP_ID = "app7c6bc0a718"
+REVENUECAT_GOOGLE_PLAY_STORE_APP_ID = "appcb2fcb6c98"
