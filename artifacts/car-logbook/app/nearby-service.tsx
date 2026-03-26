@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   reloadBtn: { padding: 4, marginLeft: "auto" },
   headerTitle: { fontSize: 18, fontWeight: "700", flex: 1, marginLeft: 4 },
 
-  pillRow: { paddingHorizontal: 16, paddingBottom: 8, gap: 8, flexDirection: "row" },
+  pillRow: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, flexDirection: "row", alignItems: "center" },
   pill: {
     paddingHorizontal: 14,
     paddingVertical: 6,
