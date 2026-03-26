@@ -21,7 +21,10 @@ export default function ToolsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Tools</Text>
+        <View style={styles.titleRow}>
+          <Feather name="sliders" size={22} color={C.tint} style={{ marginRight: 8, marginTop: 2 }} />
+          <Text style={[styles.headerTitle, { color: C.text }]}>Tools</Text>
+        </View>
         <Text style={[styles.headerSub, { color: C.textSecondary }]}>
           Utilities for your vehicle
         </Text>
@@ -109,6 +112,10 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 24,
     paddingBottom: 20,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 36,

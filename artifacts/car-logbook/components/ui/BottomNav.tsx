@@ -20,7 +20,7 @@ const TABS: {
   { id: "dashboard", label: "Dashboard",    icon: "grid",            route: "/home" },
   { id: "faults",    label: "Active Faults", icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
   { id: "history",   label: "History",      icon: "clock",           route: "/history" },
-  { id: "tools",     label: "Tools",        icon: "tool",            route: "/tools" },
+  { id: "tools",     label: "Tools",        icon: "sliders",         route: "/tools" },
   { id: "settings",  label: "Settings",     icon: "settings",        route: "/settings" },
 ];
 
