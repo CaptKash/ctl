@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingBottom: 12,
+    paddingBottom: 6,
     paddingHorizontal: 16,
     gap: 8,
   },
@@ -435,13 +435,13 @@ const styles = StyleSheet.create({
   reloadBtn: { padding: 4, marginLeft: "auto" },
   headerTitle: { fontSize: 18, fontWeight: "700", flex: 1, marginLeft: 4 },
 
-  pillRow: { paddingHorizontal: 16, paddingVertical: 8, gap: 8, flexDirection: "row", alignItems: "center" },
+  pillRow: { paddingHorizontal: 16, paddingTop: 2, paddingBottom: 10, gap: 8, flexDirection: "row", alignItems: "center" },
   pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
   },
-  pillText: { fontSize: 13, fontWeight: "500" },
+  pillText: { fontSize: 14, fontWeight: "500" },
 
   countLabel: {
     fontSize: 12,
