@@ -34,7 +34,7 @@ export default function ToolsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Pressable
-          onPress={() => router.push("/tools/fuel" as any)}
+          onPress={() => router.push("/fuel" as any)}
           style={({ pressed }) => [
             styles.tool,
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },

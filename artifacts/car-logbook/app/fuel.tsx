@@ -26,6 +26,7 @@ import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { RecordCard } from "@/components/ui/RecordCard";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 
@@ -88,10 +89,8 @@ export default function FuelScreen() {
     queryKey: ["cars"],
     queryFn: () => apiGet<Car[]>("/cars"),
   });
-
   const cars = carsQuery.data ?? [];
 
-  // Fetch fuel records for every car in parallel
   const fuelQueries = useQueries({
     queries: cars.map((car) => ({
       queryKey: ["fuel", car.id],
@@ -99,10 +98,8 @@ export default function FuelScreen() {
       enabled: cars.length > 0,
     })),
   });
-
   const isLoadingFuel = fuelQueries.some((q) => q.isLoading);
 
-  // Combine and enrich all records with car label
   const allRecords: EnrichedRecord[] = useMemo(() => {
     const result: EnrichedRecord[] = [];
     fuelQueries.forEach((q, i) => {
@@ -116,7 +113,6 @@ export default function FuelScreen() {
   // Stats across all cars
   const stats = useMemo(() => {
     if (allRecords.length === 0) return null;
-    // Per-car efficiency
     const byCarId = new Map<number, FuelRecord[]>();
     allRecords.forEach((r) => {
       if (!byCarId.has(r.carId)) byCarId.set(r.carId, []);
@@ -139,7 +135,6 @@ export default function FuelScreen() {
     return { avgL100km, totalCost, count: allRecords.length };
   }, [allRecords]);
 
-  // Per-fill-up consumption map (within each car)
   const consumptionMap = useMemo(() => {
     const map = new Map<number, string>();
     const byCarId = new Map<number, FuelRecord[]>();
@@ -151,9 +146,7 @@ export default function FuelScreen() {
       const sorted = [...carRecords].sort((a, b) => a.mileage - b.mileage);
       for (let i = 1; i < sorted.length; i++) {
         const dist = sorted[i].mileage - sorted[i - 1].mileage;
-        if (dist > 0) {
-          map.set(sorted[i].id, calcConsumption(sorted[i].liters, dist, unit));
-        }
+        if (dist > 0) map.set(sorted[i].id, calcConsumption(sorted[i].liters, dist, unit));
       }
     });
     return map;
@@ -167,39 +160,28 @@ export default function FuelScreen() {
 
   const handleLitersChange = (val: string) => {
     setFLiters(val);
-    const l = parseFloat(val);
-    const p = parseFloat(fPricePerUnit);
+    const l = parseFloat(val), p = parseFloat(fPricePerUnit);
     if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) setFTotalCost((l * p).toFixed(2));
   };
 
   const handlePriceChange = (val: string) => {
     setFPricePerUnit(val);
-    const l = parseFloat(fLiters);
-    const p = parseFloat(val);
+    const l = parseFloat(fLiters), p = parseFloat(val);
     if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) setFTotalCost((l * p).toFixed(2));
   };
 
   const resetForm = () => {
     setFDate(new Date().toISOString().split("T")[0]);
-    setFMileage("");
-    setFLiters("");
-    setFPricePerUnit("");
-    setFTotalCost("");
-    setFFuelType("");
-    setFStation("");
-    setFFullTank(true);
-    setFNotes("");
-    // Keep fCarId — user probably logging multiple fill-ups for the same car
+    setFMileage(""); setFLiters(""); setFPricePerUnit(""); setFTotalCost("");
+    setFFuelType(""); setFStation(""); setFFullTank(true); setFNotes("");
   };
 
-  const carOptions = cars.map((c) => carLabel(c));
-
+  const carOptions = cars.map(carLabel);
+  const selectedCarLabel = fCarId ? (cars.find((c) => c.id === fCarId) ? carLabel(cars.find((c) => c.id === fCarId)!) : "") : "";
   const handleCarSelect = (label: string) => {
     const car = cars.find((c) => carLabel(c) === label);
     if (car) setFCarId(car.id);
   };
-
-  const selectedCarLabel = fCarId ? (cars.find((c) => c.id === fCarId) ? carLabel(cars.find((c) => c.id === fCarId)!) : "") : "";
 
   const addMutation = useMutation({
     mutationFn: () =>
@@ -234,18 +216,15 @@ export default function FuelScreen() {
 
   const canSubmit =
     fCarId !== null &&
-    fMileage.trim() !== "" &&
-    !isNaN(parseInt(fMileage)) &&
-    fLiters.trim() !== "" &&
-    !isNaN(parseFloat(fLiters)) &&
-    fTotalCost.trim() !== "" &&
-    !isNaN(parseFloat(fTotalCost));
+    fMileage.trim() !== "" && !isNaN(parseInt(fMileage)) &&
+    fLiters.trim() !== "" && !isNaN(parseFloat(fLiters)) &&
+    fTotalCost.trim() !== "" && !isNaN(parseFloat(fTotalCost));
 
   const isLoading = carsQuery.isLoading || isLoadingFuel;
 
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
-      {/* Header */}
+      {/* Header — matches maintenance/faults pattern */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
@@ -258,6 +237,17 @@ export default function FuelScreen() {
             <Text style={[styles.headerTitle, { color: C.text }]}>Fuel Consumption</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>All vehicles</Text>
           </View>
+          <Pressable
+            onPress={() => {
+              if (cars.length > 0) {
+                if (!fCarId) setFCarId(cars[0].id);
+                setShowAdd(true);
+              }
+            }}
+            style={({ pressed }) => [styles.addBtn, { backgroundColor: C.tint, opacity: pressed ? 0.8 : 1 }]}
+          >
+            <Feather name="plus" size={18} color="#FFFFFF" />
+          </Pressable>
         </View>
       </View>
 
@@ -268,18 +258,18 @@ export default function FuelScreen() {
         {/* Stats row */}
         {stats && (
           <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: C.card, shadowColor: C.shadow }]}>
-              <Feather name="trending-up" size={16} color="#2563EB" style={{ marginBottom: 6 }} />
+            <View style={[styles.statCard, { backgroundColor: C.card }]}>
+              <Feather name="trending-up" size={15} color="#2563EB" style={{ marginBottom: 4 }} />
               <Text style={[styles.statValue, { color: C.text }]}>{formatAvg(stats.avgL100km)}</Text>
               <Text style={[styles.statLabel, { color: C.textSecondary }]}>Avg. Efficiency</Text>
             </View>
-            <View style={[styles.statCard, { backgroundColor: C.card, shadowColor: C.shadow }]}>
-              <Feather name="droplet" size={16} color="#10B981" style={{ marginBottom: 6 }} />
+            <View style={[styles.statCard, { backgroundColor: C.card }]}>
+              <Feather name="droplet" size={15} color={C.success} style={{ marginBottom: 4 }} />
               <Text style={[styles.statValue, { color: C.text }]}>{stats.count}</Text>
               <Text style={[styles.statLabel, { color: C.textSecondary }]}>Fill-ups</Text>
             </View>
-            <View style={[styles.statCard, { backgroundColor: C.card, shadowColor: C.shadow }]}>
-              <Feather name="dollar-sign" size={16} color="#F59E0B" style={{ marginBottom: 6 }} />
+            <View style={[styles.statCard, { backgroundColor: C.card }]}>
+              <Feather name="dollar-sign" size={15} color={C.warning} style={{ marginBottom: 4 }} />
               <Text style={[styles.statValue, { color: C.text }]}>
                 {currency.symbol}{stats.totalCost.toFixed(0)}
               </Text>
@@ -289,7 +279,7 @@ export default function FuelScreen() {
         )}
 
         {isLoading ? (
-          <ActivityIndicator color={C.tint} style={{ marginTop: 24 }} />
+          <ActivityIndicator color={C.tint} style={{ marginTop: 32 }} />
         ) : cars.length === 0 ? (
           <EmptyState
             icon="truck"
@@ -300,7 +290,7 @@ export default function FuelScreen() {
           <EmptyState
             icon="droplet"
             title="No fill-ups logged"
-            description="Log your first fill-up to start tracking fuel efficiency."
+            description="Tap + to log your first fill-up and start tracking fuel efficiency."
             actionLabel="Log Fill-up"
             onAction={() => {
               if (!fCarId && cars.length > 0) setFCarId(cars[0].id);
@@ -310,50 +300,30 @@ export default function FuelScreen() {
         ) : (
           allRecords.map((r) => {
             const effText = consumptionMap.get(r.id);
+            const subtitleParts = [
+              r.carLabel,
+              formatDate(r.date),
+              `${r.mileage.toLocaleString()} ${unit}`,
+              r.station,
+            ].filter(Boolean);
             return (
-              <View key={r.id} style={[styles.card, { backgroundColor: C.card, shadowColor: C.shadow }]}>
-                <View style={[styles.cardIconWrap, { backgroundColor: "#DBEAFE" }]}>
-                  <Feather name="droplet" size={18} color="#2563EB" />
-                </View>
-                <View style={styles.cardBody}>
-                  <View style={styles.cardRow}>
-                    <Text style={[styles.cardTitle, { color: C.text }]}>
-                      {r.liters.toFixed(1)} L{r.fuelType ? ` · ${r.fuelType}` : ""}
-                    </Text>
-                    <Text style={[styles.cardCost, { color: C.text }]}>
-                      {currency.symbol}{r.totalCost.toFixed(2)}
-                    </Text>
-                  </View>
-                  <View style={styles.cardRow}>
-                    <Text style={[styles.cardSub, { color: C.textSecondary }]} numberOfLines={1}>
-                      {r.carLabel} · {formatDate(r.date)} · {r.mileage.toLocaleString()} {unit}
-                      {r.station ? ` · ${r.station}` : ""}
-                    </Text>
-                  </View>
-                  {effText && (
-                    <Text style={[styles.cardEff, { color: "#2563EB" }]}>{effText}</Text>
-                  )}
-                  {r.fullTank === false && (
-                    <Text style={[styles.cardNote, { color: C.textTertiary }]}>Partial fill</Text>
-                  )}
-                  {r.notes ? (
-                    <Text style={[styles.cardNote, { color: C.textTertiary }]}>{r.notes}</Text>
-                  ) : null}
-                </View>
-                <Pressable
-                  onPress={() => setConfirmRecord({ id: r.id, carId: r.carId })}
-                  hitSlop={8}
-                  style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
-                >
-                  <Feather name="trash-2" size={16} color={C.textTertiary} />
-                </Pressable>
-              </View>
+              <RecordCard
+                key={r.id}
+                icon="droplet"
+                iconColor="#2563EB"
+                iconBg="#DBEAFE"
+                title={`${r.liters.toFixed(1)} L${r.fuelType ? ` · ${r.fuelType}` : ""}${r.fullTank === false ? " · Partial" : ""}`}
+                subtitle={subtitleParts.join(" · ")}
+                rightText={`${currency.symbol}${r.totalCost.toFixed(2)}`}
+                rightSubtext={effText}
+                onDelete={() => setConfirmRecord({ id: r.id, carId: r.carId })}
+              />
             );
           })
         )}
       </ScrollView>
 
-      {/* Add Fill-up Sheet */}
+      {/* Add Fill-up Modal */}
       <Modal
         visible={showAdd}
         animationType="slide"
@@ -371,7 +341,6 @@ export default function FuelScreen() {
             contentContainerStyle={[styles.sheetBody, { paddingBottom: insets.bottom + 24 }]}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Car selector — first field */}
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <SelectField
                 label="Vehicle"
@@ -501,27 +470,19 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 1 },
-  content: { padding: 16, gap: 0 },
+  addBtn: {
+    width: 36, height: 36, borderRadius: 10,
+    alignItems: "center", justifyContent: "center",
+  },
+  content: { padding: 16 },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
   statCard: {
-    flex: 1, borderRadius: 14, padding: 14, alignItems: "center",
+    flex: 1, borderRadius: 14, padding: 12, alignItems: "center",
+    shadowColor: "rgba(0,0,0,0.06)",
     shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 6, elevation: 2,
   },
-  statValue: { fontSize: 15, fontFamily: "Inter_700Bold", textAlign: "center" },
+  statValue: { fontSize: 14, fontFamily: "Inter_700Bold", textAlign: "center" },
   statLabel: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 2, textAlign: "center" },
-  card: {
-    flexDirection: "row", alignItems: "flex-start", gap: 12,
-    borderRadius: 14, padding: 14, marginBottom: 10,
-    shadowOffset: { width: 0, height: 1 }, shadowOpacity: 1, shadowRadius: 4, elevation: 2,
-  },
-  cardIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  cardBody: { flex: 1, gap: 3 },
-  cardRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
-  cardCost: { fontSize: 15, fontFamily: "Inter_700Bold" },
-  cardSub: { fontSize: 12, fontFamily: "Inter_400Regular", flex: 1 },
-  cardEff: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
-  cardNote: { fontSize: 12, fontFamily: "Inter_400Regular", fontStyle: "italic" },
   sheet: { flex: 1 },
   sheetHeader: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
