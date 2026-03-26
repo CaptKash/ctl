@@ -257,8 +257,10 @@ export default function ExportScreen() {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
         } else {
-          const path = (FileSystem.cacheDirectory ?? "") + filename;
-          await FileSystem.writeAsStringAsync(path, csv, { encoding: FileSystem.EncodingType.UTF8 });
+          const cacheDir = FileSystem.cacheDirectory;
+          if (!cacheDir) throw new Error("File system unavailable on this device.");
+          const path = cacheDir + filename;
+          await FileSystem.writeAsStringAsync(path, csv, { encoding: "utf8" as any });
           await Sharing.shareAsync(path, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
         }
       }
