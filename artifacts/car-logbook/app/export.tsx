@@ -10,6 +10,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -258,10 +259,18 @@ export default function ExportScreen() {
           URL.revokeObjectURL(url);
         } else {
           const cacheDir = FileSystem.cacheDirectory;
-          if (!cacheDir) throw new Error("File system unavailable on this device.");
-          const path = cacheDir + filename;
-          await FileSystem.writeAsStringAsync(path, csv, { encoding: "utf8" as any });
-          await Sharing.shareAsync(path, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
+          if (cacheDir) {
+            const path = cacheDir + filename;
+            await FileSystem.writeAsStringAsync(path, csv, { encoding: "utf8" as any });
+            const canShare = await Sharing.isAvailableAsync();
+            if (canShare) {
+              await Sharing.shareAsync(path, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
+            } else {
+              await Share.share({ message: csv, title: filename });
+            }
+          } else {
+            await Share.share({ message: csv, title: filename });
+          }
         }
       }
     } catch (e: any) {
