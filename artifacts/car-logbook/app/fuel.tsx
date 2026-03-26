@@ -73,6 +73,7 @@ export default function FuelScreen() {
 
   const [showAdd, setShowAdd] = useState(false);
   const [confirmRecord, setConfirmRecord] = useState<{ id: number; carId: number } | null>(null);
+  const [filterCarId, setFilterCarId] = useState<number | null>(null);
 
   // form state
   const [fCarId, setFCarId] = useState<number | null>(null);
@@ -111,11 +112,16 @@ export default function FuelScreen() {
     return result.sort((a, b) => b.date.localeCompare(a.date) || b.mileage - a.mileage);
   }, [fuelQueries, cars]);
 
-  // Stats across all cars
+  const filteredRecords = useMemo(
+    () => filterCarId === null ? allRecords : allRecords.filter((r) => r.carId === filterCarId),
+    [allRecords, filterCarId]
+  );
+
+  // Stats for current filter
   const stats = useMemo(() => {
-    if (allRecords.length === 0) return null;
+    if (filteredRecords.length === 0) return null;
     const byCarId = new Map<number, FuelRecord[]>();
-    allRecords.forEach((r) => {
+    filteredRecords.forEach((r) => {
       if (!byCarId.has(r.carId)) byCarId.set(r.carId, []);
       byCarId.get(r.carId)!.push(r);
     });
@@ -132,14 +138,14 @@ export default function FuelScreen() {
       }
     });
     const avgL100km = consumptionPairCount > 0 ? totalConsumptionPairs / consumptionPairCount : null;
-    const totalCost = allRecords.reduce((s, r) => s + r.totalCost, 0);
-    return { avgL100km, totalCost, count: allRecords.length };
-  }, [allRecords]);
+    const totalCost = filteredRecords.reduce((s, r) => s + r.totalCost, 0);
+    return { avgL100km, totalCost, count: filteredRecords.length };
+  }, [filteredRecords]);
 
   const consumptionMap = useMemo(() => {
     const map = new Map<number, string>();
     const byCarId = new Map<number, FuelRecord[]>();
-    allRecords.forEach((r) => {
+    filteredRecords.forEach((r) => {
       if (!byCarId.has(r.carId)) byCarId.set(r.carId, []);
       byCarId.get(r.carId)!.push(r);
     });
@@ -151,7 +157,7 @@ export default function FuelScreen() {
       }
     });
     return map;
-  }, [allRecords, unit]);
+  }, [filteredRecords, unit]);
 
   const formatAvg = (avgL100km: number | null) => {
     if (avgL100km === null) return "—";
@@ -236,7 +242,9 @@ export default function FuelScreen() {
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Fuel Consumption</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>All vehicles</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
+              {filterCarId === null ? "All vehicles" : (cars.find((c) => c.id === filterCarId) ? carLabel(cars.find((c) => c.id === filterCarId)!) : "All vehicles")}
+            </Text>
           </View>
           <Pressable
             onPress={() => {
@@ -251,6 +259,39 @@ export default function FuelScreen() {
           </Pressable>
         </View>
       </View>
+
+      {/* Car filter pills — only visible when there are multiple cars */}
+      {cars.length > 1 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.pillsRow}
+          style={[styles.pillsContainer, { backgroundColor: C.card, borderBottomColor: C.border }]}
+        >
+          <Pressable
+            onPress={() => setFilterCarId(null)}
+            style={[styles.pill, filterCarId === null && { backgroundColor: C.tint }]}
+          >
+            <Text style={[styles.pillText, { color: filterCarId === null ? "#fff" : C.textSecondary }]}>
+              All
+            </Text>
+          </Pressable>
+          {cars.map((car) => {
+            const active = filterCarId === car.id;
+            return (
+              <Pressable
+                key={car.id}
+                onPress={() => setFilterCarId(car.id)}
+                style={[styles.pill, active && { backgroundColor: C.tint }]}
+              >
+                <Text style={[styles.pillText, { color: active ? "#fff" : C.textSecondary }]} numberOfLines={1}>
+                  {carLabel(car)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
 
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
@@ -298,11 +339,17 @@ export default function FuelScreen() {
               setShowAdd(true);
             }}
           />
+        ) : filteredRecords.length === 0 ? (
+          <EmptyState
+            icon="droplet"
+            title="No fill-ups for this vehicle"
+            description="Log a fill-up for this car to see its stats here."
+          />
         ) : (
-          allRecords.map((r) => {
+          filteredRecords.map((r) => {
             const effText = consumptionMap.get(r.id);
             const subtitleParts = [
-              r.carLabel,
+              filterCarId === null ? r.carLabel : null,
               formatDate(r.date),
               `${r.mileage.toLocaleString()} ${unit}`,
               r.station,
@@ -487,6 +534,25 @@ const styles = StyleSheet.create({
   },
   statValue: { fontSize: 14, fontFamily: "Inter_700Bold", textAlign: "center" },
   statLabel: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 2, textAlign: "center" },
+  pillsContainer: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  pillsRow: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  pill: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: "rgba(128,128,128,0.12)",
+  },
+  pillText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+  },
   sheet: { flex: 1 },
   sheetHeader: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
