@@ -114,6 +114,27 @@ export default function ToolsScreen() {
         </Pressable>
 
         <Pressable
+          onPress={() => router.push("/nearby-service" as any)}
+          style={({ pressed }) => [
+            styles.tool,
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
+          ]}
+        >
+          <View style={[styles.toolIcon, { backgroundColor: "#ECFDF5" }]}>
+            <Feather name="map-pin" size={24} color="#059669" />
+          </View>
+          <View style={styles.toolBody}>
+            <Text style={[styles.toolTitle, { color: C.text }]}>
+              Service Centers Nearby
+            </Text>
+            <Text style={[styles.toolSub, { color: C.textSecondary }]}>
+              Find repair shops close to you
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={18} color={C.textTertiary} />
+        </Pressable>
+
+        <Pressable
           onPress={openModal}
           style={({ pressed }) => [styles.suggestCard, { opacity: pressed ? 0.85 : 1 }]}
         >
