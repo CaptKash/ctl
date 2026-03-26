@@ -4,7 +4,7 @@ import { optionalAuth } from "../middlewares/auth";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudios.com>";
-const SUPPORT_EMAIL = "ctl.support@inroomstudio.com";
+const SUPPORT_EMAIL = "mkashour.apple@gmail.com";
 
 const router = Router();
 
