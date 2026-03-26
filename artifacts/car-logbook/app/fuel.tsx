@@ -31,7 +31,7 @@ import { RecordCard } from "@/components/ui/RecordCard";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 
-type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
+type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; isElectric?: boolean | null };
 
 type FuelRecord = {
   id: number;
@@ -92,12 +92,13 @@ export default function FuelScreen() {
     queryFn: () => apiGet<Car[]>("/cars"),
   });
   const cars = carsQuery.data ?? [];
+  const fuelCars = useMemo(() => cars.filter((c) => !c.isElectric), [cars]);
 
   const fuelQueries = useQueries({
-    queries: cars.map((car) => ({
+    queries: fuelCars.map((car) => ({
       queryKey: ["fuel", car.id],
       queryFn: () => apiGet<FuelRecord[]>(`/cars/${car.id}/fuel`),
-      enabled: cars.length > 0,
+      enabled: fuelCars.length > 0,
     })),
   });
   const isLoadingFuel = fuelQueries.some((q) => q.isLoading);
@@ -105,12 +106,12 @@ export default function FuelScreen() {
   const allRecords: EnrichedRecord[] = useMemo(() => {
     const result: EnrichedRecord[] = [];
     fuelQueries.forEach((q, i) => {
-      const car = cars[i];
+      const car = fuelCars[i];
       if (!car || !q.data) return;
       q.data.forEach((r) => result.push({ ...r, carLabel: carLabel(car) }));
     });
     return result.sort((a, b) => b.date.localeCompare(a.date) || b.mileage - a.mileage);
-  }, [fuelQueries, cars]);
+  }, [fuelQueries, fuelCars]);
 
   const filteredRecords = useMemo(
     () => filterCarId === null ? allRecords : allRecords.filter((r) => r.carId === filterCarId),
@@ -183,10 +184,10 @@ export default function FuelScreen() {
     setFFuelType(""); setFStation(""); setFFullTank(true); setFNotes("");
   };
 
-  const carOptions = cars.map(carLabel);
-  const selectedCarLabel = fCarId ? (cars.find((c) => c.id === fCarId) ? carLabel(cars.find((c) => c.id === fCarId)!) : "") : "";
+  const carOptions = fuelCars.map(carLabel);
+  const selectedCarLabel = fCarId ? (fuelCars.find((c) => c.id === fCarId) ? carLabel(fuelCars.find((c) => c.id === fCarId)!) : "") : "";
   const handleCarSelect = (label: string) => {
-    const car = cars.find((c) => carLabel(c) === label);
+    const car = fuelCars.find((c) => carLabel(c) === label);
     if (car) setFCarId(car.id);
   };
 
@@ -243,13 +244,13 @@ export default function FuelScreen() {
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Fuel Consumption</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-              {filterCarId === null ? "All vehicles" : (cars.find((c) => c.id === filterCarId) ? carLabel(cars.find((c) => c.id === filterCarId)!) : "All vehicles")}
+              {filterCarId === null ? "All vehicles" : (fuelCars.find((c) => c.id === filterCarId) ? carLabel(fuelCars.find((c) => c.id === filterCarId)!) : "All vehicles")}
             </Text>
           </View>
           <Pressable
             onPress={() => {
-              if (cars.length > 0) {
-                if (!fCarId) setFCarId(cars[0].id);
+              if (fuelCars.length > 0) {
+                if (!fCarId) setFCarId(fuelCars[0].id);
                 setShowAdd(true);
               }
             }}
@@ -260,8 +261,8 @@ export default function FuelScreen() {
         </View>
       </View>
 
-      {/* Car filter pills — only visible when there are multiple cars */}
-      {cars.length > 1 && (
+      {/* Car filter pills — only visible when there are multiple non-EV cars */}
+      {fuelCars.length > 1 && (
         <View style={[styles.pillsContainer, { backgroundColor: C.card, borderBottomColor: C.border }]}>
           <View style={styles.pillsRow}>
             <Pressable
@@ -272,7 +273,7 @@ export default function FuelScreen() {
                 All
               </Text>
             </Pressable>
-            {cars.map((car) => {
+            {fuelCars.map((car) => {
               const active = filterCarId === car.id;
               return (
                 <Pressable
@@ -319,11 +320,11 @@ export default function FuelScreen() {
 
         {isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 32 }} />
-        ) : cars.length === 0 ? (
+        ) : fuelCars.length === 0 ? (
           <EmptyState
-            icon="truck"
-            title="No cars added"
-            description="Add a car to your fleet first."
+            icon="zap"
+            title="No fuel-powered vehicles"
+            description="Electric vehicles don't use fuel. Add a non-EV car to track fill-ups."
           />
         ) : allRecords.length === 0 ? (
           <EmptyState
@@ -332,7 +333,7 @@ export default function FuelScreen() {
             description="Tap + to log your first fill-up and start tracking fuel efficiency."
             actionLabel="Log Fill-up"
             onAction={() => {
-              if (!fCarId && cars.length > 0) setFCarId(cars[0].id);
+              if (!fCarId && fuelCars.length > 0) setFCarId(fuelCars[0].id);
               setShowAdd(true);
             }}
           />
