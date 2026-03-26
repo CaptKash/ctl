@@ -540,17 +540,17 @@ const styles = StyleSheet.create({
   pillsRow: {
     flexDirection: "row",
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
+    paddingVertical: 8,
+    gap: 6,
   },
   pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 20,
     backgroundColor: "rgba(128,128,128,0.12)",
   },
   pillText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Inter_500Medium",
   },
   sheet: { flex: 1 },
