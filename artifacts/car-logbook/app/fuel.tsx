@@ -262,35 +262,32 @@ export default function FuelScreen() {
 
       {/* Car filter pills — only visible when there are multiple cars */}
       {cars.length > 1 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.pillsRow}
-          style={[styles.pillsContainer, { backgroundColor: C.card, borderBottomColor: C.border }]}
-        >
-          <Pressable
-            onPress={() => setFilterCarId(null)}
-            style={[styles.pill, filterCarId === null && { backgroundColor: C.tint }]}
-          >
-            <Text style={[styles.pillText, { color: filterCarId === null ? "#fff" : C.textSecondary }]}>
-              All
-            </Text>
-          </Pressable>
-          {cars.map((car) => {
-            const active = filterCarId === car.id;
-            return (
-              <Pressable
-                key={car.id}
-                onPress={() => setFilterCarId(car.id)}
-                style={[styles.pill, active && { backgroundColor: C.tint }]}
-              >
-                <Text style={[styles.pillText, { color: active ? "#fff" : C.textSecondary }]} numberOfLines={1}>
-                  {carLabel(car)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <View style={[styles.pillsContainer, { backgroundColor: C.card, borderBottomColor: C.border }]}>
+          <View style={styles.pillsRow}>
+            <Pressable
+              onPress={() => setFilterCarId(null)}
+              style={[styles.pill, filterCarId === null && { backgroundColor: C.tint }]}
+            >
+              <Text style={[styles.pillText, { color: filterCarId === null ? "#fff" : C.textSecondary }]}>
+                All
+              </Text>
+            </Pressable>
+            {cars.map((car) => {
+              const active = filterCarId === car.id;
+              return (
+                <Pressable
+                  key={car.id}
+                  onPress={() => setFilterCarId(car.id)}
+                  style={[styles.pill, active && { backgroundColor: C.tint }]}
+                >
+                  <Text style={[styles.pillText, { color: active ? "#fff" : C.textSecondary }]}>
+                    {carLabel(car)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
       )}
 
       <ScrollView
@@ -539,14 +536,14 @@ const styles = StyleSheet.create({
   },
   pillsRow: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     paddingHorizontal: 16,
-    paddingVertical: 6,
-    gap: 6,
+    paddingVertical: 10,
+    gap: 8,
   },
   pill: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: 20,
     backgroundColor: "rgba(128,128,128,0.12)",
   },
