@@ -539,21 +539,20 @@ const styles = StyleSheet.create({
   },
   pillsRow: {
     flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 6,
     gap: 6,
   },
   pill: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 20,
     backgroundColor: "rgba(128,128,128,0.12)",
-    alignSelf: "flex-start",
   },
   pillText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Inter_500Medium",
-    lineHeight: 16,
   },
   sheet: { flex: 1 },
   sheetHeader: {
