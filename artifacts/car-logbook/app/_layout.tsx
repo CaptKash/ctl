@@ -21,6 +21,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { DistanceUnitProvider } from "@/context/DistanceUnitContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { EventRemindersProvider } from "@/context/EventRemindersContext";
+import { CountryProvider } from "@/context/CountryContext";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
 
 SplashScreen.preventAutoHideAsync();
@@ -86,6 +87,7 @@ export default function RootLayout() {
           <DistanceUnitProvider>
           <CurrencyProvider>
           <EventRemindersProvider>
+          <CountryProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <AppProvider>
@@ -98,6 +100,7 @@ export default function RootLayout() {
               </AppProvider>
             </AuthProvider>
           </QueryClientProvider>
+          </CountryProvider>
           </EventRemindersProvider>
           </CurrencyProvider>
           </DistanceUnitProvider>

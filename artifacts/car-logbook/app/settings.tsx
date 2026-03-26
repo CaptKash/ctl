@@ -24,6 +24,7 @@ import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { useCurrency, CURRENCIES, currencyOption, findCurrencyByOption } from "@/context/CurrencyContext";
 import { useEventReminders } from "@/context/EventRemindersContext";
+import { useCountry, COUNTRIES, countryOption, findCountryByOption } from "@/context/CountryContext";
 import { registerPicker } from "@/components/ui/selectPickerStore";
 import { requestNotificationPermissions } from "@/lib/notifications";
 import { apiGet, apiDelete } from "@/hooks/useApi";
@@ -139,6 +140,39 @@ const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string }[] = [
   { value: "km", label: "km" },
   { value: "mi", label: "mi" },
 ];
+
+function CountryRow() {
+  const C = useColors();
+  const { country, setCountry } = useCountry();
+
+  const handlePress = () => {
+    registerPicker(
+      "Country",
+      COUNTRIES.map(countryOption),
+      country ? countryOption(country) : "",
+      (selected) => {
+        const found = findCountryByOption(selected);
+        if (found) setCountry(found);
+      }
+    );
+    router.push("/select-picker");
+  };
+
+  return (
+    <TouchableOpacity style={styles.row} onPress={handlePress} activeOpacity={0.7}>
+      <View style={[styles.rowIcon, { backgroundColor: "#EDE9FE" }]}>
+        <Feather name="globe" size={16} color="#7C3AED" />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={[styles.rowTitle, { color: C.text }]}>Country</Text>
+        <Text style={[styles.rowSub, { color: C.textSecondary }]}>
+          {country ? `${country.flag} ${country.name}` : "Select your country"}
+        </Text>
+      </View>
+      <Feather name="chevron-right" size={16} color={C.textTertiary} />
+    </TouchableOpacity>
+  );
+}
 
 function CurrencyRow() {
   const C = useColors();
@@ -335,6 +369,8 @@ export default function SettingsScreen() {
             subtitle="Update name or email"
             onPress={() => router.push("/edit-profile")}
           />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <CountryRow />
         </View>
 
         {/* CTL Fleet upgrade card */}
