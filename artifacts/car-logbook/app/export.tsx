@@ -231,15 +231,36 @@ export default function ExportScreen() {
 
       if (format === "pdf") {
         const html = buildPdfHtml(selectedCar, sections);
-        const { uri } = await Print.printToFileAsync({ html, base64: false });
-        await Sharing.shareAsync(uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" });
+        if (Platform.OS === "web") {
+          await Print.printAsync({ html });
+        } else {
+          const { uri } = await Print.printToFileAsync({ html, base64: false });
+          const canShare = await Sharing.isAvailableAsync();
+          if (canShare) {
+            await Sharing.shareAsync(uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" });
+          } else {
+            await Print.printAsync({ html });
+          }
+        }
       } else {
         const csv = buildCombinedCsv(selectedCar, sections);
         const filename =
           `CTL_${selectedCar.make}_${selectedCar.model}_${selectedCar.year}_${Date.now()}.csv`.replace(/\s+/g, "_");
-        const path = (FileSystem.cacheDirectory ?? "") + filename;
-        await FileSystem.writeAsStringAsync(path, csv, { encoding: FileSystem.EncodingType.UTF8 });
-        await Sharing.shareAsync(path, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
+        if (Platform.OS === "web") {
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } else {
+          const path = (FileSystem.cacheDirectory ?? "") + filename;
+          await FileSystem.writeAsStringAsync(path, csv, { encoding: FileSystem.EncodingType.UTF8 });
+          await Sharing.shareAsync(path, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
+        }
       }
     } catch (e: any) {
       setError(e?.message ?? "Export failed. Please try again.");
