@@ -10,13 +10,13 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
+import * as XLSX from "xlsx";
 import { useColors } from "@/context/ThemeContext";
 import { apiGet } from "@/hooks/useApi";
 
@@ -43,6 +43,15 @@ type SectionId = (typeof SECTIONS)[number]["id"];
 
 const HIDDEN_FIELDS = new Set(["id", "carId", "userId", "createdAt", "updatedAt", "completed"]);
 
+const SHEET_NAMES: Record<SectionId, string> = {
+  maintenance: "Maintenance",
+  fuel: "Fuel Records",
+  parts: "Parts Replaced",
+  insurance: "Insurance",
+  faults: "Faults",
+  inspections: "Inspections",
+};
+
 function toLabel(key: string): string {
   return key
     .replace(/([A-Z])/g, " $1")
@@ -58,19 +67,63 @@ function formatVal(v: unknown): string {
   return s;
 }
 
-function toCSV(rows: Record<string, unknown>[]): string {
-  if (!rows.length) return "";
-  const headers = Object.keys(rows[0]).filter((k) => !HIDDEN_FIELDS.has(k));
-  const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
-  const lines = [
-    headers.map((h) => escape(toLabel(h))).join(","),
-    ...rows.map((r) => headers.map((h) => escape(formatVal(r[h]))).join(",")),
-  ];
-  return lines.join("\r\n");
-}
-
 function carLabel(car: Car) {
   return `${car.year} ${car.make} ${car.model}${car.nickname ? ` (${car.nickname})` : ""}`;
+}
+
+function buildWorkbook(car: Car, sections: Record<SectionId, unknown[]>) {
+  const wb = XLSX.utils.book_new();
+  (wb as any).Props = {
+    Title: `CTL Fleet – ${carLabel(car)}`,
+    Author: "Car Technical Log",
+    CreatedDate: new Date(),
+  };
+
+  const sectionOrder: SectionId[] = ["maintenance", "fuel", "parts", "insurance", "faults", "inspections"];
+
+  const summaryRows = [
+    ["CTL Fleet Export"],
+    [carLabel(car)],
+    [car.licensePlate ? `Plate: ${car.licensePlate}` : ""],
+    [car.mileage ? `Mileage: ${car.mileage.toLocaleString()} km` : ""],
+    [`Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`],
+    [],
+    ["Section", "Records"],
+    ...sectionOrder
+      .filter((id) => sections[id] !== undefined)
+      .map((id) => [SHEET_NAMES[id], sections[id].length]),
+  ];
+  const summaryWs = XLSX.utils.aoa_to_sheet(summaryRows);
+  summaryWs["!cols"] = [{ wch: 28 }, { wch: 12 }];
+  XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+
+  sectionOrder
+    .filter((id) => sections[id] !== undefined)
+    .forEach((id) => {
+      const rows = sections[id] as Record<string, unknown>[];
+
+      if (!rows.length) {
+        const ws = XLSX.utils.aoa_to_sheet([["No records found for this section."]]);
+        ws["!cols"] = [{ wch: 36 }];
+        XLSX.utils.book_append_sheet(wb, ws, SHEET_NAMES[id]);
+        return;
+      }
+
+      const keys = Object.keys(rows[0]).filter((k) => !HIDDEN_FIELDS.has(k));
+      const header = keys.map(toLabel);
+      const dataRows = rows.map((r) => keys.map((k) => formatVal(r[k])));
+      const ws = XLSX.utils.aoa_to_sheet([header, ...dataRows]);
+
+      const colWidths = keys.map((k, i) => {
+        const maxData = Math.max(...dataRows.map((r) => (r[i] ?? "").length));
+        return { wch: Math.max(header[i].length, maxData, 10) + 2 };
+      });
+      ws["!cols"] = colWidths;
+
+      XLSX.utils.book_append_sheet(wb, ws, SHEET_NAMES[id]);
+    });
+
+  return wb;
 }
 
 function buildPdfHtml(car: Car, sections: Record<SectionId, unknown[]>): string {
@@ -137,35 +190,18 @@ function buildPdfHtml(car: Car, sections: Record<SectionId, unknown[]>): string 
   </body></html>`;
 }
 
-function buildCombinedCsv(car: Car, sections: Record<SectionId, unknown[]>): string {
-  const label = carLabel(car);
-  const sectionOrder: SectionId[] = ["maintenance", "fuel", "parts", "insurance", "faults", "inspections"];
-  const sectionLabels: Record<SectionId, string> = {
-    maintenance: "MAINTENANCE LOGS",
-    fuel: "FUEL RECORDS",
-    parts: "PARTS REPLACED",
-    insurance: "INSURANCE",
-    faults: "FAULTS / MALFUNCTIONS",
-    inspections: "INSPECTIONS",
-  };
-
-  const lines: string[] = [
-    `"CTL Export: ${label}"`,
-    `"Generated: ${new Date().toLocaleDateString()}"`,
-    "",
-  ];
-
-  sectionOrder
-    .filter((id) => sections[id] !== undefined)
-    .forEach((id) => {
-      lines.push(`"--- ${sectionLabels[id]} ---"`);
-      const csv = toCSV(sections[id] as Record<string, unknown>[]);
-      if (csv) lines.push(csv);
-      else lines.push('"No records"');
-      lines.push("");
-    });
-
-  return "\uFEFF" + lines.join("\r\n");
+async function sharePdf(html: string) {
+  if (Platform.OS === "web") {
+    await Print.printAsync({ html });
+  } else {
+    const { uri } = await Print.printToFileAsync({ html, base64: false });
+    const canShare = await Sharing.isAvailableAsync();
+    if (canShare) {
+      await Sharing.shareAsync(uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" });
+    } else {
+      await Print.printAsync({ html });
+    }
+  }
 }
 
 export default function ExportScreen() {
@@ -174,7 +210,7 @@ export default function ExportScreen() {
   const topPad = Platform.OS === "web" ? 20 : insets.top;
 
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
-  const [format, setFormat] = useState<"pdf" | "csv">("pdf");
+  const [format, setFormat] = useState<"pdf" | "xlsx">("pdf");
   const [enabled, setEnabled] = useState<Set<SectionId>>(
     new Set(["maintenance", "fuel", "parts", "insurance", "faults", "inspections"])
   );
@@ -229,26 +265,20 @@ export default function ExportScreen() {
       );
 
       const sections = fetched as Record<SectionId, unknown[]>;
+      const safeName = `${selectedCar.make}_${selectedCar.model}_${selectedCar.year}`.replace(/\s+/g, "_");
 
       if (format === "pdf") {
         const html = buildPdfHtml(selectedCar, sections);
-        if (Platform.OS === "web") {
-          await Print.printAsync({ html });
-        } else {
-          const { uri } = await Print.printToFileAsync({ html, base64: false });
-          const canShare = await Sharing.isAvailableAsync();
-          if (canShare) {
-            await Sharing.shareAsync(uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" });
-          } else {
-            await Print.printAsync({ html });
-          }
-        }
+        await sharePdf(html);
       } else {
-        const csv = buildCombinedCsv(selectedCar, sections);
-        const filename =
-          `CTL_${selectedCar.make}_${selectedCar.model}_${selectedCar.year}_${Date.now()}.csv`.replace(/\s+/g, "_");
+        const wb = buildWorkbook(selectedCar, sections);
+        const filename = `CTL_${safeName}_${Date.now()}.xlsx`;
+
         if (Platform.OS === "web") {
-          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const ab = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+          const blob = new Blob([ab], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
@@ -260,16 +290,20 @@ export default function ExportScreen() {
         } else {
           const cacheDir = FileSystem.cacheDirectory;
           if (cacheDir) {
+            const base64 = XLSX.write(wb, { bookType: "xlsx", type: "base64" }) as string;
             const path = cacheDir + filename;
-            await FileSystem.writeAsStringAsync(path, csv, { encoding: "utf8" as any });
+            await FileSystem.writeAsStringAsync(path, base64, { encoding: "base64" as any });
             const canShare = await Sharing.isAvailableAsync();
             if (canShare) {
-              await Sharing.shareAsync(path, { mimeType: "text/csv", UTI: "public.comma-separated-values-text" });
-            } else {
-              await Share.share({ message: csv, title: filename });
+              await Sharing.shareAsync(path, {
+                mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                UTI: "org.openxmlformats.spreadsheetml.sheet",
+              });
             }
           } else {
-            await Share.share({ message: csv, title: filename });
+            const html = buildPdfHtml(selectedCar, sections);
+            await sharePdf(html);
+            setError("Excel export requires the full app. Shared as PDF instead.");
           }
         }
       }
@@ -282,7 +316,6 @@ export default function ExportScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: C.background }]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: C.card, borderBottomColor: C.border }]}>
         <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={C.text} />
@@ -293,7 +326,6 @@ export default function ExportScreen() {
 
       <ScrollView contentContainerStyle={[styles.content]} showsVerticalScrollIndicator={false}>
 
-        {/* Car selector */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>VEHICLE</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           {carsLoading ? (
@@ -322,20 +354,27 @@ export default function ExportScreen() {
           )}
         </View>
 
-        {/* Format selector */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>FORMAT</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
-          {(["pdf", "csv"] as const).map((f, idx) => {
-            const active = format === f;
-            const labels = { pdf: "PDF Report", csv: "CSV Spreadsheet" };
-            const subs = {
-              pdf: "Styled report — great for printing or sharing",
-              csv: "Raw data — open in Excel or Google Sheets",
-            };
+          {([
+            {
+              id: "pdf" as const,
+              label: "PDF Report",
+              sub: "Styled report — great for printing or sharing",
+              icon: "file-text" as const,
+            },
+            {
+              id: "xlsx" as const,
+              label: "Excel Spreadsheet (.xlsx)",
+              sub: "One tab per section — opens in Excel, Numbers, Sheets",
+              icon: "grid" as const,
+            },
+          ]).map((f, idx) => {
+            const active = format === f.id;
             return (
               <Pressable
-                key={f}
-                onPress={() => { setFormat(f); Haptics.selectionAsync(); }}
+                key={f.id}
+                onPress={() => { setFormat(f.id); Haptics.selectionAsync(); }}
                 style={[
                   styles.optionRow,
                   idx === 0 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border },
@@ -345,16 +384,16 @@ export default function ExportScreen() {
                 <View style={[styles.radio, { borderColor: active ? C.tint : C.textTertiary }]}>
                   {active && <View style={[styles.radioInner, { backgroundColor: C.tint }]} />}
                 </View>
-                <View>
-                  <Text style={[styles.optionText, { color: C.text }]}>{labels[f]}</Text>
-                  <Text style={[styles.optionSub, { color: C.textSecondary }]}>{subs[f]}</Text>
+                <Feather name={f.icon} size={16} color={active ? C.tint : C.textTertiary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.optionText, { color: C.text }]}>{f.label}</Text>
+                  <Text style={[styles.optionSub, { color: C.textSecondary }]}>{f.sub}</Text>
                 </View>
               </Pressable>
             );
           })}
         </View>
 
-        {/* Sections */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>INCLUDE</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           {SECTIONS.map((s, idx) => {
@@ -380,7 +419,6 @@ export default function ExportScreen() {
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        {/* Generate button */}
         <Pressable
           onPress={generate}
           disabled={generating || !selectedCar || enabled.size === 0}
@@ -395,7 +433,7 @@ export default function ExportScreen() {
             <>
               <Feather name="share" size={18} color="#fff" />
               <Text style={styles.generateBtnText}>
-                Generate {format === "pdf" ? "PDF" : "CSV"} & Share
+                Export {format === "pdf" ? "PDF" : "Excel"} & Share
               </Text>
             </>
           )}
