@@ -41,6 +41,7 @@ export default function FleetScreen() {
   const C = useColors();
   const qc = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const swipeableRefs = useRef<Map<number, Swipeable>>(new Map());
   const openRowId = useRef<number | null>(null);
@@ -143,6 +144,16 @@ export default function FleetScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setIsEditing((v) => !v);
+            }}
+            style={[styles.addBtn, { backgroundColor: isEditing ? "#DC2626" : "rgba(220,38,38,0.12)" }]}
+          >
+            <Feather name="minus" size={20} color={isEditing ? "#fff" : "#DC2626"} />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setIsEditing(false);
               router.push("/car/add");
             }}
             style={[styles.addBtn, { backgroundColor: C.tint }]}
@@ -177,35 +188,44 @@ export default function FleetScreen() {
             />
           }
           renderItem={({ item }) => (
-            <Swipeable
-              renderRightActions={renderRightActions(item)}
-              onSwipeableWillOpen={() => {
-                closePreviousRow(item.id);
-              }}
-              ref={(ref) => {
-                if (ref) {
-                  swipeableRefs.current.set(item.id, ref);
-                } else {
-                  swipeableRefs.current.delete(item.id);
-                }
-              }}
-              overshootRight={false}
-              friction={2}
-            >
-              <CarCard
-                car={item}
-                accentBg="#DBEAFE"
-                accentIcon="#1A56DB"
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  router.push({ pathname: "/car/[id]", params: { id: String(item.id) } });
-                }}
-                onLogEvent={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push({ pathname: "/event/add", params: { carId: String(item.id) } });
-                }}
-              />
-            </Swipeable>
+            <View style={styles.rowWrapper}>
+              {isEditing && (
+                <Pressable
+                  onPress={() => handleDelete(item)}
+                  style={styles.deleteCircle}
+                  hitSlop={6}
+                >
+                  <Feather name="minus" size={16} color="#fff" />
+                </Pressable>
+              )}
+              <View style={{ flex: 1 }}>
+                <Swipeable
+                  renderRightActions={renderRightActions(item)}
+                  onSwipeableWillOpen={() => { closePreviousRow(item.id); }}
+                  ref={(ref) => {
+                    if (ref) swipeableRefs.current.set(item.id, ref);
+                    else swipeableRefs.current.delete(item.id);
+                  }}
+                  overshootRight={false}
+                  friction={2}
+                >
+                  <CarCard
+                    car={item}
+                    accentBg="#DBEAFE"
+                    accentIcon="#1A56DB"
+                    onPress={() => {
+                      if (isEditing) { handleDelete(item); return; }
+                      Haptics.selectionAsync();
+                      router.push({ pathname: "/car/[id]", params: { id: String(item.id) } });
+                    }}
+                    onLogEvent={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push({ pathname: "/event/add", params: { carId: String(item.id) } });
+                    }}
+                  />
+                </Swipeable>
+              </View>
+            </View>
           )}
         />
       )}
@@ -249,6 +269,20 @@ const styles = StyleSheet.create({
   },
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
   listContent: { paddingHorizontal: 20, paddingTop: 16 },
+  rowWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  deleteCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#DC2626",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
   deleteActionContainer: {
     justifyContent: "center",
     alignItems: "flex-end",
