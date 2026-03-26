@@ -27,15 +27,11 @@ export default function ToolsScreen() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [suggestion, setSuggestion] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   function openModal() {
     setSuggestion("");
-    setName("");
-    setEmail("");
     setSent(false);
     setModalVisible(true);
   }
@@ -49,8 +45,6 @@ export default function ToolsScreen() {
     try {
       await apiPost("/suggest-tool", {
         suggestion: suggestion.trim(),
-        name: name.trim() || undefined,
-        email: email.trim() || undefined,
       });
       setSent(true);
     } catch {
@@ -210,31 +204,6 @@ export default function ToolsScreen() {
                   maxLength={800}
                 />
 
-                <Text style={[styles.fieldLabel, { color: C.textSecondary, marginTop: 20 }]}>
-                  Your name (optional)
-                </Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: C.card, color: C.text, borderColor: C.border }]}
-                  placeholder="e.g. Mohammed"
-                  placeholderTextColor={C.textTertiary}
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                />
-
-                <Text style={[styles.fieldLabel, { color: C.textSecondary, marginTop: 16 }]}>
-                  Email (optional — if you'd like a reply)
-                </Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: C.card, color: C.text, borderColor: C.border }]}
-                  placeholder="you@example.com"
-                  placeholderTextColor={C.textTertiary}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-
                 <TouchableOpacity
                   style={[styles.submitBtn, loading && { opacity: 0.6 }]}
                   onPress={handleSubmit}
@@ -376,14 +345,6 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     minHeight: 120,
     lineHeight: 22,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    height: 50,
   },
   submitBtn: {
     marginTop: 28,
