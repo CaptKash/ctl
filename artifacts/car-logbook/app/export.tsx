@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { useColors } from "@/context/ThemeContext";
 import { apiGet } from "@/hooks/useApi";
 
@@ -71,6 +71,23 @@ function carLabel(car: Car) {
   return `${car.year} ${car.make} ${car.model}${car.nickname ? ` (${car.nickname})` : ""}`;
 }
 
+const HEADER_STYLE = {
+  fill: { patternType: "solid", fgColor: { rgb: "D97706" } },
+  font: { bold: true, color: { rgb: "FFFFFF" }, sz: 11 },
+  alignment: { horizontal: "left", vertical: "center" },
+};
+
+const TITLE_STYLE = {
+  font: { bold: true, color: { rgb: "111827" }, sz: 14 },
+};
+
+function styleRow(ws: XLSX.WorkSheet, rowIdx: number, numCols: number, style: object) {
+  for (let c = 0; c < numCols; c++) {
+    const addr = XLSX.utils.encode_cell({ r: rowIdx, c });
+    if (ws[addr]) ws[addr].s = style;
+  }
+}
+
 function buildWorkbook(car: Car, sections: Record<SectionId, unknown[]>) {
   const wb = XLSX.utils.book_new();
   (wb as any).Props = {
@@ -95,6 +112,9 @@ function buildWorkbook(car: Car, sections: Record<SectionId, unknown[]>) {
   ];
   const summaryWs = XLSX.utils.aoa_to_sheet(summaryRows);
   summaryWs["!cols"] = [{ wch: 28 }, { wch: 12 }];
+  summaryWs["!rows"] = [{ hpt: 22 }, { hpt: 18 }];
+  styleRow(summaryWs, 0, 1, TITLE_STYLE);
+  styleRow(summaryWs, 6, 2, HEADER_STYLE);
   XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
 
   sectionOrder
@@ -119,6 +139,8 @@ function buildWorkbook(car: Car, sections: Record<SectionId, unknown[]>) {
         return { wch: Math.max(header[i].length, maxData, 10) + 2 };
       });
       ws["!cols"] = colWidths;
+      ws["!rows"] = [{ hpt: 20 }];
+      styleRow(ws, 0, header.length, HEADER_STYLE);
 
       XLSX.utils.book_append_sheet(wb, ws, SHEET_NAMES[id]);
     });

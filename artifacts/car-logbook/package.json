@@ -63,6 +63,6 @@
     "expo-print": "~15.0.8",
     "expo-secure-store": "~15.0.8",
     "expo-sharing": "~14.0.8",
-    "xlsx": "^0.18.5"
+    "xlsx-js-style": "^1.2.0"
   }
 }
