@@ -102,4 +102,52 @@ router.post("/feedback", optionalAuth, async (req, res) => {
   }
 });
 
+router.post("/suggest-tool", optionalAuth, async (req, res) => {
+  try {
+    const { suggestion, name, email } = req.body as { suggestion?: string; name?: string; email?: string };
+
+    if (!suggestion || suggestion.trim().length < 5) {
+      res.status(400).json({ error: "Suggestion is too short." });
+      return;
+    }
+
+    const userName  = req.user?.name  ?? name  ?? "App User";
+    const userEmail = req.user?.email ?? email ?? null;
+    const subject = `[CTL] Tool Suggestion — from ${userName}`;
+
+    console.log(`[suggest-tool] Received from ${userName}: ${suggestion.substring(0, 60)}`);
+
+    const html = `
+      <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
+        <p style="font-size:13px;color:#9CA3AF;margin:0 0 20px">CTL App — Tool Suggestion</p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+          <tr>
+            <td style="font-size:13px;color:#6B7280;padding:6px 0;width:90px">From</td>
+            <td style="font-size:14px;color:#111827">${userName}${userEmail ? ` &lt;${userEmail}&gt;` : ""}</td>
+          </tr>
+        </table>
+        <div style="background:#FEFCE8;border:1px solid #FDE047;border-radius:10px;padding:16px;font-size:15px;color:#111827;line-height:1.6;white-space:pre-wrap">${suggestion.trim()}</div>
+      </div>
+    `;
+
+    if (resend) {
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: ["support.ctl@inroomstudio.com"],
+        replyTo: userEmail ?? undefined,
+        subject,
+        html,
+      });
+      console.log(`[suggest-tool] Sent via Resend to support.ctl@inroomstudio.com`);
+    } else {
+      console.log(`[suggest-tool] No RESEND_API_KEY — ${subject}\n${suggestion.trim()}`);
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[suggest-tool] Error:", err);
+    res.status(500).json({ error: "Failed to send suggestion. Please try again." });
+  }
+});
+
 export default router;
