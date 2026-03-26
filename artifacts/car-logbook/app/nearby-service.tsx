@@ -136,15 +136,13 @@ async function fetchNearby(
 
 function openMaps(center: ServiceCenter) {
   const label = encodeURIComponent(center.name);
-  const url =
-    Platform.OS === "ios"
-      ? `maps://maps.apple.com/?ll=${center.lat},${center.lon}&q=${label}`
-      : `geo:${center.lat},${center.lon}?q=${label}`;
-  Linking.openURL(url).catch(() => {
-    Linking.openURL(
-      `https://www.google.com/maps/search/?api=1&query=${center.lat},${center.lon}`
-    );
-  });
+  if (Platform.OS === "ios") {
+    const googleUrl = `comgooglemaps://?q=${label}&center=${center.lat},${center.lon}`;
+    const appleUrl = `maps://maps.apple.com/?ll=${center.lat},${center.lon}&q=${label}`;
+    Linking.openURL(googleUrl).catch(() => Linking.openURL(appleUrl));
+  } else {
+    Linking.openURL(`geo:${center.lat},${center.lon}?q=${label}`);
+  }
 }
 
 function formatDist(km: number): string {
