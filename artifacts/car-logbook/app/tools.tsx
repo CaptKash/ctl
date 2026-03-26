@@ -22,12 +22,11 @@ export default function ToolsScreen() {
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
         <View style={styles.titleRow}>
-          <Feather name="sliders" size={22} color={C.tint} style={{ marginRight: 8, marginTop: 2 }} />
+          <View style={[styles.titleIconBox, { backgroundColor: C.tint + "22" }]}>
+            <Feather name="sliders" size={20} color={C.tint} />
+          </View>
           <Text style={[styles.headerTitle, { color: C.text }]}>Tools</Text>
         </View>
-        <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-          Utilities for your vehicle
-        </Text>
       </View>
 
       <View style={[styles.divider, { backgroundColor: C.border }]} />
@@ -117,15 +116,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  titleIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
   headerTitle: {
     fontSize: 36,
     fontFamily: "Inter_700Bold",
     lineHeight: 40,
-  },
-  headerSub: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    marginTop: 4,
   },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 24 },
   content: { padding: 20, gap: 14, paddingBottom: 40 },
