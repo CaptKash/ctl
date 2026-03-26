@@ -153,9 +153,9 @@ export default function ToolsScreen() {
             <Feather name="download" size={24} color={isFleet ? "#D97706" : "#9CA3AF"} />
           </View>
           <View style={styles.toolBody}>
-            <Text style={[styles.toolTitle, { color: C.text }]}>Export Records</Text>
+            <Text style={[styles.toolTitle, { color: C.text }]}>Data Backup & Export</Text>
             <Text style={[styles.toolSub, { color: C.textSecondary }]}>
-              Download PDF or CSV of your data
+              Export all records as PDF or CSV
             </Text>
           </View>
           {isFleet

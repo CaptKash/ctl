@@ -255,7 +255,7 @@ export default function ExportScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={C.text} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Export Records</Text>
+        <Text style={[styles.headerTitle, { color: C.text }]}>Data Backup & Export</Text>
         <View style={{ width: 36 }} />
       </View>
 
