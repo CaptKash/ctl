@@ -339,11 +339,18 @@ export default function ExportScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: C.card, borderBottomColor: C.border }]}>
-        <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color={C.text} />
-        </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Data Backup & Export</Text>
-        <View style={{ width: 36 }} />
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
+            <Feather name="arrow-left" size={22} color={C.text} />
+          </Pressable>
+          <View style={[styles.iconBox, { backgroundColor: "#FEF3C7" }]}>
+            <Feather name="download" size={22} color="#D97706" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Data Backup & Export</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>PDF report & Excel spreadsheet</Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={[styles.content]} showsVerticalScrollIndicator={false}>
@@ -473,15 +480,16 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
 
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingBottom: 14,
+    paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   backBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  headerTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
+  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
+  headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
   content: { padding: 16, gap: 10, paddingBottom: 60 },
   sectionLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold", letterSpacing: 0.8, marginTop: 6 },
