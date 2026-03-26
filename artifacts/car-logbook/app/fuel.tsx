@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 20,
-    backgroundColor: "#FF3B30",
+    backgroundColor: "rgba(128,128,128,0.12)",
     alignSelf: "flex-start",
   },
   pillText: {
