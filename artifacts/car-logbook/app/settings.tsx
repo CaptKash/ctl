@@ -23,7 +23,7 @@ import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { useCurrency, CURRENCIES, currencyOption, findCurrencyByOption } from "@/context/CurrencyContext";
 import { registerPicker } from "@/components/ui/selectPickerStore";
-import { apiGet, apiDelete, apiPatch } from "@/hooks/useApi";
+import { apiGet, apiDelete } from "@/hooks/useApi";
 
 const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/privacy`

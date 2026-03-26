@@ -27,7 +27,6 @@ export type AuthUser = {
   id: number;
   name: string;
   email: string;
-  country?: string | null;
 };
 
 type AuthContextType = {

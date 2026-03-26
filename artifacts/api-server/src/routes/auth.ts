@@ -9,7 +9,7 @@ import { requireAuth } from "../middlewares/auth";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const RESET_BASE_URL = process.env.RESET_BASE_URL ?? "http://localhost:3000";
-const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudio.com>";
+const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudios.com>";
 
 const router = Router();
 
@@ -102,7 +102,7 @@ router.get("/auth/me", async (req, res) => {
     const payload = jwt.verify(token, JWT_SECRET) as { id: number; email: string; name: string };
 
     const [user] = await db
-      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, country: usersTable.country })
+      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
       .from(usersTable)
       .where(eq(usersTable.id, payload.id))
       .limit(1);
@@ -118,7 +118,7 @@ router.get("/auth/me", async (req, res) => {
 
 router.patch("/auth/profile", requireAuth, async (req, res) => {
   try {
-    const { name, email, country } = req.body as { name?: string; email?: string; country?: string | null };
+    const { name, email } = req.body as { name?: string; email?: string };
 
     if (!name?.trim()) {
       return res.status(400).json({ error: "Name is required." });
@@ -129,7 +129,6 @@ router.patch("/auth/profile", requireAuth, async (req, res) => {
 
     const newEmail = email.toLowerCase().trim();
     const newName = name.trim();
-    const newCountry = country?.trim() || null;
 
     if (newEmail !== req.user!.email) {
       const existing = await db
@@ -144,9 +143,9 @@ router.patch("/auth/profile", requireAuth, async (req, res) => {
 
     const [updated] = await db
       .update(usersTable)
-      .set({ name: newName, email: newEmail, country: newCountry })
+      .set({ name: newName, email: newEmail })
       .where(eq(usersTable.id, req.user!.id))
-      .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email, country: usersTable.country });
+      .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
 
     res.json({ user: updated });
   } catch (err) {
