@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
@@ -45,19 +45,16 @@ type FuelRecord = {
   notes?: string | null;
 };
 
-const FUEL_TYPES = ["Petrol", "Diesel", "Premium", "E85", "LPG", "Other"];
+type EnrichedRecord = FuelRecord & { carLabel: string };
 
+const FUEL_TYPES = ["Petrol", "Diesel", "Premium", "E85", "LPG", "Other"];
 const L_PER_GAL = 3.78541;
 
-function calcConsumption(liters: number, distanceKm: number, unit: "km" | "mi"): string {
-  if (distanceKm <= 0 || liters <= 0) return "—";
-  if (unit === "km") {
-    return (liters / distanceKm * 100).toFixed(1) + " L/100km";
-  } else {
-    const miles = distanceKm * 0.621371;
-    const gallons = liters / L_PER_GAL;
-    return (miles / gallons).toFixed(1) + " mpg";
-  }
+function calcConsumption(liters: number, distKm: number, unit: "km" | "mi"): string {
+  if (distKm <= 0 || liters <= 0) return "—";
+  if (unit === "km") return (liters / distKm * 100).toFixed(1) + " L/100km";
+  const miles = distKm * 0.621371;
+  return (miles / (liters / L_PER_GAL)).toFixed(1) + " mpg";
 }
 
 function carLabel(car: Car) {
@@ -72,11 +69,11 @@ export default function FuelScreen() {
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [confirmRecord, setConfirmRecord] = useState<{ id: number; carId: number } | null>(null);
 
   // form state
+  const [fCarId, setFCarId] = useState<number | null>(null);
   const [fDate, setFDate] = useState(new Date().toISOString().split("T")[0]);
   const [fMileage, setFMileage] = useState("");
   const [fLiters, setFLiters] = useState("");
@@ -94,66 +91,92 @@ export default function FuelScreen() {
 
   const cars = carsQuery.data ?? [];
 
-  // Auto-select first car once loaded
-  React.useEffect(() => {
-    if (cars.length > 0 && selectedCarId === null) {
-      setSelectedCarId(cars[0].id);
-    }
-  }, [cars]);
-
-  const fuelQuery = useQuery<FuelRecord[]>({
-    queryKey: ["fuel", selectedCarId],
-    queryFn: () => apiGet<FuelRecord[]>(`/cars/${selectedCarId}/fuel`),
-    enabled: selectedCarId !== null,
+  // Fetch fuel records for every car in parallel
+  const fuelQueries = useQueries({
+    queries: cars.map((car) => ({
+      queryKey: ["fuel", car.id],
+      queryFn: () => apiGet<FuelRecord[]>(`/cars/${car.id}/fuel`),
+      enabled: cars.length > 0,
+    })),
   });
 
-  const records = useMemo(() => {
-    return (fuelQuery.data ?? []).slice().sort((a, b) => b.mileage - a.mileage);
-  }, [fuelQuery.data]);
+  const isLoadingFuel = fuelQueries.some((q) => q.isLoading);
 
-  // Stats
+  // Combine and enrich all records with car label
+  const allRecords: EnrichedRecord[] = useMemo(() => {
+    const result: EnrichedRecord[] = [];
+    fuelQueries.forEach((q, i) => {
+      const car = cars[i];
+      if (!car || !q.data) return;
+      q.data.forEach((r) => result.push({ ...r, carLabel: carLabel(car) }));
+    });
+    return result.sort((a, b) => b.date.localeCompare(a.date) || b.mileage - a.mileage);
+  }, [fuelQueries, cars]);
+
+  // Stats across all cars
   const stats = useMemo(() => {
-    if (records.length === 0) return null;
-    const sorted = [...records].sort((a, b) => a.mileage - b.mileage);
+    if (allRecords.length === 0) return null;
+    // Per-car efficiency
+    const byCarId = new Map<number, FuelRecord[]>();
+    allRecords.forEach((r) => {
+      if (!byCarId.has(r.carId)) byCarId.set(r.carId, []);
+      byCarId.get(r.carId)!.push(r);
+    });
     let totalConsumptionPairs = 0;
     let consumptionPairCount = 0;
-    for (let i = 1; i < sorted.length; i++) {
-      const dist = sorted[i].mileage - sorted[i - 1].mileage;
-      if (dist > 0 && sorted[i].fullTank !== false) {
-        totalConsumptionPairs += sorted[i].liters / dist * 100;
-        consumptionPairCount++;
+    byCarId.forEach((carRecords) => {
+      const sorted = [...carRecords].sort((a, b) => a.mileage - b.mileage);
+      for (let i = 1; i < sorted.length; i++) {
+        const dist = sorted[i].mileage - sorted[i - 1].mileage;
+        if (dist > 0 && sorted[i].fullTank !== false) {
+          totalConsumptionPairs += sorted[i].liters / dist * 100;
+          consumptionPairCount++;
+        }
       }
-    }
+    });
     const avgL100km = consumptionPairCount > 0 ? totalConsumptionPairs / consumptionPairCount : null;
-    const totalCost = records.reduce((s, r) => s + r.totalCost, 0);
-    const totalLiters = records.reduce((s, r) => s + r.liters, 0);
-    return { avgL100km, totalCost, totalLiters, count: records.length };
-  }, [records]);
+    const totalCost = allRecords.reduce((s, r) => s + r.totalCost, 0);
+    return { avgL100km, totalCost, count: allRecords.length };
+  }, [allRecords]);
+
+  // Per-fill-up consumption map (within each car)
+  const consumptionMap = useMemo(() => {
+    const map = new Map<number, string>();
+    const byCarId = new Map<number, FuelRecord[]>();
+    allRecords.forEach((r) => {
+      if (!byCarId.has(r.carId)) byCarId.set(r.carId, []);
+      byCarId.get(r.carId)!.push(r);
+    });
+    byCarId.forEach((carRecords) => {
+      const sorted = [...carRecords].sort((a, b) => a.mileage - b.mileage);
+      for (let i = 1; i < sorted.length; i++) {
+        const dist = sorted[i].mileage - sorted[i - 1].mileage;
+        if (dist > 0) {
+          map.set(sorted[i].id, calcConsumption(sorted[i].liters, dist, unit));
+        }
+      }
+    });
+    return map;
+  }, [allRecords, unit]);
 
   const formatAvg = (avgL100km: number | null) => {
     if (avgL100km === null) return "—";
     if (unit === "km") return avgL100km.toFixed(1) + " L/100km";
-    const mpg = L_PER_GAL / (avgL100km / 100) * 0.621371;
-    return mpg.toFixed(1) + " mpg";
+    return (L_PER_GAL / (avgL100km / 100) * 0.621371).toFixed(1) + " mpg";
   };
 
-  // Auto-calculate total cost when liters & price per unit change
   const handleLitersChange = (val: string) => {
     setFLiters(val);
     const l = parseFloat(val);
     const p = parseFloat(fPricePerUnit);
-    if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) {
-      setFTotalCost((l * p).toFixed(2));
-    }
+    if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) setFTotalCost((l * p).toFixed(2));
   };
 
   const handlePriceChange = (val: string) => {
     setFPricePerUnit(val);
     const l = parseFloat(fLiters);
     const p = parseFloat(val);
-    if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) {
-      setFTotalCost((l * p).toFixed(2));
-    }
+    if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) setFTotalCost((l * p).toFixed(2));
   };
 
   const resetForm = () => {
@@ -166,11 +189,21 @@ export default function FuelScreen() {
     setFStation("");
     setFFullTank(true);
     setFNotes("");
+    // Keep fCarId — user probably logging multiple fill-ups for the same car
   };
+
+  const carOptions = cars.map((c) => carLabel(c));
+
+  const handleCarSelect = (label: string) => {
+    const car = cars.find((c) => carLabel(c) === label);
+    if (car) setFCarId(car.id);
+  };
+
+  const selectedCarLabel = fCarId ? (cars.find((c) => c.id === fCarId) ? carLabel(cars.find((c) => c.id === fCarId)!) : "") : "";
 
   const addMutation = useMutation({
     mutationFn: () =>
-      apiPost(`/cars/${selectedCarId}/fuel`, {
+      apiPost(`/cars/${fCarId}/fuel`, {
         date: fDate,
         mileage: parseInt(fMileage),
         liters: parseFloat(fLiters),
@@ -182,7 +215,7 @@ export default function FuelScreen() {
         notes: fNotes || undefined,
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["fuel", selectedCarId] });
+      qc.invalidateQueries({ queryKey: ["fuel", fCarId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowAdd(false);
       resetForm();
@@ -190,16 +223,17 @@ export default function FuelScreen() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (recordId: number) =>
-      apiDelete(`/cars/${selectedCarId}/fuel/${recordId}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["fuel", selectedCarId] });
+    mutationFn: ({ id, carId }: { id: number; carId: number }) =>
+      apiDelete(`/cars/${carId}/fuel/${id}`),
+    onSuccess: (_, { carId }) => {
+      qc.invalidateQueries({ queryKey: ["fuel", carId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setConfirmId(null);
+      setConfirmRecord(null);
     },
   });
 
   const canSubmit =
+    fCarId !== null &&
     fMileage.trim() !== "" &&
     !isNaN(parseInt(fMileage)) &&
     fLiters.trim() !== "" &&
@@ -207,27 +241,14 @@ export default function FuelScreen() {
     fTotalCost.trim() !== "" &&
     !isNaN(parseFloat(fTotalCost));
 
-  // Per-fill-up consumption (needs sorted-ascending list)
-  const sortedAsc = useMemo(() => [...records].reverse(), [records]);
-  const consumptionMap = useMemo(() => {
-    const map = new Map<number, string>();
-    for (let i = 1; i < sortedAsc.length; i++) {
-      const dist = sortedAsc[i].mileage - sortedAsc[i - 1].mileage;
-      if (dist > 0) {
-        map.set(sortedAsc[i].id, calcConsumption(sortedAsc[i].liters, dist, unit));
-      }
-    }
-    return map;
-  }, [sortedAsc, unit]);
-
-  const selectedCar = cars.find((c) => c.id === selectedCarId);
+  const isLoading = carsQuery.isLoading || isLoadingFuel;
 
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
           <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
@@ -235,42 +256,10 @@ export default function FuelScreen() {
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Fuel Consumption</Text>
-            {selectedCar && (
-              <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>
-                {carLabel(selectedCar)}
-              </Text>
-            )}
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>All vehicles</Text>
           </View>
         </View>
       </View>
-
-      {/* Car picker */}
-      {cars.length > 1 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={[styles.carPicker, { backgroundColor: C.card, borderBottomColor: C.border }]}
-          contentContainerStyle={styles.carPickerContent}
-        >
-          {cars.map((car) => {
-            const active = car.id === selectedCarId;
-            return (
-              <Pressable
-                key={car.id}
-                onPress={() => setSelectedCarId(car.id)}
-                style={[
-                  styles.carChip,
-                  { backgroundColor: active ? C.tint : C.backgroundTertiary, borderColor: active ? C.tint : C.border },
-                ]}
-              >
-                <Text style={[styles.carChipText, { color: active ? "#FFFFFF" : C.textSecondary }]}>
-                  {carLabel(car)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      )}
 
       <ScrollView
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
@@ -304,28 +293,34 @@ export default function FuelScreen() {
           title="Fill-up Log"
           actionLabel="Log Fill-up"
           onAction={() => {
-            if (selectedCarId !== null) setShowAdd(true);
+            if (cars.length > 0) {
+              if (!fCarId) setFCarId(cars[0].id);
+              setShowAdd(true);
+            }
           }}
         />
 
-        {carsQuery.isLoading || fuelQuery.isLoading ? (
+        {isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 24 }} />
-        ) : selectedCarId === null ? (
+        ) : cars.length === 0 ? (
           <EmptyState
             icon="truck"
             title="No cars added"
             description="Add a car to your fleet first."
           />
-        ) : records.length === 0 ? (
+        ) : allRecords.length === 0 ? (
           <EmptyState
             icon="droplet"
             title="No fill-ups logged"
             description="Log your first fill-up to start tracking fuel efficiency."
             actionLabel="Log Fill-up"
-            onAction={() => setShowAdd(true)}
+            onAction={() => {
+              if (!fCarId && cars.length > 0) setFCarId(cars[0].id);
+              setShowAdd(true);
+            }}
           />
         ) : (
-          records.map((r) => {
+          allRecords.map((r) => {
             const effText = consumptionMap.get(r.id);
             return (
               <View key={r.id} style={[styles.card, { backgroundColor: C.card, shadowColor: C.shadow }]}>
@@ -342,14 +337,14 @@ export default function FuelScreen() {
                     </Text>
                   </View>
                   <View style={styles.cardRow}>
-                    <Text style={[styles.cardSub, { color: C.textSecondary }]}>
-                      {formatDate(r.date)} · {r.mileage.toLocaleString()} {unit}
+                    <Text style={[styles.cardSub, { color: C.textSecondary }]} numberOfLines={1}>
+                      {r.carLabel} · {formatDate(r.date)} · {r.mileage.toLocaleString()} {unit}
                       {r.station ? ` · ${r.station}` : ""}
                     </Text>
-                    {effText && (
-                      <Text style={[styles.cardEff, { color: "#2563EB" }]}>{effText}</Text>
-                    )}
                   </View>
+                  {effText && (
+                    <Text style={[styles.cardEff, { color: "#2563EB" }]}>{effText}</Text>
+                  )}
                   {r.fullTank === false && (
                     <Text style={[styles.cardNote, { color: C.textTertiary }]}>Partial fill</Text>
                   )}
@@ -358,7 +353,7 @@ export default function FuelScreen() {
                   ) : null}
                 </View>
                 <Pressable
-                  onPress={() => setConfirmId(r.id)}
+                  onPress={() => setConfirmRecord({ id: r.id, carId: r.carId })}
                   hitSlop={8}
                   style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
                 >
@@ -388,6 +383,18 @@ export default function FuelScreen() {
             contentContainerStyle={[styles.sheetBody, { paddingBottom: insets.bottom + 24 }]}
             keyboardShouldPersistTaps="handled"
           >
+            {/* Car selector — first field */}
+            <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
+              <SelectField
+                label="Vehicle"
+                value={selectedCarLabel}
+                onSelect={handleCarSelect}
+                options={carOptions}
+                placeholder="Select vehicle…"
+                required
+              />
+            </View>
+
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <DatePickerField label="Date" value={fDate} onChange={setFDate} />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
@@ -481,12 +488,12 @@ export default function FuelScreen() {
       </Modal>
 
       <ConfirmModal
-        visible={confirmId !== null}
+        visible={confirmRecord !== null}
         title="Delete Fill-up"
         message="This fill-up record will be permanently deleted."
         confirmLabel="Delete"
-        onConfirm={() => confirmId !== null && deleteMutation.mutate(confirmId)}
-        onCancel={() => setConfirmId(null)}
+        onConfirm={() => confirmRecord && deleteMutation.mutate(confirmRecord)}
+        onCancel={() => setConfirmRecord(null)}
         destructive
       />
     </SwipeBackView>
@@ -504,13 +511,6 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 1 },
-  carPicker: { borderBottomWidth: StyleSheet.hairlineWidth },
-  carPickerContent: { paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
-  carChip: {
-    paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20,
-    borderWidth: 1,
-  },
-  carChipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   content: { padding: 16, gap: 0 },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
   statCard: {
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   cardRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
   cardCost: { fontSize: 15, fontFamily: "Inter_700Bold" },
-  cardSub: { fontSize: 12, fontFamily: "Inter_400Regular", flex: 1, marginRight: 8 },
+  cardSub: { fontSize: 12, fontFamily: "Inter_400Regular", flex: 1 },
   cardEff: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
   cardNote: { fontSize: 12, fontFamily: "Inter_400Regular", fontStyle: "italic" },
   sheet: { flex: 1 },
