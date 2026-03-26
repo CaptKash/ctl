@@ -2,12 +2,14 @@ import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 
@@ -31,14 +33,15 @@ export default function ToolsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={[
+        <Pressable
+          onPress={() => router.push("/tools/fuel" as any)}
+          style={({ pressed }) => [
             styles.tool,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: 0.7 },
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: "#F3F4F6" }]}>
-            <Feather name="droplet" size={24} color="#9CA3AF" />
+          <View style={[styles.toolIcon, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="droplet" size={24} color="#2563EB" />
           </View>
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
@@ -48,10 +51,8 @@ export default function ToolsScreen() {
               Track &amp; monitor fuel usage
             </Text>
           </View>
-          <View style={styles.comingSoonBadge}>
-            <Text style={styles.comingSoonText}>Soon</Text>
-          </View>
-        </View>
+          <Feather name="chevron-right" size={18} color={C.textTertiary} />
+        </Pressable>
 
         <View
           style={[
