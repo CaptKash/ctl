@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
+import * as FileSystem from "expo-file-system";
 import { Platform } from "react-native";
 
 const TOKEN_KEY = "ctl_auth_token";
 const USER_KEY = "ctl_auth_user";
+const INSTALL_SENTINEL_KEY = "ctl_install_sentinel";
+const INSTALL_SENTINEL_SECURE_KEY = "ctl_install_id";
 
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -20,6 +23,21 @@ async function verifyTokenWithServer(token: string): Promise<AuthUser | null> {
     return data.user ?? null;
   } catch {
     return null;
+  }
+}
+
+async function isFreshInstall(): Promise<boolean> {
+  if (Platform.OS === "web") return false;
+  try {
+    const sentinelPath = `${FileSystem.documentDirectory}${INSTALL_SENTINEL_KEY}`;
+    const info = await FileSystem.getInfoAsync(sentinelPath);
+    if (!info.exists) {
+      await FileSystem.writeAsStringAsync(sentinelPath, "1");
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
   }
 }
 
@@ -89,6 +107,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
+        const freshInstall = await isFreshInstall();
+        if (freshInstall) {
+          await Promise.all([
+            secureDelete(TOKEN_KEY),
+            secureDelete(USER_KEY),
+            secureDelete(INSTALL_SENTINEL_SECURE_KEY),
+          ]);
+          return;
+        }
+
         const storedToken = await secureGet(TOKEN_KEY);
         if (storedToken) {
           const serverUser = await verifyTokenWithServer(storedToken);
