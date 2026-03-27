@@ -184,7 +184,10 @@ export default function AddCarScreen() {
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
-          <View style={styles.toggleRow}>
+          <View style={[
+            styles.toggleRow,
+            isElectric && styles.toggleRowActive,
+          ]}>
             <View style={styles.toggleLeft}>
               <View style={[styles.evBadge, { backgroundColor: isElectric ? "#D1FAE5" : C.backgroundTertiary }]}>
                 <Text style={{ fontSize: 16 }}>⚡</Text>
@@ -342,6 +345,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 4,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "transparent",
+    marginHorizontal: -8,
+    paddingHorizontal: 8,
+  },
+  toggleRowActive: {
+    borderColor: "#34D399",
   },
   toggleLeft: {
     flexDirection: "row",

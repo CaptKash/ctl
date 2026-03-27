@@ -37,17 +37,18 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
       return;
     }
 
+    const editing = Platform.OS === "ios";
     const result = useCamera
       ? await ImagePicker.launchCameraAsync({
           mediaTypes: ["images"],
-          allowsEditing: true,
+          allowsEditing: editing,
           aspect: [4, 3],
           quality: 0.65,
           base64: true,
         })
       : await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ["images"],
-          allowsEditing: true,
+          allowsEditing: editing,
           aspect: [4, 3],
           quality: 0.65,
           base64: true,
