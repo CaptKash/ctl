@@ -8,7 +8,7 @@ const router: IRouter = Router();
 
 router.use(authRouter);
 router.use(healthRouter);
-router.use(carsRouter);
 router.use(feedbackRouter);
+router.use(carsRouter);
 
 export default router;
