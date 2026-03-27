@@ -25,6 +25,11 @@ const light = {
   infoLight: "#DBEAFE",
   shadow: "rgba(0,0,0,0.08)",
   overlay: "rgba(0,0,0,0.5)",
+  heroBg: "#FFFFFF",
+  heroBorder: "#B8CADD",
+  heroText: "#0F2D5E",
+  heroTagline: "#2563EB",
+  heroAccent: "#DBEAFE",
 };
 
 const dark = {
@@ -51,6 +56,11 @@ const dark = {
   infoLight: "#172554",
   shadow: "rgba(0,0,0,0.3)",
   overlay: "rgba(0,0,0,0.7)",
+  heroBg: "#0F2D5E",
+  heroBorder: "transparent",
+  heroText: "#FFFFFF",
+  heroTagline: "#93C5FD",
+  heroAccent: "#1D4A96",
 };
 
 export type ColorScheme = typeof light;

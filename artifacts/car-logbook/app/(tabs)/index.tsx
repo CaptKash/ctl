@@ -119,8 +119,16 @@ export default function LoginScreen() {
     >
       <View style={[styles.container, { backgroundColor: C.background }]}>
 
-        {/* ── Brand hero — always dark navy brand colors ─────────────── */}
-        <View style={[styles.hero, { paddingTop: topPad + 28 }]}>
+        {/* ── Brand hero ─────────────────────────────────────────────── */}
+        <View style={[
+          styles.hero,
+          {
+            paddingTop: topPad + 28,
+            backgroundColor: C.heroBg,
+            borderBottomColor: C.heroBorder,
+            borderBottomWidth: C.heroBorder === "transparent" ? 0 : 2,
+          },
+        ]}>
           <Svg
             width={screenW}
             height={250}
@@ -129,15 +137,15 @@ export default function LoginScreen() {
           >
             <Polygon
               points={`${Math.round(screenW * 0.57)},0 ${screenW},0 ${screenW},250 ${Math.round(screenW * 0.57)},155`}
-              fill="#1D4A96"
+              fill={C.heroAccent}
             />
           </Svg>
-          <Text style={styles.heroTitle}>CTL</Text>
+          <Text style={[styles.heroTitle, { color: C.heroText }]}>CTL</Text>
           <View style={styles.heroLines}>
             <View style={styles.heroLineLong} />
             <View style={styles.heroLineShort} />
           </View>
-          <Text style={styles.heroTagline}>Car Technical Log</Text>
+          <Text style={[styles.heroTagline, { color: C.heroTagline }]}>Car Technical Log</Text>
         </View>
 
         {/* ── Form ───────────────────────────────────────────────────── */}
@@ -268,7 +276,6 @@ const styles = StyleSheet.create({
 
   // ── Hero ──────────────────────────────────────────────────────────────────
   hero: {
-    backgroundColor: "#0F2D5E",
     paddingHorizontal: 28,
     paddingBottom: 32,
     borderBottomLeftRadius: 28,
