@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { Platform } from "react-native";
 import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -84,8 +84,17 @@ export function initializeRevenueCat() {
 function useSubscriptionContext() {
   const { user } = useAuth();
 
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    if (user?.id) {
+      Purchases.logIn(String(user.id)).catch(() => {});
+    } else {
+      Purchases.logOut().catch(() => {});
+    }
+  }, [user?.id]);
+
   const customerInfoQuery = useQuery<CustomerInfo>({
-    queryKey: ["revenuecat", "customer-info"],
+    queryKey: ["revenuecat", "customer-info", user?.id ?? null],
     queryFn: async () => Purchases.getCustomerInfo(),
     staleTime: 60 * 1000,
     retry: 2,
