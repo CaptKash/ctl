@@ -91,7 +91,7 @@ type HistoryItem = {
 
 function carLabel(car: CarStub | null): string {
   if (!car) return "Unknown car";
-  return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
+  return `${car.year} ${car.make} ${car.model}`;
 }
 
 function field(label: string, value: string | null | undefined) {
