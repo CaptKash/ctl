@@ -68,6 +68,7 @@ type MaintenanceRecord = {
   warrantyPeriod?: string | null;
   warrantyDetails?: string | null;
   billPhoto?: string | null;
+  warrantyPhoto?: string | null;
 };
 
 type InspectionRecord = {
@@ -248,12 +249,21 @@ export default function CarDetailScreen() {
             </View>
           )}
           <View style={styles.cardFooter}>
-            {r.billPhoto ? (
-              <View style={[styles.photoBadge, { backgroundColor: meta.bg }]}>
-                <Feather name="image" size={11} color={meta.color} />
-                <Text style={[styles.photoBadgeText, { color: meta.color }]}>Bill photo</Text>
-              </View>
-            ) : <View style={{ flex: 1 }} />}
+            <View style={styles.photoBadges}>
+              {r.billPhoto && (
+                <View style={[styles.photoBadge, { backgroundColor: meta.bg }]}>
+                  <Feather name="image" size={11} color={meta.color} />
+                  <Text style={[styles.photoBadgeText, { color: meta.color }]}>Bill</Text>
+                </View>
+              )}
+              {r.warrantyPhoto && (
+                <View style={[styles.photoBadge, { backgroundColor: "#EDE9FE" }]}>
+                  <Feather name="shield" size={11} color="#7C3AED" />
+                  <Text style={[styles.photoBadgeText, { color: "#7C3AED" }]}>Warranty</Text>
+                </View>
+              )}
+              {!r.billPhoto && !r.warrantyPhoto && <View style={{ flex: 1 }} />}
+            </View>
             <View style={styles.cardActions}>
               <TouchableOpacity
                 onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
@@ -533,6 +543,18 @@ export default function CarDetailScreen() {
                       </Pressable>
                     </View>
                   )}
+                  {r.warrantyPhoto && (
+                    <View style={detailStyles.photoSection}>
+                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary }]}>Warranty Photo</Text>
+                      <Pressable onPress={() => setPhotoViewer(r.warrantyPhoto!)} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+                        <Image source={{ uri: r.warrantyPhoto }} style={detailStyles.photoThumb} resizeMode="cover" />
+                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }]}>
+                          <Feather name="maximize-2" size={14} color="#fff" />
+                          <Text style={detailStyles.photoHintText}>Tap to enlarge</Text>
+                        </View>
+                      </Pressable>
+                    </View>
+                  )}
                 </ScrollView>
               </View>
             );
@@ -695,6 +717,12 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     borderRadius: 8, borderWidth: 1,
   },
+  photoBadges: {
+    flex: 1,
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+  },
   photoBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -702,7 +730,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    flex: 1,
   },
   photoBadgeText: { fontSize: 11, fontFamily: "Inter_500Medium" },
 });

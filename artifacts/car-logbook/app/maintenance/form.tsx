@@ -196,6 +196,7 @@ export default function MaintenanceFormScreen() {
         warrantyDetails: warrantyDetails.trim() || undefined,
         cost: totalCost > 0 ? totalCost : undefined,
         billPhoto: billPhotos.length > 0 ? billPhotos[0] : undefined,
+        warrantyPhoto: warrantyPhotos.length > 0 ? warrantyPhotos[0] : undefined,
       }),
     onSuccess: async () => {
       if (faultId) {

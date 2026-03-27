@@ -9,6 +9,7 @@ export const usersTable = pgTable("users", {
   email: text("email").notNull(),
   passwordHash: text("password_hash").notNull(),
   isAdmin: boolean("is_admin").default(false).notNull(),
+  country: text("country"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => [unique("users_email_unique").on(t.email)]);
 
@@ -68,6 +69,7 @@ export const maintenanceTable = pgTable("maintenance_records", {
   warrantyPeriod: text("warranty_period"),
   warrantyDetails: text("warranty_details"),
   billPhoto: text("bill_photo"),
+  warrantyPhoto: text("warranty_photo"),
   notes: text("notes"),
   nextDueDate: text("next_due_date"),
   nextDueMileage: integer("next_due_mileage"),
