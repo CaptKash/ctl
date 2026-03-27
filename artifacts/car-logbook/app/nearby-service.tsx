@@ -81,7 +81,7 @@ const OVERPASS_MIRRORS = [
 async function fetchNearby(
   lat: number,
   lon: number,
-  radiusM = 10000
+  radiusM = 25000
 ): Promise<ServiceCenter[]> {
   const query = `[out:json][timeout:25];(node["amenity"="car_repair"](around:${radiusM},${lat},${lon});node["amenity"="car_service"](around:${radiusM},${lat},${lon});node["shop"="tyres"](around:${radiusM},${lat},${lon});node["shop"="car_parts"](around:${radiusM},${lat},${lon});way["amenity"="car_repair"](around:${radiusM},${lat},${lon});way["amenity"="car_service"](around:${radiusM},${lat},${lon});way["shop"="tyres"](around:${radiusM},${lat},${lon}););out center;`;
 
@@ -275,7 +275,7 @@ export default function NearbyServiceScreen() {
             None Found Nearby
           </Text>
           <Text style={[styles.stateText, { color: C.textSecondary }]}>
-            No service centers found within 10 km of your location.
+            No service centers found within 25 km of your location.
           </Text>
         </View>
       );
@@ -397,7 +397,7 @@ export default function NearbyServiceScreen() {
       {/* Count label */}
       {phase === "done" && centers.length > 0 && (
         <Text style={[styles.countLabel, { color: C.textSecondary }]}>
-          {visible.length} {visible.length === 1 ? "result" : "results"} within 10 km
+          {visible.length} {visible.length === 1 ? "result" : "results"} within 25 km
         </Text>
       )}
 
