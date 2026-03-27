@@ -230,7 +230,10 @@ router.post("/auth/forgot-password", async (req, res) => {
         .values({ userId: user.id, expiresAt })
         .returning({ token: passwordResetTokensTable.token });
 
-      const resetLink = `${RESET_BASE_URL}/api/reset-password?token=${record.token}`;
+      const host = (req.headers["x-forwarded-host"] as string) || req.headers["host"] || "";
+      const proto = (req.headers["x-forwarded-proto"] as string) || "https";
+      const baseUrl = host ? `${proto}://${host}` : RESET_BASE_URL;
+      const resetLink = `${baseUrl}/api/reset-password?token=${record.token}`;
       console.log(`[forgot-password] Reset link for ${user.email}: ${resetLink}`);
 
       if (resend) {
