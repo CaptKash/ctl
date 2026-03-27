@@ -6,6 +6,7 @@ import { Platform } from "react-native";
 
 const TOKEN_KEY = "ctl_auth_token";
 const USER_KEY = "ctl_auth_user";
+const REMEMBER_KEY = "ctl_remember_session";
 const INSTALL_SENTINEL_KEY = "ctl_install_sentinel";
 const INSTALL_SENTINEL_SECURE_KEY = "ctl_install_id";
 
@@ -112,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await Promise.all([
             secureDelete(TOKEN_KEY),
             secureDelete(USER_KEY),
+            secureDelete(REMEMBER_KEY),
             secureDelete(INSTALL_SENTINEL_SECURE_KEY),
           ]);
           return;
@@ -119,6 +121,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const storedToken = await secureGet(TOKEN_KEY);
         if (storedToken) {
+          const remember = await secureGet(REMEMBER_KEY);
+          if (remember === "0") {
+            await Promise.all([
+              secureDelete(TOKEN_KEY),
+              secureDelete(USER_KEY),
+              secureDelete(REMEMBER_KEY),
+            ]);
+            return;
+          }
+
           const serverUser = await verifyTokenWithServer(storedToken);
           if (serverUser) {
             setToken(storedToken);
@@ -127,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await Promise.all([
               secureDelete(TOKEN_KEY),
               secureDelete(USER_KEY),
+              secureDelete(REMEMBER_KEY),
             ]);
           }
         }
@@ -139,12 +152,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (newToken: string, newUser: AuthUser, rememberMe = true) => {
     queryClient.clear();
-    if (rememberMe) {
-      await Promise.all([
-        secureSet(TOKEN_KEY, newToken),
-        secureSet(USER_KEY, JSON.stringify(newUser)),
-      ]);
-    }
+    await Promise.all([
+      secureSet(TOKEN_KEY, newToken),
+      secureSet(USER_KEY, JSON.stringify(newUser)),
+      secureSet(REMEMBER_KEY, rememberMe ? "1" : "0"),
+    ]);
     setToken(newToken);
     setUser(newUser);
   };
@@ -154,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await Promise.all([
       secureDelete(TOKEN_KEY),
       secureDelete(USER_KEY),
+      secureDelete(REMEMBER_KEY),
     ]);
     setToken(null);
     setUser(null);

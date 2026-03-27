@@ -117,7 +117,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={[styles.container, { backgroundColor: C.background }]}>
 
@@ -141,12 +141,12 @@ export default function LoginScreen() {
           <Svg
             width={screenW}
             height={250}
-            style={{ position: "absolute", top: 0, left: 0 }}
+            style={{ position: "absolute", top: 0, left: 0, backgroundColor: "transparent" }}
             pointerEvents="none"
           >
             <Polygon
               points={`${Math.round(screenW * 0.57)},0 ${screenW},0 ${screenW},250 ${Math.round(screenW * 0.57)},155`}
-              fill={isDark ? "#071A40" : "#DBEAFE"}
+              fill={isDark ? "#1D4A96" : "#DBEAFE"}
             />
           </Svg>
           <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
