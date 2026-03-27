@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ActionSheetIOS,
   Alert,
   Image,
+  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -21,6 +22,7 @@ type Props = {
 
 export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
   const C = useColors();
+  const [viewingUri, setViewingUri] = useState<string | null>(null);
 
   const pickImage = async (useCamera: boolean) => {
     const permission = useCamera
@@ -105,7 +107,12 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
       <Text style={[styles.label, { color: C.textSecondary }]}>Photos</Text>
       <View style={styles.grid}>
         {photos.map((uri, i) => (
-          <Pressable key={i} onLongPress={() => removePhoto(i)} style={styles.thumb}>
+          <Pressable
+            key={i}
+            onPress={() => setViewingUri(uri)}
+            onLongPress={() => removePhoto(i)}
+            style={styles.thumb}
+          >
             <Image source={{ uri }} style={styles.thumbImg} resizeMode="cover" />
             <Pressable
               onPress={() => removePhoto(i)}
@@ -137,9 +144,25 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
       </View>
       {photos.length > 0 && (
         <Text style={[styles.hint, { color: C.textTertiary }]}>
-          Long-press a photo to remove it
+          Tap to view · Long-press to remove
         </Text>
       )}
+
+      <Modal
+        visible={!!viewingUri}
+        animationType="fade"
+        onRequestClose={() => setViewingUri(null)}
+        statusBarTranslucent
+      >
+        <View style={styles.photoModal}>
+          <Pressable onPress={() => setViewingUri(null)} style={styles.photoModalClose} hitSlop={12}>
+            <Feather name="x" size={24} color="#fff" />
+          </Pressable>
+          {viewingUri && (
+            <Image source={{ uri: viewingUri }} style={styles.photoFull} resizeMode="contain" />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -184,4 +207,18 @@ const styles = StyleSheet.create({
   },
   addText: { fontSize: 11, fontFamily: "Inter_500Medium" },
   hint: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  photoModal: { flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" },
+  photoModalClose: {
+    position: "absolute",
+    top: 56,
+    right: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  photoFull: { width: "100%", height: "80%" },
 });

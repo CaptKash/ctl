@@ -6,11 +6,13 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -59,6 +61,13 @@ type MaintenanceRecord = {
   date: string;
   cost?: number | null;
   shop?: string | null;
+  shopAddress?: string | null;
+  shopPhone?: string | null;
+  correctiveAction?: string | null;
+  partsReplaced?: string | null;
+  warrantyPeriod?: string | null;
+  warrantyDetails?: string | null;
+  billPhoto?: string | null;
 };
 
 type InspectionRecord = {
@@ -68,6 +77,7 @@ type InspectionRecord = {
   place?: string | null;
   results?: string | null;
   cost?: number | null;
+  requiredRepairs?: string | null;
   nextInspectionDate?: string | null;
 };
 
@@ -97,6 +107,9 @@ export default function CarDetailScreen() {
     message: string;
     onConfirm: () => void;
   }>({ visible: false, title: "", message: "", onConfirm: () => {} });
+
+  const [detailEvent, setDetailEvent] = useState<EventItem | null>(null);
+  const [photoViewer, setPhotoViewer] = useState<string | null>(null);
 
   const carQuery = useQuery<Car>({
     queryKey: ["car", carId],
@@ -205,7 +218,11 @@ export default function CarDetailScreen() {
     if (ev.kind === "maintenance") {
       const r = ev.data;
       return (
-        <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+        <Pressable
+          key={key}
+          onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
+          style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+        >
           <View style={styles.cardHeader}>
             <View style={[styles.badge, { backgroundColor: meta.bg }]}>
               <Feather name={meta.icon} size={11} color={meta.color} />
@@ -231,22 +248,33 @@ export default function CarDetailScreen() {
             </View>
           )}
           <View style={styles.cardFooter}>
-            <View style={{ flex: 1 }} />
-            <Pressable
-              onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
-              style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
-            >
-              <Feather name="trash-2" size={14} color={meta.color} />
-            </Pressable>
+            {r.billPhoto ? (
+              <View style={[styles.photoBadge, { backgroundColor: meta.bg }]}>
+                <Feather name="image" size={11} color={meta.color} />
+                <Text style={[styles.photoBadgeText, { color: meta.color }]}>Bill photo</Text>
+              </View>
+            ) : <View style={{ flex: 1 }} />}
+            <View style={styles.cardActions}>
+              <TouchableOpacity
+                onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
+                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+              >
+                <Feather name="trash-2" size={14} color={meta.color} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </Pressable>
       );
     }
 
     if (ev.kind === "inspection") {
       const r = ev.data;
       return (
-        <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+        <Pressable
+          key={key}
+          onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
+          style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+        >
           <View style={styles.cardHeader}>
             <View style={[styles.badge, { backgroundColor: meta.bg }]}>
               <Feather name={meta.icon} size={11} color={meta.color} />
@@ -281,14 +309,14 @@ export default function CarDetailScreen() {
           )}
           <View style={styles.cardFooter}>
             <View style={{ flex: 1 }} />
-            <Pressable
+            <TouchableOpacity
               onPress={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
               style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
             >
               <Feather name="trash-2" size={14} color={meta.color} />
-            </Pressable>
+            </TouchableOpacity>
           </View>
-        </View>
+        </Pressable>
       );
     }
 
@@ -418,6 +446,115 @@ export default function CarDetailScreen() {
         onCancel={() => setConfirmModal((s) => ({ ...s, visible: false }))}
         destructive
       />
+
+      {/* Event Detail Sheet */}
+      <Modal
+        visible={!!detailEvent}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setDetailEvent(null)}
+      >
+        {detailEvent && (() => {
+          const meta = EVENT_META[detailEvent.kind];
+          if (detailEvent.kind === "maintenance") {
+            const r = detailEvent.data;
+            const rows: { label: string; value: string }[] = [];
+            if (r.correctiveAction && r.correctiveAction !== r.description) rows.push({ label: "Corrective Action", value: r.correctiveAction });
+            if (r.shop) rows.push({ label: "Shop", value: r.shop });
+            if (r.shopAddress) rows.push({ label: "Address", value: r.shopAddress });
+            if (r.shopPhone) rows.push({ label: "Phone", value: r.shopPhone });
+            if (r.cost != null) rows.push({ label: "Cost", value: `$${r.cost.toFixed(2)}` });
+            if (r.partsReplaced) rows.push({ label: "Parts Replaced", value: r.partsReplaced });
+            if (r.warrantyPeriod) rows.push({ label: "Warranty Period", value: r.warrantyPeriod });
+            if (r.warrantyDetails) rows.push({ label: "Warranty Details", value: r.warrantyDetails });
+            return (
+              <View style={[detailStyles.sheet, { backgroundColor: C.backgroundSecondary }]}>
+                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+                    <Feather name={meta.icon} size={12} color={meta.color} />
+                    <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || meta.label}</Text>
+                  </View>
+                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary }]}>{formatDate(r.date)}</Text>
+                  <Pressable onPress={() => setDetailEvent(null)} hitSlop={12}>
+                    <Feather name="x" size={22} color={C.textSecondary} />
+                  </Pressable>
+                </View>
+                <ScrollView contentContainerStyle={detailStyles.body} showsVerticalScrollIndicator={false}>
+                  <Text style={[detailStyles.title, { color: C.text }]}>{r.description}</Text>
+                  {rows.map((row) => (
+                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }]}>
+                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary }]}>{row.label}</Text>
+                      <Text style={[detailStyles.rowValue, { color: C.text }]}>{row.value}</Text>
+                    </View>
+                  ))}
+                  {r.billPhoto && (
+                    <View style={detailStyles.photoSection}>
+                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary }]}>Bill Photo</Text>
+                      <Pressable onPress={() => setPhotoViewer(r.billPhoto!)} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+                        <Image source={{ uri: r.billPhoto }} style={detailStyles.photoThumb} resizeMode="cover" />
+                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }]}>
+                          <Feather name="maximize-2" size={14} color="#fff" />
+                          <Text style={detailStyles.photoHintText}>Tap to enlarge</Text>
+                        </View>
+                      </Pressable>
+                    </View>
+                  )}
+                </ScrollView>
+              </View>
+            );
+          }
+          if (detailEvent.kind === "inspection") {
+            const r = detailEvent.data;
+            const rows: { label: string; value: string }[] = [];
+            if (r.place) rows.push({ label: "Location", value: r.place });
+            if (r.cost != null) rows.push({ label: "Cost", value: `$${r.cost.toFixed(2)}` });
+            if (r.requiredRepairs) rows.push({ label: "Required Repairs", value: r.requiredRepairs });
+            if (r.nextInspectionDate) rows.push({ label: "Next Inspection", value: formatDate(r.nextInspectionDate) });
+            return (
+              <View style={[detailStyles.sheet, { backgroundColor: C.backgroundSecondary }]}>
+                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+                    <Feather name={meta.icon} size={12} color={meta.color} />
+                    <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+                  </View>
+                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary }]}>{formatDate(r.date)}</Text>
+                  <Pressable onPress={() => setDetailEvent(null)} hitSlop={12}>
+                    <Feather name="x" size={22} color={C.textSecondary} />
+                  </Pressable>
+                </View>
+                <ScrollView contentContainerStyle={detailStyles.body} showsVerticalScrollIndicator={false}>
+                  {r.results && <Text style={[detailStyles.title, { color: C.text }]}>{r.results}</Text>}
+                  {rows.map((row) => (
+                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }]}>
+                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary }]}>{row.label}</Text>
+                      <Text style={[detailStyles.rowValue, { color: C.text }]}>{row.value}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            );
+          }
+          return null;
+        })()}
+      </Modal>
+
+      {/* Full-screen photo viewer */}
+      <Modal
+        visible={!!photoViewer}
+        animationType="fade"
+        onRequestClose={() => setPhotoViewer(null)}
+        statusBarTranslucent
+      >
+        <View style={detailStyles.photoModal}>
+          <Pressable onPress={() => setPhotoViewer(null)} style={detailStyles.photoModalClose} hitSlop={12}>
+            <Feather name="x" size={24} color="#fff" />
+          </Pressable>
+          {photoViewer && (
+            <Image source={{ uri: photoViewer }} style={detailStyles.photoFull} resizeMode="contain" />
+          )}
+        </View>
+      </Modal>
+
       <BottomNav />
     </SwipeBackView>
   );
@@ -500,4 +637,68 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
     borderRadius: 8, borderWidth: 1,
   },
+  photoBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    flex: 1,
+  },
+  photoBadgeText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+});
+
+const detailStyles = StyleSheet.create({
+  sheet: { flex: 1 },
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  dateLabel: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
+  body: { padding: 20, gap: 0, paddingBottom: 48 },
+  title: { fontSize: 17, fontFamily: "Inter_700Bold", lineHeight: 24, marginBottom: 16 },
+  row: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 12,
+    gap: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  rowLabel: { fontSize: 13, fontFamily: "Inter_500Medium", width: 130 },
+  rowValue: { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
+  photoSection: { marginTop: 24, gap: 10 },
+  photoLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  photoThumb: { width: "100%", height: 220, borderRadius: 12 },
+  photoHint: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  photoHintText: { color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" },
+  photoModal: { flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" },
+  photoModalClose: {
+    position: "absolute",
+    top: 56,
+    right: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  photoFull: { width: "100%", height: "80%" },
 });
