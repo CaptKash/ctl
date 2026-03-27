@@ -254,11 +254,11 @@ export default function MenuDashboardScreen() {
           }}
           style={({ pressed }) => [
             styles.tile,
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 1, borderColor: "#DC2626" },
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 1, borderColor: "#2563EB" },
           ]}
         >
-          <View style={[styles.tileIcon, { backgroundColor: "#FEE2E2" }]}>
-            <Feather name="plus-circle" size={24} color="#DC2626" />
+          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
+            <Feather name="plus-circle" size={24} color="#2563EB" />
           </View>
           <View style={styles.tileBody}>
             <Text style={[styles.tileTitle, { color: C.text }]}>Log Event</Text>
