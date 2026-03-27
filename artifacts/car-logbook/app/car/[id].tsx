@@ -411,44 +411,44 @@ export default function CarDetailScreen() {
             {/* Row 1: Car info pills */}
             <View style={styles.statsRow}>
               {car.mileage != null && (
-                <View style={styles.infoPill}>
-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{unit}</Text>
-                  <Text style={[styles.pillValue, { color: C.text }]}>{car.mileage.toLocaleString()}</Text>
+                <View style={[styles.infoPill, { marginRight: 16 }]}>
+                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{unit} </Text>
+                  <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.mileage.toLocaleString()}</Text>
                 </View>
               )}
               {car.licensePlate && (
-                <View style={styles.infoPill}>
-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Plate</Text>
-                  <Text style={[styles.pillValue, { color: C.text }]}>{car.licensePlate}</Text>
+                <View style={[styles.infoPill, { marginRight: 16 }]}>
+                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Plate </Text>
+                  <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.licensePlate}</Text>
                 </View>
               )}
               {car.color && (
-                <View style={styles.infoPill}>
-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Color</Text>
-                  <Text style={[styles.pillValue, { color: C.text }]}>{car.color}</Text>
+                <View style={[styles.infoPill, { marginRight: 16 }]}>
+                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Color </Text>
+                  <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.color}</Text>
                 </View>
               )}
               {car.vin && (
                 <View style={styles.infoPill}>
-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>VIN</Text>
+                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>VIN </Text>
                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.vin.slice(-6)}</Text>
                 </View>
               )}
             </View>
             {/* Row 2: Expiry date pills */}
             {hasExpiry && (
-              <View style={[styles.statsRow, styles.statsRowTop, { borderTopColor: C.border }]}>
+              <View style={[styles.statsRow, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border }]}>
                 {car.licenseValidUntil && (
-                  <View style={styles.expiryPill}>
+                  <View style={[styles.expiryPill, { marginRight: 20 }]}>
                     <View style={[styles.expiryDot, { backgroundColor: expiryColor(car.licenseValidUntil) }]} />
-                    <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Lic.</Text>
+                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginLeft: 5 }]}>Lic. </Text>
                     <Text style={[styles.expiryValue, { color: expiryColor(car.licenseValidUntil) }]} numberOfLines={1}>{formatDate(car.licenseValidUntil)}</Text>
                   </View>
                 )}
                 {car.insuredUntil && (
                   <View style={styles.expiryPill}>
                     <View style={[styles.expiryDot, { backgroundColor: expiryColor(car.insuredUntil) }]} />
-                    <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Ins.</Text>
+                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginLeft: 5 }]}>Ins. </Text>
                     <Text style={[styles.expiryValue, { color: expiryColor(car.insuredUntil) }]} numberOfLines={1}>{formatDate(car.insuredUntil)}</Text>
                   </View>
                 )}
@@ -652,22 +652,16 @@ const styles = StyleSheet.create({
     flexWrap: "nowrap",
     paddingHorizontal: 14,
     paddingVertical: 8,
-    gap: 16,
-  },
-  statsRowTop: {
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
   infoPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
   },
   pillLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
   pillValue: { fontSize: 13, fontFamily: "Inter_700Bold" },
   expiryPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
   },
   expiryDot: {
     width: 7,
