@@ -19,8 +19,14 @@
     },
     "production": {
       "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app"
+      },
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {
+        "image": "sdk-54"
       }
     }
   },
