@@ -138,27 +138,27 @@ export default function LoginScreen() {
                 elevation: 4,
               },
         ]}>
-          <Svg
-            width={screenW}
-            height={250}
-            style={{ position: "absolute", top: 0, left: 0, backgroundColor: "transparent", zIndex: 0 }}
-            pointerEvents="none"
-          >
-            <Polygon
-              points={`${Math.round(screenW * 0.57)},0 ${screenW},0 ${screenW},250 ${Math.round(screenW * 0.57)},155`}
-              fill={isDark ? "#1D4A96" : "#DBEAFE"}
-            />
-          </Svg>
-          <View style={{ zIndex: 1 }}>
-            <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
-            <View style={styles.heroLines}>
-              <View style={styles.heroLineLong} />
-              <View style={styles.heroLineShort} />
-            </View>
-            <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
-              Car Technical Log
-            </Text>
+          {!isDark && (
+            <Svg
+              width={screenW}
+              height={250}
+              style={{ position: "absolute", top: 0, left: 0, backgroundColor: "transparent" }}
+              pointerEvents="none"
+            >
+              <Polygon
+                points={`${Math.round(screenW * 0.57)},0 ${screenW},0 ${screenW},250 ${Math.round(screenW * 0.57)},155`}
+                fill="#DBEAFE"
+              />
+            </Svg>
+          )}
+          <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
+          <View style={styles.heroLines}>
+            <View style={styles.heroLineLong} />
+            <View style={styles.heroLineShort} />
           </View>
+          <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
+            Car Technical Log
+          </Text>
         </View>
 
         {/* ── Form ───────────────────────────────────────────────────── */}
