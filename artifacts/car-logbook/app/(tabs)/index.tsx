@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useColors, useTheme } from "@/context/ThemeContext";
+import { useColors } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 import { apiPost } from "@/hooks/useApi";
@@ -59,8 +59,6 @@ const toggleStyles = StyleSheet.create({
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { width: screenW } = useWindowDimensions();
   const {
@@ -121,44 +119,25 @@ export default function LoginScreen() {
     >
       <View style={[styles.container, { backgroundColor: C.background }]}>
 
-        {/* ── Brand hero ─────────────────────────────────────────────── */}
-        <View style={[
-          styles.hero,
-          { paddingTop: topPad + 28 },
-          isDark
-            ? { backgroundColor: "#0F2D5E" }
-            : {
-                backgroundColor: "#FFFFFF",
-                borderBottomWidth: 2,
-                borderBottomColor: "#B8CADD",
-                shadowColor: "#1D4ED8",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-                elevation: 4,
-              },
-        ]}>
-          {!isDark && (
-            <Svg
-              width={screenW}
-              height={250}
-              style={{ position: "absolute", top: 0, left: 0, backgroundColor: "transparent" }}
-              pointerEvents="none"
-            >
-              <Polygon
-                points={`${Math.round(screenW * 0.57)},0 ${screenW},0 ${screenW},250 ${Math.round(screenW * 0.57)},155`}
-                fill="#DBEAFE"
-              />
-            </Svg>
-          )}
-          <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
+        {/* ── Brand hero — always dark navy brand colors ─────────────── */}
+        <View style={[styles.hero, { paddingTop: topPad + 28 }]}>
+          <Svg
+            width={screenW}
+            height={250}
+            style={{ position: "absolute", top: 0, left: 0, backgroundColor: "transparent" }}
+            pointerEvents="none"
+          >
+            <Polygon
+              points={`${Math.round(screenW * 0.57)},0 ${screenW},0 ${screenW},250 ${Math.round(screenW * 0.57)},155`}
+              fill="#1D4A96"
+            />
+          </Svg>
+          <Text style={styles.heroTitle}>CTL</Text>
           <View style={styles.heroLines}>
             <View style={styles.heroLineLong} />
             <View style={styles.heroLineShort} />
           </View>
-          <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
-            Car Technical Log
-          </Text>
+          <Text style={styles.heroTagline}>Car Technical Log</Text>
         </View>
 
         {/* ── Form ───────────────────────────────────────────────────── */}
