@@ -387,32 +387,60 @@ export default function CarDetailScreen() {
       </View>
 
       {/* Stats Strip */}
-      <View style={[styles.statsStrip, { backgroundColor: C.card }]}>
-        {car.mileage != null && (
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: C.text }]}>{car.mileage.toLocaleString()}</Text>
-            <Text style={[styles.statLabel, { color: C.textSecondary }]}>{unit}</Text>
-          </View>
-        )}
-        {car.vin && (
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: C.text }]} numberOfLines={1}>{car.vin.slice(-6)}</Text>
-            <Text style={[styles.statLabel, { color: C.textSecondary }]}>VIN</Text>
-          </View>
-        )}
-        {car.color && (
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: C.text }]}>{car.color}</Text>
-            <Text style={[styles.statLabel, { color: C.textSecondary }]}>Color</Text>
-          </View>
-        )}
-        {car.licensePlate && (
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: C.text }]}>{car.licensePlate}</Text>
-            <Text style={[styles.statLabel, { color: C.textSecondary }]}>Plate</Text>
-          </View>
-        )}
-      </View>
+      {(() => {
+        const expiryColor = (iso: string | null | undefined): string => {
+          if (!iso) return C.text;
+          const days = Math.floor((new Date(iso).getTime() - Date.now()) / 86_400_000);
+          if (days <= 0) return "#DC2626";
+          if (days <= 60) return "#D97706";
+          return "#16A34A";
+        };
+        return (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={[styles.statsStrip, { backgroundColor: C.card }]}
+            contentContainerStyle={styles.statsStripContent}
+          >
+            {car.mileage != null && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: C.text }]}>{car.mileage.toLocaleString()}</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>{unit}</Text>
+              </View>
+            )}
+            {car.vin && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: C.text }]} numberOfLines={1}>{car.vin.slice(-6)}</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>VIN</Text>
+              </View>
+            )}
+            {car.color && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: C.text }]}>{car.color}</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>Color</Text>
+              </View>
+            )}
+            {car.licensePlate && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: C.text }]}>{car.licensePlate}</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>Plate</Text>
+              </View>
+            )}
+            {car.licenseValidUntil && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: expiryColor(car.licenseValidUntil) }]}>{formatDate(car.licenseValidUntil)}</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>Lic. Exp.</Text>
+              </View>
+            )}
+            {car.insuredUntil && (
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: expiryColor(car.insuredUntil) }]}>{formatDate(car.insuredUntil)}</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>Ins. Exp.</Text>
+              </View>
+            )}
+          </ScrollView>
+        );
+      })()}
 
       <ScrollView
         style={styles.content}
@@ -580,17 +608,20 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   statsStrip: {
-    flexDirection: "row",
     marginHorizontal: 16,
     borderRadius: 14,
-    padding: 14,
     marginBottom: 4,
-    gap: 24,
     shadowColor: "rgba(0,0,0,0.04)",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 1,
     shadowRadius: 4,
     elevation: 1,
+  },
+  statsStripContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    gap: 24,
   },
   statItem: { alignItems: "center", gap: 2 },
   statValue: { fontSize: 14, fontFamily: "Inter_700Bold" },
