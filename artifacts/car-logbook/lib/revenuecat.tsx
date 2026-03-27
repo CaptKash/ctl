@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
+import { useAuth } from "@/context/AuthContext";
 
 const REVENUECAT_TEST_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY;
 const REVENUECAT_IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
@@ -81,6 +82,8 @@ export function initializeRevenueCat() {
 }
 
 function useSubscriptionContext() {
+  const { user } = useAuth();
+
   const customerInfoQuery = useQuery<CustomerInfo>({
     queryKey: ["revenuecat", "customer-info"],
     queryFn: async () => Purchases.getCustomerInfo(),
@@ -109,6 +112,7 @@ function useSubscriptionContext() {
   });
 
   const isFleet =
+    user?.isAdmin === true ||
     customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
   const offeringsLoaded = !offeringsQuery.isLoading;

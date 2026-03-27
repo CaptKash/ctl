@@ -45,13 +45,13 @@ router.post("/auth/register", async (req, res) => {
     const [user] = await db
       .insert(usersTable)
       .values({ name: name.trim(), email: email.toLowerCase().trim(), passwordHash })
-      .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
+      .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email, isAdmin: usersTable.isAdmin });
 
-    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin }, JWT_SECRET, {
       expiresIn: "90d",
     });
 
-    res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email } });
+    res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ error: "Registration failed. Please try again." });
@@ -81,11 +81,11 @@ router.post("/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin }, JWT_SECRET, {
       expiresIn: "90d",
     });
 
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Login failed. Please try again." });
@@ -102,7 +102,7 @@ router.get("/auth/me", async (req, res) => {
     const payload = jwt.verify(token, JWT_SECRET) as { id: number; email: string; name: string };
 
     const [user] = await db
-      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
+      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, isAdmin: usersTable.isAdmin })
       .from(usersTable)
       .where(eq(usersTable.id, payload.id))
       .limit(1);
@@ -306,6 +306,54 @@ router.post("/auth/reset-password", async (req, res) => {
   } catch (err) {
     console.error("Reset password error:", err);
     res.status(500).json({ error: "Something went wrong. Please try again." });
+  }
+});
+
+const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "ctl-admin-secret-2025";
+
+router.post("/auth/admin/grant", async (req, res) => {
+  try {
+    const { email, secret } = req.body as { email?: string; secret?: string };
+    if (!secret || secret !== ADMIN_SECRET) {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+    if (!email?.trim()) {
+      return res.status(400).json({ error: "Email is required." });
+    }
+    const [user] = await db
+      .update(usersTable)
+      .set({ isAdmin: true })
+      .where(eq(usersTable.email, email.toLowerCase().trim()))
+      .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
+    if (!user) return res.status(404).json({ error: "User not found." });
+    console.log(`[admin] Granted admin to ${user.email}`);
+    res.json({ ok: true, user });
+  } catch (err) {
+    console.error("[admin] Grant error:", err);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+});
+
+router.post("/auth/admin/revoke", async (req, res) => {
+  try {
+    const { email, secret } = req.body as { email?: string; secret?: string };
+    if (!secret || secret !== ADMIN_SECRET) {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+    if (!email?.trim()) {
+      return res.status(400).json({ error: "Email is required." });
+    }
+    const [user] = await db
+      .update(usersTable)
+      .set({ isAdmin: false })
+      .where(eq(usersTable.email, email.toLowerCase().trim()))
+      .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
+    if (!user) return res.status(404).json({ error: "User not found." });
+    console.log(`[admin] Revoked admin from ${user.email}`);
+    res.json({ ok: true, user });
+  } catch (err) {
+    console.error("[admin] Revoke error:", err);
+    res.status(500).json({ error: "Something went wrong." });
   }
 });
 

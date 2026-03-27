@@ -46,6 +46,7 @@ export type AuthUser = {
   id: number;
   name: string;
   email: string;
+  isAdmin?: boolean;
 };
 
 type AuthContextType = {

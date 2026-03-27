@@ -7,6 +7,7 @@ export interface AuthPayload {
   id: number;
   email: string;
   name: string;
+  isAdmin?: boolean;
 }
 
 declare global {
