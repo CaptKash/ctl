@@ -248,14 +248,14 @@ function ThemeRow() {
   const { preference, setPreference } = useTheme();
 
   return (
-    <View style={styles.row}>
-      <View style={[styles.rowIcon, { backgroundColor: "#FEF3C7" }]}>
-        <Feather name="sun" size={16} color="#D97706" />
-      </View>
-      <View style={styles.rowBody}>
+    <View style={[styles.row, { alignItems: "flex-start", flexDirection: "column", gap: 10 }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={[styles.rowIcon, { backgroundColor: "#FEF3C7" }]}>
+          <Feather name="sun" size={16} color="#D97706" />
+        </View>
         <Text style={[styles.rowTitle, { color: C.text }]}>Theme</Text>
       </View>
-      <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
+      <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border, alignSelf: "stretch" }]}>
         {THEME_OPTIONS.map((opt) => {
           const active = preference === opt.value;
           return (
@@ -267,6 +267,7 @@ function ThemeRow() {
               }}
               style={[
                 styles.segmentBtn,
+                { flex: 1, justifyContent: "center" },
                 active && { backgroundColor: C.tint },
               ]}
               activeOpacity={0.7}
