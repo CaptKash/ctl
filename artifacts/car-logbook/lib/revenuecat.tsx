@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from "react";
 import { Platform } from "react-native";
-import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage } from "react-native-purchases";
+import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
 
@@ -11,6 +11,54 @@ const REVENUECAT_ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_AP
 export const REVENUECAT_ENTITLEMENT_IDENTIFIER = "fleet";
 
 export const FREE_CAR_LIMIT = 2;
+
+export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
+  {
+    identifier: "$rc_monthly",
+    packageType: PACKAGE_TYPE.MONTHLY,
+    product: {
+      identifier: "ctl_fleet_monthly",
+      description: "CTL Fleet Monthly",
+      title: "Monthly",
+      price: 2.99,
+      priceString: "$2.99",
+      currencyCode: "USD",
+      introPrice: null,
+      discounts: [],
+    },
+    offeringIdentifier: "default",
+  } as unknown as PurchasesPackage,
+  {
+    identifier: "$rc_annual",
+    packageType: PACKAGE_TYPE.ANNUAL,
+    product: {
+      identifier: "ctl_fleet_annual",
+      description: "CTL Fleet Annual",
+      title: "Annual",
+      price: 24.99,
+      priceString: "$24.99",
+      currencyCode: "USD",
+      introPrice: null,
+      discounts: [],
+    },
+    offeringIdentifier: "default",
+  } as unknown as PurchasesPackage,
+  {
+    identifier: "$rc_lifetime",
+    packageType: PACKAGE_TYPE.LIFETIME,
+    product: {
+      identifier: "ctl_fleet_lifetime",
+      description: "CTL Fleet Lifetime",
+      title: "Lifetime",
+      price: 19.99,
+      priceString: "$19.99",
+      currencyCode: "USD",
+      introPrice: null,
+      discounts: [],
+    },
+    offeringIdentifier: "default",
+  } as unknown as PurchasesPackage,
+];
 
 function getRevenueCatApiKey() {
   if (__DEV__ || Platform.OS === "web" || Constants.executionEnvironment === "storeClient") {
@@ -63,17 +111,25 @@ function useSubscriptionContext() {
   const isFleet =
     customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
+  const offeringsLoaded = !offeringsQuery.isLoading;
+  const offeringsFailed = offeringsLoaded && (offeringsQuery.isError || (offeringsQuery.data?.current?.availablePackages?.length ?? 0) === 0);
+  const usingMockPackages = __DEV__ && offeringsFailed;
+
   return {
     customerInfo: customerInfoQuery.data,
     offerings: offeringsQuery.data,
     isFleet,
     isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
+    offeringsFailed,
+    usingMockPackages,
     FREE_CAR_LIMIT,
     purchase: purchaseMutation.mutateAsync,
     restore: restoreMutation.mutateAsync,
     isPurchasing: purchaseMutation.isPending,
     isRestoring: restoreMutation.isPending,
     refetchCustomerInfo: customerInfoQuery.refetch,
+    refetchOfferings: offeringsQuery.refetch,
+    mockPackages: DEV_MOCK_PACKAGES,
   };
 }
 

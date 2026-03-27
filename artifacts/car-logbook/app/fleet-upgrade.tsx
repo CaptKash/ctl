@@ -45,12 +45,14 @@ export default function FleetUpgradeScreen() {
   const C = useColors();
   const topPad = Platform.OS === "web" ? 20 : insets.top;
 
-  const { offerings, isLoading, purchase, isPurchasing, restore, isRestoring, isFleet } = useSubscription();
+  const { offerings, isLoading, purchase, isPurchasing, restore, isRestoring, isFleet, offeringsFailed, usingMockPackages, refetchOfferings, mockPackages } = useSubscription();
   const [selectedId, setSelectedId] = React.useState("$rc_lifetime");
   const [confirmPkg, setConfirmPkg] = React.useState<PurchasesPackage | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  const availablePackages: PurchasesPackage[] = offerings?.current?.availablePackages ?? [];
+  const availablePackages: PurchasesPackage[] = usingMockPackages
+    ? mockPackages
+    : (offerings?.current?.availablePackages ?? []);
 
   const orderedPackages = PACKAGE_ORDER
     .map((id) => availablePackages.find((p) => p.identifier === id))
@@ -158,15 +160,26 @@ export default function FleetUpgradeScreen() {
 
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>CHOOSE A PLAN</Text>
 
+        {usingMockPackages && (
+          <View style={[styles.devNotice, { backgroundColor: "#FEF3C7" }]}>
+            <Text style={styles.devNoticeText}>Dev mode · RevenueCat not connected · prices are test values</Text>
+          </View>
+        )}
+
         {isLoading ? (
           <View style={styles.loadingRow}>
             <ActivityIndicator color={C.tint} />
             <Text style={[styles.loadingText, { color: C.textSecondary }]}>Loading plans...</Text>
           </View>
-        ) : orderedPackages.length === 0 ? (
-          <Text style={[styles.loadingText, { color: C.textSecondary, textAlign: "center" }]}>
-            Plans unavailable. Please try again later.
-          </Text>
+        ) : !usingMockPackages && orderedPackages.length === 0 ? (
+          <View style={styles.loadingRow}>
+            <Text style={[styles.loadingText, { color: C.textSecondary, textAlign: "center" }]}>
+              Plans unavailable.
+            </Text>
+            <Pressable onPress={() => refetchOfferings()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+              <Text style={[styles.loadingText, { color: C.tint }]}>Retry</Text>
+            </Pressable>
+          </View>
         ) : (
           orderedPackages.map((pkg) => {
             const meta = PACKAGE_META[pkg.identifier] ?? { label: pkg.identifier, sub: "", highlight: false };
@@ -216,7 +229,11 @@ export default function FleetUpgradeScreen() {
           disabled={isPurchasing || isLoading || orderedPackages.length === 0}
           style={({ pressed }) => [
             styles.ctaBtn,
-            { opacity: pressed || isPurchasing ? 0.75 : 1 },
+            {
+              opacity: (isPurchasing || isLoading || orderedPackages.length === 0)
+                ? 0.45
+                : pressed ? 0.8 : 1,
+            },
           ]}
         >
           {isPurchasing ? (
@@ -334,6 +351,17 @@ const styles = StyleSheet.create({
 
   loadingRow: { flexDirection: "row", alignItems: "center", gap: 10, justifyContent: "center", paddingVertical: 16 },
   loadingText: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  devNotice: {
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  devNoticeText: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    color: "#92400E",
+    textAlign: "center",
+  },
 
   planCard: {
     borderRadius: 14,
