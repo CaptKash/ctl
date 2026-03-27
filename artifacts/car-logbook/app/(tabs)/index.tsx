@@ -141,7 +141,7 @@ export default function LoginScreen() {
           <Svg
             width={screenW}
             height={250}
-            style={{ position: "absolute", top: 0, left: 0, backgroundColor: "transparent" }}
+            style={{ position: "absolute", top: 0, left: 0, backgroundColor: "transparent", zIndex: 0 }}
             pointerEvents="none"
           >
             <Polygon
@@ -149,14 +149,16 @@ export default function LoginScreen() {
               fill={isDark ? "#1D4A96" : "#DBEAFE"}
             />
           </Svg>
-          <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
-          <View style={styles.heroLines}>
-            <View style={styles.heroLineLong} />
-            <View style={styles.heroLineShort} />
+          <View style={{ zIndex: 1 }}>
+            <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
+            <View style={styles.heroLines}>
+              <View style={styles.heroLineLong} />
+              <View style={styles.heroLineShort} />
+            </View>
+            <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
+              Car Technical Log
+            </Text>
           </View>
-          <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
-            Car Technical Log
-          </Text>
         </View>
 
         {/* ── Form ───────────────────────────────────────────────────── */}
