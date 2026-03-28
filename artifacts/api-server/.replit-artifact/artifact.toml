@@ -1,5 +1,5 @@
 kind = "api"
-  previewPath = "/api" # TODO - should be excluded from preview in the first place
+  previewPath = "/api"
   title = "API Server"
   version = "1.0.0"
   id = "3B4_FFSkEVBkAeYMFRJ2e"
@@ -14,11 +14,9 @@ kind = "api"
 
   [services.production]
   build = "pnpm --filter @workspace/api-server run build"
+  run = "node artifacts/api-server/dist/index.js"
 
-  [services.production.run]
-  args = ["node", "artifacts/api-server/dist/index.js"]
-
-  [services.production.run.env]
+  [services.production.env]
   PORT = "8080"
 
   [services.production.health.startup]
