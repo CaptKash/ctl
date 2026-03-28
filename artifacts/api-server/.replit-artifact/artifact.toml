@@ -14,7 +14,7 @@ kind = "api"
 
   [services.production]
   build = "pnpm --filter @workspace/api-server run build"
-  run = "node artifacts/api-server/dist/index.js"
+  run = "pnpm --filter @workspace/api-server run serve"
 
   [services.production.env]
   PORT = "8080"
