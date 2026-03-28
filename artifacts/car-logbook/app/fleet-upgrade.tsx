@@ -36,7 +36,7 @@ const FLEET_FEATURES = [
 const PACKAGE_ORDER = ["$rc_monthly", "$rc_annual", "$rc_lifetime"];
 const PACKAGE_META: Record<string, { label: string; sub: string; highlight: boolean }> = {
   "$rc_monthly": { label: "Monthly", sub: "per month", highlight: false },
-  "$rc_annual": { label: "Annual", sub: "per year · save 30%", highlight: false },
+  "$rc_annual": { label: "Annual", sub: "per year · save 44%", highlight: false },
   "$rc_lifetime": { label: "Lifetime", sub: "one-time payment", highlight: true },
 };
 
