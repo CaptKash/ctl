@@ -7,7 +7,9 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app"
+        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
+        "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX"
       },
       "android": {
         "buildType": "apk"
@@ -20,7 +22,9 @@
     "production": {
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app"
+        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
+        "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX"
       },
       "android": {
         "buildType": "app-bundle"
