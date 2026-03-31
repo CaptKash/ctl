@@ -1,9 +1,41 @@
 import * as Calendar from "expo-calendar";
-import { Alert, Platform } from "react-native";
+import { Alert, Linking, Platform } from "react-native";
+
+export type WritableCalendar = { id: string; title: string; color?: string };
+
+export async function getWritableCalendars(): Promise<WritableCalendar[] | null> {
+  if (Platform.OS === "web") return null;
+
+  const { status } = await Calendar.requestCalendarPermissionsAsync();
+
+  if (status !== "granted") {
+    Alert.alert(
+      "Calendar Access Needed",
+      "Allow CTL to access your calendar in Settings to save service reminders.",
+      [
+        { text: "Not Now", style: "cancel" },
+        {
+          text: "Open Settings",
+          onPress: () => Linking.openSettings(),
+        },
+      ]
+    );
+    return null;
+  }
+
+  const all = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+  const writable = all.filter((c) => c.allowsModifications);
+  return writable.map((c) => ({
+    id: c.id,
+    title: c.title,
+    color: c.color,
+  }));
+}
 
 export async function addToCalendar(
   title: string,
   dateStr: string,
+  calendarId: string,
   notes?: string
 ): Promise<boolean> {
   if (Platform.OS === "web") {
@@ -15,30 +47,10 @@ export async function addToCalendar(
     return true;
   }
 
-  const { status } = await Calendar.requestCalendarPermissionsAsync();
-  if (status !== "granted") {
-    Alert.alert(
-      "Permission needed",
-      "Allow calendar access so CTL can save this reminder to your calendar."
-    );
-    return false;
-  }
-
-  const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-  const writable =
-    calendars.find((c) => c.allowsModifications && c.source?.isLocalAccount) ??
-    calendars.find((c) => c.allowsModifications) ??
-    calendars[0];
-
-  if (!writable) {
-    Alert.alert("No calendar found", "Could not find a writable calendar on this device.");
-    return false;
-  }
-
   const startDate = new Date(`${dateStr}T00:00:00`);
   const endDate = new Date(`${dateStr}T23:59:59`);
 
-  await Calendar.createEventAsync(writable.id, {
+  await Calendar.createEventAsync(calendarId, {
     title,
     startDate,
     endDate,

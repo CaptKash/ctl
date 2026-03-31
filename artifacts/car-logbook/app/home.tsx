@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -23,7 +24,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
-import { addToCalendar } from "@/lib/addToCalendar";
+import { addToCalendar, getWritableCalendars, WritableCalendar } from "@/lib/addToCalendar";
 
 type Car = {
   id: number;
@@ -80,16 +81,35 @@ export default function MenuDashboardScreen() {
   const [calendarLoading, setCalendarLoading] = useState<string | null>(null);
   const [activeCarIndex, setActiveCarIndex] = useState(0);
   const CHIP_WIDTH = 170;
+  const [calendarPickerVisible, setCalendarPickerVisible] = useState(false);
+  const [calendarPickerItem, setCalendarPickerItem] = useState<UpcomingItem | null>(null);
+  const [writableCalendars, setWritableCalendars] = useState<WritableCalendar[]>([]);
 
   const handleAddToCalendar = async (item: UpcomingItem) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS === "web") {
+      const carLabel = item.nickname ?? `${item.year} ${item.make} ${item.model}`;
+      await addToCalendar(`${item.type} — ${carLabel}`, item.nextDueDate, "", item.description);
+      return;
+    }
     const key = `${item.itemKind}-${item.id}`;
     setCalendarLoading(key);
+    const calendars = await getWritableCalendars().catch(() => null);
+    setCalendarLoading(null);
+    if (!calendars || calendars.length === 0) return;
+    if (calendars.length === 1) {
+      await saveToCalendar(item, calendars[0].id);
+    } else {
+      setWritableCalendars(calendars);
+      setCalendarPickerItem(item);
+      setCalendarPickerVisible(true);
+    }
+  };
+
+  const saveToCalendar = async (item: UpcomingItem, calendarId: string) => {
     const carLabel = item.nickname ?? `${item.year} ${item.make} ${item.model}`;
     const title = `${item.type} — ${carLabel}`;
-    const notes = item.description;
-    const added = await addToCalendar(title, item.nextDueDate, notes).catch(() => false);
-    setCalendarLoading(null);
+    const added = await addToCalendar(title, item.nextDueDate, calendarId, item.description).catch(() => false);
     if (added) {
       Alert.alert("Added to Calendar", `"${item.type}" has been saved to your calendar.`);
     }
@@ -378,6 +398,55 @@ export default function MenuDashboardScreen() {
       </ScrollView>
 
       <BottomNav active="dashboard" />
+
+      <Modal
+        visible={calendarPickerVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCalendarPickerVisible(false)}
+      >
+        <Pressable
+          style={calStyles.overlay}
+          onPress={() => setCalendarPickerVisible(false)}
+        />
+        <View style={[calStyles.sheet, { backgroundColor: C.card }]}>
+          <View style={[calStyles.handle, { backgroundColor: C.border }]} />
+          <Text style={[calStyles.title, { color: C.text }]}>Choose Calendar</Text>
+          <Text style={[calStyles.sub, { color: C.textSecondary }]}>
+            Select which calendar to add this reminder to
+          </Text>
+          {writableCalendars.map((cal) => (
+            <Pressable
+              key={cal.id}
+              onPress={async () => {
+                setCalendarPickerVisible(false);
+                if (calendarPickerItem) {
+                  await saveToCalendar(calendarPickerItem, cal.id);
+                  setCalendarPickerItem(null);
+                }
+              }}
+              style={({ pressed }) => [
+                calStyles.calRow,
+                { borderColor: C.border, opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <View
+                style={[calStyles.calDot, { backgroundColor: cal.color ?? C.tint }]}
+              />
+              <Text style={[calStyles.calName, { color: C.text }]} numberOfLines={1}>
+                {cal.title}
+              </Text>
+              <Feather name="chevron-right" size={16} color={C.textTertiary} />
+            </Pressable>
+          ))}
+          <Pressable
+            onPress={() => setCalendarPickerVisible(false)}
+            style={({ pressed }) => [calStyles.cancelBtn, { opacity: pressed ? 0.6 : 1 }]}
+          >
+            <Text style={[calStyles.cancelText, { color: C.textSecondary }]}>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -561,5 +630,63 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Inter_600SemiBold",
     color: "#2563EB",
+  },
+});
+
+const calStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  sheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 36,
+    paddingTop: 12,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 17,
+    fontFamily: "Inter_700Bold",
+    marginBottom: 4,
+  },
+  sub: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    marginBottom: 20,
+  },
+  calRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 12,
+  },
+  calDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  calName: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: "Inter_500Medium",
+  },
+  cancelBtn: {
+    marginTop: 20,
+    alignSelf: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+  },
+  cancelText: {
+    fontSize: 15,
+    fontFamily: "Inter_500Medium",
   },
 });
