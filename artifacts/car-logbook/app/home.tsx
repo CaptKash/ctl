@@ -363,7 +363,10 @@ export default function MenuDashboardScreen() {
                       {calendarLoading === `${item.itemKind}-${item.id}` ? (
                         <ActivityIndicator size={13} color="#2563EB" />
                       ) : (
-                        <Feather name="calendar" size={14} color="#2563EB" />
+                        <>
+                          <Feather name="calendar" size={14} color="#2563EB" />
+                          <Text style={styles.calBtnText}>Add</Text>
+                        </>
                       )}
                     </Pressable>
                   </View>
@@ -546,11 +549,17 @@ const styles = StyleSheet.create({
   eventCardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   calBtn: {
-    width: 30,
-    height: 30,
+    width: 44,
+    paddingVertical: 5,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
+    gap: 2,
+  },
+  calBtnText: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    color: "#2563EB",
   },
 });
