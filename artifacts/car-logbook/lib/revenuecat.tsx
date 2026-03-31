@@ -85,8 +85,18 @@ export function initializeRevenueCat() {
   }
 }
 
+function decodeJwtIsAdmin(token: string | null): boolean {
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.isAdmin === true;
+  } catch {
+    return false;
+  }
+}
+
 function useSubscriptionContext() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -124,13 +134,15 @@ function useSubscriptionContext() {
     onSuccess: () => customerInfoQuery.refetch(),
   });
 
+  const isAdmin = user?.isAdmin === true || decodeJwtIsAdmin(token);
+
   const isFleet =
-    user?.isAdmin === true ||
+    isAdmin ||
     customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
   const offeringsLoaded = !offeringsQuery.isLoading;
   const offeringsFailed = offeringsLoaded && (offeringsQuery.isError || (offeringsQuery.data?.current?.availablePackages?.length ?? 0) === 0);
-  const usingMockPackages = __DEV__ && offeringsFailed;
+  const usingMockPackages = offeringsFailed;
 
   return {
     customerInfo: customerInfoQuery.data,

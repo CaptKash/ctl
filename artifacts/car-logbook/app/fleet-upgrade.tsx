@@ -160,9 +160,18 @@ export default function FleetUpgradeScreen() {
 
         <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>CHOOSE A PLAN</Text>
 
-        {usingMockPackages && (
+        {usingMockPackages && __DEV__ && (
           <View style={[styles.devNotice, { backgroundColor: "#FEF3C7" }]}>
             <Text style={styles.devNoticeText}>Dev mode · RevenueCat not connected · prices are test values</Text>
+          </View>
+        )}
+
+        {usingMockPackages && !__DEV__ && (
+          <View style={[styles.devNotice, { backgroundColor: C.card }]}>
+            <Text style={[styles.devNoticeText, { color: C.textSecondary }]}>
+              Connecting to App Store…{" "}
+              <Text onPress={() => refetchOfferings()} style={{ color: C.tint }}>Retry</Text>
+            </Text>
           </View>
         )}
 
@@ -170,15 +179,6 @@ export default function FleetUpgradeScreen() {
           <View style={styles.loadingRow}>
             <ActivityIndicator color={C.tint} />
             <Text style={[styles.loadingText, { color: C.textSecondary }]}>Loading plans...</Text>
-          </View>
-        ) : !usingMockPackages && orderedPackages.length === 0 ? (
-          <View style={styles.loadingRow}>
-            <Text style={[styles.loadingText, { color: C.textSecondary, textAlign: "center" }]}>
-              Plans unavailable.
-            </Text>
-            <Pressable onPress={() => refetchOfferings()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
-              <Text style={[styles.loadingText, { color: C.tint }]}>Retry</Text>
-            </Pressable>
           </View>
         ) : (
           orderedPackages.map((pkg) => {
