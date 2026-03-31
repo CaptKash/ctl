@@ -27,6 +27,7 @@ import { SubscriptionProvider, initializeRevenueCat } from "@/lib/revenuecat";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
 
 SplashScreen.preventAutoHideAsync();
+initializeRevenueCat();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,10 +81,6 @@ export default function RootLayout() {
     ...Feather.font,
     ...Ionicons.font,
   });
-
-  useEffect(() => {
-    initializeRevenueCat();
-  }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
