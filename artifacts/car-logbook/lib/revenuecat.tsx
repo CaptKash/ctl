@@ -62,9 +62,8 @@ export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
 ];
 
 function getRevenueCatApiKey() {
-  if (__DEV__ || Platform.OS === "web" || Constants.executionEnvironment === "storeClient") {
-    return REVENUECAT_TEST_API_KEY ?? "";
-  }
+  if (Platform.OS === "web") return REVENUECAT_TEST_API_KEY ?? "";
+  if (__DEV__) return REVENUECAT_TEST_API_KEY ?? "";
   if (Platform.OS === "ios") return REVENUECAT_IOS_API_KEY ?? "";
   if (Platform.OS === "android") return REVENUECAT_ANDROID_API_KEY ?? "";
   return REVENUECAT_TEST_API_KEY ?? "";
@@ -146,8 +145,19 @@ function useSubscriptionContext() {
     isAdmin ||
     customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
+  // Collect real packages: try current offering first, then fall back to any offering
+  const realPackages: PurchasesPackage[] = (() => {
+    const data = offeringsQuery.data;
+    if (!data) return [];
+    if ((data.current?.availablePackages?.length ?? 0) > 0) return data.current!.availablePackages;
+    for (const offering of Object.values(data.all ?? {})) {
+      if ((offering.availablePackages?.length ?? 0) > 0) return offering.availablePackages;
+    }
+    return [];
+  })();
+
   const offeringsLoaded = !offeringsQuery.isLoading;
-  const offeringsFailed = offeringsLoaded && (offeringsQuery.isError || (offeringsQuery.data?.current?.availablePackages?.length ?? 0) === 0);
+  const offeringsFailed = offeringsLoaded && (offeringsQuery.isError || realPackages.length === 0);
   const usingMockPackages = offeringsFailed;
 
   return {
@@ -165,6 +175,7 @@ function useSubscriptionContext() {
     refetchCustomerInfo: customerInfoQuery.refetch,
     refetchOfferings: offeringsQuery.refetch,
     mockPackages: DEV_MOCK_PACKAGES,
+    realPackages,
   };
 }
 

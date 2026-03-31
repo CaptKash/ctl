@@ -45,14 +45,12 @@ export default function FleetUpgradeScreen() {
   const C = useColors();
   const topPad = Platform.OS === "web" ? 20 : insets.top;
 
-  const { offerings, isLoading, purchase, isPurchasing, restore, isRestoring, isFleet, offeringsFailed, usingMockPackages, refetchOfferings, mockPackages } = useSubscription();
+  const { isLoading, purchase, isPurchasing, restore, isRestoring, isFleet, offeringsFailed, usingMockPackages, refetchOfferings, mockPackages, realPackages } = useSubscription();
   const [selectedId, setSelectedId] = React.useState("$rc_lifetime");
   const [confirmPkg, setConfirmPkg] = React.useState<PurchasesPackage | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  const availablePackages: PurchasesPackage[] = usingMockPackages
-    ? mockPackages
-    : (offerings?.current?.availablePackages ?? []);
+  const availablePackages: PurchasesPackage[] = usingMockPackages ? mockPackages : realPackages;
 
   const orderedPackages = PACKAGE_ORDER
     .map((id) => availablePackages.find((p) => p.identifier === id))
