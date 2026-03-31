@@ -16,12 +16,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ctl.carlogbook",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "CTL uses your location to find nearby service centers and repair shops.",
-        "NSPhotoLibraryUsageDescription": "CTL needs access to your photo library to save maintenance photos.",
-        "NSPhotoLibraryAddUsageDescription": "CTL needs permission to save maintenance and bill photos to your camera roll."
+        "NSLocationWhenInUseUsageDescription": "CTL uses your location to find nearby service centers and repair shops."
       }
     },
     "android": {
@@ -38,9 +36,7 @@
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.ACCESS_COARSE_LOCATION"
       ]
     },
     "web": {

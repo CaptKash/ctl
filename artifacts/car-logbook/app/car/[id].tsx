@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
-import React, { useState } from "react";
+import * as Sharing from "expo-sharing";
+import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -115,19 +115,19 @@ export default function CarDetailScreen() {
   const [detailEvent, setDetailEvent] = useState<EventItem | null>(null);
   const [photoViewer, setPhotoViewer] = useState<string | null>(null);
   const [downloadingPhoto, setDownloadingPhoto] = useState(false);
+  const pendingShareRef = useRef<string | null>(null);
 
-  const handleDownloadPhoto = async (url: string) => {
+  const handleDownloadPhoto = (url: string) => {
     if (!url || downloadingPhoto) return;
+    pendingShareRef.current = url;
+    setPhotoViewer(null);
+  };
+
+  const doShare = async (url: string) => {
     setDownloadingPhoto(true);
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission required", "Please allow access to your photo library in Settings to save photos.");
-        return;
-      }
-
       const filename = `ctl_photo_${Date.now()}.jpg`;
-      let fileUri = (FileSystem.cacheDirectory ?? "") + filename;
+      const fileUri = (FileSystem.cacheDirectory ?? "") + filename;
 
       if (url.startsWith("data:")) {
         const base64 = url.split(",")[1];
@@ -135,12 +135,14 @@ export default function CarDetailScreen() {
           encoding: FileSystem.EncodingType.Base64,
         });
       } else {
-        const result = await FileSystem.downloadAsync(url, fileUri);
-        fileUri = result.uri;
+        await FileSystem.downloadAsync(url, fileUri);
       }
 
-      await MediaLibrary.saveToLibraryAsync(fileUri);
-      Alert.alert("Saved", "Photo saved to your camera roll.");
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "image/jpeg",
+        UTI: "public.jpeg",
+        dialogTitle: "Save Photo",
+      });
     } catch {
       Alert.alert("Save failed", "Could not save the photo. Please try again.");
     } finally {
@@ -634,6 +636,11 @@ export default function CarDetailScreen() {
           visible={!!photoViewer}
           animationType="fade"
           onRequestClose={() => setPhotoViewer(null)}
+          onDismiss={() => {
+            const url = pendingShareRef.current;
+            pendingShareRef.current = null;
+            if (url) doShare(url);
+          }}
           statusBarTranslucent
         >
           <View style={detailStyles.photoModal}>
