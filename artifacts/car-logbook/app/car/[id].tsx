@@ -2,9 +2,12 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Modal,
   Platform,
@@ -111,6 +114,28 @@ export default function CarDetailScreen() {
 
   const [detailEvent, setDetailEvent] = useState<EventItem | null>(null);
   const [photoViewer, setPhotoViewer] = useState<string | null>(null);
+  const [downloadingPhoto, setDownloadingPhoto] = useState(false);
+
+  const handleDownloadPhoto = async (url: string) => {
+    if (!url || downloadingPhoto) return;
+    setDownloadingPhoto(true);
+    try {
+      const ext = url.split("?")[0].split(".").pop() ?? "jpg";
+      const filename = `ctl_photo_${Date.now()}.${ext}`;
+      const localUri = (FileSystem.cacheDirectory ?? "") + filename;
+      const { uri } = await FileSystem.downloadAsync(url, localUri);
+      const available = await Sharing.isAvailableAsync();
+      if (available) {
+        await Sharing.shareAsync(uri, { mimeType: "image/jpeg", UTI: "public.jpeg", dialogTitle: "Save or Share Photo" });
+      } else {
+        Alert.alert("Sharing not available", "Cannot share on this device.");
+      }
+    } catch {
+      Alert.alert("Download failed", "Could not download the photo. Please try again.");
+    } finally {
+      setDownloadingPhoto(false);
+    }
+  };
 
   const carQuery = useQuery<Car>({
     queryKey: ["car", carId],
@@ -592,23 +617,38 @@ export default function CarDetailScreen() {
           }
           return null;
         })()}
-      </Modal>
 
-      {/* Full-screen photo viewer */}
-      <Modal
-        visible={!!photoViewer}
-        animationType="fade"
-        onRequestClose={() => setPhotoViewer(null)}
-        statusBarTranslucent
-      >
-        <View style={detailStyles.photoModal}>
-          <Pressable onPress={() => setPhotoViewer(null)} style={detailStyles.photoModalClose} hitSlop={12}>
-            <Feather name="x" size={24} color="#fff" />
-          </Pressable>
-          {photoViewer && (
-            <Image source={{ uri: photoViewer }} style={detailStyles.photoFull} resizeMode="contain" />
-          )}
-        </View>
+        {/* Full-screen photo viewer — nested here to work on top of pageSheet on iOS */}
+        <Modal
+          visible={!!photoViewer}
+          animationType="fade"
+          onRequestClose={() => setPhotoViewer(null)}
+          statusBarTranslucent
+        >
+          <View style={detailStyles.photoModal}>
+            <Pressable onPress={() => setPhotoViewer(null)} style={detailStyles.photoModalClose} hitSlop={12}>
+              <Feather name="x" size={24} color="#fff" />
+            </Pressable>
+            {photoViewer && (
+              <Image source={{ uri: photoViewer }} style={detailStyles.photoFull} resizeMode="contain" />
+            )}
+            <Pressable
+              onPress={() => photoViewer && handleDownloadPhoto(photoViewer)}
+              disabled={downloadingPhoto}
+              style={detailStyles.photoModalDownload}
+              hitSlop={12}
+            >
+              {downloadingPhoto ? (
+                <ActivityIndicator size={18} color="#fff" />
+              ) : (
+                <>
+                  <Feather name="download" size={20} color="#fff" />
+                  <Text style={detailStyles.photoModalDownloadText}>Save</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        </Modal>
       </Modal>
 
       <BottomNav />
@@ -780,4 +820,18 @@ const detailStyles = StyleSheet.create({
     zIndex: 10,
   },
   photoFull: { width: "100%", height: "80%" },
+  photoModalDownload: {
+    position: "absolute",
+    bottom: 56,
+    right: 24,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    zIndex: 10,
+  },
+  photoModalDownloadText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });
