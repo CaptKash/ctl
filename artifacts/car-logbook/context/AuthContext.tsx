@@ -132,10 +132,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
 
+          const storedUserStr = await secureGet(USER_KEY);
+          const storedUser: AuthUser | null = storedUserStr ? JSON.parse(storedUserStr) : null;
+
           const serverUser = await verifyTokenWithServer(storedToken);
           if (serverUser) {
+            const mergedUser: AuthUser = {
+              ...serverUser,
+              isAdmin: serverUser.isAdmin ?? storedUser?.isAdmin,
+            };
             setToken(storedToken);
-            setUser(serverUser);
+            setUser(mergedUser);
           } else {
             await Promise.all([
               secureDelete(TOKEN_KEY),

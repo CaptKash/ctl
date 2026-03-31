@@ -88,7 +88,13 @@ export function initializeRevenueCat() {
 function decodeJwtIsAdmin(token: string | null): boolean {
   if (!token) return false;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const parts = token.split(".");
+    if (parts.length < 2) return false;
+    let base64 = parts[1];
+    base64 = base64.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4 !== 0) base64 += "=";
+    const json = atob(base64);
+    const payload = JSON.parse(json);
     return payload.isAdmin === true;
   } catch {
     return false;
