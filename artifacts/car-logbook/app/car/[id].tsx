@@ -639,7 +639,7 @@ export default function CarDetailScreen() {
           onDismiss={() => {
             const url = pendingShareRef.current;
             pendingShareRef.current = null;
-            if (url) doShare(url);
+            if (url) setTimeout(() => doShare(url), 200);
           }}
           statusBarTranslucent
         >
