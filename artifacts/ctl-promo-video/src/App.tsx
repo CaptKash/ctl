@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, AlertTriangle, Fuel, Grid, Crown, Apple } from 'lucide-react';
 
@@ -15,14 +15,14 @@ const TOTAL_DURATION = SCENES.reduce((acc, scene) => acc + scene.duration, 0);
 
 export default function App() {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const currentSceneRef = useRef(0);
 
   useEffect(() => {
-    let startTime = Date.now();
+    const startTime = Date.now();
     let animationFrameId: number;
 
     const tick = () => {
-      const now = Date.now();
-      const elapsed = (now - startTime) % TOTAL_DURATION;
+      const elapsed = (Date.now() - startTime) % TOTAL_DURATION;
 
       let accumulated = 0;
       let targetIndex = 0;
@@ -35,7 +35,8 @@ export default function App() {
         }
       }
 
-      if (targetIndex !== currentSceneIndex) {
+      if (targetIndex !== currentSceneRef.current) {
+        currentSceneRef.current = targetIndex;
         setCurrentSceneIndex(targetIndex);
       }
 
@@ -44,7 +45,7 @@ export default function App() {
 
     animationFrameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [currentSceneIndex]);
+  }, []);
 
   const scene = SCENES[currentSceneIndex];
 
