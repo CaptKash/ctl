@@ -120,13 +120,23 @@ export default function CarDetailScreen() {
     if (!url || downloadingPhoto) return;
     setDownloadingPhoto(true);
     try {
-      const ext = url.split("?")[0].split(".").pop() ?? "jpg";
-      const filename = `ctl_photo_${Date.now()}.${ext}`;
+      const filename = `ctl_photo_${Date.now()}.jpg`;
       const localUri = (FileSystem.cacheDirectory ?? "") + filename;
-      const { uri } = await FileSystem.downloadAsync(url, localUri);
+      let fileUri = localUri;
+
+      if (url.startsWith("data:")) {
+        const base64 = url.split(",")[1];
+        await FileSystem.writeAsStringAsync(localUri, base64, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      } else {
+        const result = await FileSystem.downloadAsync(url, localUri);
+        fileUri = result.uri;
+      }
+
       const available = await Sharing.isAvailableAsync();
       if (available) {
-        await Sharing.shareAsync(uri, { mimeType: "image/jpeg", UTI: "public.jpeg", dialogTitle: "Save or Share Photo" });
+        await Sharing.shareAsync(fileUri, { mimeType: "image/jpeg", UTI: "public.jpeg", dialogTitle: "Save or Share Photo" });
       } else {
         Alert.alert("Sharing not available", "Cannot share on this device.");
       }
