@@ -1,113 +1,57 @@
-# Car Logbook
-
-## Development Rules
-
-- **Cross-platform first**: Every feature must be built and verified to work on both iOS and Android before it is considered done. Never ship a feature that only works on one platform.
-- **SelectField on Android**: Uses navigation (`/select-picker` screen) instead of Modal — Modals are unreliable on Android 15+. iOS uses Modal slide-up sheet.
+# Car Technical Log (CTL) — Project State
 
 ## Overview
+Aviation-style car logbook mobile app. iOS only (TestFlight). Freemium model:
+- Free: up to 2 cars
+- CTL Fleet ($2.99/mo, $19.99/yr, $24.99 lifetime): unlimited vehicles + premium tools
 
-A mobile logbook app for car owners — similar to an aviation logbook but for vehicles. Users can track multiple cars with full maintenance, parts, fuel, insurance, and dealership records. Includes comprehensive report generation.
+## Architecture
+- `artifacts/car-logbook` — Expo React Native app (SDK 54)
+- `artifacts/api-server` — Express + PostgreSQL backend
+- `artifacts/ctl-promo-video` — Promotional video (React + Framer Motion)
+- `artifacts/mockup-sandbox` — Component preview server
 
-## Stack
+## Key Identifiers
+- Bundle ID: `com.ctl.carlogbook`
+- Apple Team: `7TU3WQ845C`
+- ASC App ID: `6760766535`
+- EAS Project ID: `2984157c-0a32-485b-8b48-1048d72a1520`
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **Mobile app**: Expo (React Native) with Expo Router
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
-- **Auth**: bcryptjs (password hashing), jsonwebtoken (JWT), expo-secure-store (token storage), expo-local-authentication (biometric sign-in)
+## RevenueCat
+- iOS production key: `appl_LRjDIRTvidTYYIqipELDpvRAyjX`
+- iOS test key: `test_PBSHgnlulFoqCVjXUEsBEzNBWRQ`
+- Android key: `goog_FIsrsuflbNEdjOgxcIXJzwwCOtl`
+- Entitlement: `fleet`
+- Product IDs: `ctl_fleet_monthly`, `ctl_fleet_annual`, `ctl_fleet_lifetime`
+- Offering: identifier `default`, display name "CTL Fleet Offering" — all 3 packages configured in dashboard
 
-## Structure
+## Admin
+- Admin user: `mkashour.apple@gmail.com` (DB user ID: 11)
+- `is_admin = true` set directly in production DB — no build needed
+- Admin secret: `ctl-admin-secret-2025`
+- Grant endpoint: `POST /api/auth/admin/grant` with `{ email, secret }`
 
-```text
-artifacts-monorepo/
-├── artifacts/
-│   ├── api-server/         # Express API server
-│   └── car-logbook/        # Expo mobile app
-├── lib/
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts
-├── pnpm-workspace.yaml
-├── tsconfig.base.json
-├── tsconfig.json
-└── package.json
-```
+## Build History
+- Build 10: MediaLibrary photo save (failed — wrong approach)
+- Build 11: Reverted to expo-sharing + modal dismiss pattern
+- Build 12: RevenueCat API key simplified, offerings fallback to any offering
+- Build 13: RevenueCat `isConfigured` check + self-healing initialization in query
+- Build 14 (current in TestFlight): + 200ms delay in onDismiss before shareAsync
 
-## Features
+## Known Issues (as of end of session 2026-03-31)
+1. **Photo save ("Save failed")** — persists through Build 14. The `onDismiss` + `setTimeout(doShare, 200)` approach still fails. Root cause unknown — the catch block swallows the real error. **Next step**: change `catch` to `catch (e: any)` and show `e?.message` in the alert so the real error is visible. Do this BEFORE triggering another build.
+2. **RevenueCat "Connecting to App Store"** — `Purchases.configure()` failing silently. Build 13+ has `isConfigured` guard and self-healing query. Not yet confirmed fixed.
 
-- **Authentication**: Email/password login & signup with JWT tokens, biometric sign-in (Face ID / Touch ID), forgot/reset password flow
-- **Cars**: Add/manage multiple vehicles (make, model, year, color, VIN, license plate, mileage, photos)
-- **Maintenance**: Log service records with type, date, mileage, cost, shop, next due date
-- **Parts**: Track replacement parts with brand, category, cost, supplier, warranty
-- **Insurance**: Manage policies with provider, policy number, premiums, dates
-- **Dealerships**: Log dealership visits with purpose, cost, contact info, rating
-- **Fuel**: Track fill-ups with liters, cost, mileage, fuel type, station
-- **Reports**: Full per-car report with cost breakdown, activity timeline, upcoming services
+## Important Rules
+- **DO NOT trigger EAS builds without explicit user permission**
+- **DO NOT submit to TestFlight without explicit user permission**
+- Always diagnose fully before building — confirm the fix is correct first
 
-## Navigation
+## Secrets in Use
+- `EXPO_TOKEN` — EAS CLI authentication
+- `RESEND_API_KEY` — email (reset password flow)
+- `DATABASE_URL` — PostgreSQL production DB
 
-- Tab 1: **Login** — sign in screen (tab bar hidden)
-- Tab 2: **Sign Up** — create account screen (tab bar hidden)
-- Tab 3: **Reports** — pick a car and see full logbook report
-- **Home Dashboard** (stack): quick action menu (Add Car, My Fleet, Add Maintenance, Upcoming)
-- **Car Detail** (stack): tabs for Maintenance, Parts, Insurance, Dealerships, Fuel with add/delete
-- **Add Car** (modal): form to add a new vehicle
-- **Report** (stack): full report with cost breakdown and activity
-
-## Database Tables
-
-- `users` — user accounts (email, password_hash, name)
-- `password_reset_tokens` — password reset tokens (token, userId, expiresAt, usedAt)
-- `cars` — vehicle records
-- `maintenance_records` — service/maintenance log
-- `parts_records` — replacement parts log
-- `insurance_records` — insurance policies
-- `dealership_records` — dealership/service visits
-- `fuel_records` — fuel fill-up log
-
-## Auth Flow
-
-- Login/signup via email+password → JWT token stored in expo-secure-store (native) or localStorage (web)
-- After first successful login on native device, user is prompted to enable biometric sign-in
-- Biometric button appears on login screen when device supports it and user has enrolled
-- Forgot password: modal → enter email → backend generates reset token (logged to console, email delivery TBD) → enter token + new password to reset
-- Token key: `ctl_auth_token`, user key: `ctl_auth_user`, biometric pref: `ctl_biometric_enabled`
-- API helper (`useApi.ts`) automatically attaches Bearer token to all requests
-
-## Key Files
-
-- `artifacts/car-logbook/app/(tabs)/index.tsx` — Login screen
-- `artifacts/car-logbook/app/(tabs)/signup.tsx` — Sign up screen
-- `artifacts/car-logbook/app/(tabs)/reports.tsx` — Reports list screen
-- `artifacts/car-logbook/app/home.tsx` — Menu dashboard (post-login)
-- `artifacts/car-logbook/context/AuthContext.tsx` — Auth state + biometric management
-- `artifacts/car-logbook/hooks/useApi.ts` — API helper with auth token injection
-- `artifacts/car-logbook/app/car/[id].tsx` — Car detail with all log tabs
-- `artifacts/car-logbook/app/car/add.tsx` — Add car form
-- `artifacts/car-logbook/app/report/[id].tsx` — Full car report
-- `artifacts/api-server/src/routes/auth.ts` — Auth endpoints (register, login, forgot/reset password)
-- `artifacts/api-server/src/routes/cars.ts` — All car/maintenance REST endpoints
-- `lib/db/src/schema/cars.ts` — Drizzle schema for all tables
-
-## Packages
-
-### `artifacts/api-server` (`@workspace/api-server`)
-Express 5 API with full CRUD + report generation + auth (bcryptjs, jsonwebtoken).
-
-### `artifacts/car-logbook` (`@workspace/car-logbook`)
-Expo mobile app with Expo Router, React Query, expo-secure-store, expo-local-authentication.
-
-### `lib/db` (`@workspace/db`)
-Drizzle ORM with PostgreSQL. Run migrations with `pnpm --filter @workspace/db run push`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-OpenAPI spec. Run codegen: `pnpm --filter @workspace/api-spec run codegen`
+## Next Planned Features
+- Arabic (RTL) support
+- Google Play (Android on hold — Play Console account being verified)
