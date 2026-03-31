@@ -70,10 +70,12 @@ function getRevenueCatApiKey() {
 }
 
 export function initializeRevenueCat() {
+  if (Platform.OS === "web") return;
   try {
+    if (Purchases.isConfigured) return;
     const apiKey = getRevenueCatApiKey();
     if (!apiKey) {
-      console.warn("RevenueCat: API key not found, skipping initialization");
+      console.warn("[RevenueCat] API key not found, skipping initialization");
       return;
     }
     Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
@@ -121,9 +123,15 @@ function useSubscriptionContext() {
 
   const offeringsQuery = useQuery<PurchasesOfferings>({
     queryKey: ["revenuecat", "offerings"],
-    queryFn: async () => Purchases.getOfferings(),
+    queryFn: async () => {
+      if (Platform.OS !== "web" && !Purchases.isConfigured) {
+        initializeRevenueCat();
+      }
+      return Purchases.getOfferings();
+    },
     staleTime: 300 * 1000,
-    retry: 2,
+    retry: 3,
+    enabled: Platform.OS !== "web",
   });
 
   const purchaseMutation = useMutation({
