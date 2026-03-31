@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useColors } from "@/context/ThemeContext";
+import { useColors, useTheme } from "@/context/ThemeContext";
 import { formatDate, toISODate } from "@/lib/dateUtils";
 
 type Props = {
@@ -21,6 +21,7 @@ type Props = {
 
 export function DatePickerField({ label, value, onChange, placeholder = "Select date" }: Props) {
   const C = useColors();
+  const { resolvedTheme } = useTheme();
   const [show, setShow] = useState(false);
 
   const dateObj = value ? new Date(value + "T12:00:00") : new Date();
@@ -48,7 +49,7 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
               background: "transparent",
               fontSize: 15,
               fontFamily: "Inter_400Regular, system-ui, sans-serif",
-              color: value ? "#111827" : "#9CA3AF",
+              color: value ? (resolvedTheme === "dark" ? "#F9FAFB" : "#111827") : "#9CA3AF",
               outline: "none",
               cursor: "pointer",
               padding: 0,
@@ -86,13 +87,14 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
       </Pressable>
 
       {show && (
-        <View style={styles.pickerWrap}>
+        <View style={[styles.pickerWrap, { backgroundColor: C.card, borderColor: C.border }]}>
           <DateTimePicker
             mode="date"
             value={dateObj}
             display={Platform.OS === "ios" ? "spinner" : "default"}
             onChange={handleChange}
-            themeVariant="light"
+            themeVariant={resolvedTheme}
+            style={styles.picker}
           />
           {Platform.OS === "ios" && (
             <Pressable
@@ -134,13 +136,19 @@ const styles = StyleSheet.create({
   },
   pickerWrap: {
     borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
+    paddingBottom: 8,
+  },
+  picker: {
+    height: 180,
   },
   doneBtn: {
+    marginHorizontal: 16,
     paddingVertical: 12,
     alignItems: "center",
     borderRadius: 10,
-    marginTop: 8,
+    marginTop: 4,
   },
   doneBtnText: {
     fontSize: 15,
