@@ -1,44 +1,9 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-background: hsl(0 0% 98%);
-  --color-foreground: hsl(0 0% 9%);
-  --color-accent: hsl(213 94% 47%);
-  --color-accent-dark: hsl(214 52% 24%);
-  --color-surface: hsl(0 0% 100%);
-  --color-border: hsl(0 0% 90%);
-}
-
-:root {
-  --background: 0 0% 98%;
-  --foreground: 0 0% 9%;
-  --accent: 213 94% 47%;
-  --accent-dark: 214 52% 24%;
-  --surface: 0 0% 100%;
-  --border: 0 0% 90%;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
   overflow: hidden;
-}
-
-.bg-background { background-color: hsl(var(--background)); }
-.bg-surface { background-color: hsl(var(--surface)); }
-.bg-foreground { background-color: hsl(var(--foreground)); }
-.bg-accent { background-color: hsl(var(--accent)); }
-.bg-accent-dark { background-color: hsl(var(--accent-dark)); }
-.text-foreground { color: hsl(var(--foreground)); }
-.text-background { color: hsl(var(--background)); }
-.text-accent { color: hsl(var(--accent)); }
-.text-accent-dark { color: hsl(var(--accent-dark)); }
-.border-border { border-color: hsl(var(--border)); }
-
-.arabic-text {
-  font-family: 'Noto Kufi Arabic', system-ui, sans-serif;
-  direction: rtl;
 }

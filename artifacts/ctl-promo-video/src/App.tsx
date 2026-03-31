@@ -1,401 +1,407 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, AlertTriangle, Fuel, Grid, Crown, Apple } from 'lucide-react';
+
+const BASE = import.meta.env.BASE_URL;
 
 const SCENES = [
-  { id: 'intro', duration: 4000 },
-  { id: 'problem', duration: 6000 },
-  { id: 'features', duration: 8000 },
-  { id: 'dashboard', duration: 8000 },
-  { id: 'fleet', duration: 8000 },
-  { id: 'outro', duration: 6000 },
+  { id: 'intro',      duration: 5000 },
+  { id: 'tagline',    duration: 4000 },
+  { id: 'maintenance',duration: 6000 },
+  { id: 'faults',     duration: 6000 },
+  { id: 'screenshot', duration: 6000 },
+  { id: 'fleet',      duration: 7000 },
+  { id: 'outro',      duration: 5000 },
 ];
 
-const TOTAL_DURATION = SCENES.reduce((acc, scene) => acc + scene.duration, 0);
+const TOTAL = SCENES.reduce((a, s) => a + s.duration, 0);
 
 export default function App() {
-  const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
-  const currentSceneRef = useRef(0);
+  const [scene, setScene] = useState(0);
+  const sceneRef = useRef(0);
 
   useEffect(() => {
-    const startTime = Date.now();
-    let animationFrameId: number;
-
+    const t0 = Date.now();
+    let raf: number;
     const tick = () => {
-      const elapsed = (Date.now() - startTime) % TOTAL_DURATION;
-
-      let accumulated = 0;
-      let targetIndex = 0;
-
+      const elapsed = (Date.now() - t0) % TOTAL;
+      let acc = 0, idx = 0;
       for (let i = 0; i < SCENES.length; i++) {
-        accumulated += SCENES[i].duration;
-        if (elapsed < accumulated) {
-          targetIndex = i;
-          break;
-        }
+        acc += SCENES[i].duration;
+        if (elapsed < acc) { idx = i; break; }
       }
-
-      if (targetIndex !== currentSceneRef.current) {
-        currentSceneRef.current = targetIndex;
-        setCurrentSceneIndex(targetIndex);
-      }
-
-      animationFrameId = requestAnimationFrame(tick);
+      if (idx !== sceneRef.current) { sceneRef.current = idx; setScene(idx); }
+      raf = requestAnimationFrame(tick);
     };
-
-    animationFrameId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(animationFrameId);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
-  const scene = SCENES[currentSceneIndex];
+  const id = SCENES[scene].id;
+  const progress = ((scene + 1) / SCENES.length) * 100;
 
   return (
-    <div className="w-full h-screen bg-background flex items-center justify-center font-sans overflow-hidden">
-      {/* 9:16 Aspect Ratio Container */}
-      <div className="relative w-full max-w-[54vh] h-full max-h-[96vw] aspect-[9/16] bg-background shadow-2xl overflow-hidden shadow-black/10 border border-border/50">
-        
-        {/* Global Accent Line */}
-        <motion.div 
-          className="absolute top-0 left-0 h-1 bg-accent z-50"
-          initial={{ width: '0%' }}
-          animate={{ width: `${((currentSceneIndex + 1) / SCENES.length) * 100}%` }}
-          transition={{ duration: 1, ease: "circOut" }}
+    <div className="w-full h-screen flex items-center justify-center overflow-hidden" style={{ background: '#F0F2F5' }}>
+      <div className="relative overflow-hidden shadow-2xl" style={{
+        width: 'min(54vh, 100vw)',
+        aspectRatio: '9/16',
+        background: '#FFFFFF',
+        borderRadius: 28,
+      }}>
+        {/* Progress bar */}
+        <motion.div
+          className="absolute top-0 left-0 h-[3px] z-50"
+          style={{ background: '#2563EB' }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.8, ease: 'circOut' }}
+        />
+
+        {/* Persistent background orb — changes with scene */}
+        <motion.div
+          className="absolute rounded-full"
+          style={{ width: '60%', aspectRatio: '1', top: '-10%', right: '-10%' }}
+          animate={{
+            background: ['intro','tagline','screenshot','fleet','outro'].includes(id)
+              ? 'radial-gradient(circle, #0F2557 0%, #1D3461 100%)'
+              : 'radial-gradient(circle, #DBEAFE 0%, #EFF6FF 100%)',
+            scale: id === 'intro' || id === 'outro' ? 1.2 : 0.9,
+            opacity: id === 'tagline' ? 0.15 : 0.35,
+          }}
+          transition={{ duration: 1.2, ease: 'easeInOut' }}
         />
 
         <AnimatePresence mode="wait">
-          {scene.id === 'intro' && <SceneIntro key="intro" />}
-          {scene.id === 'problem' && <SceneProblem key="problem" />}
-          {scene.id === 'features' && <SceneFeatures key="features" />}
-          {scene.id === 'dashboard' && <SceneDashboard key="dashboard" />}
-          {scene.id === 'fleet' && <SceneFleet key="fleet" />}
-          {scene.id === 'outro' && <SceneOutro key="outro" />}
+          {id === 'intro'       && <SceneIntro       key="intro"       />}
+          {id === 'tagline'     && <SceneTagline      key="tagline"     />}
+          {id === 'maintenance' && <SceneMaintenance  key="maintenance" />}
+          {id === 'faults'      && <SceneFaults       key="faults"      />}
+          {id === 'screenshot'  && <SceneScreenshot   key="screenshot"  />}
+          {id === 'fleet'       && <SceneFleet        key="fleet"       />}
+          {id === 'outro'       && <SceneOutro        key="outro"       />}
         </AnimatePresence>
-
       </div>
     </div>
   );
 }
 
-// Scene 1: App name reveal
+/* ─── Shared motion presets ─── */
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+});
+
+const scaleIn = (delay = 0) => ({
+  initial: { opacity: 0, scale: 0.85 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { delay, duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+});
+
+/* ─── Scene 1: Intro ─── */
 function SceneIntro() {
   return (
-    <motion.div 
-      className="absolute inset-0 flex flex-col items-center justify-center px-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    <motion.div
+      className="absolute inset-0 flex flex-col items-center justify-center"
+      style={{ background: 'linear-gradient(160deg, #1D3461 0%, #0F2045 100%)' }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.04 }}
+      transition={{ duration: 0.7 }}
     >
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
-        className="text-8xl font-bold tracking-tighter text-foreground mb-4"
-      >
-        CTL
-      </motion.div>
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
-        className="text-xl font-medium tracking-wide text-foreground/70 uppercase"
-      >
-        Car Technical Log
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="mt-6 text-2xl text-accent-dark arabic-text font-semibold"
-      >
-        سجل السيارة التقني
-      </motion.div>
-    </motion.div>
-  );
-}
-
-// Scene 2: Problem statement
-function SceneProblem() {
-  return (
-    <motion.div 
-      className="absolute inset-0 flex flex-col items-center justify-center px-10 bg-surface"
-      initial={{ opacity: 0, x: 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -50 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {/* Abstract Car Silhouette */}
-      <motion.div 
-        className="mb-12 relative w-48 h-24"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.3, duration: 1 }}
-      >
-        <svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-          <motion.path
-            d="M30 70 L40 40 L80 30 L140 30 L170 45 L180 70 Z"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-foreground"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ delay: 0.5, duration: 1.5, ease: "easeInOut" }}
-          />
-          <motion.circle 
-            cx="60" cy="70" r="12" 
-            stroke="currentColor" strokeWidth="3" className="text-accent"
-            initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.5, type: 'spring' }}
-          />
-          <motion.circle 
-            cx="140" cy="70" r="12" 
-            stroke="currentColor" strokeWidth="3" className="text-accent"
-            initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.7, type: 'spring' }}
-          />
-          <motion.path 
-            d="M70 40 L130 40" 
-            stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-foreground/30"
-            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 2, duration: 0.5 }}
-          />
-        </svg>
-      </motion.div>
-
-      <motion.h2
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        className="text-4xl font-bold text-center leading-tight mb-6"
-      >
-        Your car has a story.
-      </motion.h2>
-      
+      <motion.img
+        src={`${BASE}icon.png`}
+        alt="CTL"
+        style={{ width: '38%', borderRadius: 24 }}
+        {...scaleIn(0.2)}
+      />
       <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2.0, duration: 0.8 }}
-        className="text-3xl text-accent-dark arabic-text"
+        style={{ color: '#93C5FD', fontSize: '3.5vw', marginTop: '4%', letterSpacing: '0.18em', fontWeight: 500 }}
+        {...fadeUp(0.8)}
       >
-        لسيارتك قصة.
+        CAR TECHNICAL LOG
       </motion.p>
     </motion.div>
   );
 }
 
-// Scene 3: Feature showcase
-function SceneFeatures() {
-  const features = [
-    { icon: Settings, en: "Maintenance Log", ar: "سجل الصيانة" },
-    { icon: AlertTriangle, en: "Fault Records", ar: "سجل الأعطال" },
-    { icon: Fuel, en: "Fuel & Costs", ar: "الوقود والتكاليف" }
-  ];
-
+/* ─── Scene 2: Tagline ─── */
+function SceneTagline() {
   return (
-    <motion.div 
-      className="absolute inset-0 flex flex-col items-center justify-center px-8 bg-background"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, filter: 'blur(10px)' }}
-      transition={{ duration: 0.6 }}
+    <motion.div
+      className="absolute inset-0 flex flex-col justify-center px-[8%]"
+      style={{ background: '#FFFFFF' }}
+      initial={{ clipPath: 'inset(0 100% 0 0)' }}
+      animate={{ clipPath: 'inset(0 0% 0 0)' }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
     >
-      <div className="w-full flex flex-col gap-6">
-        {features.map((feat, idx) => (
-          <motion.div
-            key={idx}
-            className="bg-surface border border-border p-6 rounded-2xl flex items-center shadow-sm relative overflow-hidden"
-            initial={{ opacity: 0, y: 40, rotateX: 20 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ delay: 0.4 + idx * 0.8, duration: 0.8, type: "spring", stiffness: 100, damping: 20 }}
-          >
-            <motion.div 
-              className="absolute left-0 top-0 bottom-0 w-1 bg-accent"
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: 1 }}
-              transition={{ delay: 0.8 + idx * 0.8, duration: 0.4 }}
-            />
-            
-            <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mr-6 shrink-0 text-accent">
-              <feat.icon size={24} strokeWidth={2} />
-            </div>
-            
-            <div className="flex flex-col">
-              <span className="text-xl font-semibold text-foreground mb-1">{feat.en}</span>
-              <span className="text-lg text-foreground/60 arabic-text">{feat.ar}</span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      <motion.p style={{ color: '#9CA3AF', fontSize: '2.8vw', fontWeight: 500, letterSpacing: '0.12em', marginBottom: '3%' }} {...fadeUp(0.3)}>
+        AVIATION-STYLE LOGBOOK
+      </motion.p>
+      <motion.h1 style={{ color: '#1D3461', fontSize: '8.5vw', fontWeight: 800, lineHeight: 1.1, marginBottom: '5%' }} {...fadeUp(0.5)}>
+        Your car<br />has a history.
+      </motion.h1>
+      <motion.p style={{ color: '#2563EB', fontSize: '6.5vw', fontWeight: 700 }} {...fadeUp(0.8)}>
+        Track it.
+      </motion.p>
+
+      {/* accent line */}
+      <motion.div
+        style={{ height: 3, background: 'linear-gradient(90deg, #2563EB, #20B2AA)', borderRadius: 2, marginTop: '8%' }}
+        initial={{ width: 0 }} animate={{ width: '40%' }}
+        transition={{ delay: 1.1, duration: 0.8, ease: 'circOut' }}
+      />
     </motion.div>
   );
 }
 
-// Scene 4: Dashboard Mockup
-function SceneDashboard() {
+/* ─── Shared feature card row ─── */
+function LogRow({ icon, title, detail, date, color, delay }: {
+  icon: string; title: string; detail: string; date: string; color: string; delay: number;
+}) {
   return (
-    <motion.div 
-      className="absolute inset-0 flex flex-col items-center pt-24 pb-12 px-8 bg-surface"
-      initial={{ opacity: 0, y: "100%" }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+    <motion.div
+      style={{
+        display: 'flex', alignItems: 'center', gap: '4%',
+        background: '#FFFFFF', borderRadius: 14,
+        padding: '3.5% 4%', marginBottom: '3%',
+        boxShadow: '0 1px 8px rgba(29,52,97,0.08)',
+        border: '1px solid #F1F5F9',
+      }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, duration: 0.5, ease: 'circOut' }}
     >
+      <div style={{
+        width: '11%', aspectRatio: '1', borderRadius: 10,
+        background: color, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontSize: '3.5vw', flexShrink: 0,
+      }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ color: '#1D3461', fontWeight: 600, fontSize: '3vw', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</p>
+        <p style={{ color: '#6B7280', fontSize: '2.4vw' }}>{detail}</p>
+      </div>
+      <p style={{ color: '#9CA3AF', fontSize: '2.2vw', flexShrink: 0 }}>{date}</p>
+    </motion.div>
+  );
+}
+
+/* ─── Scene 3: Maintenance Log ─── */
+function SceneMaintenance() {
+  return (
+    <motion.div
+      className="absolute inset-0 flex flex-col"
+      style={{ background: '#F8FAFD', padding: '7%' }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
+    >
+      <motion.p style={{ color: '#9CA3AF', fontSize: '2.5vw', fontWeight: 500, letterSpacing: '0.1em', marginBottom: '2%' }} {...fadeUp(0.1)}>
+        LOG EVERY SERVICE
+      </motion.p>
+      <motion.h2 style={{ color: '#1D3461', fontSize: '6.5vw', fontWeight: 800, marginBottom: '6%' }} {...fadeUp(0.25)}>
+        Maintenance Log
+      </motion.h2>
+
+      <LogRow icon="🔧" title="Oil Change" detail="5W-30 · 5,000 km interval" date="Mar 15" color="#DBEAFE" delay={0.4} />
+      <LogRow icon="⚙️" title="Timing Belt" detail="Replaced at 98,000 km" date="Jan 02" color="#EDE9FE" delay={0.6} />
+      <LogRow icon="🛞" title="Tire Rotation" detail="All four · Balanced" date="Dec 20" color="#D1FAE5" delay={0.8} />
+      <LogRow icon="🔋" title="Battery" detail="12V AGM · 80Ah" date="Nov 11" color="#FEF3C7" delay={1.0} />
+
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.6 }}
-        className="text-center mb-10 w-full"
+        style={{ height: 3, background: 'linear-gradient(90deg, #2563EB, #20B2AA)', borderRadius: 2, marginTop: 'auto' }}
+        initial={{ width: 0 }} animate={{ width: '35%' }}
+        transition={{ delay: 1.2, duration: 0.8, ease: 'circOut' }}
+      />
+    </motion.div>
+  );
+}
+
+/* ─── Scene 4: Fault Records ─── */
+function SceneFaults() {
+  return (
+    <motion.div
+      className="absolute inset-0 flex flex-col"
+      style={{ background: '#F8FAFD', padding: '7%' }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
+    >
+      <motion.p style={{ color: '#9CA3AF', fontSize: '2.5vw', fontWeight: 500, letterSpacing: '0.1em', marginBottom: '2%' }} {...fadeUp(0.1)}>
+        TRACK EVERY ISSUE
+      </motion.p>
+      <motion.h2 style={{ color: '#1D3461', fontSize: '6.5vw', fontWeight: 800, marginBottom: '6%' }} {...fadeUp(0.25)}>
+        Fault Records
+      </motion.h2>
+
+      <LogRow icon="⚠️" title="Check Engine" detail="P0420 · Catalyst Below Threshold" date="Mar 20" color="#FEE2E2" delay={0.4} />
+      <LogRow icon="🌡️" title="Overheating" detail="Coolant low · Resolved" date="Feb 08" color="#FFEDD5" delay={0.6} />
+      <LogRow icon="💡" title="ABS Warning" detail="Sensor fault · Front left" date="Jan 17" color="#FEF3C7" delay={0.8} />
+      <LogRow icon="🔊" title="Knocking" detail="Fuel quality issue · Resolved" date="Dec 30" color="#F3E8FF" delay={1.0} />
+
+      <motion.div
+        style={{ height: 3, background: 'linear-gradient(90deg, #EF4444, #F97316)', borderRadius: 2, marginTop: 'auto' }}
+        initial={{ width: 0 }} animate={{ width: '35%' }}
+        transition={{ delay: 1.2, duration: 0.8, ease: 'circOut' }}
+      />
+    </motion.div>
+  );
+}
+
+/* ─── Scene 5: Real Screenshot ─── */
+function SceneScreenshot() {
+  return (
+    <motion.div
+      className="absolute inset-0 flex flex-col items-center justify-center"
+      style={{ background: 'linear-gradient(160deg, #1D3461 0%, #0F2045 100%)', padding: '6%' }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
+    >
+      <motion.p
+        style={{ color: '#93C5FD', fontSize: '2.8vw', fontWeight: 500, letterSpacing: '0.12em', marginBottom: '5%' }}
+        {...fadeUp(0.2)}
       >
-        <h2 className="text-3xl font-bold text-foreground mb-3">Everything in one place.</h2>
-        <p className="text-2xl text-accent arabic-text">كل شيء في مكانه.</p>
+        CLEAN · FAST · RELIABLE
+      </motion.p>
+
+      <motion.div
+        style={{
+          width: '72%',
+          borderRadius: 28,
+          overflow: 'hidden',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+          border: '2px solid rgba(255,255,255,0.12)',
+        }}
+        {...scaleIn(0.4)}
+      >
+        <img
+          src={`${BASE}screen_signin.png`}
+          alt="CTL app screenshot"
+          style={{ width: '100%', display: 'block' }}
+        />
       </motion.div>
 
-      {/* Abstract Dashboard Grid */}
-      <div className="w-full flex-1 flex flex-col gap-4">
-        {/* Top Hero Card */}
-        <motion.div 
-          className="w-full h-32 rounded-2xl bg-gradient-to-br from-accent to-accent-dark p-6 flex flex-col justify-end"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.2, duration: 0.6 }}
-        >
-          <motion.div className="w-1/3 h-4 bg-white/30 rounded-full mb-3" />
-          <motion.div className="w-2/3 h-6 bg-white/50 rounded-full" />
-        </motion.div>
-
-        <div className="flex gap-4 h-24">
-          <motion.div 
-            className="flex-1 rounded-2xl bg-background border border-border p-4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.5, duration: 0.5 }}
-          >
-             <div className="w-8 h-8 rounded-full bg-foreground/10 mb-3" />
-             <div className="w-full h-3 bg-foreground/5 rounded-full" />
-          </motion.div>
-          <motion.div 
-            className="flex-1 rounded-2xl bg-background border border-border p-4"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.7, duration: 0.5 }}
-          >
-            <div className="w-8 h-8 rounded-full bg-foreground/10 mb-3" />
-            <div className="w-full h-3 bg-foreground/5 rounded-full" />
-          </motion.div>
-        </div>
-
-        {/* List Items */}
-        {[1, 2, 3].map((item, i) => (
-          <motion.div 
-            key={i}
-            className="w-full h-16 rounded-xl bg-background border border-border flex items-center px-4 gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.0 + (i * 0.2), duration: 0.5 }}
-          >
-             <div className="w-10 h-10 rounded-lg bg-foreground/5" />
-             <div className="flex-1">
-               <div className="w-1/2 h-3 bg-foreground/20 rounded-full mb-2" />
-               <div className="w-1/3 h-2 bg-foreground/10 rounded-full" />
-             </div>
-          </motion.div>
-        ))}
-      </div>
+      <motion.p
+        style={{ color: 'rgba(255,255,255,0.6)', fontSize: '2.8vw', marginTop: '5%', textAlign: 'center' }}
+        {...fadeUp(1.0)}
+      >
+        Built for drivers who care.
+      </motion.p>
     </motion.div>
   );
 }
 
-// Scene 5: Fleet Tease
+/* ─── Scene 6: Fleet ─── */
 function SceneFleet() {
   return (
-    <motion.div 
-      className="absolute inset-0 flex flex-col items-center justify-center px-8 bg-foreground text-background"
+    <motion.div
+      className="absolute inset-0 flex flex-col items-center justify-center"
+      style={{ background: 'linear-gradient(160deg, #1D3461 0%, #0F2045 100%)', padding: '7%' }}
       initial={{ clipPath: 'circle(0% at 50% 50%)' }}
       animate={{ clipPath: 'circle(150% at 50% 50%)' }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 1.2, ease: [0.64, 0, 0.13, 1] }}
+      transition={{ duration: 0.9, ease: [0.64, 0, 0.13, 1] }}
     >
       <motion.div
-        initial={{ scale: 0, rotate: -45 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ delay: 0.8, type: "spring", stiffness: 200, damping: 15 }}
-        className="w-24 h-24 rounded-full bg-accent flex items-center justify-center mb-10"
+        style={{
+          background: 'rgba(255,255,255,0.08)',
+          borderRadius: 16,
+          padding: '2.5% 6%',
+          marginBottom: '4%',
+          border: '1px solid rgba(255,255,255,0.15)',
+        }}
+        {...scaleIn(0.6)}
       >
-        <Crown size={48} className="text-white" strokeWidth={1.5} />
+        <span style={{ color: '#93C5FD', fontSize: '2.5vw', fontWeight: 600, letterSpacing: '0.15em' }}>PREMIUM</span>
       </motion.div>
 
       <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.4, duration: 0.8 }}
-        className="text-4xl font-bold text-center mb-4 tracking-tight"
+        style={{ color: '#FFFFFF', fontSize: '9vw', fontWeight: 800, textAlign: 'center', lineHeight: 1.05, marginBottom: '3%' }}
+        {...fadeUp(0.8)}
       >
-        Unlock CTL Fleet
+        CTL Fleet
       </motion.h2>
 
+      <motion.div
+        style={{ height: 3, background: 'linear-gradient(90deg, #2563EB, #20B2AA)', width: '40%', borderRadius: 2, marginBottom: '8%' }}
+        initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
+        transition={{ delay: 1.0, duration: 0.6 }}
+      />
+
+      {[
+        { label: 'Monthly', price: '$2.99', sub: 'per month' },
+        { label: 'Annual', price: '$19.99', sub: 'per year · Best value' },
+        { label: 'Lifetime', price: '$24.99', sub: 'one-time purchase' },
+      ].map((p, i) => (
+        <motion.div
+          key={p.label}
+          style={{
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: i === 1 ? 'rgba(37,99,235,0.25)' : 'rgba(255,255,255,0.06)',
+            border: i === 1 ? '1px solid rgba(37,99,235,0.5)' : '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12, padding: '3.5% 5%', marginBottom: '3%',
+          }}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.1 + i * 0.15, duration: 0.5, ease: 'circOut' }}
+        >
+          <div>
+            <p style={{ color: '#FFFFFF', fontWeight: 600, fontSize: '3.2vw' }}>{p.label}</p>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '2.4vw' }}>{p.sub}</p>
+          </div>
+          <p style={{ color: i === 1 ? '#60A5FA' : '#FFFFFF', fontWeight: 700, fontSize: '4vw' }}>{p.price}</p>
+        </motion.div>
+      ))}
+
       <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.0, duration: 0.8 }}
-        className="text-2xl text-background/70 arabic-text text-center"
+        style={{ color: 'rgba(255,255,255,0.4)', fontSize: '2.4vw', marginTop: '3%', textAlign: 'center' }}
+        {...fadeUp(1.7)}
       >
-        للأسطول والمحترفين
+        Unlimited vehicles · All features
       </motion.p>
-      
-      {/* Decorative dots */}
-      <motion.div 
-        className="absolute bottom-20 flex gap-3"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
-      >
-        {[1,2,3].map(i => (
-          <motion.div 
-            key={i} 
-            className="w-2 h-2 rounded-full bg-accent"
-            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
-          />
-        ))}
-      </motion.div>
     </motion.div>
   );
 }
 
-// Scene 6: End Card
+/* ─── Scene 7: Outro ─── */
 function SceneOutro() {
   return (
-    <motion.div 
-      className="absolute inset-0 flex flex-col items-center justify-center bg-surface"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
+    <motion.div
+      className="absolute inset-0 flex flex-col items-center justify-center"
+      style={{ background: 'linear-gradient(160deg, #1D3461 0%, #0F2045 100%)' }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
     >
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
-        className="mb-16"
-      >
-        <div className="text-7xl font-bold tracking-tighter text-foreground mb-2 text-center">CTL</div>
-        <div className="w-16 h-1 bg-accent mx-auto mt-6" />
-      </motion.div>
+      <motion.img
+        src={`${BASE}icon.png`}
+        alt="CTL"
+        style={{ width: '30%', borderRadius: 22, marginBottom: '6%' }}
+        {...scaleIn(0.3)}
+      />
+
+      <motion.p style={{ color: '#FFFFFF', fontSize: '9vw', fontWeight: 800, letterSpacing: '-0.02em' }} {...fadeUp(0.6)}>
+        CTL
+      </motion.p>
+      <motion.p style={{ color: '#93C5FD', fontSize: '3vw', fontWeight: 500, letterSpacing: '0.12em', marginBottom: '10%' }} {...fadeUp(0.8)}>
+        CAR TECHNICAL LOG
+      </motion.p>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        className="flex flex-col items-center"
+        style={{
+          background: '#FFFFFF',
+          color: '#1D3461',
+          borderRadius: 14,
+          padding: '3.5% 8%',
+          display: 'flex', alignItems: 'center', gap: '3%',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        }}
+        {...scaleIn(1.1)}
       >
-        <p className="text-foreground/60 font-medium mb-6 uppercase tracking-widest text-sm">Available on</p>
-        
-        {/* App Store Badge Mock */}
-        <div className="bg-foreground text-background px-6 py-3 rounded-full flex items-center gap-3 shadow-lg">
-          <Apple size={24} />
-          <div className="flex flex-col">
-            <span className="text-[10px] leading-none mb-1 opacity-80">Download on the</span>
-            <span className="text-lg font-semibold leading-none">App Store</span>
-          </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#1D3461">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        <div>
+          <p style={{ fontSize: '2vw', fontWeight: 400, opacity: 0.6, lineHeight: 1 }}>Download on the</p>
+          <p style={{ fontSize: '3.5vw', fontWeight: 700, lineHeight: 1.2 }}>App Store</p>
         </div>
       </motion.div>
     </motion.div>
