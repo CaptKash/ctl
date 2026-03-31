@@ -71,14 +71,18 @@ function getRevenueCatApiKey() {
 }
 
 export function initializeRevenueCat() {
-  const apiKey = getRevenueCatApiKey();
-  if (!apiKey) {
-    console.warn("RevenueCat: API key not found, skipping initialization");
-    return;
+  try {
+    const apiKey = getRevenueCatApiKey();
+    if (!apiKey) {
+      console.warn("RevenueCat: API key not found, skipping initialization");
+      return;
+    }
+    Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
+    Purchases.configure({ apiKey });
+    console.log("[RevenueCat] Configured");
+  } catch (e) {
+    console.warn("[RevenueCat] Initialization failed:", e);
   }
-  Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
-  Purchases.configure({ apiKey });
-  console.log("[RevenueCat] Configured");
 }
 
 function useSubscriptionContext() {
