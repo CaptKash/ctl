@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
+import * as MediaLibrary from "expo-media-library";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -120,28 +120,29 @@ export default function CarDetailScreen() {
     if (!url || downloadingPhoto) return;
     setDownloadingPhoto(true);
     try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission required", "Please allow access to your photo library in Settings to save photos.");
+        return;
+      }
+
       const filename = `ctl_photo_${Date.now()}.jpg`;
-      const localUri = (FileSystem.cacheDirectory ?? "") + filename;
-      let fileUri = localUri;
+      let fileUri = (FileSystem.cacheDirectory ?? "") + filename;
 
       if (url.startsWith("data:")) {
         const base64 = url.split(",")[1];
-        await FileSystem.writeAsStringAsync(localUri, base64, {
+        await FileSystem.writeAsStringAsync(fileUri, base64, {
           encoding: FileSystem.EncodingType.Base64,
         });
       } else {
-        const result = await FileSystem.downloadAsync(url, localUri);
+        const result = await FileSystem.downloadAsync(url, fileUri);
         fileUri = result.uri;
       }
 
-      const available = await Sharing.isAvailableAsync();
-      if (available) {
-        await Sharing.shareAsync(fileUri, { mimeType: "image/jpeg", UTI: "public.jpeg", dialogTitle: "Save or Share Photo" });
-      } else {
-        Alert.alert("Sharing not available", "Cannot share on this device.");
-      }
+      await MediaLibrary.saveToLibraryAsync(fileUri);
+      Alert.alert("Saved", "Photo saved to your camera roll.");
     } catch {
-      Alert.alert("Download failed", "Could not download the photo. Please try again.");
+      Alert.alert("Save failed", "Could not save the photo. Please try again.");
     } finally {
       setDownloadingPhoto(false);
     }
