@@ -225,7 +225,7 @@ export default function FleetUpgradeScreen() {
         {offeringsError && !__DEV__ && (
           <View style={[styles.devNotice, { backgroundColor: "#FEF2F2", marginTop: 4 }]}>
             <Text style={[styles.devNoticeText, { color: "#991B1B", fontSize: 11 }]} selectable>
-              {"Store error: " + offeringsError.substring(0, 200)}
+              {"Store error: " + offeringsError}
             </Text>
             {diagnostics && (
               <Text style={[styles.devNoticeText, { color: "#6B7280", fontSize: 10, marginTop: 2 }]} selectable>
