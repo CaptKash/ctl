@@ -130,7 +130,7 @@ export default function CarDetailScreen() {
       if (url.startsWith("data:")) {
         const base64 = url.split(",")[1];
         await FileSystem.writeAsStringAsync(fileUri, base64, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: "base64",
         });
       } else {
         await FileSystem.downloadAsync(url, fileUri);
