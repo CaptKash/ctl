@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect } from "react";
 import { Platform, NativeModules, TurboModuleRegistry } from "react-native";
-import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE } from "react-native-purchases";
+import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE, STOREKIT_VERSION } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 
@@ -101,7 +101,7 @@ export function initializeRevenueCat() {
       return;
     }
     Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
-    Purchases.configure({ apiKey });
+    Purchases.configure({ apiKey, storeKitVersion: STOREKIT_VERSION.STOREKIT_1 });
     _configured = true;
     _initError = null;
     console.log("[RevenueCat] Configured OK:", apiKey.substring(0, 10) + "...");
