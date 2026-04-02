@@ -69,21 +69,22 @@ function getRevenueCatApiKey() {
   return REVENUECAT_TEST_API_KEY ?? "";
 }
 
-export async function initializeRevenueCat() {
+export function initializeRevenueCat() {
   if (Platform.OS === "web") return;
   try {
-    const alreadyConfigured = await Purchases.isConfigured();
-    if (alreadyConfigured) return;
     const apiKey = getRevenueCatApiKey();
     if (!apiKey) {
-      console.warn("[RevenueCat] API key not found, skipping initialization");
+      console.warn("[RevenueCat] No API key found, skipping initialization");
       return;
     }
     Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
     Purchases.configure({ apiKey });
     console.log("[RevenueCat] Configured:", apiKey.substring(0, 10) + "...");
-  } catch (e) {
-    console.warn("[RevenueCat] Initialization failed:", e);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.toLowerCase().includes("already")) {
+      console.warn("[RevenueCat] Initialization failed:", msg);
+    }
   }
 }
 
@@ -108,6 +109,7 @@ function useSubscriptionContext() {
 
   useEffect(() => {
     if (Platform.OS === "web") return;
+    initializeRevenueCat();
     if (user?.id) {
       Purchases.logIn(String(user.id)).catch(() => {});
     } else {
@@ -117,18 +119,19 @@ function useSubscriptionContext() {
 
   const customerInfoQuery = useQuery<CustomerInfo>({
     queryKey: ["revenuecat", "customer-info", user?.id ?? null],
-    queryFn: async () => Purchases.getCustomerInfo(),
+    queryFn: async () => {
+      initializeRevenueCat();
+      return Purchases.getCustomerInfo();
+    },
     staleTime: 60 * 1000,
     retry: 2,
+    enabled: Platform.OS !== "web",
   });
 
   const offeringsQuery = useQuery<PurchasesOfferings>({
     queryKey: ["revenuecat", "offerings"],
     queryFn: async () => {
-      if (Platform.OS !== "web") {
-        const configured = await Purchases.isConfigured();
-        if (!configured) await initializeRevenueCat();
-      }
+      initializeRevenueCat();
       return Purchases.getOfferings();
     },
     staleTime: 300 * 1000,
