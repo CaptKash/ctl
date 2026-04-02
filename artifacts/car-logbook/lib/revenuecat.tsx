@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useEffect } from "react";
-import { Platform } from "react-native";
+import { Platform, NativeModules, TurboModuleRegistry } from "react-native";
 import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Constants from "expo-constants";
 import { useAuth } from "@/context/AuthContext";
 
 const REVENUECAT_TEST_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY;
@@ -69,21 +68,51 @@ function getRevenueCatApiKey() {
   return REVENUECAT_TEST_API_KEY ?? "";
 }
 
+let _configured = false;
+let _initError: string | null = null;
+
+export function getRevenueCatDiagnostics(): string {
+  const legacyModule = NativeModules.RNPurchases;
+  const turboModule = (TurboModuleRegistry as any)?.get?.("RNPurchases");
+  const apiKey = getRevenueCatApiKey();
+  return [
+    `NativeModules.RNPurchases: ${legacyModule ? "OK" : "NULL"}`,
+    `TurboModuleRegistry: ${turboModule ? "OK" : "NULL"}`,
+    `API key prefix: ${apiKey ? apiKey.substring(0, 10) + "..." : "MISSING"}`,
+    `Configured: ${_configured}`,
+    `Init error: ${_initError ?? "none"}`,
+  ].join(" | ");
+}
+
 export function initializeRevenueCat() {
   if (Platform.OS === "web") return;
+  if (_configured) return;
+
+  const legacyModule = NativeModules.RNPurchases;
+  const turboModule = (TurboModuleRegistry as any)?.get?.("RNPurchases");
+  console.log(`[RevenueCat] NativeModules.RNPurchases: ${legacyModule ? "OK" : "NULL"}`);
+  console.log(`[RevenueCat] TurboModuleRegistry: ${turboModule ? "OK" : "NULL"}`);
+
   try {
     const apiKey = getRevenueCatApiKey();
     if (!apiKey) {
+      _initError = "NO_API_KEY";
       console.warn("[RevenueCat] No API key found, skipping initialization");
       return;
     }
     Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
     Purchases.configure({ apiKey });
-    console.log("[RevenueCat] Configured:", apiKey.substring(0, 10) + "...");
+    _configured = true;
+    _initError = null;
+    console.log("[RevenueCat] Configured OK:", apiKey.substring(0, 10) + "...");
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (!msg.toLowerCase().includes("already")) {
-      console.warn("[RevenueCat] Initialization failed:", msg);
+    if (msg.toLowerCase().includes("already")) {
+      _configured = true;
+      _initError = null;
+    } else {
+      _initError = msg.substring(0, 120);
+      console.warn("[RevenueCat] Init failed:", msg);
     }
   }
 }
@@ -158,7 +187,6 @@ function useSubscriptionContext() {
     isAdmin ||
     customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
-  // Collect real packages: try current offering first, then fall back to any offering
   const realPackages: PurchasesPackage[] = (() => {
     const data = offeringsQuery.data;
     if (!data) return [];
@@ -172,6 +200,8 @@ function useSubscriptionContext() {
   const offeringsLoaded = !offeringsQuery.isLoading;
   const offeringsFailed = offeringsLoaded && (offeringsQuery.isError || realPackages.length === 0);
   const usingMockPackages = offeringsFailed;
+
+  const diagnostics = Platform.OS !== "web" ? getRevenueCatDiagnostics() : null;
 
   return {
     customerInfo: customerInfoQuery.data,
@@ -189,6 +219,10 @@ function useSubscriptionContext() {
     refetchOfferings: offeringsQuery.refetch,
     mockPackages: DEV_MOCK_PACKAGES,
     realPackages,
+    diagnostics,
+    offeringsError: offeringsQuery.error
+      ? (offeringsQuery.error instanceof Error ? offeringsQuery.error.message : String(offeringsQuery.error))
+      : null,
   };
 }
 

@@ -45,7 +45,7 @@ export default function FleetUpgradeScreen() {
   const C = useColors();
   const topPad = Platform.OS === "web" ? 20 : insets.top;
 
-  const { isLoading, purchase, isPurchasing, restore, isRestoring, isFleet, offeringsFailed, usingMockPackages, refetchOfferings, mockPackages, realPackages } = useSubscription();
+  const { isLoading, purchase, isPurchasing, restore, isRestoring, isFleet, offeringsFailed, usingMockPackages, refetchOfferings, mockPackages, realPackages, diagnostics, offeringsError } = useSubscription();
   const [selectedId, setSelectedId] = React.useState("$rc_lifetime");
   const [confirmPkg, setConfirmPkg] = React.useState<PurchasesPackage | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -220,6 +220,19 @@ export default function FleetUpgradeScreen() {
 
         {error && (
           <Text style={styles.errorText}>{error}</Text>
+        )}
+
+        {offeringsError && !__DEV__ && (
+          <View style={[styles.devNotice, { backgroundColor: "#FEF2F2", marginTop: 4 }]}>
+            <Text style={[styles.devNoticeText, { color: "#991B1B", fontSize: 11 }]} selectable>
+              {"Store error: " + offeringsError.substring(0, 200)}
+            </Text>
+            {diagnostics && (
+              <Text style={[styles.devNoticeText, { color: "#6B7280", fontSize: 10, marginTop: 2 }]} selectable>
+                {diagnostics}
+              </Text>
+            )}
+          </View>
         )}
 
         <Pressable
