@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -115,19 +115,18 @@ export default function CarDetailScreen() {
   const [detailEvent, setDetailEvent] = useState<EventItem | null>(null);
   const [photoViewer, setPhotoViewer] = useState<string | null>(null);
   const [downloadingPhoto, setDownloadingPhoto] = useState(false);
-  const pendingShareRef = useRef<string | null>(null);
-
   const handleDownloadPhoto = (url: string) => {
     if (!url || downloadingPhoto) return;
-    pendingShareRef.current = url;
     setPhotoViewer(null);
+    setTimeout(() => doShare(url), 600);
   };
 
   const doShare = async (url: string) => {
     setDownloadingPhoto(true);
     try {
       const filename = `ctl_photo_${Date.now()}.jpg`;
-      const fileUri = (FileSystem.cacheDirectory ?? "") + filename;
+      const dir = FileSystem.cacheDirectory ?? FileSystem.documentDirectory ?? "";
+      const fileUri = dir + filename;
 
       if (url.startsWith("data:")) {
         const base64 = url.split(",")[1];
@@ -138,13 +137,17 @@ export default function CarDetailScreen() {
         await FileSystem.downloadAsync(url, fileUri);
       }
 
+      const available = await Sharing.isAvailableAsync();
+      if (!available) throw new Error("Sharing not available on this device");
+
       await Sharing.shareAsync(fileUri, {
         mimeType: "image/jpeg",
         UTI: "public.jpeg",
         dialogTitle: "Save Photo",
       });
-    } catch {
-      Alert.alert("Save failed", "Could not save the photo. Please try again.");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert("Save failed", msg);
     } finally {
       setDownloadingPhoto(false);
     }
@@ -636,11 +639,6 @@ export default function CarDetailScreen() {
           visible={!!photoViewer}
           animationType="fade"
           onRequestClose={() => setPhotoViewer(null)}
-          onDismiss={() => {
-            const url = pendingShareRef.current;
-            pendingShareRef.current = null;
-            if (url) setTimeout(() => doShare(url), 200);
-          }}
           statusBarTranslucent
         >
           <View style={detailStyles.photoModal}>
