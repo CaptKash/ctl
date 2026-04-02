@@ -125,8 +125,7 @@ export default function CarDetailScreen() {
     setDownloadingPhoto(true);
     try {
       const filename = `ctl_photo_${Date.now()}.jpg`;
-      const dir = FileSystem.cacheDirectory ?? FileSystem.documentDirectory ?? "";
-      const fileUri = dir + filename;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
 
       if (url.startsWith("data:")) {
         const base64 = url.split(",")[1];
