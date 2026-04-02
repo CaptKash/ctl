@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 
 const TOKEN_KEY = "ctl_auth_token";
