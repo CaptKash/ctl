@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { Platform, NativeModules, TurboModuleRegistry } from "react-native";
 import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE, STOREKIT_VERSION } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -136,25 +136,34 @@ function decodeJwtIsAdmin(token: string | null): boolean {
 function useSubscriptionContext() {
   const { user, token } = useAuth();
 
+  // Track the RevenueCat user ID only after logIn/logOut has actually resolved,
+  // so the customerInfo query never runs against the wrong RC identity.
+  const [rcReadyUserId, setRcReadyUserId] = useState<string | null>(null);
+
   useEffect(() => {
     if (Platform.OS === "web") return;
     initializeRevenueCat();
     if (user?.id) {
-      Purchases.logIn(String(user.id)).catch(() => {});
+      const id = String(user.id);
+      Purchases.logIn(id)
+        .then(() => setRcReadyUserId(id))
+        .catch(() => setRcReadyUserId(id)); // still allow query on error — RC may already be right
     } else {
-      Purchases.logOut().catch(() => {});
+      Purchases.logOut()
+        .then(() => setRcReadyUserId(null))
+        .catch(() => setRcReadyUserId(null));
     }
   }, [user?.id]);
 
   const customerInfoQuery = useQuery<CustomerInfo>({
-    queryKey: ["revenuecat", "customer-info", user?.id ?? null],
+    queryKey: ["revenuecat", "customer-info", rcReadyUserId],
     queryFn: async () => {
       initializeRevenueCat();
       return Purchases.getCustomerInfo();
     },
     staleTime: 60 * 1000,
     retry: 2,
-    enabled: Platform.OS !== "web",
+    enabled: Platform.OS !== "web" && rcReadyUserId !== null,
   });
 
   const offeringsQuery = useQuery<PurchasesOfferings>({
