@@ -85,6 +85,17 @@ export default function MenuDashboardScreen() {
   const [calendarPickerItem, setCalendarPickerItem] = useState<UpcomingItem | null>(null);
   const [writableCalendars, setWritableCalendars] = useState<WritableCalendar[]>([]);
 
+  const handleCardPress = (item: UpcomingItem) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (item.itemKind === "inspection") {
+      router.push({ pathname: "/inspection/form", params: { carId: String(item.carId) } });
+    } else if (item.itemKind === "maintenance") {
+      router.push({ pathname: "/maintenance/form", params: { carId: String(item.carId), preType: item.type } });
+    } else {
+      router.push(`/car/${item.carId}` as any);
+    }
+  };
+
   const handleAddToCalendar = async (item: UpcomingItem) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (Platform.OS === "web") {
@@ -339,9 +350,10 @@ export default function MenuDashboardScreen() {
             const dueDate = formatDate(item.nextDueDate);
 
             return (
-              <View
+              <Pressable
                 key={`${item.itemKind}-${item.id}`}
-                style={[styles.eventCard, { backgroundColor: C.card, shadowColor: C.shadow }]}
+                onPress={() => handleCardPress(item)}
+                style={({ pressed }) => [styles.eventCard, { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 }]}
               >
                 <View style={[styles.urgencyBar, { backgroundColor: color }]} />
                 <View style={styles.eventCardBody}>
@@ -391,7 +403,7 @@ export default function MenuDashboardScreen() {
                     </Pressable>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             );
           })
         )}
