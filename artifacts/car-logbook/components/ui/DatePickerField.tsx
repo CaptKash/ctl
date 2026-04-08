@@ -91,10 +91,10 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
           <DateTimePicker
             mode="date"
             value={dateObj}
-            display={Platform.OS === "ios" ? "spinner" : "default"}
+            display={Platform.OS === "ios" ? "inline" : "default"}
             onChange={handleChange}
             themeVariant={resolvedTheme}
-            style={styles.picker}
+            accentColor={C.tint}
           />
           {Platform.OS === "ios" && (
             <Pressable
@@ -139,9 +139,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
     paddingBottom: 8,
-  },
-  picker: {
-    height: 180,
   },
   doneBtn: {
     marginHorizontal: 16,
