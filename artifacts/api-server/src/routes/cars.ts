@@ -109,8 +109,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
         nickname: carsTable.nickname,
       })
       .from(inspectionsTable)
-      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.userId, userId)))
-      .where(isNotNull(inspectionsTable.nextInspectionDate)),
+      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.userId, userId))),
   ]);
 
   const carLabel = (c: typeof cars[number]) =>
@@ -154,7 +153,16 @@ router.get("/maintenance/upcoming", async (req, res) => {
     nickname: r.nickname ?? null,
   }));
 
-  const inspectionItems = inspectionRecords
+  // Only show the latest inspection record per car (highest id wins)
+  const latestInspectionByCarId = new Map<number, typeof inspectionRecords[0]>();
+  for (const r of inspectionRecords) {
+    const existing = latestInspectionByCarId.get(r.carId);
+    if (!existing || r.id > existing.id) {
+      latestInspectionByCarId.set(r.carId, r);
+    }
+  }
+
+  const inspectionItems = Array.from(latestInspectionByCarId.values())
     .filter((r) => r.nextInspectionDate)
     .map((r) => ({
       id: r.id,
