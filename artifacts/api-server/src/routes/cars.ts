@@ -93,9 +93,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
         nickname: carsTable.nickname,
       })
       .from(maintenanceTable)
-      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.userId, userId)))
-      .where(isNotNull(maintenanceTable.nextDueDate))
-      .orderBy(asc(maintenanceTable.nextDueDate)),
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.userId, userId))),
     db.select().from(carsTable).where(eq(carsTable.userId, userId)),
     db
       .select({
@@ -147,11 +145,23 @@ router.get("/maintenance/upcoming", async (req, res) => {
       nickname: c.nickname ?? null,
     }));
 
-  const maintenanceItems = maintenanceRecords.map((r) => ({
-    ...r,
-    itemKind: "maintenance" as const,
-    nickname: r.nickname ?? null,
-  }));
+  // Only show the latest maintenance record per car per type (highest id wins)
+  const latestMaintenanceByCarType = new Map<string, typeof maintenanceRecords[0]>();
+  for (const r of maintenanceRecords) {
+    const key = `${r.carId}::${r.type}`;
+    const existing = latestMaintenanceByCarType.get(key);
+    if (!existing || r.id > existing.id) {
+      latestMaintenanceByCarType.set(key, r);
+    }
+  }
+
+  const maintenanceItems = Array.from(latestMaintenanceByCarType.values())
+    .filter((r) => r.nextDueDate)
+    .map((r) => ({
+      ...r,
+      itemKind: "maintenance" as const,
+      nickname: r.nickname ?? null,
+    }));
 
   // Only show the latest inspection record per car (highest id wins)
   const latestInspectionByCarId = new Map<number, typeof inspectionRecords[0]>();
