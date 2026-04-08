@@ -2,8 +2,8 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -133,10 +133,17 @@ export default function MenuDashboardScreen() {
     queryFn: () => apiGet<Car[]>("/cars"),
   });
 
-  const { data: upcoming, isLoading: upcomingLoading } = useQuery<UpcomingItem[]>({
+  const { data: upcoming, isLoading: upcomingLoading, refetch: refetchUpcoming } = useQuery<UpcomingItem[]>({
     queryKey: ["maintenance", "upcoming"],
     queryFn: () => apiGet<UpcomingItem[]>("/maintenance/upcoming"),
   });
+
+  // Refetch upcoming events every time this screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refetchUpcoming();
+    }, [refetchUpcoming])
+  );
 
   const fleetCount = cars?.length ?? 0;
 

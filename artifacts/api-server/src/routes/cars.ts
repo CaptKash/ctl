@@ -93,7 +93,8 @@ router.get("/maintenance/upcoming", async (req, res) => {
         nickname: carsTable.nickname,
       })
       .from(maintenanceTable)
-      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.userId, userId))),
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.userId, userId)))
+      .orderBy(desc(maintenanceTable.id)), // latest first
     db.select().from(carsTable).where(eq(carsTable.userId, userId)),
     db
       .select({
@@ -107,7 +108,8 @@ router.get("/maintenance/upcoming", async (req, res) => {
         nickname: carsTable.nickname,
       })
       .from(inspectionsTable)
-      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.userId, userId))),
+      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.userId, userId)))
+      .orderBy(desc(inspectionsTable.id)), // latest first
   ]);
 
   const carLabel = (c: typeof cars[number]) =>
@@ -145,12 +147,11 @@ router.get("/maintenance/upcoming", async (req, res) => {
       nickname: c.nickname ?? null,
     }));
 
-  // Only show the latest maintenance record per car per type (highest id wins)
+  // Records are ordered by id DESC — first record per car+type is always the latest
   const latestMaintenanceByCarType = new Map<string, typeof maintenanceRecords[0]>();
   for (const r of maintenanceRecords) {
     const key = `${r.carId}::${r.type}`;
-    const existing = latestMaintenanceByCarType.get(key);
-    if (!existing || r.id > existing.id) {
+    if (!latestMaintenanceByCarType.has(key)) {
       latestMaintenanceByCarType.set(key, r);
     }
   }
@@ -163,11 +164,10 @@ router.get("/maintenance/upcoming", async (req, res) => {
       nickname: r.nickname ?? null,
     }));
 
-  // Only show the latest inspection record per car (highest id wins)
+  // Records are ordered by id DESC — first record per car is always the latest
   const latestInspectionByCarId = new Map<number, typeof inspectionRecords[0]>();
   for (const r of inspectionRecords) {
-    const existing = latestInspectionByCarId.get(r.carId);
-    if (!existing || r.id > existing.id) {
+    if (!latestInspectionByCarId.has(r.carId)) {
       latestInspectionByCarId.set(r.carId, r);
     }
   }
