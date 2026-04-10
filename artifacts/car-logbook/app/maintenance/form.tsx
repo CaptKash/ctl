@@ -197,16 +197,10 @@ export default function MaintenanceFormScreen() {
         cost: totalCost > 0 ? totalCost : undefined,
         billPhoto: billPhotos.length > 0 ? billPhotos[0] : undefined,
         warrantyPhoto: warrantyPhotos.length > 0 ? warrantyPhotos[0] : undefined,
+        // Server atomically resolves the linked fault in the same request
+        faultId: faultId ?? undefined,
       }),
     onSuccess: async () => {
-      if (faultId) {
-        try {
-          await apiPost(`/cars/${carId}/events/complete`, {
-            recordType: "malfunction",
-            recordId: faultId,
-          });
-        } catch (_) {}
-      }
       if (nextInspectionDate.trim()) {
         try {
           await apiPost(`/cars/${carId}/inspections`, {
@@ -218,6 +212,7 @@ export default function MaintenanceFormScreen() {
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["maintenance", carId] });
+      qc.invalidateQueries({ queryKey: ["malfunctions", carId] });
       qc.invalidateQueries({ queryKey: ["events", carId] });
       qc.invalidateQueries({ queryKey: ["malfunctions-all"] });
       qc.invalidateQueries({ queryKey: ["upcoming"] });

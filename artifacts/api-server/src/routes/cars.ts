@@ -208,8 +208,16 @@ router.get("/cars/:carId/maintenance", async (req, res) => {
 
 router.post("/cars/:carId/maintenance", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const body = insertMaintenanceSchema.parse({ ...req.body, carId });
+  const { faultId: faultIdRaw, ...restBody } = req.body;
+  const body = insertMaintenanceSchema.parse({ ...restBody, carId });
   const [record] = await db.insert(maintenanceTable).values(body).returning();
+  // Atomically resolve the linked fault if one was provided
+  if (faultIdRaw !== undefined) {
+    const faultId = parseInt(faultIdRaw);
+    if (!isNaN(faultId)) {
+      await db.insert(eventCompletionsTable).values({ carId, recordType: "malfunction", recordId: faultId });
+    }
+  }
   res.status(201).json(record);
 });
 

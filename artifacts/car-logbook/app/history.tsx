@@ -229,10 +229,16 @@ export default function HistoryScreen() {
                       <Feather name={meta.icon} size={11} color={meta.color} />
                       <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
                     </View>
-                    {ev.completed && (
-                      <View style={styles.resolvedStamp}>
-                        <Text style={styles.resolvedStampText}>RESOLVED</Text>
-                      </View>
+                    {ev.type === "malfunction" && (
+                      ev.completed ? (
+                        <View style={styles.resolvedStamp}>
+                          <Text style={styles.resolvedStampText}>RESOLVED</Text>
+                        </View>
+                      ) : (
+                        <View style={styles.activeStamp}>
+                          <Text style={styles.activeStampText}>ACTIVE</Text>
+                        </View>
+                      )
                     )}
                   </View>
                   <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
@@ -350,6 +356,20 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: "Inter_700Bold",
     color: "#059669",
+    letterSpacing: 1.5,
+  },
+  activeStamp: {
+    borderWidth: 2,
+    borderColor: "#DC2626",
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    opacity: 0.85,
+  },
+  activeStampText: {
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    color: "#DC2626",
     letterSpacing: 1.5,
   },
   badge: {
