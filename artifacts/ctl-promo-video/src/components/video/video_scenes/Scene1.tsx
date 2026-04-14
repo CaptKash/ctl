@@ -1,62 +1,54 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 export function Scene1() {
   const [phase, setPhase] = useState(0);
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setPhase(1), 200),
-      setTimeout(() => setPhase(2), 1200),
-      setTimeout(() => setPhase(3), 2000),
-      setTimeout(() => setPhase(4), 3200),
+      setTimeout(() => setPhase(1), 500),
+      setTimeout(() => setPhase(2), 1500),
+      setTimeout(() => setPhase(3), 4500),
     ];
     return () => timers.forEach(t => clearTimeout(t));
   }, []);
 
   return (
     <motion.div 
-      className="absolute inset-0 flex flex-col justify-center px-[10%]"
-      initial={{ opacity: 0, scale: 1.05 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, filter: 'blur(10px)', transition: { duration: 0.6 } }}
-      transition={{ duration: 0.8 }}
+      className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F172A]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.5 }}
     >
-      <div className="relative z-10">
-        <motion.div 
-          className="w-12 h-1 bg-[#3B82F6] mb-6 rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: phase >= 1 ? 48 : 0 }}
-          transition={{ duration: 0.6, ease: "circOut" }}
+      <div className="flex flex-col items-center z-10 w-full px-8">
+        <motion.img 
+          src={`${import.meta.env.BASE_URL}ctl-logo.png`} 
+          alt="CTL Logo"
+          className="w-48 object-contain mb-8"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1.0, opacity: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
         />
         
-        <h1 className="text-[12vw] font-bold leading-[1.1] tracking-tight">
-          <motion.span 
-            className="block text-white"
-            initial={{ opacity: 0, y: 40 }}
-            animate={phase >= 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Your car
-          </motion.span>
-          <motion.span 
-            className="block text-[#94A3B8]"
-            initial={{ opacity: 0, y: 40 }}
-            animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          >
-            has a history.
-          </motion.span>
-        </h1>
+        <div className="w-64 h-[2px] bg-[#334155] relative overflow-hidden mb-8 rounded-full">
+          <motion.div 
+            className="absolute top-0 left-0 bottom-0"
+            style={{ background: 'linear-gradient(90deg, #3B82F6, #2DD4BF)' }}
+            initial={{ width: '0%' }}
+            animate={{ width: phase >= 1 ? '60%' : '0%' }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+          />
+        </div>
 
-        <motion.p 
-          className="mt-8 text-[5vw] text-[#3B82F6] font-mono tracking-widest uppercase"
-          initial={{ opacity: 0, letterSpacing: '0em' }}
-          animate={phase >= 4 ? { opacity: 1, letterSpacing: '0.1em' } : { opacity: 0, letterSpacing: '0em' }}
-          transition={{ duration: 1, ease: "easeOut" }}
+        <motion.h2 
+          className="text-[22px] font-medium text-[#9CA3AF] text-center max-w-[80%]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: phase >= 2 ? 1 : 0, y: phase >= 2 ? 0 : 20 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          Do you know it?
-        </motion.p>
+          The logbook your car deserves
+        </motion.h2>
       </div>
     </motion.div>
   );

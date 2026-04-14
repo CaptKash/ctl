@@ -1,26 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-display: 'Plus Jakarta Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+  --color-app-bg: #0F172A;
+  --color-app-card: #1E293B;
+  --color-app-card-border: #334155;
+  --color-app-primary: #3B82F6;
+  --color-app-primary-dark: #2563EB;
+  --color-app-text: #F9FAFB;
+  --color-app-text-sec: #9CA3AF;
+  --color-app-text-ter: #6B7280;
+  --color-app-success: #34D399;
+  --color-app-success-bg: #022C22;
+  --color-app-danger: #F87171;
+  --color-app-danger-bg: #450A0A;
+  --color-app-warning: #FBBF24;
+  --color-app-warning-bg: #451A03;
+  --color-app-teal: #2DD4BF;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #0B1120;
-  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  background-color: #0F172A;
+  color: #F9FAFB;
   overflow: hidden;
-}
-
-.font-mono {
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
