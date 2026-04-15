@@ -61,7 +61,7 @@ export default function IntroScene() {
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: '72%' }}
-        transition={{ delay: 3.8, duration: 0.7, ease: 'easeOut' }}
+        transition={{ delay: 2.8, duration: 0.7, ease: 'easeOut' }}
         style={{
           height: '3px',
           background: 'linear-gradient(to right, #3B82F6, #2DD4BF)',
@@ -73,7 +73,7 @@ export default function IntroScene() {
       <motion.div
         initial={{ opacity: 0, scale: 0.92, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 4.5, duration: 0.55, ease: 'easeOut' }}
+        transition={{ delay: 3.5, duration: 0.55, ease: 'easeOut' }}
         style={{
           backgroundColor: '#1E3A8A',
           borderLeft: '4px solid #3B82F6',
