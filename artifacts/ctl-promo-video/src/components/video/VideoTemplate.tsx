@@ -1,32 +1,39 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { useVideoPlayer } from '@/lib/video';
-import { Scene1 } from './video_scenes/Scene1';
-import { Scene2 } from './video_scenes/Scene2';
-import { Scene3 } from './video_scenes/Scene3';
-import { Scene4 } from './video_scenes/Scene4';
-import { Scene5 } from './video_scenes/Scene5';
+import IntroScene from './video_scenes/IntroScene';
+import CarouselScene from './video_scenes/CarouselScene';
+import EndScene from './video_scenes/EndScene';
 
-const SCENE_DURATIONS = { open: 5000, home: 7000, timeline: 7000, faults: 5000, close: 4000 };
+const SCENE_DURATIONS = {
+  intro: 4500,
+  carousel: 19000,
+  endcard: 5000,
+};
 
 export default function VideoTemplate() {
   const { currentScene } = useVideoPlayer({ durations: SCENE_DURATIONS });
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#0F172A] flex items-center justify-center font-sans">
-      <div 
-        className="relative overflow-hidden bg-[#0F172A]" 
-        style={{
-          width: 'min(56.25vh, 100vw)', 
-          aspectRatio: '9/16',
-          maxHeight: '100vh'
-        }}
-      >
-        <AnimatePresence mode="popLayout">
-          {currentScene === 0 && <Scene1 key="open" />}
-          {currentScene === 1 && <Scene2 key="home" />}
-          {currentScene === 2 && <Scene3 key="timeline" />}
-          {currentScene === 3 && <Scene4 key="faults" />}
-          {currentScene === 4 && <Scene5 key="close" />}
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#000',
+      fontFamily: "'Inter', sans-serif",
+    }}>
+      <div style={{
+        width: 'min(100vw, calc(100vh * 9 / 16))',
+        height: 'min(100vh, calc(100vw * 16 / 9))',
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: '#0F172A',
+      }}>
+        <AnimatePresence mode="wait">
+          {currentScene === 0 && <IntroScene key="intro" />}
+          {currentScene === 1 && <CarouselScene key="carousel" />}
+          {currentScene === 2 && <EndScene key="end" />}
         </AnimatePresence>
       </div>
     </div>
