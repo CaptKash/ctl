@@ -36,7 +36,6 @@ export default function IntroScene() {
         flexWrap: 'wrap',
         justifyContent: 'center',
         gap: '12px 14px',
-        marginBottom: '36px',
       }}>
         {words.map((word, i) => (
           <motion.span
@@ -57,43 +56,6 @@ export default function IntroScene() {
           </motion.span>
         ))}
       </div>
-
-      <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: '72%' }}
-        transition={{ delay: 2.8, duration: 0.7, ease: 'easeOut' }}
-        style={{
-          height: '3px',
-          background: 'linear-gradient(to right, #3B82F6, #2DD4BF)',
-          borderRadius: '2px',
-          marginBottom: '28px',
-        }}
-      />
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 3.5, duration: 0.55, ease: 'easeOut' }}
-        style={{
-          backgroundColor: '#1E3A8A',
-          borderLeft: '4px solid #3B82F6',
-          borderRadius: '10px',
-          padding: '16px 24px',
-          textAlign: 'center',
-        }}
-      >
-        <p style={{
-          color: '#FFFFFF',
-          fontSize: '30px',
-          fontWeight: 700,
-          fontFamily: "'Inter', sans-serif",
-          margin: 0,
-          lineHeight: 1.2,
-          letterSpacing: '-0.01em',
-        }}>
-          CTL helps you do that.
-        </p>
-      </motion.div>
     </motion.div>
   );
 }
