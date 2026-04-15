@@ -1,11 +1,15 @@
 import { motion } from 'framer-motion';
 
 const words = [
-  { text: 'Does', highlight: false },
+  { text: 'Are', highlight: false },
+  { text: 'you', highlight: false },
+  { text: 'giving', highlight: false },
   { text: 'your', highlight: false },
-  { text: 'car', highlight: false },
-  { text: 'remember', highlight: false },
-  { text: 'everything?', highlight: true },
+  { text: 'car', highlight: true },
+  { text: 'the', highlight: false },
+  { text: 'attention', highlight: false },
+  { text: 'it', highlight: false },
+  { text: 'needs?', highlight: true },
 ];
 
 export default function IntroScene() {
@@ -57,7 +61,7 @@ export default function IntroScene() {
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: '72%' }}
-        transition={{ delay: 1.4, duration: 0.7, ease: 'easeOut' }}
+        transition={{ delay: 2.4, duration: 0.7, ease: 'easeOut' }}
         style={{
           height: '3px',
           background: 'linear-gradient(to right, #3B82F6, #2DD4BF)',
@@ -69,18 +73,18 @@ export default function IntroScene() {
       <motion.p
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2.0, duration: 0.5 }}
+        transition={{ delay: 3.0, duration: 0.5 }}
         style={{
-          color: '#9CA3AF',
-          fontSize: '22px',
-          fontWeight: 500,
+          color: '#F9FAFB',
+          fontSize: '24px',
+          fontWeight: 600,
           fontFamily: "'Inter', sans-serif",
           textAlign: 'center',
           margin: 0,
           letterSpacing: '0.01em',
         }}
       >
-        CTL keeps the full record.
+        CTL helps you do that.
       </motion.p>
     </motion.div>
   );

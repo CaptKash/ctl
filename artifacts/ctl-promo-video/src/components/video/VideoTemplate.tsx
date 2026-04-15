@@ -5,7 +5,7 @@ import CarouselScene from './video_scenes/CarouselScene';
 import EndScene from './video_scenes/EndScene';
 
 const SCENE_DURATIONS = {
-  intro: 4500,
+  intro: 6000,
   carousel: 19000,
   endcard: 5000,
 };
