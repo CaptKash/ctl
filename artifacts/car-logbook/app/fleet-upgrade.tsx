@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -265,7 +266,16 @@ export default function FleetUpgradeScreen() {
         </Pressable>
 
         <Text style={[styles.legalText, { color: C.textTertiary }]}>
-          Subscriptions auto-renew. Cancel anytime in App Store / Play Store settings.
+          Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store / Play Store account settings.{"\n"}
+          <Text
+            style={[styles.legalLink, { color: C.tint }]}
+            onPress={() => Linking.openURL("https://e4258cb0-84c7-443c-ad62-0aa669b73cb1-00-48k7an1ynz04.spock.replit.dev/privacy")}
+          >Privacy Policy</Text>
+          {"  ·  "}
+          <Text
+            style={[styles.legalLink, { color: C.tint }]}
+            onPress={() => Linking.openURL("https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")}
+          >Terms of Use</Text>
         </Text>
       </ScrollView>
 
@@ -431,7 +441,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  legalText: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center" },
+  legalText: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 18 },
+  legalLink: { fontSize: 11, fontFamily: "Inter_500Medium" },
 
   modalOverlay: {
     flex: 1,
