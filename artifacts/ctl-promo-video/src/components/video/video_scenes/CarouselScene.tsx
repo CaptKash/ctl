@@ -42,13 +42,12 @@ export default function CarouselScene() {
         <motion.img
           key={index}
           src={screenshots[index].src}
-          initial={{ x: '100%', opacity: 0, scale: 1.04 }}
-          animate={{ x: 0, opacity: 1, scale: 1 }}
-          exit={{ x: '-100%', opacity: 0, scale: 0.98 }}
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.15 }}
           transition={{
-            x: { duration: 0.85, ease: [0.32, 0.72, 0, 1] },
-            opacity: { duration: 0.55, ease: 'easeOut' },
-            scale: { duration: 0.85, ease: [0.32, 0.72, 0, 1] },
+            scale: { duration: 0.5, ease: [0.34, 1.56, 0.64, 1] },
+            opacity: { duration: 0.35, ease: 'easeOut' },
           }}
           style={{
             width: '100%',
