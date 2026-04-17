@@ -86,30 +86,6 @@ export default function EndScene() {
           </div>
         </div>
 
-        {/* Google Play */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px',
-          backgroundColor: '#000000',
-          border: '1.5px solid #334155',
-          borderRadius: '14px',
-          padding: '14px 32px',
-          width: '80%',
-          maxWidth: '280px',
-          justifyContent: 'center',
-        }}>
-          <svg width="26" height="28" viewBox="0 0 24 28" fill="none">
-            <path d="M1.2 0.5C0.8 0.9 0.5 1.5 0.5 2.3v23.4c0 0.8 0.3 1.4 0.7 1.8l0.1 0.1 13.1-13.1v-0.3L1.2 0.5z" fill="#4FC3F7"/>
-            <path d="M18.3 18.6l-4.4-4.4v-0.3l4.4-4.4 0.1 0.1 5.2 3c1.5 0.8 1.5 2.2 0 3L18.3 18.6z" fill="#FFCA28"/>
-            <path d="M18.4 18.5L13.9 14 1.2 26.5c0.5 0.5 1.3 0.6 2.1 0.1l15.1-8.1" fill="#F44336"/>
-            <path d="M18.4 9.5L3.3 1.4C2.5 0.9 1.7 1 1.2 1.5L13.9 14l4.5-4.5z" fill="#4CAF50"/>
-          </svg>
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ color: '#9CA3AF', fontSize: '11px', fontFamily: "'Inter', sans-serif", fontWeight: 500, lineHeight: 1 }}>Get it on</div>
-            <div style={{ color: '#FFFFFF', fontSize: '20px', fontFamily: "'Inter', sans-serif", fontWeight: 700, lineHeight: 1.2 }}>Google Play</div>
-          </div>
-        </div>
       </motion.div>
     </motion.div>
   );

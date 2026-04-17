@@ -38,14 +38,18 @@ export default function CarouselScene() {
         overflow: 'hidden',
       }}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         <motion.img
           key={index}
           src={screenshots[index].src}
-          initial={{ x: '100%', opacity: 0.6 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: '-30%', opacity: 0 }}
-          transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
+          initial={{ x: '100%', opacity: 0, scale: 1.04 }}
+          animate={{ x: 0, opacity: 1, scale: 1 }}
+          exit={{ x: '-100%', opacity: 0, scale: 0.98 }}
+          transition={{
+            x: { duration: 0.85, ease: [0.32, 0.72, 0, 1] },
+            opacity: { duration: 0.55, ease: 'easeOut' },
+            scale: { duration: 0.85, ease: [0.32, 0.72, 0, 1] },
+          }}
           style={{
             width: '100%',
             height: '100%',
