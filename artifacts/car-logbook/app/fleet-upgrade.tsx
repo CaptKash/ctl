@@ -269,7 +269,7 @@ export default function FleetUpgradeScreen() {
           Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store / Play Store account settings.{"\n"}
           <Text
             style={[styles.legalLink, { color: C.tint }]}
-            onPress={() => Linking.openURL("https://e4258cb0-84c7-443c-ad62-0aa669b73cb1-00-48k7an1ynz04.spock.replit.dev/privacy")}
+            onPress={() => Linking.openURL("https://ctl-car-technical-log.replit.app/privacy")}
           >Privacy Policy</Text>
           {"  ·  "}
           <Text
