@@ -48,3 +48,9 @@ id = "SJ1Ihj52xzdYo_5tvB1U5"
 uri = "file://CTL_Test_Checklist.pdf"
 type = "pdf"
 title = "CTL – iOS & Android Test Checklist (v2)"
+
+[[outputs]]
+id = "rUMxGQHyOeIgVcTO4XXH9"
+uri = "file://exports/ctl_instagram_story.png"
+type = "image"
+title = "CTL Instagram Story (1080x1920)"
