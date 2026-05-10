@@ -12,6 +12,12 @@ uri = "file://artifacts/mockup-sandbox/public/images/ctl-cockpit.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "Rl-JoSQAOaXzKzeciG4ov"
+uri = "file://artifacts/mockup-sandbox/public/images/ctl-logbook.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "Nt8KmQJPMXX0hIpC0sP62"
 uri = "file://artifacts/car-logbook/assets/images/icon.png"
