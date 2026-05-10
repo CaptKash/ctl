@@ -1,5 +1,10 @@
 uploads = []
-generated = []
+
+[[generated]]
+id = "pWUHJzLszaVSSuvawKhXL"
+uri = "file://artifacts/mockup-sandbox/public/images/cinematic-car.png"
+type = "image"
+title = "Cinematic sports car at sunset"
 
 [[outputs]]
 id = "Nt8KmQJPMXX0hIpC0sP62"

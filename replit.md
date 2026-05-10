@@ -66,5 +66,14 @@ Aviation-style car logbook mobile app. iOS only (TestFlight). Freemium model:
 - Moving from custom email/password JWT (api-server `/auth/*`) to **Replit-managed Clerk**
 - Adding Google + Apple SSO (Apple required by App Store rules if Google offered)
 - 71 real production users to migrate — preserve all car/log data via email-based account linking on first re-login
+- **CRITICAL: Fleet subscribers MUST NOT lose their subscriptions** — RevenueCat ties entitlements to Apple ID (StoreKit), so iOS purchases survive any backend auth change. But DB-side subscription records (if any) must also be preserved and re-linked by email on first re-login.
 - Strengthen password rules: 8+ chars, letter + number, live strength meter
 - Clerk status: `not_configured` (needs setup)
+- **Signup redesign**: 3 variants on canvas first, user picks one, then graduate
+
+## Next Build Scope (will be Build 28)
+Bundle these together to minimize EAS credit usage:
+1. Clerk migration + Google/Apple sign-in + new signup design
+2. Bug fixes from week-1 feedback (license-renewal delete/edit, car-registration crash, Geely EX2)
+3. **CTL Enterprise** — new tier, details TBD with user
+4. **Arabic language + RTL support**
