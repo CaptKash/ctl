@@ -53,7 +53,7 @@ function CinematicCTLScreen({ mode }: { mode: 'light' | 'dark' }) {
       {/* Background Image / Hero Strip */}
       <div className="absolute inset-0">
         <img 
-          src="/__mockup/images/ctl-cockpit.png" 
+          src="/__mockup/images/ctl-logbook.png" 
           alt="Cinematic Car" 
           className="w-full h-full object-cover object-center"
         />
@@ -78,7 +78,7 @@ function CinematicCTLScreen({ mode }: { mode: 'light' | 'dark' }) {
 
         {/* CTL Identity */}
         <div className="mt-8 flex flex-col items-center">
-          <img src="/__mockup/images/ctl-icon.png" alt="CTL Icon" className="w-16 h-16 rounded-2xl mb-3 shadow-lg" />
+          <img src="/__mockup/images/ctl-logo.jpg" alt="CTL Icon" className="w-16 h-16 rounded-2xl mb-3 shadow-lg" />
           <p className={`text-xs font-semibold tracking-widest uppercase ${isDark ? 'text-[#93C5FD]' : 'text-[#2563EB]'}`}>
             Car Technical Log
           </p>
