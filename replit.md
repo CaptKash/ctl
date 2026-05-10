@@ -55,3 +55,16 @@ Aviation-style car logbook mobile app. iOS only (TestFlight). Freemium model:
 ## Next Planned Features
 - Arabic (RTL) support
 - Google Play (Android on hold — Play Console account being verified)
+- **In-app referral hook** (share to WhatsApp button on home screen — WhatsApp broadcast on May 4 drove 23 signups in one day, ~30% of user base; users clearly willing to share)
+- **Signup page redesign** required as part of Clerk migration (user wants new design, not direct port)
+
+## User Preferences
+- Strong preference for users' personal-network growth channels (WhatsApp broadcasts) — keep referral/share features high priority
+- Audience is heavily Arabic-speaking (Gulf/Levant region) — Arabic + RTL is high impact
+
+## Auth Migration Plan (in progress, May 10 2026)
+- Moving from custom email/password JWT (api-server `/auth/*`) to **Replit-managed Clerk**
+- Adding Google + Apple SSO (Apple required by App Store rules if Google offered)
+- 71 real production users to migrate — preserve all car/log data via email-based account linking on first re-login
+- Strengthen password rules: 8+ chars, letter + number, live strength meter
+- Clerk status: `not_configured` (needs setup)
