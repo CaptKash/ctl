@@ -10,7 +10,11 @@ export const usersTable = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   isAdmin: boolean("is_admin").default(false).notNull(),
   country: text("country"),
-  passwordUpgradeRequired: boolean("password_upgrade_required").default(false).notNull(),
+  // Default `true` exists so that when this column is first added to a
+  // populated database (i.e. the prod publish migration) every existing
+  // row is backfilled with `true` automatically. New signups override
+  // this with an explicit `false` in /auth/register.
+  passwordUpgradeRequired: boolean("password_upgrade_required").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => [unique("users_email_unique").on(t.email)]);
 

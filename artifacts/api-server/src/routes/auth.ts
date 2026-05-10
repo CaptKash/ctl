@@ -57,7 +57,14 @@ router.post("/auth/register", async (req, res) => {
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     const [user] = await db
       .insert(usersTable)
-      .values({ name: name.trim(), email: email.toLowerCase().trim(), passwordHash })
+      .values({
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+        passwordHash,
+        // New signups go through the strict signup form, so they already
+        // meet the new password rules — no upgrade nudge needed.
+        passwordUpgradeRequired: false,
+      })
       .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email, isAdmin: usersTable.isAdmin });
 
     const token = jwt.sign({ id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin }, JWT_SECRET, {
