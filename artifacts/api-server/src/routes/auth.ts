@@ -64,7 +64,7 @@ router.post("/auth/register", async (req, res) => {
       expiresIn: "90d",
     });
 
-    res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
+    res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, passwordUpgradeRequired: false } });
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ error: "Registration failed. Please try again." });
@@ -98,7 +98,7 @@ router.post("/auth/login", async (req, res) => {
       expiresIn: "90d",
     });
 
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, passwordUpgradeRequired: user.passwordUpgradeRequired } });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Login failed. Please try again." });
@@ -115,7 +115,7 @@ router.get("/auth/me", async (req, res) => {
     const payload = jwt.verify(token, JWT_SECRET) as { id: number; email: string; name: string };
 
     const [user] = await db
-      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, isAdmin: usersTable.isAdmin })
+      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, isAdmin: usersTable.isAdmin, passwordUpgradeRequired: usersTable.passwordUpgradeRequired })
       .from(usersTable)
       .where(eq(usersTable.id, payload.id))
       .limit(1);
@@ -214,7 +214,7 @@ router.post("/auth/change-password", requireAuth, async (req, res) => {
     const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
     await db
       .update(usersTable)
-      .set({ passwordHash: newHash })
+      .set({ passwordHash: newHash, passwordUpgradeRequired: false })
       .where(eq(usersTable.id, req.user!.id));
 
     res.json({ message: "Password changed successfully." });
@@ -316,7 +316,7 @@ router.post("/auth/reset-password", async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    await db.update(usersTable).set({ passwordHash }).where(eq(usersTable.id, record.userId));
+    await db.update(usersTable).set({ passwordHash, passwordUpgradeRequired: false }).where(eq(usersTable.id, record.userId));
     await db
       .update(passwordResetTokensTable)
       .set({ usedAt: new Date() })

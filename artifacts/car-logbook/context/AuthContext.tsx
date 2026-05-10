@@ -47,6 +47,7 @@ export type AuthUser = {
   name: string;
   email: string;
   isAdmin?: boolean;
+  passwordUpgradeRequired?: boolean;
 };
 
 type AuthContextType = {
@@ -140,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const mergedUser: AuthUser = {
               ...serverUser,
               isAdmin: serverUser.isAdmin ?? storedUser?.isAdmin,
+              passwordUpgradeRequired: serverUser.passwordUpgradeRequired ?? storedUser?.passwordUpgradeRequired,
             };
             setToken(storedToken);
             setUser(mergedUser);

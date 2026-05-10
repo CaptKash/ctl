@@ -10,6 +10,7 @@ export const usersTable = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   isAdmin: boolean("is_admin").default(false).notNull(),
   country: text("country"),
+  passwordUpgradeRequired: boolean("password_upgrade_required").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (t) => [unique("users_email_unique").on(t.email)]);
 
