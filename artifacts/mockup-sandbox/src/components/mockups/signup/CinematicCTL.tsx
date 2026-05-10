@@ -10,11 +10,10 @@ function PhoneFrame({ label, children }: PhoneFrameProps) {
   return (
     <div className="flex flex-col items-center gap-3">
       <span className="text-sm font-medium text-neutral-500 uppercase tracking-widest">{label}</span>
-      <div 
+      <div
         className="relative overflow-hidden rounded-[40px] shadow-2xl ring-8 ring-neutral-900/5"
         style={{ width: 390, height: 844 }}
       >
-        {/* Dynamic Island / Notch area */}
         <div className="absolute top-0 inset-x-0 h-7 flex justify-center z-50 pt-2 pointer-events-none">
           <div className="w-[120px] h-[30px] bg-black rounded-full" />
         </div>
@@ -43,95 +42,156 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+function BrandHero({ isDark, width = 390 }: { isDark: boolean; width?: number }) {
+  const polyFill = isDark ? '#1D4A96' : '#DBEAFE';
+  const titleColor = isDark ? '#FFFFFF' : '#0F2D5E';
+  const tagColor = isDark ? '#93C5FD' : '#2563EB';
+  return (
+    <div
+      className="relative overflow-hidden"
+      style={{
+        backgroundColor: isDark ? '#0F2D5E' : '#FFFFFF',
+        paddingTop: 56,
+        paddingBottom: 28,
+        paddingLeft: 28,
+        paddingRight: 28,
+        borderBottomLeftRadius: 28,
+        borderBottomRightRadius: 28,
+        borderBottom: isDark ? 'none' : '2px solid #B8CADD',
+        boxShadow: isDark ? 'none' : '0 4px 8px rgba(29, 78, 216, 0.08)',
+      }}
+    >
+      <svg
+        width={width}
+        height={250}
+        style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
+      >
+        <polygon
+          points={`${Math.round(width * 0.57)},0 ${width},0 ${width},250 ${Math.round(width * 0.57)},155`}
+          fill={polyFill}
+        />
+      </svg>
+      <div className="relative">
+        <div
+          style={{
+            fontSize: 72,
+            lineHeight: '76px',
+            fontWeight: 700,
+            color: titleColor,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          CTL
+        </div>
+        <div className="flex items-center gap-2 mt-1.5">
+          <div style={{ height: 5, width: 90, backgroundColor: '#1D4ED8', borderRadius: 3 }} />
+          <div style={{ height: 5, width: 38, backgroundColor: '#0891B2', borderRadius: 3 }} />
+        </div>
+        <div
+          style={{
+            marginTop: 10,
+            fontSize: 18,
+            fontWeight: 600,
+            color: tagColor,
+          }}
+        >
+          Car Technical Log
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CinematicCTLScreen({ mode }: { mode: 'light' | 'dark' }) {
   const isDark = mode === 'dark';
 
   return (
-    <div 
-      className={`w-full h-full relative font-sans ${isDark ? 'bg-[#0F172A] text-[#F9FAFB]' : 'bg-[#F9FAFB] text-[#111827]'}`}
+    <div
+      className={`w-full h-full relative font-sans flex flex-col ${
+        isDark ? 'bg-[#0F172A] text-[#F9FAFB]' : 'bg-[#F9FAFB] text-[#111827]'
+      }`}
     >
-      {/* Background Image / Hero Strip */}
-      <div className="absolute inset-0">
-        <img 
-          src="/__mockup/images/ctl-logbook.png" 
-          alt="Cinematic Car" 
-          className="w-full h-full object-cover object-center"
-        />
-        {isDark ? (
-          // Dark mode: Full bleed photo with heavy navy gradient
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.96) 100%)' }} />
-        ) : (
-          // Light mode: Full bleed photo with light wash gradient
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(249,250,251,0.35) 0%, rgba(249,250,251,0.96) 100%)' }} />
-        )}
-      </div>
+      {/* Brand hero (matches the existing app signup screen) */}
+      <BrandHero isDark={isDark} />
 
-      {/* Content */}
-      <div className="relative z-10 w-full h-full flex flex-col pt-16 px-6 pb-8">
-        
-        {/* Aviation Chrome - Small instrument detail */}
-        <div className="flex justify-between items-center mb-8">
-          <div className={`text-[10px] font-mono tracking-widest ${isDark ? 'text-[#9CA3AF]' : 'text-[#6B7280]'}`}>
-            CTL · v2.8 · LOG 001
-          </div>
-        </div>
-
-        {/* CTL Identity */}
-        <div className="mt-8 flex flex-col items-center">
-          <img src="/__mockup/images/ctl-logo.jpg" alt="CTL Icon" className="w-16 h-16 rounded-2xl mb-3 shadow-lg" />
-          <p className={`text-xs font-semibold tracking-widest uppercase ${isDark ? 'text-[#93C5FD]' : 'text-[#2563EB]'}`}>
-            Car Technical Log
-          </p>
-        </div>
-
-        <div className="flex-grow" />
-
-        {/* Sign-in Card */}
-        <div className={`w-full rounded-3xl p-6 ${
-          isDark 
-            ? 'bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl' 
-            : 'bg-white border border-[#B8CADD] shadow-[0_8px_30px_rgb(0,0,0,0.08)]'
-        }`}>
-          <div className="text-center mb-8">
-            <p className={`text-[15px] font-medium ${isDark ? 'text-[#F9FAFB]/90' : 'text-[#111827]/80'}`}>
-              Aviation-grade logbook for your car
+      {/* Sign-in card */}
+      <div className="flex-1 flex flex-col px-6 pt-6 pb-6">
+        <div
+          className={`w-full rounded-2xl p-5 ${
+            isDark
+              ? 'bg-white/[0.04] border border-white/10'
+              : 'bg-white border border-[#E5E7EB] shadow-[0_2px_12px_rgba(15,45,94,0.06)]'
+          }`}
+        >
+          <div className="mb-5">
+            <h2
+              className={`text-[22px] font-bold ${isDark ? 'text-white' : 'text-[#0F2D5E]'}`}
+            >
+              Create account
+            </h2>
+            <p
+              className={`text-[13px] mt-1 ${isDark ? 'text-[#93A4BF]' : 'text-[#6B7280]'}`}
+            >
+              Start logging your fleet's full service history
             </p>
           </div>
 
           <div className="flex flex-col gap-3">
-            {/* Apple Button */}
-            <button className="w-full h-[52px] bg-black text-white rounded-xl flex items-center justify-center gap-2 font-semibold text-[16px] transition-transform active:scale-[0.98]">
+            <button className="w-full h-[50px] bg-black text-white rounded-xl flex items-center justify-center gap-2 font-semibold text-[15px] active:scale-[0.98] transition-transform">
               <AppleIcon className="w-5 h-5 fill-current" />
               Continue with Apple
             </button>
 
-            {/* Google Button */}
-            <button className="w-full h-[52px] bg-white text-black border border-gray-200 rounded-xl flex items-center justify-center gap-2 font-semibold text-[16px] transition-transform active:scale-[0.98]">
+            <button
+              className={`w-full h-[50px] rounded-xl flex items-center justify-center gap-2 font-semibold text-[15px] active:scale-[0.98] transition-transform ${
+                isDark
+                  ? 'bg-white text-black'
+                  : 'bg-white text-[#111827] border border-[#E5E7EB]'
+              }`}
+            >
               <GoogleIcon className="w-5 h-5" />
               Continue with Google
             </button>
 
-            {/* Email Button */}
-            <button className="w-full h-[52px] bg-[#1A56DB] text-white rounded-xl flex items-center justify-center gap-2 font-semibold text-[16px] transition-transform active:scale-[0.98]">
+            <button className="w-full h-[50px] bg-[#1A56DB] text-white rounded-xl flex items-center justify-center gap-2 font-semibold text-[15px] active:scale-[0.98] transition-transform">
               <Mail className="w-5 h-5" />
               Continue with Email
             </button>
           </div>
 
-          <div className="mt-6 flex justify-center">
-            <button className={`text-[14px] ${isDark ? 'text-[#9CA3AF] hover:text-white' : 'text-[#6B7280] hover:text-[#111827]'} transition-colors`}>
-              Already have an account? <span className={`font-semibold ${isDark ? 'text-white' : 'text-[#111827]'}`}>Sign in</span>
-            </button>
+          {/* Divider */}
+          <div className="flex items-center gap-2.5 mt-5">
+            <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-[#E5E7EB]'}`} />
+            <span
+              className={`text-[11px] ${isDark ? 'text-[#6B7E9C]' : 'text-[#9CA3AF]'}`}
+            >
+              already have an account?
+            </span>
+            <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-[#E5E7EB]'}`} />
           </div>
+
+          {/* Sign In button */}
+          <button
+            className={`mt-4 w-full h-[48px] rounded-xl flex items-center justify-center gap-2 font-semibold text-[15px] border ${
+              isDark
+                ? 'border-white/15 text-white bg-white/[0.03]'
+                : 'border-[#E5E7EB] text-[#111827] bg-white'
+            }`}
+          >
+            Sign In
+            <span className="text-[16px]">→</span>
+          </button>
         </div>
 
-        {/* Legal line */}
-        <div className="mt-8 mb-2">
-          <p className={`text-[11px] text-center ${isDark ? 'text-[#6B7280]' : 'text-[#9CA3AF]'}`}>
-            By continuing you agree to our Terms & Privacy
-          </p>
-        </div>
+        <div className="flex-1" />
 
+        <p
+          className={`text-[11px] text-center mt-6 ${
+            isDark ? 'text-[#6B7E9C]' : 'text-[#9CA3AF]'
+          }`}
+        >
+          By continuing you agree to our Terms & Privacy
+        </p>
       </div>
     </div>
   );
