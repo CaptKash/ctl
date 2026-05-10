@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -132,6 +132,42 @@ export default function SignupScreen() {
               <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
                 Start logging your fleet's full service history
               </Text>
+            </View>
+
+            {/* OAuth (visual preview — wired up in next release) */}
+            <View style={styles.oauthBlock}>
+              <Pressable
+                onPress={() => {}}
+                style={({ pressed }) => [
+                  styles.oauthBtn,
+                  { backgroundColor: "#000000", opacity: pressed ? 0.9 : 1 },
+                ]}
+              >
+                <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
+                <Text style={[styles.oauthLabel, { color: "#FFFFFF" }]}>Continue with Apple</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {}}
+                style={({ pressed }) => [
+                  styles.oauthBtn,
+                  {
+                    backgroundColor: "#FFFFFF",
+                    borderWidth: 1,
+                    borderColor: isDark ? "transparent" : C.border,
+                    opacity: pressed ? 0.9 : 1,
+                  },
+                ]}
+              >
+                <Ionicons name="logo-google" size={18} color="#1A1A1A" />
+                <Text style={[styles.oauthLabel, { color: "#1A1A1A" }]}>Continue with Google</Text>
+              </Pressable>
+
+              <View style={styles.oauthDivider}>
+                <View style={[styles.oauthDividerLine, { backgroundColor: C.border }]} />
+                <Text style={[styles.oauthDividerText, { color: C.textTertiary }]}>or use email</Text>
+                <View style={[styles.oauthDividerLine, { backgroundColor: C.border }]} />
+              </View>
             </View>
 
             {/* Error */}
@@ -347,6 +383,23 @@ const styles = StyleSheet.create({
   errorText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium" },
 
   formCard: { borderRadius: 16, padding: 16, gap: 14 },
+
+  // ── OAuth ────────────────────────────────────────────────────────────────
+  oauthBlock: { gap: 10 },
+  oauthBtn: {
+    height: 50,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  oauthLabel: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  oauthDivider: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
+  oauthDividerLine: { flex: 1, height: StyleSheet.hairlineWidth },
+  oauthDividerText: { fontSize: 11, fontFamily: "Inter_500Medium", textTransform: "lowercase" },
+
   fieldGroup: { gap: 6 },
   fieldLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
   inputRow: {
