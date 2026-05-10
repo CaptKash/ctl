@@ -37,14 +37,26 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const passwordRules = [
+    { key: "len", label: "At least 8 characters", met: password.length >= 8 },
+    { key: "upper", label: "One uppercase letter (A–Z)", met: /[A-Z]/.test(password) },
+    { key: "lower", label: "One lowercase letter (a–z)", met: /[a-z]/.test(password) },
+    { key: "num", label: "One number (0–9)", met: /[0-9]/.test(password) },
+  ];
+  const passwordValid = passwordRules.every((r) => r.met);
+
   const canSubmit =
     name.trim().length >= 2 &&
     email.trim().includes("@") &&
-    password.length >= 6 &&
+    passwordValid &&
     confirmPassword === password;
 
   const handleSignup = async () => {
     if (!canSubmit) return;
+    if (!passwordValid) {
+      setError("Password does not meet the requirements below.");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -220,9 +232,7 @@ export default function SignupScreen() {
 
             {/* Password */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>
-                Password <Text style={{ color: C.textTertiary, fontSize: 11 }}>(min 6 chars)</Text>
-              </Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Password</Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="lock" size={16} color={C.textSecondary} />
                 <TextInput
@@ -239,6 +249,29 @@ export default function SignupScreen() {
                   <Feather name={showPassword ? "eye-off" : "eye"} size={16} color={C.textSecondary} />
                 </Pressable>
               </View>
+
+              {/* Password requirements checklist (appears once user starts typing) */}
+              {password.length > 0 && (
+                <View style={styles.pwRules}>
+                  {passwordRules.map((r) => (
+                    <View key={r.key} style={styles.pwRuleRow}>
+                      <Feather
+                        name={r.met ? "check-circle" : "circle"}
+                        size={13}
+                        color={r.met ? C.success : C.textTertiary}
+                      />
+                      <Text
+                        style={[
+                          styles.pwRuleText,
+                          { color: r.met ? C.success : C.textSecondary },
+                        ]}
+                      >
+                        {r.label}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
 
             <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
@@ -399,6 +432,12 @@ const styles = StyleSheet.create({
   oauthDivider: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
   oauthDividerLine: { flex: 1, height: StyleSheet.hairlineWidth },
   oauthDividerText: { fontSize: 11, fontFamily: "Inter_500Medium", textTransform: "lowercase" },
+
+  // ── Password rules ──────────────────────────────────────────────────────
+  pwRules: { gap: 6, marginTop: 8, paddingLeft: 2 },
+  pwRuleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  pwRuleText: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 16 },
+
 
   fieldGroup: { gap: 6 },
   fieldLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
