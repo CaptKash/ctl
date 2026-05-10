@@ -51,18 +51,18 @@ function CinematicCTLScreen({ mode }: { mode: 'light' | 'dark' }) {
       className={`w-full h-full relative font-sans ${isDark ? 'bg-[#0F172A] text-[#F9FAFB]' : 'bg-[#F9FAFB] text-[#111827]'}`}
     >
       {/* Background Image / Hero Strip */}
-      <div className={`absolute top-0 left-0 right-0 ${isDark ? 'bottom-0' : 'h-[60%]'}`}>
+      <div className="absolute inset-0">
         <img 
-          src="/__mockup/images/cinematic-car.png" 
+          src="/__mockup/images/ctl-cockpit.png" 
           alt="Cinematic Car" 
-          className={`w-full h-full object-cover object-center ${isDark ? '' : 'opacity-40'}`}
+          className="w-full h-full object-cover object-center"
         />
         {isDark ? (
-          // Dark mode: Full bleed photo with heavy navy to near-black gradient
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0F2D5E]/80 via-[#0F172A]/90 to-[#0F172A] mix-blend-multiply" />
+          // Dark mode: Full bleed photo with heavy navy gradient
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.96) 100%)' }} />
         ) : (
-          // Light mode: Soft white wash over the top photo
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/60 to-[#F9FAFB]" />
+          // Light mode: Full bleed photo with light wash gradient
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(249,250,251,0.35) 0%, rgba(249,250,251,0.96) 100%)' }} />
         )}
       </div>
 
@@ -78,9 +78,7 @@ function CinematicCTLScreen({ mode }: { mode: 'light' | 'dark' }) {
 
         {/* CTL Identity */}
         <div className="mt-8 flex flex-col items-center">
-          <h1 className={`text-5xl font-extrabold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#0F2D5E]'}`}>
-            CTL
-          </h1>
+          <img src="/__mockup/images/ctl-icon.png" alt="CTL Icon" className="w-16 h-16 rounded-2xl mb-3 shadow-lg" />
           <p className={`text-xs font-semibold tracking-widest uppercase ${isDark ? 'text-[#93C5FD]' : 'text-[#2563EB]'}`}>
             Car Technical Log
           </p>
@@ -108,17 +106,13 @@ function CinematicCTLScreen({ mode }: { mode: 'light' | 'dark' }) {
             </button>
 
             {/* Google Button */}
-            <button className={`w-full h-[52px] bg-white text-black rounded-xl flex items-center justify-center gap-2 font-semibold text-[16px] transition-transform active:scale-[0.98] ${
-              isDark ? 'border border-white/10' : 'border border-gray-200'
-            }`}>
+            <button className="w-full h-[52px] bg-white text-black border border-gray-200 rounded-xl flex items-center justify-center gap-2 font-semibold text-[16px] transition-transform active:scale-[0.98]">
               <GoogleIcon className="w-5 h-5" />
               Continue with Google
             </button>
 
             {/* Email Button */}
-            <button className={`w-full h-[52px] text-white rounded-xl flex items-center justify-center gap-2 font-semibold text-[16px] transition-transform active:scale-[0.98] ${
-              isDark ? 'bg-[#3B82F6]' : 'bg-[#1A56DB]'
-            }`}>
+            <button className="w-full h-[52px] bg-[#1A56DB] text-white rounded-xl flex items-center justify-center gap-2 font-semibold text-[16px] transition-transform active:scale-[0.98]">
               <Mail className="w-5 h-5" />
               Continue with Email
             </button>
