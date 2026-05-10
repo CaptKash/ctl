@@ -16,6 +16,18 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET ?? "ctl-logbook-secret-2025";
 const SALT_ROUNDS = 10;
 
+/**
+ * Standard password rules used for new signups, change-password, and reset-password.
+ * Existing user logins are unaffected — bcrypt.compare against the stored hash regardless.
+ */
+function validatePassword(pw: string): string | null {
+  if (pw.length < 8) return "Password must be at least 8 characters.";
+  if (!/[A-Z]/.test(pw)) return "Password must contain an uppercase letter (A–Z).";
+  if (!/[a-z]/.test(pw)) return "Password must contain a lowercase letter (a–z).";
+  if (!/[0-9]/.test(pw)) return "Password must contain a number (0–9).";
+  return null;
+}
+
 router.post("/auth/register", async (req, res) => {
   try {
     const { name, email, password } = req.body as {
@@ -27,8 +39,9 @@ router.post("/auth/register", async (req, res) => {
     if (!name?.trim() || !email?.trim() || !password) {
       return res.status(400).json({ error: "Name, email and password are required." });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters." });
+    const pwErr = validatePassword(password);
+    if (pwErr) {
+      return res.status(400).json({ error: pwErr });
     }
 
     const existing = await db
@@ -174,8 +187,9 @@ router.post("/auth/change-password", requireAuth, async (req, res) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: "Current and new passwords are required." });
     }
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: "New password must be at least 6 characters." });
+    const pwErr = validatePassword(newPassword);
+    if (pwErr) {
+      return res.status(400).json({ error: pwErr.replace("Password", "New password") });
     }
 
     const [user] = await db
@@ -280,8 +294,9 @@ router.post("/auth/reset-password", async (req, res) => {
     if (!token?.trim() || !password) {
       return res.status(400).json({ error: "Token and new password are required." });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters." });
+    const pwErr = validatePassword(password);
+    if (pwErr) {
+      return res.status(400).json({ error: pwErr });
     }
 
     const [record] = await db
@@ -399,6 +414,12 @@ router.get("/reset-password", (_req, res) => {
     .msg.success{background:#F0FDF4;color:#16A34A}
     .expired{text-align:center;padding:16px 0}
     .expired p{color:#6B7280;font-size:15px}
+    .rules{list-style:none;margin-top:10px;padding-left:2px;display:flex;flex-direction:column;gap:6px}
+    .rules li{display:flex;align-items:center;gap:8px;font-size:12px;color:#6B7280;line-height:1.4}
+    .rules li .dot{display:inline-block;width:13px;height:13px;border-radius:50%;border:1.5px solid #D1D5DB;flex-shrink:0;position:relative}
+    .rules li.met{color:#16A34A}
+    .rules li.met .dot{border-color:#16A34A;background:#16A34A}
+    .rules li.met .dot::after{content:"";position:absolute;left:3px;top:0;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
   </style>
 </head>
 <body>
@@ -413,10 +434,16 @@ router.get("/reset-password", (_req, res) => {
 
     <div id="form-section">
       <h1>Set new password</h1>
-      <p class="sub">Choose a strong password for your CTL account. Must be at least 6 characters.</p>
+      <p class="sub">Choose a strong password for your CTL account.</p>
       <div class="field">
         <label for="pw">New Password</label>
-        <input id="pw" type="password" placeholder="••••••••" autocomplete="new-password"/>
+        <input id="pw" type="password" placeholder="••••••••" autocomplete="new-password" oninput="updateRules()"/>
+        <ul id="rules" class="rules" style="display:none">
+          <li id="r-len"><span class="dot"></span>At least 8 characters</li>
+          <li id="r-upper"><span class="dot"></span>One uppercase letter (A–Z)</li>
+          <li id="r-lower"><span class="dot"></span>One lowercase letter (a–z)</li>
+          <li id="r-num"><span class="dot"></span>One number (0–9)</li>
+        </ul>
       </div>
       <div class="field">
         <label for="pw2">Confirm Password</label>
@@ -450,7 +477,8 @@ router.get("/reset-password", (_req, res) => {
       err.style.display = 'none';
       ok.style.display = 'none';
 
-      if (pw.length < 6) { show(err, 'Password must be at least 6 characters.'); return; }
+      const ruleErr = checkPassword(pw);
+      if (ruleErr) { show(err, ruleErr); return; }
       if (pw !== pw2) { show(err, 'Passwords do not match.'); return; }
 
       btn.disabled = true;
@@ -474,6 +502,29 @@ router.get("/reset-password", (_req, res) => {
     }
 
     function show(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+
+    function checkPassword(pw) {
+      if (pw.length < 8) return 'Password must be at least 8 characters.';
+      if (!/[A-Z]/.test(pw)) return 'Password must contain an uppercase letter (A–Z).';
+      if (!/[a-z]/.test(pw)) return 'Password must contain a lowercase letter (a–z).';
+      if (!/[0-9]/.test(pw)) return 'Password must contain a number (0–9).';
+      return null;
+    }
+
+    function updateRules() {
+      const pw = document.getElementById('pw').value;
+      const list = document.getElementById('rules');
+      list.style.display = pw.length > 0 ? 'flex' : 'none';
+      const checks = {
+        'r-len': pw.length >= 8,
+        'r-upper': /[A-Z]/.test(pw),
+        'r-lower': /[a-z]/.test(pw),
+        'r-num': /[0-9]/.test(pw),
+      };
+      for (const id in checks) {
+        document.getElementById(id).classList.toggle('met', checks[id]);
+      }
+    }
   </script>
 </body>
 </html>`);
