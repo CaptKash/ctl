@@ -16,10 +16,17 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
+import { useSignIn } from "@clerk/clerk-expo";
+import { isClerkAPIResponseError } from "@clerk/clerk-expo";
 import { useColors } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
-import { apiPost } from "@/hooks/useApi";
+
+const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+  : "/api";
+
+const GENERIC_ERROR = "Invalid email or password.";
 
 function ToggleSwitch({ value, onValueChange }: { value: boolean; onValueChange: (v: boolean) => void }) {
   return (
@@ -62,10 +69,10 @@ export default function LoginScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { width: screenW } = useWindowDimensions();
   const {
-    login,
     isAuthenticated,
     isLoading: authLoading,
   } = useAuth();
+  const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -88,23 +95,93 @@ export default function LoginScreen() {
     );
   }
 
-  const canSubmit = email.trim().length > 0 && password.length >= 1;
+  const canSubmit = email.trim().length > 0 && password.length >= 1 && signInLoaded;
+
+  // ── Clerk sign-in helpers ────────────────────────────────────────────────
+  // Treat anything Clerk emits other than form_identifier_not_found as a
+  // genuine bad-credentials response. We never reveal whether the email
+  // exists — same generic string for "no such user", "wrong password", and
+  // "user exists in legacy DB but migrate failed".
+  const isUnknownIdentifier = (err: unknown): boolean =>
+    isClerkAPIResponseError(err) &&
+    err.errors.some((e) => e.code === "form_identifier_not_found");
+
+  const tryClerkSignIn = async (identifier: string, pw: string): Promise<boolean> => {
+    if (!signIn || !setActive) return false;
+    const result = await signIn.create({ identifier, password: pw });
+    if (result.status === "complete" && result.createdSessionId) {
+      await setActive({ session: result.createdSessionId });
+      return true;
+    }
+    return false;
+  };
+
+  // POST /auth/clerk/migrate — server bcrypt-checks the legacy hash and, on
+  // success, imports the user into Clerk preserving the same hash. Returns
+  // true if the user is now in Clerk (whether we just migrated them or a
+  // prior attempt already did).
+  const tryMigrate = async (identifier: string, pw: string): Promise<boolean> => {
+    const res = await fetch(`${BASE_URL}/auth/clerk/migrate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: identifier, password: pw }),
+    });
+    if (res.status === 429) {
+      throw new Error("Too many attempts. Please try again in a few minutes.");
+    }
+    if (!res.ok) return false; // 401 etc. → caller treats as bad credentials
+    const data = await res.json().catch(() => ({}));
+    return data?.migrated === true || data?.alreadyMigrated === true;
+  };
 
   const handleLogin = async () => {
     if (!canSubmit) return;
     setError("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
+    const identifier = email.trim();
     try {
-      const res = await apiPost<{ token: string; user: { id: number; name: string; email: string } }>(
-        "/auth/login",
-        { email: email.trim(), password },
-      );
-      await login(res.token, res.user, rememberMe);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace("/home");
+      // 1. Try Clerk directly (covers users who already migrated, or who
+      //    signed up new in this build).
+      try {
+        if (await tryClerkSignIn(identifier, password)) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          router.replace("/home");
+          return;
+        }
+      } catch (err: unknown) {
+        if (!isUnknownIdentifier(err)) {
+          // Wrong password (or any other Clerk failure) — generic 401 UX.
+          setError(GENERIC_ERROR);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+        // fall through to migrate path
+      }
+
+      // 2. Identifier unknown to Clerk — try the lazy-migration endpoint.
+      const migrated = await tryMigrate(identifier, password);
+      if (!migrated) {
+        setError(GENERIC_ERROR);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
+
+      // 3. Retry Clerk sign-in now that the user exists in Clerk.
+      try {
+        if (await tryClerkSignIn(identifier, password)) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          router.replace("/home");
+          return;
+        }
+        setError(GENERIC_ERROR);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } catch {
+        setError(GENERIC_ERROR);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Login failed. Please check your credentials.";
+      const msg = err instanceof Error ? err.message : GENERIC_ERROR;
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {

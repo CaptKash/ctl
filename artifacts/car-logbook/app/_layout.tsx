@@ -14,6 +14,8 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ClerkProvider } from "@clerk/clerk-expo";
+import { tokenCache } from "@clerk/clerk-expo/token-cache";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
@@ -95,34 +97,39 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) return null;
 
   return (
-    <SafeAreaProvider>
-      <ErrorBoundary>
-        <ThemeProvider>
-          <DistanceUnitProvider>
-          <CurrencyProvider>
-          <EventRemindersProvider>
-          <CountryProvider>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <AppProvider>
-                <SubscriptionProvider>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                  <KeyboardProvider>
-                    <NotificationSyncer />
-                    <RootLayoutNav />
-                    <PasswordUpgradeModal />
-                  </KeyboardProvider>
-                </GestureHandlerRootView>
-                </SubscriptionProvider>
-              </AppProvider>
-            </AuthProvider>
-          </QueryClientProvider>
-          </CountryProvider>
-          </EventRemindersProvider>
-          </CurrencyProvider>
-          </DistanceUnitProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
-    </SafeAreaProvider>
+    <ClerkProvider
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}
+      tokenCache={tokenCache}
+    >
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <DistanceUnitProvider>
+            <CurrencyProvider>
+            <EventRemindersProvider>
+            <CountryProvider>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <AppProvider>
+                  <SubscriptionProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <KeyboardProvider>
+                      <NotificationSyncer />
+                      <RootLayoutNav />
+                      <PasswordUpgradeModal />
+                    </KeyboardProvider>
+                  </GestureHandlerRootView>
+                  </SubscriptionProvider>
+                </AppProvider>
+              </AuthProvider>
+            </QueryClientProvider>
+            </CountryProvider>
+            </EventRemindersProvider>
+            </CurrencyProvider>
+            </DistanceUnitProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
+      </SafeAreaProvider>
+    </ClerkProvider>
   );
 }

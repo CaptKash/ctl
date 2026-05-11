@@ -117,24 +117,8 @@ export function initializeRevenueCat() {
   }
 }
 
-function decodeJwtIsAdmin(token: string | null): boolean {
-  if (!token) return false;
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return false;
-    let base64 = parts[1];
-    base64 = base64.replace(/-/g, "+").replace(/_/g, "/");
-    while (base64.length % 4 !== 0) base64 += "=";
-    const json = atob(base64);
-    const payload = JSON.parse(json);
-    return payload.isAdmin === true;
-  } catch {
-    return false;
-  }
-}
-
 function useSubscriptionContext() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
 
   // Track the RevenueCat user ID only after logIn/logOut has actually resolved,
   // so the customerInfo query never runs against the wrong RC identity.
@@ -190,7 +174,7 @@ function useSubscriptionContext() {
     onSuccess: () => customerInfoQuery.refetch(),
   });
 
-  const isAdmin = user?.isAdmin === true || decodeJwtIsAdmin(token);
+  const isAdmin = user?.isAdmin === true;
 
   const isFleet =
     isAdmin ||

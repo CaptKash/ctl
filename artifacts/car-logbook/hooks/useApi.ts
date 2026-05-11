@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
+import { getClerkInstance } from "@clerk/clerk-expo";
 
 const TOKEN_KEY = "ctl_auth_token";
 
@@ -7,7 +8,7 @@ const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : "/api";
 
-async function getToken(): Promise<string | null> {
+async function getLegacyToken(): Promise<string | null> {
   try {
     if (Platform.OS === "web") {
       return localStorage.getItem(TOKEN_KEY);
@@ -16,6 +17,19 @@ async function getToken(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// Prefer Clerk session token (Phase 3+); fall back to legacy SecureStore JWT
+// for users who haven't migrated yet on this device. The Phase 1 dual-auth
+// middleware on the API server accepts either credential.
+async function getToken(): Promise<string | null> {
+  try {
+    const clerkToken = await getClerkInstance().session?.getToken();
+    if (clerkToken) return clerkToken;
+  } catch {
+    // Clerk not initialized (very early boot) — fall through to legacy.
+  }
+  return getLegacyToken();
 }
 
 async function buildHeaders(extra?: Record<string, string>): Promise<Record<string, string>> {

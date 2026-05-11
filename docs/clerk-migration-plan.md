@@ -227,3 +227,27 @@ Total: ~5–7 working sessions before the new build is ready for TestFlight.
 - Does not change RevenueCat product IDs, offerings, or entitlements.
 - Does not migrate Replit Auth users (we're not on Replit Auth — we're on custom JWT).
 - Does not implement organization/team features for "CTL Enterprise" — that's a separate piece of Build 28 that can build on top of this.
+
+---
+
+## Phase 3 — shipped (mobile app cutover to Clerk)
+
+The Expo app (`artifacts/car-logbook`) now authenticates through Clerk while the local numeric `users.id` is preserved as RevenueCat's `appUserID`. All 71 prod entitlements are unaffected.
+
+### What shipped
+- `app/_layout.tsx`: wrapped everything in `<ClerkProvider publishableKey={EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY} tokenCache={...}>` (token cache from `@clerk/clerk-expo/token-cache`, backed by SecureStore).
+- `hooks/useApi.ts`: `getToken()` now prefers `getClerkInstance().session?.getToken()` and falls back to the legacy SecureStore JWT — Phase-1 dual-auth middleware accepts either.
+- `context/AuthContext.tsx`: rewritten to bridge Clerk → local user. On any Clerk session change to "signed in" it POSTs `/auth/clerk/sync-user` once (deduped via `syncedClerkIdRef`), populates context with the local `{id, name, email, isAdmin}`, then flushes the legacy SecureStore keys. Cold-start grace path still honors a legacy JWT if no Clerk session exists. `logout()` calls Clerk `signOut()` AND clears legacy keys (resolves follow-ups #15 / #16).
+- `app/(tabs)/index.tsx` (login): `useSignIn` → on `form_identifier_not_found` falls back to `POST /auth/clerk/migrate` and retries Clerk sign-in transparently. Generic "Invalid email or password" everywhere; 429 surfaces "Too many attempts".
+- `app/(tabs)/signup.tsx`: `useSignUp` two-step flow — `signUp.create` + `prepareEmailAddressVerification({strategy:"email_code"})` → 6-digit code entry → `attemptEmailAddressVerification` + `setActive`. Apple/Google buttons wired via `useSSO.startSSOFlow` with `Linking.createURL("/(tabs)")` redirect. Local DB row is created automatically by AuthContext's sync-user effect after `setActive`.
+- `lib/revenuecat.tsx`: removed `decodeJwtIsAdmin(token)` (Clerk session tokens have a different shape). `isAdmin` now comes from `user.isAdmin` returned by `/auth/clerk/sync-user`. **`Purchases.logIn(String(user.id))` line untouched** — `user.id` is still the local numeric id, NOT the Clerk id. This is the load-bearing line for the 71 prod users' entitlements.
+- Added `expo-auth-session` dep (required by `useSSO`).
+
+### Verification done
+- `pnpm --filter @workspace/car-logbook exec tsc --noEmit`: only pre-existing baseline errors (15 in maintenance/edit-profile/faults/feedback/forgot-password/fuel/select-picker/DashboardLightIcons/notifications). No new errors from Phase 3 files.
+- Web bundle succeeds after adding `expo-auth-session`.
+- No prod publish, no EAS build trigger.
+
+### Deferred / follow-ups
+- Forgot-password screen still uses the legacy `/auth/forgot-password` endpoint. Server already silently no-ops for migrated users; needs Clerk `signIn.create({strategy:"reset_password_email_code"})` flow in a follow-up.
+- Phase 4 (next build): remove the legacy-JWT cold-start branch from `AuthContext`, drop `users.password_hash`, rotate `JWT_SECRET`.
