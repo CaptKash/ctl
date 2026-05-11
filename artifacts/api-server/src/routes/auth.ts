@@ -13,7 +13,14 @@ const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudios.com
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "ctl-logbook-secret-2025";
+// Fail fast — see middlewares/auth.ts for the full rationale. Both modules
+// load at boot, so any misconfigured env is caught before the server listens.
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error(
+    "JWT_SECRET env var is required. Refusing to start with a default secret.",
+  );
+}
 const SALT_ROUNDS = 10;
 
 /**

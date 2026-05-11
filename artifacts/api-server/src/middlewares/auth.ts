@@ -4,7 +4,18 @@ import { getAuth } from "@clerk/express";
 import { eq } from "drizzle-orm";
 import { db, usersTable } from "@workspace/db";
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "ctl-logbook-secret-2025";
+// Fail fast at boot if JWT_SECRET is missing. Previously fell back to a
+// hardcoded literal — that allowed forged tokens in any misconfigured env.
+// The actual rotation of this secret is intentionally deferred until Phase 3
+// of the Clerk migration ships (rotating now would log out all 71 prod users
+// on the old pre-Clerk login UI). After Phase 3, a follow-up will rotate
+// JWT_SECRET to a fresh strong value once legacy JWTs are no longer accepted.
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error(
+    "JWT_SECRET env var is required. Refusing to start with a default secret.",
+  );
+}
 
 export interface AuthPayload {
   id: number;
@@ -46,18 +57,16 @@ async function authenticate(req: Request): Promise<AuthPayload | null> {
   }
 
   // Path 2 — Clerk session.
-  let auth: ReturnType<typeof getAuth> | undefined;
-  try {
-    auth = getAuth(req);
-  } catch {
-    // `clerkMiddleware()` was never mounted in this process (e.g. CLERK_*
-    // env missing). Silently treat as no Clerk session — this is the only
-    // error we want to swallow. Any *other* failure below (DB outage etc.)
-    // must surface as a 500 via requireAuth's outer try/catch, NOT degrade
-    // to a misleading 401.
+  // Env-gate identically to app.ts: if Clerk keys aren't set, clerkMiddleware
+  // wasn't mounted, so getAuth() would throw. Detecting this upfront (instead
+  // of via try/catch) means we no longer swallow *any* getAuth runtime error.
+  // Any unexpected throw below — bad token format, Clerk SDK bug, network
+  // failure inside the SDK — now propagates to requireAuth's outer try/catch
+  // and surfaces as 500, exactly as architect review #2 required.
+  if (!process.env.CLERK_SECRET_KEY || !process.env.CLERK_PUBLISHABLE_KEY) {
     return null;
   }
-
+  const auth = getAuth(req);
   const clerkUserId = auth?.userId;
   if (!clerkUserId) return null;
 

@@ -174,6 +174,20 @@ Each phase is independently revertible:
 
 Phase 1 is invisible to all users — no mobile app changes, no behavior change for the 71 existing accounts. The API is now *ready* to accept Clerk sessions but no real one will appear until Phase 3 ships.
 
+### Phase 1 hardening (post-architect review)
+
+The first architect review (FAIL) flagged three issues; all addressed in-band before declaring Phase 1 done:
+
+1. **Hardcoded JWT_SECRET fallback removed.** Both `middlewares/auth.ts` and `routes/auth.ts` now require `process.env.JWT_SECRET` and throw at boot if missing. `JWT_SECRET` set as a Replit shared-env var to the current literal value (`ctl-logbook-secret-2025`) so all 71 existing user tokens remain valid. **Deferred follow-up:** rotate `JWT_SECRET` to a fresh strong value AFTER Phase 3 ships and legacy JWTs are no longer accepted (rotating now would log everyone out on the old login UI). This is the only intentionally-deferred item.
+2. **Clerk-path error handling narrowed.** `authenticate()` now only swallows the specific "clerkMiddleware not mounted" error; DB outages or other runtime errors propagate to the outer `requireAuth` try/catch and return 500 instead of a misleading 401.
+3. **Loud warning when Clerk keys absent.** `app.ts` logs `[auth] CLERK_SECRET_KEY/CLERK_PUBLISHABLE_KEY not set — Clerk auth is disabled` at boot if either env var is missing.
+
+Re-smoke-tested after hardening:
+- Valid current-secret JWT → 200 ✅ (existing users still work)
+- Wrong-secret JWT → 401 ✅
+- `/healthz` → 200 ✅
+- Server boots cleanly with `JWT_SECRET` from env, no fallback path remains.
+
 ---
 
 ## Estimated effort
