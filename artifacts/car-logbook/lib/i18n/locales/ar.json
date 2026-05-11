@@ -21,7 +21,7 @@
     "noAccount": "ليس لديك حساب؟",
     "signUp": "إنشاء حساب",
     "errorGeneric": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
-    "errorTooManyAttempts": "محاولات كثيرة جداً. يرجى المحاولة مرة أخرى بعد بضع دقائق.",
+    "errorTooManyAttempts": "تجاوزت حد المحاولات المسموح. حاول مرة أخرى بعد قليل.",
     "languageToggleEnglish": "English",
     "languageToggleArabic": "العربية"
   }
