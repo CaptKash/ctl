@@ -200,16 +200,8 @@ export default function SignupScreen() {
     } catch (err: unknown) {
       if (__DEV__) {
         console.log("[SSO error]", strategy, JSON.stringify(err, null, 2), err);
-        const raw =
-          err instanceof Error
-            ? `${err.name}: ${err.message}`
-            : typeof err === "string"
-              ? err
-              : JSON.stringify(err);
-        setError(`[dev] ${strategy}: ${raw.slice(0, 300)}`);
-      } else {
-        setError(formatSignUpError(err, "Sign-in failed. Please try again."));
       }
+      setError(formatSignUpError(err, "Sign-in failed. Please try again."));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
