@@ -1,5 +1,6 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
@@ -16,9 +17,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn } from "@clerk/clerk-expo";
+import { useSignIn, useSSO } from "@clerk/clerk-expo";
 import { isClerkAPIResponseError } from "@clerk/clerk-expo";
-import { useColors } from "@/context/ThemeContext";
+import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
 
@@ -66,6 +67,8 @@ const toggleStyles = StyleSheet.create({
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { width: screenW } = useWindowDimensions();
   const {
@@ -73,6 +76,7 @@ export default function LoginScreen() {
     isLoading: authLoading,
   } = useAuth();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
+  const { startSSOFlow } = useSSO();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -132,6 +136,34 @@ export default function LoginScreen() {
     if (!res.ok) return false; // 401 etc. → caller treats as bad credentials
     const data = await res.json().catch(() => ({}));
     return data?.migrated === true || data?.alreadyMigrated === true;
+  };
+
+  // Apple/Google sign-in via Clerk's hosted SSO flow. Same generic-error
+  // contract as password sign-in — never reveal anything provider-specific.
+  // Cancellation by the user (no createdSessionId) is a silent no-op.
+  const handleOAuth = async (strategy: "oauth_apple" | "oauth_google") => {
+    if (!setActive) return;
+    setError("");
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setLoading(true);
+    try {
+      const redirectUrl = Linking.createURL("/");
+      const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
+        strategy,
+        redirectUrl,
+      });
+      if (createdSessionId) {
+        const activator = ssoSetActive ?? setActive;
+        await activator({ session: createdSessionId });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        router.replace("/home");
+      }
+    } catch {
+      setError(GENERIC_ERROR);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = async () => {
@@ -240,6 +272,44 @@ export default function LoginScreen() {
               <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
                 Access your fleet and service records
               </Text>
+            </View>
+
+            {/* OAuth */}
+            <View style={styles.oauthBlock}>
+              <Pressable
+                onPress={() => handleOAuth("oauth_apple")}
+                disabled={loading}
+                style={({ pressed }) => [
+                  styles.oauthBtn,
+                  { backgroundColor: "#000000", opacity: pressed || loading ? 0.7 : 1 },
+                ]}
+              >
+                <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
+                <Text style={[styles.oauthLabel, { color: "#FFFFFF" }]}>Continue with Apple</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleOAuth("oauth_google")}
+                disabled={loading}
+                style={({ pressed }) => [
+                  styles.oauthBtn,
+                  {
+                    backgroundColor: "#FFFFFF",
+                    borderWidth: 1,
+                    borderColor: isDark ? "transparent" : C.border,
+                    opacity: pressed || loading ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <Ionicons name="logo-google" size={18} color="#1A1A1A" />
+                <Text style={[styles.oauthLabel, { color: "#1A1A1A" }]}>Continue with Google</Text>
+              </Pressable>
+
+              <View style={styles.oauthDivider}>
+                <View style={[styles.oauthDividerLine, { backgroundColor: C.border }]} />
+                <Text style={[styles.oauthDividerText, { color: C.textTertiary }]}>or use email</Text>
+                <View style={[styles.oauthDividerLine, { backgroundColor: C.border }]} />
+              </View>
             </View>
 
             {error !== "" && (
@@ -416,6 +486,22 @@ const styles = StyleSheet.create({
   errorText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium" },
 
   formCard: { borderRadius: 16, padding: 16, gap: 14 },
+
+  // ── OAuth ────────────────────────────────────────────────────────────────
+  oauthBlock: { gap: 10 },
+  oauthBtn: {
+    height: 50,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  oauthLabel: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  oauthDivider: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
+  oauthDividerLine: { flex: 1, height: StyleSheet.hairlineWidth },
+  oauthDividerText: { fontSize: 11, fontFamily: "Inter_500Medium", textTransform: "lowercase" },
   fieldGroup: { gap: 6 },
   fieldLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
   inputRow: {

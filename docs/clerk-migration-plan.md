@@ -274,3 +274,22 @@ The forgot-password screen now drives Clerk's `reset_password_email_code` flow w
 - `pnpm --filter @workspace/car-logbook exec tsc --noEmit`: only pre-existing baseline errors remain. Zero new errors from the rewritten file.
 - Web bundle succeeds.
 - No prod publish.
+
+## Phase 3.2 — login OAuth + redirect path fix
+
+Added Clerk-hosted OAuth (Apple + Google) to the login screen, mirroring the buttons that already shipped on the signup screen. Also tightened the SSO `redirectUrl` on both screens.
+
+### Login OAuth
+- `useSSO()` hook + `handleOAuth(strategy)` wired in `app/(tabs)/index.tsx`.
+- Buttons rendered above the email field inside `formCard`, separated by an `or use email` divider — same visual contract as signup.
+- Failures collapse to the existing `GENERIC_ERROR = "Invalid email or password."` (no provider-specific leakage). User cancellation (no `createdSessionId`) is a silent no-op.
+- Reuses the screen-wide `loading` state so OAuth and password submission can't fire concurrently.
+
+### Redirect path
+- Both login and signup now call `Linking.createURL("/")` instead of `Linking.createURL("/(tabs)")`.
+- Route groups in parens are not URL-facing in Expo Router, so `/(tabs)` was a brittle deep-link target across providers. Root path is the actual app entry.
+
+### Verification
+- `pnpm --filter @workspace/car-logbook exec tsc --noEmit`: no new errors from the touched files.
+- Architect evaluate-task review: pass, no severe findings.
+- No prod publish.

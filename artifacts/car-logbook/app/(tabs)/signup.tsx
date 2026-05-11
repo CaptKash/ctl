@@ -163,7 +163,10 @@ export default function SignupScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      const redirectUrl = Linking.createURL("/(tabs)");
+      // Use the app scheme root rather than a route-group path. Route
+      // groups (parens) aren't URL-facing in Expo Router so deep-link
+      // matching against "/(tabs)" is fragile across providers.
+      const redirectUrl = Linking.createURL("/");
       const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
         strategy,
         redirectUrl,
