@@ -2,7 +2,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -39,6 +39,21 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [code, setCode] = useState("");
+  // Seconds remaining before the user can request another verification
+  // code. Set to 60 after each successful prepare/resend; ticks down to 0
+  // via the effect below. While > 0, the Resend button shows the
+  // countdown and is disabled — protects Clerk's per-user resend rate
+  // limit and reads as a friendlier "give it a moment" instead of a
+  // generic error.
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const id = setInterval(() => {
+      setResendCooldown((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [resendCooldown]);
 
   const passwordRules = [
     { key: "len", label: "At least 8 characters", met: password.length >= 8 },
@@ -114,6 +129,7 @@ export default function SignupScreen() {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setStep("verify");
       setCode("");
+      setResendCooldown(60);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: unknown) {
       setError(formatSignUpError(err, "Couldn't create your account. Please check your details and try again."));
@@ -147,13 +163,16 @@ export default function SignupScreen() {
   };
 
   const handleResendCode = async () => {
-    if (!signUp) return;
+    if (!signUp || resendCooldown > 0) return;
     setError("");
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setResendCooldown(60);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: unknown) {
       setError(formatVerifyError(err, "Couldn't resend the code right now."));
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 
@@ -502,12 +521,19 @@ export default function SignupScreen() {
 
           <Pressable
             onPress={handleResendCode}
+            disabled={resendCooldown > 0}
             style={({ pressed }) => [
               styles.signinBtn,
-              { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.card },
+              {
+                borderColor: C.border,
+                backgroundColor: pressed && resendCooldown === 0 ? C.backgroundTertiary : C.card,
+                opacity: resendCooldown > 0 ? 0.55 : 1,
+              },
             ]}
           >
-            <Text style={[styles.signinText, { color: C.text }]}>Resend code</Text>
+            <Text style={[styles.signinText, { color: resendCooldown > 0 ? C.textSecondary : C.text }]}>
+              {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Resend code"}
+            </Text>
             <Feather name="refresh-cw" size={16} color={C.textSecondary} />
           </Pressable>
 

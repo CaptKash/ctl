@@ -293,3 +293,23 @@ Added Clerk-hosted OAuth (Apple + Google) to the login screen, mirroring the but
 - `pnpm --filter @workspace/car-logbook exec tsc --noEmit`: no new errors from the touched files.
 - Architect evaluate-task review: pass, no severe findings.
 - No prod publish.
+
+## Phase 3.3 — link OAuth in Settings + signup resend cooldown
+
+Two small UX additions — finish the loose ends from the OAuth rollout.
+
+### Settings → "Sign-in methods" card (#3)
+- New `ConnectedAccountsCard` in `app/settings.tsx`. Shown only when a Clerk session exists (`useUser()` returns a user) — legacy users see nothing until they migrate.
+- Apple and Google rows. Each row's pill says **Connect** or **Connected** (green) and is replaced by a spinner while in flight.
+- Connect: `user.createExternalAccount({ strategy, redirectUrl })` → opens `verification.externalVerificationRedirectURL` via `expo-web-browser` `openAuthSessionAsync` → `user.reload()` on success.
+- Disconnect: native `Alert.alert` confirmation then `account.destroy()` + `user.reload()`. We rely on Clerk's server-side "must keep at least one sign-in method" guard and surface its rejection in a friendly alert instead of a stack trace.
+
+### Signup → 60s resend cooldown (#4)
+- New `resendCooldown` state seeded to 60s on entering the verify step and reset to 60s on every successful resend.
+- `useEffect` ticks the counter once per second and clears its interval on unmount / cooldown reaching 0.
+- Resend button is disabled while the counter > 0, label flips between `Resend code` and `Resend code in 42s`. Protects Clerk's per-user rate limit and reads as a friendly "give it a moment" instead of a generic error.
+
+### Verification
+- `pnpm --filter @workspace/car-logbook exec tsc --noEmit`: only the documented pre-existing baseline error remains. No new errors.
+- Architect evaluate-task review: pass on substance; flagged provider-key concern resolved by TypeScript (Clerk's `provider` enum uses bare `"apple"`/`"google"`).
+- No prod publish.

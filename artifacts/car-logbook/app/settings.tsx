@@ -1,8 +1,11 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as ExpoLinking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Linking,
   Platform,
@@ -17,6 +20,7 @@ import {
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@clerk/clerk-expo";
 import BottomNav from "@/components/ui/BottomNav";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
@@ -79,6 +83,155 @@ function NavRow({
         <Feather name="chevron-right" size={16} color={C.textTertiary} />
       ) : null}
     </Pressable>
+  );
+}
+
+// Lets a signed-in Clerk user link / unlink Apple & Google to their
+// existing account. Uses Clerk's createExternalAccount → opens the
+// returned verification URL in the OS-managed auth browser → reloads
+// the user to refresh the externalAccounts list. Hidden for legacy
+// users who haven't been migrated into Clerk yet (they have no Clerk
+// `user` object). Disconnecting the last sign-in method falls through
+// to Clerk's own server-side guard, which surfaces an error we show.
+function ConnectedAccountsCard() {
+  const C = useColors();
+  const { user, isLoaded } = useUser();
+  const [pending, setPending] = useState<string | null>(null);
+
+  if (!isLoaded || !user) return null;
+
+  const accounts = user.externalAccounts ?? [];
+  const apple = accounts.find((a) => a.provider === "apple");
+  const google = accounts.find((a) => a.provider === "google");
+
+  const connect = async (strategy: "oauth_apple" | "oauth_google", label: string) => {
+    if (!user || pending) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPending(strategy);
+    try {
+      const redirectUrl = ExpoLinking.createURL("/settings");
+      const externalAccount = await user.createExternalAccount({ strategy, redirectUrl });
+      const verifyUrl = externalAccount.verification?.externalVerificationRedirectURL?.toString();
+      if (verifyUrl) {
+        const result = await WebBrowser.openAuthSessionAsync(verifyUrl, redirectUrl);
+        if (result.type === "success") {
+          await user.reload();
+        }
+      }
+    } catch {
+      Alert.alert("Couldn't connect", `We couldn't link your ${label} account. Please try again.`);
+    } finally {
+      setPending(null);
+    }
+  };
+
+  const disconnect = (account: NonNullable<typeof apple>, label: string) => {
+    Alert.alert(
+      `Disconnect ${label}?`,
+      `You'll need another sign-in method (email/password or your other linked account) to sign in next time.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Disconnect",
+          style: "destructive",
+          onPress: async () => {
+            if (pending) return;
+            setPending(account.provider);
+            try {
+              await account.destroy();
+              await user.reload();
+            } catch {
+              Alert.alert(
+                "Couldn't disconnect",
+                "Make sure you still have at least one other way to sign in, then try again.",
+              );
+            } finally {
+              setPending(null);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const Row = ({
+    icon,
+    iconColor,
+    iconBg,
+    label,
+    account,
+    strategy,
+  }: {
+    icon: React.ComponentProps<typeof Ionicons>["name"];
+    iconColor: string;
+    iconBg: string;
+    label: string;
+    account: typeof apple;
+    strategy: "oauth_apple" | "oauth_google";
+  }) => {
+    const isConnected = !!account;
+    const isPending = pending === strategy || (account && pending === account.provider);
+    const onPress = isConnected
+      ? () => disconnect(account!, label)
+      : () => connect(strategy, label);
+    const subtitle = isConnected
+      ? account!.emailAddress || "Connected"
+      : `Sign in faster with ${label}`;
+    return (
+      <Pressable
+        onPress={() => {
+          if (isPending) return;
+          onPress();
+        }}
+        style={({ pressed }) => [styles.row, { opacity: pressed && !isPending ? 0.75 : 1 }]}
+      >
+        <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
+          <Ionicons name={icon} size={18} color={iconColor} />
+        </View>
+        <View style={styles.rowBody}>
+          <Text style={[styles.rowTitle, { color: C.text }]}>{label}</Text>
+          <Text style={[styles.rowSub, { color: C.textSecondary }]} numberOfLines={1}>
+            {subtitle}
+          </Text>
+        </View>
+        {isPending ? (
+          <ActivityIndicator size="small" color={C.textSecondary} />
+        ) : isConnected ? (
+          <View style={[styles.pill, { backgroundColor: "#10B98118" }]}>
+            <Text style={[styles.pillText, { color: "#059669" }]}>Connected</Text>
+          </View>
+        ) : (
+          <View style={[styles.pill, { backgroundColor: C.tint + "18" }]}>
+            <Text style={[styles.pillText, { color: C.tint }]}>Connect</Text>
+          </View>
+        )}
+      </Pressable>
+    );
+  };
+
+  return (
+    <>
+      <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>SIGN-IN METHODS</Text>
+      <View style={[styles.card, { backgroundColor: C.card }]}>
+        <Row
+          icon="logo-apple"
+          iconColor={C.text}
+          iconBg={C.backgroundTertiary}
+          label="Apple"
+          account={apple}
+          strategy="oauth_apple"
+        />
+        <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+        <Row
+          icon="logo-google"
+          iconColor="#1A1A1A"
+          iconBg="#FFFFFF"
+          label="Google"
+          account={google}
+          strategy="oauth_google"
+        />
+      </View>
+    </>
   );
 }
 
@@ -373,6 +526,10 @@ export default function SettingsScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <CountryRow />
         </View>
+
+        {/* Connected accounts (Clerk-only — legacy users only see this once
+            they've migrated and have a Clerk session). */}
+        <ConnectedAccountsCard />
 
         {/* CTL Fleet upgrade card */}
         <Pressable
