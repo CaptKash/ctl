@@ -1,7 +1,7 @@
 {
   "common": {
     "appName": "CTL",
-    "appTagline": "سجل السيارة الفني",
+    "appTagline": "Car Technical Log",
     "version": "CTL ‏v1.0.0"
   },
   "login": {
