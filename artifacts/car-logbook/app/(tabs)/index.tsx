@@ -434,7 +434,7 @@ export default function LoginScreen() {
 
           <View style={styles.signupRow}>
             <Text style={[styles.signupText, { color: C.textSecondary }]}>
-              {t("login.noAccount")}{" "}
+              {t("login.noAccount")}
             </Text>
             <Pressable
               hitSlop={8}
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular" },
   sep: { height: StyleSheet.hairlineWidth },
 
-  signupRow: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
+  signupRow: { flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 4 },
   signupText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   signupLink: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 
