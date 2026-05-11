@@ -395,13 +395,30 @@ export default function LoginScreen() {
           </View>
 
           <Pressable
-            style={styles.rememberRow}
+            style={[
+              styles.rememberRow,
+              i18n.language === "ar" && { flexDirection: "row-reverse" },
+            ]}
             onPress={() => setRememberMe((v) => !v)}
             hitSlop={8}
           >
-            <View>
-              <Text style={[styles.rememberLabel, { color: C.text }]}>{t("login.rememberMe")}</Text>
-              <Text style={[styles.rememberSub, { color: C.textSecondary }]}>
+            <View style={i18n.language === "ar" && { alignItems: "flex-end" }}>
+              <Text
+                style={[
+                  styles.rememberLabel,
+                  { color: C.text },
+                  i18n.language === "ar" && { textAlign: "right" },
+                ]}
+              >
+                {t("login.rememberMe")}
+              </Text>
+              <Text
+                style={[
+                  styles.rememberSub,
+                  { color: C.textSecondary },
+                  i18n.language === "ar" && { textAlign: "right" },
+                ]}
+              >
                 {t("login.rememberMeSub")}
               </Text>
             </View>
