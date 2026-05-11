@@ -251,3 +251,26 @@ The Expo app (`artifacts/car-logbook`) now authenticates through Clerk while the
 ### Deferred / follow-ups
 - Forgot-password screen still uses the legacy `/auth/forgot-password` endpoint. Server already silently no-ops for migrated users; needs Clerk `signIn.create({strategy:"reset_password_email_code"})` flow in a follow-up.
 - Phase 4 (next build): remove the legacy-JWT cold-start branch from `AuthContext`, drop `users.password_hash`, rotate `JWT_SECRET`.
+
+---
+
+## Phase 3.1 — forgot-password Clerk wiring
+
+The forgot-password screen now drives Clerk's `reset_password_email_code` flow with a graceful fallback to the legacy `/auth/forgot-password` endpoint for users who haven't yet been migrated into Clerk.
+
+### Flow
+1. **Email step** → `signIn.create({ strategy: "reset_password_email_code", identifier: email })`.
+   - On success: transition to the verify step.
+   - On `form_identifier_not_found` (legacy user, not yet in Clerk): silently call `POST /auth/forgot-password` and show the generic "check your email for a reset link" success state.
+   - On any other failure: generic "Couldn't start password reset right now."
+2. **Verify step** → `signIn.attemptFirstFactor({ strategy: "reset_password_email_code", code, password })` then `setActive({ session: createdSessionId })` → `router.replace("/home")`. The user is auto-signed-in with the new password; the AuthContext sync-user effect mirrors them into the local DB on the way through.
+3. **Resend code** → re-invokes `signIn.create` with the same identifier.
+
+### Non-enumeration
+- Generic error strings throughout. We never reveal whether an account exists in Clerk vs. legacy vs. neither.
+- The visible difference between code-entry (Clerk) and link-sent (legacy) is a small enumeration channel during the migration window. It collapses automatically once Phase 4 removes the legacy branch.
+
+### Verification
+- `pnpm --filter @workspace/car-logbook exec tsc --noEmit`: only pre-existing baseline errors remain. Zero new errors from the rewritten file.
+- Web bundle succeeds.
+- No prod publish.
