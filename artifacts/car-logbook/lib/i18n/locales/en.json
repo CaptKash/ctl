@@ -1,0 +1,28 @@
+{
+  "common": {
+    "appName": "CTL",
+    "appTagline": "Car Technical Log",
+    "version": "CTL v1.0.0"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Access your fleet and service records",
+    "continueWithApple": "Continue with Apple",
+    "continueWithGoogle": "Continue with Google",
+    "orUseEmail": "or use email",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me",
+    "rememberMeSub": "Stay signed in after closing the app",
+    "submit": "Sign In",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "errorGeneric": "Invalid email or password.",
+    "errorTooManyAttempts": "Too many attempts. Please try again in a few minutes.",
+    "languageToggleEnglish": "English",
+    "languageToggleArabic": "العربية"
+  }
+}

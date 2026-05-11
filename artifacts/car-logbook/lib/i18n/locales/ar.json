@@ -1,0 +1,28 @@
+{
+  "common": {
+    "appName": "CTL",
+    "appTagline": "سجل السيارة الفني",
+    "version": "CTL ‏v1.0.0"
+  },
+  "login": {
+    "title": "تسجيل الدخول",
+    "subtitle": "الوصول إلى أسطولك وسجلات الصيانة",
+    "continueWithApple": "المتابعة بحساب Apple",
+    "continueWithGoogle": "المتابعة بحساب Google",
+    "orUseEmail": "أو استخدم البريد الإلكتروني",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "كلمة المرور",
+    "passwordPlaceholder": "••••••••",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "rememberMe": "تذكرني",
+    "rememberMeSub": "ابقَ مسجلاً بعد إغلاق التطبيق",
+    "submit": "تسجيل الدخول",
+    "noAccount": "ليس لديك حساب؟",
+    "signUp": "إنشاء حساب",
+    "errorGeneric": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "errorTooManyAttempts": "محاولات كثيرة جداً. يرجى المحاولة مرة أخرى بعد بضع دقائق.",
+    "languageToggleEnglish": "English",
+    "languageToggleArabic": "العربية"
+  }
+}

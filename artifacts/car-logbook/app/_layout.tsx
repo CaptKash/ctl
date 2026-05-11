@@ -17,6 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 
+import { initI18n } from "@/lib/i18n";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -83,18 +84,27 @@ export default function RootLayout() {
     ...Feather.font,
     ...Ionicons.font,
   });
+  const [i18nReady, setI18nReady] = React.useState(false);
 
   useEffect(() => {
     initializeRevenueCat();
   }, []);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    initI18n()
+      .catch((err) => {
+        if (__DEV__) console.warn("[i18n] init failed", err);
+      })
+      .finally(() => setI18nReady(true));
+  }, []);
+
+  useEffect(() => {
+    if ((fontsLoaded || fontError) && i18nReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, i18nReady]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if ((!fontsLoaded && !fontError) || !i18nReady) return null;
 
   return (
     <ClerkProvider

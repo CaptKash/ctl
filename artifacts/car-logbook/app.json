@@ -70,7 +70,8 @@
           "calendarPermission": "Allow CTL to add service reminders to your calendar."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
