@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
 import { useSignUp, useSSO, isClerkAPIResponseError } from "@clerk/clerk-expo";
+import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 
@@ -25,6 +26,8 @@ export default function SignupScreen() {
   const C = useColors();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { width: screenW } = useWindowDimensions();
   const { signUp, setActive, isLoaded: signUpLoaded } = useSignUp();
@@ -56,10 +59,10 @@ export default function SignupScreen() {
   }, [resendCooldown]);
 
   const passwordRules = [
-    { key: "len", label: "At least 8 characters", met: password.length >= 8 },
-    { key: "upper", label: "One uppercase letter (A–Z)", met: /[A-Z]/.test(password) },
-    { key: "lower", label: "One lowercase letter (a–z)", met: /[a-z]/.test(password) },
-    { key: "num", label: "One number (0–9)", met: /[0-9]/.test(password) },
+    { key: "len", label: t("signup.passwordRuleLength"), met: password.length >= 8 },
+    { key: "upper", label: t("signup.passwordRuleUpper"), met: /[A-Z]/.test(password) },
+    { key: "lower", label: t("signup.passwordRuleLower"), met: /[a-z]/.test(password) },
+    { key: "num", label: t("signup.passwordRuleNumber"), met: /[0-9]/.test(password) },
   ];
   const passwordValid = passwordRules.every((r) => r.met);
 
@@ -84,10 +87,10 @@ export default function SignupScreen() {
         case "form_password_length_too_short":
         case "form_password_validation_failed":
         case "form_password_not_strong_enough":
-          return "Please choose a stronger password.";
+          return t("signup.errorWeakPassword");
         case "form_param_format_invalid":
         case "form_param_nil":
-          return "Please double-check the details you entered.";
+          return t("signup.errorInvalidDetails");
         // form_identifier_exists, form_identifier_not_allowed, and any
         // other identifier-related codes fall through to the generic
         // message to avoid revealing whether the email is already taken.
@@ -102,7 +105,7 @@ export default function SignupScreen() {
     if (isClerkAPIResponseError(err) && err.errors.length > 0) {
       const code = err.errors[0].code;
       if (code === "form_code_incorrect" || code === "verification_expired") {
-        return "Invalid or expired code. Please try again.";
+        return t("signup.errorVerifyInvalid");
       }
     }
     return fallback;
@@ -132,7 +135,7 @@ export default function SignupScreen() {
       setResendCooldown(60);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: unknown) {
-      setError(formatSignUpError(err, "Couldn't create your account. Please check your details and try again."));
+      setError(formatSignUpError(err, t("signup.errorCreateFailed")));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -152,10 +155,10 @@ export default function SignupScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         router.replace("/home");
       } else {
-        setError("Verification incomplete. Please try again.");
+        setError(t("signup.errorVerifyIncomplete"));
       }
     } catch (err: unknown) {
-      setError(formatVerifyError(err, "Invalid or expired code. Please try again."));
+      setError(formatVerifyError(err, t("signup.errorVerifyInvalid")));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -171,7 +174,7 @@ export default function SignupScreen() {
       setResendCooldown(60);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: unknown) {
-      setError(formatVerifyError(err, "Couldn't resend the code right now."));
+      setError(formatVerifyError(err, t("signup.errorResendFailed")));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
@@ -201,7 +204,7 @@ export default function SignupScreen() {
       if (__DEV__) {
         console.log("[SSO error]", strategy, JSON.stringify(err, null, 2), err);
       }
-      setError(formatSignUpError(err, "Sign-in failed. Please try again."));
+      setError(formatSignUpError(err, t("signup.errorOAuthFailed")));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -245,13 +248,13 @@ export default function SignupScreen() {
               fill={isDark ? "#1D4A96" : "#DBEAFE"}
             />
           </Svg>
-          <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>CTL</Text>
+          <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#0F2D5E" }]}>{t("common.appName")}</Text>
           <View style={styles.heroLines}>
             <View style={styles.heroLineLong} />
             <View style={styles.heroLineShort} />
           </View>
           <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
-            Car Technical Log
+            {t("common.appTagline")}
           </Text>
         </View>
 
@@ -269,9 +272,9 @@ export default function SignupScreen() {
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
             {/* Heading */}
             <View style={styles.welcomeBlock}>
-              <Text style={[styles.welcomeTitle, { color: C.text }]}>Create account</Text>
+              <Text style={[styles.welcomeTitle, { color: C.text }]}>{t("signup.title")}</Text>
               <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
-                Start logging your fleet's full service history
+                {t("signup.subtitle")}
               </Text>
             </View>
 
@@ -286,7 +289,7 @@ export default function SignupScreen() {
                 ]}
               >
                 <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
-                <Text style={[styles.oauthLabel, { color: "#FFFFFF" }]}>Continue with Apple</Text>
+                <Text style={[styles.oauthLabel, { color: "#FFFFFF" }]}>{t("signup.continueWithApple")}</Text>
               </Pressable>
 
               <Pressable
@@ -303,12 +306,12 @@ export default function SignupScreen() {
                 ]}
               >
                 <Ionicons name="logo-google" size={18} color="#1A1A1A" />
-                <Text style={[styles.oauthLabel, { color: "#1A1A1A" }]}>Continue with Google</Text>
+                <Text style={[styles.oauthLabel, { color: "#1A1A1A" }]}>{t("signup.continueWithGoogle")}</Text>
               </Pressable>
 
               <View style={styles.oauthDivider}>
                 <View style={[styles.oauthDividerLine, { backgroundColor: C.border }]} />
-                <Text style={[styles.oauthDividerText, { color: C.textTertiary }]}>or use email</Text>
+                <Text style={[styles.oauthDividerText, { color: C.textTertiary }]}>{t("signup.orUseEmail")}</Text>
                 <View style={[styles.oauthDividerLine, { backgroundColor: C.border }]} />
               </View>
             </View>
@@ -323,12 +326,12 @@ export default function SignupScreen() {
 
             {/* Name */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Full Name</Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.nameLabel")}</Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="user" size={16} color={C.textSecondary} />
                 <TextInput
                   style={[styles.input, { color: C.text }]}
-                  placeholder="John Smith"
+                  placeholder={t("signup.namePlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={name}
                   onChangeText={(t) => { setName(t); setError(""); }}
@@ -342,12 +345,12 @@ export default function SignupScreen() {
 
             {/* Email */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Email</Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.emailLabel")}</Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="mail" size={16} color={C.textSecondary} />
                 <TextInput
                   style={[styles.input, { color: C.text }]}
-                  placeholder="you@example.com"
+                  placeholder={t("signup.emailPlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={email}
                   onChangeText={(t) => { setEmail(t); setError(""); }}
@@ -363,12 +366,12 @@ export default function SignupScreen() {
 
             {/* Password */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Password</Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.passwordLabel")}</Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="lock" size={16} color={C.textSecondary} />
                 <TextInput
                   style={[styles.input, { color: C.text }]}
-                  placeholder="••••••••"
+                  placeholder={t("signup.passwordPlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={password}
                   onChangeText={(t) => { setPassword(t); setError(""); }}
@@ -409,7 +412,7 @@ export default function SignupScreen() {
 
             {/* Confirm Password */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Confirm Password</Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.confirmPasswordLabel")}</Text>
               <View
                 style={[
                   styles.inputRow,
@@ -426,7 +429,7 @@ export default function SignupScreen() {
                 />
                 <TextInput
                   style={[styles.input, { color: C.text }]}
-                  placeholder="••••••••"
+                  placeholder={t("signup.passwordPlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={confirmPassword}
                   onChangeText={(t) => { setConfirmPassword(t); setError(""); }}
@@ -447,7 +450,7 @@ export default function SignupScreen() {
           </View>
 
           <PrimaryButton
-            label="Create Account"
+            label={t("signup.submit")}
             onPress={handleSignup}
             loading={loading}
             disabled={!canSubmit || loading}
@@ -456,7 +459,7 @@ export default function SignupScreen() {
           {/* Divider */}
           <View style={styles.orRow}>
             <View style={[styles.orLine, { backgroundColor: C.border }]} />
-            <Text style={[styles.orText, { color: C.textTertiary }]}>already have an account?</Text>
+            <Text style={[styles.orText, { color: C.textTertiary }]}>{t("signup.haveAccount")}</Text>
             <View style={[styles.orLine, { backgroundColor: C.border }]} />
           </View>
 
@@ -471,8 +474,8 @@ export default function SignupScreen() {
               { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.card },
             ]}
           >
-            <Text style={[styles.signinText, { color: C.text }]}>Sign In</Text>
-            <Feather name="arrow-right" size={16} color={C.textSecondary} />
+            <Text style={[styles.signinText, { color: C.text }]}>{t("signup.signIn")}</Text>
+            <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={16} color={C.textSecondary} />
           </Pressable>
           </>
           )}
@@ -481,9 +484,9 @@ export default function SignupScreen() {
           <>
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
             <View style={styles.welcomeBlock}>
-              <Text style={[styles.welcomeTitle, { color: C.text }]}>Check your email</Text>
+              <Text style={[styles.welcomeTitle, { color: C.text }]}>{t("signup.verifyTitle")}</Text>
               <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
-                We sent a 6-digit code to {email.trim()}. Enter it below to finish creating your account.
+                {t("signup.verifySubtitle", { email: email.trim() })}
               </Text>
             </View>
 
@@ -495,12 +498,12 @@ export default function SignupScreen() {
             )}
 
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Verification code</Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.verifyCodeLabel")}</Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="hash" size={16} color={C.textSecondary} />
                 <TextInput
                   style={[styles.input, { color: C.text, letterSpacing: 4 }]}
-                  placeholder="123456"
+                  placeholder={t("signup.verifyCodePlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={code}
                   onChangeText={(t) => { setCode(t.replace(/[^0-9]/g, "")); setError(""); }}
@@ -516,7 +519,7 @@ export default function SignupScreen() {
           </View>
 
           <PrimaryButton
-            label="Verify & Continue"
+            label={t("signup.verifySubmit")}
             onPress={handleVerify}
             loading={loading}
             disabled={loading || code.trim().length < 4}
@@ -535,7 +538,9 @@ export default function SignupScreen() {
             ]}
           >
             <Text style={[styles.signinText, { color: resendCooldown > 0 ? C.textSecondary : C.text }]}>
-              {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Resend code"}
+              {resendCooldown > 0
+                ? t("signup.resendCodeIn", { seconds: resendCooldown })
+                : t("signup.resendCode")}
             </Text>
             <Feather name="refresh-cw" size={16} color={C.textSecondary} />
           </Pressable>
@@ -547,8 +552,8 @@ export default function SignupScreen() {
               { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.card },
             ]}
           >
-            <Feather name="arrow-left" size={16} color={C.textSecondary} />
-            <Text style={[styles.signinText, { color: C.text }]}>Back</Text>
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color={C.textSecondary} />
+            <Text style={[styles.signinText, { color: C.text }]}>{t("signup.back")}</Text>
           </Pressable>
           </>
           )}
