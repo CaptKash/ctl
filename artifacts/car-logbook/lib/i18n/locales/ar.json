@@ -2,7 +2,12 @@
   "common": {
     "appName": "CTL",
     "appTagline": "Car Technical Log",
-    "version": "CTL ‏v1.0.0"
+    "version": "CTL ‏v1.0.0",
+    "cancel": "إلغاء",
+    "ok": "حسناً",
+    "dash": "—",
+    "restartRequiredTitle": "إعادة تشغيل مطلوبة",
+    "restartRequiredMessage": "يرجى إغلاق التطبيق وإعادة فتحه لتطبيق التخطيط من اليمين إلى اليسار."
   },
   "login": {
     "title": "تسجيل الدخول",
@@ -60,5 +65,93 @@
     "errorVerifyInvalid": "رمز غير صحيح أو منتهي الصلاحية. حاول مرة أخرى.",
     "errorResendFailed": "تعذر إعادة إرسال الرمز الآن.",
     "errorOAuthFailed": "فشل تسجيل الدخول. حاول مرة أخرى."
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "subtitle": "الحساب والتفضيلات",
+    "carsLabel": "سيارة",
+    "vehicleCount": {
+      "none": "لا توجد مركبات مسجلة",
+      "one": "مركبة واحدة · {{label}}",
+      "many": "{{count}} مركبات مسجلة"
+    },
+    "sections": {
+      "account": "الحساب",
+      "signInMethods": "طرق تسجيل الدخول",
+      "preferences": "التفضيلات",
+      "notifications": "الإشعارات",
+      "about": "حول التطبيق",
+      "session": "الجلسة"
+    },
+    "account": {
+      "editProfile": "تعديل الملف الشخصي",
+      "editProfileSub": "تحديث الاسم أو البريد الإلكتروني",
+      "country": "الدولة",
+      "countryPlaceholder": "اختر دولتك",
+      "language": "اللغة",
+      "languageEnglish": "English",
+      "languageArabic": "العربية"
+    },
+    "connected": {
+      "apple": "Apple",
+      "google": "Google",
+      "connected": "متصل",
+      "connect": "ربط",
+      "signInFasterWith": "سجّل الدخول بشكل أسرع باستخدام {{provider}}",
+      "couldntConnectTitle": "تعذّر الربط",
+      "couldntConnectMessage": "تعذّر ربط حسابك على {{provider}}. حاول مرة أخرى.",
+      "disconnectTitle": "إلغاء ربط {{provider}}؟",
+      "disconnectMessage": "ستحتاج إلى طريقة تسجيل دخول أخرى (بريد إلكتروني/كلمة مرور أو حسابك الآخر المرتبط) لتسجيل الدخول في المرة القادمة.",
+      "disconnectConfirm": "إلغاء الربط",
+      "couldntDisconnectTitle": "تعذّر إلغاء الربط",
+      "couldntDisconnectMessage": "تأكد أنه لا يزال لديك طريقة أخرى على الأقل لتسجيل الدخول، ثم حاول مرة أخرى."
+    },
+    "fleet": {
+      "title": "CTL Fleet",
+      "tagline": "إدارة كل مركباتك بدون قيود",
+      "feature1": "مركبات بلا حدود",
+      "feature2": "تحليلات استهلاك الوقود",
+      "feature3": "متتبع تكاليف الصيانة",
+      "feature4": "تصدير PDF و CSV",
+      "feature5": "جميع الأدوات الحالية والمستقبلية"
+    },
+    "preferences": {
+      "theme": "المظهر",
+      "themeLight": "فاتح",
+      "themeDark": "داكن",
+      "themeSystem": "النظام",
+      "distanceUnit": "وحدة المسافة",
+      "currency": "العملة"
+    },
+    "toggle": {
+      "soon": "قريباً"
+    },
+    "notifications": {
+      "eventReminders": "تذكيرات الأحداث القادمة",
+      "eventRemindersSub": "قبل 30 و 7 أيام وقبل يوم من المواعيد المستحقة",
+      "disabledTitle": "الإشعارات معطّلة",
+      "disabledMessage": "لتلقّي تذكيرات الصيانة، فعّل إشعارات CTL من إعدادات جهازك."
+    },
+    "about": {
+      "appVersion": "إصدار التطبيق",
+      "feedback": "إرسال ملاحظات",
+      "feedbackSub": "ساعدنا في تحسين CTL",
+      "privacy": "سياسة الخصوصية"
+    },
+    "session": {
+      "signOut": "تسجيل الخروج",
+      "signOutSub": "ستحتاج إلى تسجيل الدخول مرة أخرى",
+      "deleteAccount": "حذف الحساب",
+      "deleteAccountSub": "محو جميع البيانات نهائياً"
+    },
+    "modals": {
+      "signOutTitle": "تسجيل الخروج",
+      "signOutMessage": "هل أنت متأكد أنك تريد تسجيل الخروج من CTL؟",
+      "signOutConfirm": "تسجيل الخروج",
+      "deleteTitle": "حذف الحساب",
+      "deleteMessage": "سيؤدي ذلك إلى حذف حسابك وجميع مركباتك وكل السجلات المرتبطة بها نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+      "deleting": "جاري الحذف…",
+      "deleteConfirm": "حذف كل شيء"
+    }
   }
 }

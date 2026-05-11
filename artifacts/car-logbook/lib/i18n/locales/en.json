@@ -2,7 +2,12 @@
   "common": {
     "appName": "CTL",
     "appTagline": "Car Technical Log",
-    "version": "CTL v1.0.0"
+    "version": "CTL v1.0.0",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "dash": "—",
+    "restartRequiredTitle": "Restart required",
+    "restartRequiredMessage": "Please close and reopen the app to apply the right-to-left layout."
   },
   "login": {
     "title": "Sign in",
@@ -60,5 +65,93 @@
     "errorVerifyInvalid": "Invalid or expired code. Please try again.",
     "errorResendFailed": "Couldn't resend the code right now.",
     "errorOAuthFailed": "Sign-in failed. Please try again."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Account & preferences",
+    "carsLabel": "cars",
+    "vehicleCount": {
+      "none": "No vehicles registered",
+      "one": "1 vehicle · {{label}}",
+      "many": "{{count}} vehicles registered"
+    },
+    "sections": {
+      "account": "ACCOUNT",
+      "signInMethods": "SIGN-IN METHODS",
+      "preferences": "PREFERENCES",
+      "notifications": "NOTIFICATIONS",
+      "about": "ABOUT",
+      "session": "SESSION"
+    },
+    "account": {
+      "editProfile": "Edit Profile",
+      "editProfileSub": "Update name or email",
+      "country": "Country",
+      "countryPlaceholder": "Select your country",
+      "language": "Language",
+      "languageEnglish": "English",
+      "languageArabic": "العربية"
+    },
+    "connected": {
+      "apple": "Apple",
+      "google": "Google",
+      "connected": "Connected",
+      "connect": "Connect",
+      "signInFasterWith": "Sign in faster with {{provider}}",
+      "couldntConnectTitle": "Couldn't connect",
+      "couldntConnectMessage": "We couldn't link your {{provider}} account. Please try again.",
+      "disconnectTitle": "Disconnect {{provider}}?",
+      "disconnectMessage": "You'll need another sign-in method (email/password or your other linked account) to sign in next time.",
+      "disconnectConfirm": "Disconnect",
+      "couldntDisconnectTitle": "Couldn't disconnect",
+      "couldntDisconnectMessage": "Make sure you still have at least one other way to sign in, then try again."
+    },
+    "fleet": {
+      "title": "CTL Fleet",
+      "tagline": "Manage every vehicle without limits",
+      "feature1": "Unlimited vehicles",
+      "feature2": "Fuel Consumption analytics",
+      "feature3": "Service Cost Tracker",
+      "feature4": "PDF & CSV export",
+      "feature5": "All current & future tools"
+    },
+    "preferences": {
+      "theme": "Theme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System",
+      "distanceUnit": "Distance Unit",
+      "currency": "Currency"
+    },
+    "toggle": {
+      "soon": "Soon"
+    },
+    "notifications": {
+      "eventReminders": "Upcoming Event Reminders",
+      "eventRemindersSub": "30d, 7d and 1d before due dates",
+      "disabledTitle": "Notifications Disabled",
+      "disabledMessage": "To receive service reminders, enable notifications for CTL in your device Settings."
+    },
+    "about": {
+      "appVersion": "App Version",
+      "feedback": "Send Feedback",
+      "feedbackSub": "Help us improve CTL",
+      "privacy": "Privacy Policy"
+    },
+    "session": {
+      "signOut": "Sign Out",
+      "signOutSub": "You'll need to log in again",
+      "deleteAccount": "Delete Account",
+      "deleteAccountSub": "Permanently erase all data"
+    },
+    "modals": {
+      "signOutTitle": "Sign Out",
+      "signOutMessage": "Are you sure you want to sign out of CTL?",
+      "signOutConfirm": "Sign Out",
+      "deleteTitle": "Delete Account",
+      "deleteMessage": "This will permanently delete your account, all your vehicles, and every record associated with them. This cannot be undone.",
+      "deleting": "Deleting…",
+      "deleteConfirm": "Delete Everything"
+    }
   }
 }

@@ -24,7 +24,6 @@ import { isClerkAPIResponseError } from "@clerk/clerk-expo";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
-import { setLanguage, type SupportedLanguage } from "@/lib/i18n";
 
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -80,20 +79,6 @@ export default function LoginScreen() {
   } = useAuth();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
   const { startSSOFlow } = useSSO();
-
-  const handleLanguageChange = async (lng: SupportedLanguage) => {
-    if (i18n.language === lng) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const { requiresReload } = await setLanguage(lng);
-    if (requiresReload && Platform.OS !== "web") {
-      Alert.alert(
-        lng === "ar" ? "إعادة تشغيل مطلوبة" : "Restart required",
-        lng === "ar"
-          ? "يرجى إغلاق التطبيق وإعادة فتحه لتطبيق التخطيط من اليمين إلى اليسار."
-          : "Please close and reopen the app to apply the right-to-left layout.",
-      );
-    }
-  };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -447,40 +432,6 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          {/* Language toggle (POC — will move to Settings in next pass) */}
-          <View style={styles.langRow}>
-            <Pressable
-              onPress={() => handleLanguageChange("en")}
-              hitSlop={6}
-              style={[
-                styles.langBtn,
-                {
-                  backgroundColor: i18n.language === "en" ? C.tint + "18" : "transparent",
-                  borderColor: i18n.language === "en" ? C.tint : C.border,
-                },
-              ]}
-            >
-              <Text style={[styles.langText, { color: i18n.language === "en" ? C.tint : C.textSecondary }]}>
-                {t("login.languageToggleEnglish")}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => handleLanguageChange("ar")}
-              hitSlop={6}
-              style={[
-                styles.langBtn,
-                {
-                  backgroundColor: i18n.language === "ar" ? C.tint + "18" : "transparent",
-                  borderColor: i18n.language === "ar" ? C.tint : C.border,
-                },
-              ]}
-            >
-              <Text style={[styles.langText, { color: i18n.language === "ar" ? C.tint : C.textSecondary }]}>
-                {t("login.languageToggleArabic")}
-              </Text>
-            </Pressable>
-          </View>
-
           <Text style={[styles.versionText, { color: C.textTertiary }]}>{t("common.version")}</Text>
         </ScrollView>
       </View>
@@ -604,14 +555,4 @@ const styles = StyleSheet.create({
   rememberSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   versionText: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center" },
-
-  // ── Language toggle ──────────────────────────────────────────────────────
-  langRow: { flexDirection: "row", justifyContent: "center", gap: 8 },
-  langBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-  },
-  langText: { fontSize: 12, fontFamily: "Inter_500Medium" },
 });

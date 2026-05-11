@@ -21,6 +21,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/clerk-expo";
+import { useTranslation } from "react-i18next";
 import BottomNav from "@/components/ui/BottomNav";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
@@ -32,6 +33,7 @@ import { useCountry, COUNTRIES, countryOption, findCountryByOption } from "@/con
 import { registerPicker } from "@/components/ui/selectPickerStore";
 import { requestNotificationPermissions } from "@/lib/notifications";
 import { apiGet, apiDelete } from "@/hooks/useApi";
+import { setLanguage, type SupportedLanguage } from "@/lib/i18n";
 
 const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/privacy`
@@ -95,6 +97,7 @@ function NavRow({
 // to Clerk's own server-side guard, which surfaces an error we show.
 function ConnectedAccountsCard() {
   const C = useColors();
+  const { t } = useTranslation();
   const { user, isLoaded } = useUser();
   const [pending, setPending] = useState<string | null>(null);
 
@@ -119,7 +122,10 @@ function ConnectedAccountsCard() {
         }
       }
     } catch {
-      Alert.alert("Couldn't connect", `We couldn't link your ${label} account. Please try again.`);
+      Alert.alert(
+        t("settings.connected.couldntConnectTitle"),
+        t("settings.connected.couldntConnectMessage", { provider: label }),
+      );
     } finally {
       setPending(null);
     }
@@ -127,12 +133,12 @@ function ConnectedAccountsCard() {
 
   const disconnect = (account: NonNullable<typeof apple>, label: string) => {
     Alert.alert(
-      `Disconnect ${label}?`,
-      `You'll need another sign-in method (email/password or your other linked account) to sign in next time.`,
+      t("settings.connected.disconnectTitle", { provider: label }),
+      t("settings.connected.disconnectMessage"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Disconnect",
+          text: t("settings.connected.disconnectConfirm"),
           style: "destructive",
           onPress: async () => {
             if (pending) return;
@@ -142,8 +148,8 @@ function ConnectedAccountsCard() {
               await user.reload();
             } catch {
               Alert.alert(
-                "Couldn't disconnect",
-                "Make sure you still have at least one other way to sign in, then try again.",
+                t("settings.connected.couldntDisconnectTitle"),
+                t("settings.connected.couldntDisconnectMessage"),
               );
             } finally {
               setPending(null);
@@ -175,8 +181,8 @@ function ConnectedAccountsCard() {
       ? () => disconnect(account!, label)
       : () => connect(strategy, label);
     const subtitle = isConnected
-      ? account!.emailAddress || "Connected"
-      : `Sign in faster with ${label}`;
+      ? account!.emailAddress || t("settings.connected.connected")
+      : t("settings.connected.signInFasterWith", { provider: label });
     return (
       <Pressable
         onPress={() => {
@@ -198,11 +204,11 @@ function ConnectedAccountsCard() {
           <ActivityIndicator size="small" color={C.textSecondary} />
         ) : isConnected ? (
           <View style={[styles.pill, { backgroundColor: "#10B98118" }]}>
-            <Text style={[styles.pillText, { color: "#059669" }]}>Connected</Text>
+            <Text style={[styles.pillText, { color: "#059669" }]}>{t("settings.connected.connected")}</Text>
           </View>
         ) : (
           <View style={[styles.pill, { backgroundColor: C.tint + "18" }]}>
-            <Text style={[styles.pillText, { color: C.tint }]}>Connect</Text>
+            <Text style={[styles.pillText, { color: C.tint }]}>{t("settings.connected.connect")}</Text>
           </View>
         )}
       </Pressable>
@@ -211,13 +217,13 @@ function ConnectedAccountsCard() {
 
   return (
     <>
-      <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>SIGN-IN METHODS</Text>
+      <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.signInMethods")}</Text>
       <View style={[styles.card, { backgroundColor: C.card }]}>
         <Row
           icon="logo-apple"
           iconColor={C.text}
           iconBg={C.backgroundTertiary}
-          label="Apple"
+          label={t("settings.connected.apple")}
           account={apple}
           strategy="oauth_apple"
         />
@@ -226,7 +232,7 @@ function ConnectedAccountsCard() {
           icon="logo-google"
           iconColor="#1A1A1A"
           iconBg="#FFFFFF"
-          label="Google"
+          label={t("settings.connected.google")}
           account={google}
           strategy="oauth_google"
         />
@@ -255,6 +261,7 @@ function ToggleRow({
   comingSoon?: boolean;
 }) {
   const C = useColors();
+  const { t } = useTranslation();
   return (
     <View style={styles.row}>
       <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
@@ -266,7 +273,7 @@ function ToggleRow({
       </View>
       {comingSoon ? (
         <View style={[styles.pill, { backgroundColor: C.tint + "18" }]}>
-          <Text style={[styles.pillText, { color: C.tint }]}>Soon</Text>
+          <Text style={[styles.pillText, { color: C.tint }]}>{t("settings.toggle.soon")}</Text>
         </View>
       ) : (
         <Switch
@@ -283,10 +290,10 @@ function ToggleRow({
   );
 }
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; icon: React.ComponentProps<typeof Feather>["name"] }[] = [
-  { value: "light", label: "Light", icon: "sun" },
-  { value: "dark", label: "Dark", icon: "moon" },
-  { value: "system", label: "System", icon: "smartphone" },
+const THEME_VALUES: { value: ThemePreference; icon: React.ComponentProps<typeof Feather>["name"]; key: string }[] = [
+  { value: "light", icon: "sun", key: "themeLight" },
+  { value: "dark", icon: "moon", key: "themeDark" },
+  { value: "system", icon: "smartphone", key: "themeSystem" },
 ];
 
 const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string }[] = [
@@ -296,11 +303,12 @@ const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string }[] = [
 
 function CountryRow() {
   const C = useColors();
+  const { t } = useTranslation();
   const { country, setCountry } = useCountry();
 
   const handlePress = () => {
     registerPicker(
-      "Country",
+      t("settings.account.country"),
       COUNTRIES.map(countryOption),
       country ? countryOption(country) : "",
       (selected) => {
@@ -317,10 +325,58 @@ function CountryRow() {
         <Feather name="globe" size={16} color="#7C3AED" />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>Country</Text>
+        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.account.country")}</Text>
         <Text style={[styles.rowSub, { color: C.textSecondary }]}>
-          {country ? `${country.flag} ${country.name}` : "Select your country"}
+          {country ? `${country.flag} ${country.name}` : t("settings.account.countryPlaceholder")}
         </Text>
+      </View>
+      <Feather name="chevron-right" size={16} color={C.textTertiary} />
+    </TouchableOpacity>
+  );
+}
+
+// Lets the user switch between English and Arabic. Uses the shared
+// select-picker. When switching to/from Arabic, the underlying
+// `setLanguage` helper toggles I18nManager.forceRTL — that requires a
+// JS reload to actually re-mount the layout, so we surface an Alert
+// asking the user to close and reopen the app. Bare in-language
+// string changes (e.g. en → fr later) wouldn't need this.
+function LanguageRow() {
+  const C = useColors();
+  const { t, i18n } = useTranslation();
+
+  const optionFor = (lng: SupportedLanguage) =>
+    lng === "ar" ? t("settings.account.languageArabic") : t("settings.account.languageEnglish");
+  const codeFor = (label: string): SupportedLanguage =>
+    label === t("settings.account.languageArabic") ? "ar" : "en";
+
+  const current = i18n.language === "ar" ? "ar" : "en";
+
+  const handlePress = () => {
+    registerPicker(
+      t("settings.account.language"),
+      [optionFor("en"), optionFor("ar")],
+      optionFor(current),
+      async (selected) => {
+        const lng = codeFor(selected);
+        if (lng === i18n.language) return;
+        const { requiresReload } = await setLanguage(lng);
+        if (requiresReload && Platform.OS !== "web") {
+          Alert.alert(t("common.restartRequiredTitle"), t("common.restartRequiredMessage"));
+        }
+      },
+    );
+    router.push("/select-picker");
+  };
+
+  return (
+    <TouchableOpacity style={styles.row} onPress={handlePress} activeOpacity={0.7}>
+      <View style={[styles.rowIcon, { backgroundColor: "#FCE7F3" }]}>
+        <Feather name="message-circle" size={16} color="#DB2777" />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.account.language")}</Text>
+        <Text style={[styles.rowSub, { color: C.textSecondary }]}>{optionFor(current)}</Text>
       </View>
       <Feather name="chevron-right" size={16} color={C.textTertiary} />
     </TouchableOpacity>
@@ -329,11 +385,12 @@ function CountryRow() {
 
 function CurrencyRow() {
   const C = useColors();
+  const { t } = useTranslation();
   const { currency, setCurrency } = useCurrency();
 
   const handlePress = () => {
     registerPicker(
-      "Currency",
+      t("settings.preferences.currency"),
       CURRENCIES.map(currencyOption),
       currencyOption(currency),
       (selected) => {
@@ -350,7 +407,7 @@ function CurrencyRow() {
         <Feather name="dollar-sign" size={16} color="#059669" />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>Currency</Text>
+        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.preferences.currency")}</Text>
         <Text style={[styles.rowSub, { color: C.textSecondary }]}>
           {currency.code} · {currency.name}
         </Text>
@@ -362,6 +419,7 @@ function CurrencyRow() {
 
 function DistanceRow() {
   const C = useColors();
+  const { t } = useTranslation();
   const { unit, setUnit } = useDistanceUnit();
 
   return (
@@ -370,7 +428,7 @@ function DistanceRow() {
         <Feather name="navigation" size={16} color="#0891B2" />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>Distance Unit</Text>
+        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.preferences.distanceUnit")}</Text>
       </View>
       <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
         {DISTANCE_OPTIONS.map((opt) => {
@@ -398,6 +456,7 @@ function DistanceRow() {
 
 function ThemeRow() {
   const C = useColors();
+  const { t } = useTranslation();
   const { preference, setPreference } = useTheme();
 
   return (
@@ -406,10 +465,10 @@ function ThemeRow() {
         <View style={[styles.rowIcon, { backgroundColor: "#FEF3C7" }]}>
           <Feather name="sun" size={16} color="#D97706" />
         </View>
-        <Text style={[styles.rowTitle, { color: C.text }]}>Theme</Text>
+        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.preferences.theme")}</Text>
       </View>
       <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border, alignSelf: "stretch" }]}>
-        {THEME_OPTIONS.map((opt) => {
+        {THEME_VALUES.map((opt) => {
           const active = preference === opt.value;
           return (
             <TouchableOpacity
@@ -427,7 +486,7 @@ function ThemeRow() {
             >
               <Feather name={opt.icon} size={13} color={active ? "#fff" : C.textSecondary} />
               <Text style={[styles.segmentText, { color: active ? "#fff" : C.textSecondary }]}>
-                {opt.label}
+                {t(`settings.preferences.${opt.key}`)}
               </Text>
             </TouchableOpacity>
           );
@@ -439,6 +498,7 @@ function ThemeRow() {
 
 export default function SettingsScreen() {
   const C = useColors();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -453,9 +513,9 @@ export default function SettingsScreen() {
       const granted = await requestNotificationPermissions();
       if (!granted) {
         Alert.alert(
-          "Notifications Disabled",
-          "To receive service reminders, enable notifications for CTL in your device Settings.",
-          [{ text: "OK" }]
+          t("settings.notifications.disabledTitle"),
+          t("settings.notifications.disabledMessage"),
+          [{ text: t("common.ok") }]
         );
         return;
       }
@@ -474,10 +534,10 @@ export default function SettingsScreen() {
     : "?";
 
   const fleetLabel = cars.length === 0
-    ? "No vehicles registered"
+    ? t("settings.vehicleCount.none")
     : cars.length === 1
-      ? `1 vehicle · ${cars[0].nickname ?? `${cars[0].year} ${cars[0].make}`}`
-      : `${cars.length} vehicles registered`;
+      ? t("settings.vehicleCount.one", { label: cars[0].nickname ?? `${cars[0].year} ${cars[0].make}` })
+      : t("settings.vehicleCount.many", { count: cars.length });
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
@@ -487,8 +547,8 @@ export default function SettingsScreen() {
             <Feather name="settings" size={22} color={C.textSecondary} />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Settings</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Account & preferences</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>{t("settings.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>{t("settings.subtitle")}</Text>
           </View>
         </View>
       </View>
@@ -503,28 +563,30 @@ export default function SettingsScreen() {
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={[styles.profileName, { color: C.text }]}>{user?.name ?? "—"}</Text>
-            <Text style={[styles.profileEmail, { color: C.textSecondary }]}>{user?.email ?? "—"}</Text>
+            <Text style={[styles.profileName, { color: C.text }]}>{user?.name ?? t("common.dash")}</Text>
+            <Text style={[styles.profileEmail, { color: C.textSecondary }]}>{user?.email ?? t("common.dash")}</Text>
           </View>
           <View style={[styles.statBubble, { backgroundColor: C.tint + "15" }]}>
             <Text style={[styles.statValue, { color: C.tint }]}>{cars.length}</Text>
-            <Text style={[styles.statLabel, { color: C.tint }]}>cars</Text>
+            <Text style={[styles.statLabel, { color: C.tint }]}>{t("settings.carsLabel")}</Text>
           </View>
         </View>
 
         {/* Account */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ACCOUNT</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.account")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <NavRow
             icon="edit-2"
             iconColor="#2563EB"
             iconBg="#DBEAFE"
-            label="Edit Profile"
-            subtitle="Update name or email"
+            label={t("settings.account.editProfile")}
+            subtitle={t("settings.account.editProfileSub")}
             onPress={() => router.push("/edit-profile")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <CountryRow />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <LanguageRow />
         </View>
 
         {/* Connected accounts (Clerk-only — legacy users only see this once
@@ -541,17 +603,17 @@ export default function SettingsScreen() {
               <Feather name="star" size={16} color="#92400E" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.fleetTitle}>CTL Fleet</Text>
-              <Text style={styles.fleetTagline}>Manage every vehicle without limits</Text>
+              <Text style={styles.fleetTitle}>{t("settings.fleet.title")}</Text>
+              <Text style={styles.fleetTagline}>{t("settings.fleet.tagline")}</Text>
             </View>
           </View>
           <View style={styles.fleetFeatures}>
             {[
-              "Unlimited vehicles",
-              "Fuel Consumption analytics",
-              "Service Cost Tracker",
-              "PDF & CSV export",
-              "All current & future tools",
+              t("settings.fleet.feature1"),
+              t("settings.fleet.feature2"),
+              t("settings.fleet.feature3"),
+              t("settings.fleet.feature4"),
+              t("settings.fleet.feature5"),
             ].map((f) => (
               <View key={f} style={styles.fleetFeatureRow}>
                 <Feather name="check-circle" size={13} color="#D97706" />
@@ -562,7 +624,7 @@ export default function SettingsScreen() {
         </Pressable>
 
         {/* Preferences */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>PREFERENCES</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.preferences")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <ThemeRow />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
@@ -572,29 +634,29 @@ export default function SettingsScreen() {
         </View>
 
         {/* Notifications */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>NOTIFICATIONS</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.notifications")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <ToggleRow
             icon="bell"
             iconColor="#D97706"
             iconBg="#FEF3C7"
-            label="Upcoming Event Reminders"
-            subtitle="30d, 7d and 1d before due dates"
+            label={t("settings.notifications.eventReminders")}
+            subtitle={t("settings.notifications.eventRemindersSub")}
             value={remindersEnabled}
             onChange={handleRemindersToggle}
           />
         </View>
 
         {/* About */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>ABOUT</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.about")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <View style={styles.row}>
             <View style={[styles.rowIcon, { backgroundColor: C.backgroundTertiary }]}>
               <Feather name="info" size={16} color={C.textSecondary} />
             </View>
             <View style={styles.rowBody}>
-              <Text style={[styles.rowTitle, { color: C.text }]}>App Version</Text>
-              <Text style={[styles.rowSub, { color: C.textSecondary }]}>CTL v1.0.0</Text>
+              <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.about.appVersion")}</Text>
+              <Text style={[styles.rowSub, { color: C.textSecondary }]}>{t("common.version")}</Text>
             </View>
           </View>
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
@@ -602,8 +664,8 @@ export default function SettingsScreen() {
             icon="message-square"
             iconColor="#7C3AED"
             iconBg="#EDE9FE"
-            label="Send Feedback"
-            subtitle="Help us improve CTL"
+            label={t("settings.about.feedback")}
+            subtitle={t("settings.about.feedbackSub")}
             onPress={() => router.push("/feedback")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
@@ -611,20 +673,20 @@ export default function SettingsScreen() {
             icon="lock"
             iconColor="#6B7280"
             iconBg="#F3F4F6"
-            label="Privacy Policy"
+            label={t("settings.about.privacy")}
             onPress={() => Linking.openURL(PRIVACY_URL)}
           />
         </View>
 
         {/* Sign out + danger */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>SESSION</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.session")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <NavRow
             icon="log-out"
             iconColor="#DC2626"
             iconBg="#FEE2E2"
-            label="Sign Out"
-            subtitle="You'll need to log in again"
+            label={t("settings.session.signOut")}
+            subtitle={t("settings.session.signOutSub")}
             onPress={() => setShowSignOutModal(true)}
             danger
           />
@@ -633,23 +695,23 @@ export default function SettingsScreen() {
             icon="trash-2"
             iconColor="#DC2626"
             iconBg="#FEE2E2"
-            label="Delete Account"
-            subtitle="Permanently erase all data"
+            label={t("settings.session.deleteAccount")}
+            subtitle={t("settings.session.deleteAccountSub")}
             onPress={() => setShowDeleteModal(true)}
             danger
           />
         </View>
 
-        <Text style={[styles.version, { color: C.textTertiary }]}>CTL v1.0.0</Text>
+        <Text style={[styles.version, { color: C.textTertiary }]}>{t("common.version")}</Text>
       </ScrollView>
 
       <BottomNav active="settings" />
 
       <ConfirmModal
         visible={showSignOutModal}
-        title="Sign Out"
-        message="Are you sure you want to sign out of CTL?"
-        confirmLabel="Sign Out"
+        title={t("settings.modals.signOutTitle")}
+        message={t("settings.modals.signOutMessage")}
+        confirmLabel={t("settings.modals.signOutConfirm")}
         onConfirm={async () => {
           setShowSignOutModal(false);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -661,9 +723,9 @@ export default function SettingsScreen() {
 
       <ConfirmModal
         visible={showDeleteModal}
-        title="Delete Account"
-        message="This will permanently delete your account, all your vehicles, and every record associated with them. This cannot be undone."
-        confirmLabel={deleteLoading ? "Deleting…" : "Delete Everything"}
+        title={t("settings.modals.deleteTitle")}
+        message={t("settings.modals.deleteMessage")}
+        confirmLabel={deleteLoading ? t("settings.modals.deleting") : t("settings.modals.deleteConfirm")}
         confirmStyle="destructive"
         onConfirm={async () => {
           if (deleteLoading) return;
