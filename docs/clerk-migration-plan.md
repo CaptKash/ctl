@@ -1,8 +1,12 @@
 # Clerk Migration Plan — Build 28
 
-Status: **Planning. No code changes yet.**
+Status: **Phase 0 in progress.** Schema column added, SDKs installed, Clerk Auth-pane setup pending user action.
 Strategy: **Lazy / just-in-time migration** (Option A from the rollout discussion).
 Constraint: Production sees new signups daily — zero-downtime, zero-orphan migration required.
+
+**Runtime preflight (verified):** API server runs Node v24.13.0; `@clerk/express` requires `>=20.9.0` ✅.
+
+**Phase 2 spike still owed:** confirm Clerk Backend API accepts importing existing bcrypt password hashes (`password_digest` + `password_hasher: "bcrypt"` per current Clerk docs). Owning this assumption is the highest single risk in the lazy-migration design — if Clerk rejects pre-hashed bcrypt at our cost factor, `/auth/clerk/migrate` falls back to a forced password-reset flow on first login. Spike happens at the start of Phase 2, not now.
 
 ---
 
@@ -141,12 +145,20 @@ Each phase is independently revertible:
 
 ---
 
-## Open questions to resolve before Phase 0
+## Open questions — resolved
 
-1. **Clerk Apple sign-in setup**: Replit-managed Clerk handles the OAuth provider config, but Apple sign-in requires the bundle ID `com.ctl.carlogbook` to be registered with the right Service ID in Apple Developer console. We need to verify this works before committing to the new build. (~15 min check via Clerk Auth pane.)
-2. **Email verification for the 71 existing users**: Clerk by default requires email verification for new sign-ups. When we silently migrate an existing user via `/auth/clerk/migrate`, do we mark their email as already-verified (since they've been receiving forgot-password emails for months and it works)? Recommendation: yes, mark as verified — they've proven email ownership through prior use.
-3. **Clerk MAU pricing** at our scale (71 today, growing daily). Need to check the current Replit-managed Clerk pricing tier limits before going further.
-4. **Test account cleanup**: the 7 dev test accounts (`testuser@example.com`, `mkashour@gmail.com (Test)`, 2× Test (icloud), `mkashour@icloud.com`, `mkashour.apple@gmail.com`) should be cleaned from prod before migration so we're not migrating junk into Clerk.
+1. **Clerk Apple sign-in setup**: Replit-managed Clerk handles OAuth provider config; user enables Google + Apple in the Auth pane during Phase 0. End-to-end Apple sign-in to be verified during Phase 3 dev-build testing.
+2. **Email verification for the 71 existing users**: ✅ **Decision: mark as already-verified** when we silently migrate them via `/auth/clerk/migrate`. They've proven ownership through months of working forgot-password flows. (User confirmed.)
+3. **Clerk MAU pricing**: Replit-managed Clerk — pricing handled at the Replit subscription tier level. Will check current limits before Phase 3 ship.
+4. **Prod test account cleanup**: ✅ **Decision: clean before Phase 3** (queued, not done yet). Targets: `testuser@example.com`, the two Test-icloud accounts, `mkashour@gmail.com (Test)`, `mkashour@icloud.com`. **Excluded (keep)**: `mkashour.apple@gmail.com` (admin, prod user id 11). Agent's `executeSql` is read-only against prod, so the actual delete will be done either via a one-shot admin endpoint triggered manually or via the Publish-time SQL window.
+
+## Phase 0 status (in flight)
+
+- [x] `clerk_user_id text unique nullable` column added to dev DB + schema file (`lib/db/src/schema/cars.ts`)
+- [x] `@clerk/clerk-expo` installed in `artifacts/car-logbook`
+- [x] `@clerk/express` installed in `artifacts/api-server`
+- [ ] **(user)** Set up Clerk in the Auth pane (workspace toolbar)
+- [ ] **(user)** Enable Google + Apple providers in the Auth pane
 
 ---
 

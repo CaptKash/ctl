@@ -15,8 +15,16 @@ export const usersTable = pgTable("users", {
   // row is backfilled with `true` automatically. New signups override
   // this with an explicit `false` in /auth/register.
   passwordUpgradeRequired: boolean("password_upgrade_required").default(true).notNull(),
+  // Populated lazily as users sign in to the new Clerk-backed build for the
+  // first time. NULL means "not yet migrated" (still on legacy bcrypt auth).
+  // We never reuse Clerk's user id as our primary key — `id` (serial) stays
+  // the source of truth so RevenueCat appUserIDs survive the migration.
+  clerkUserId: text("clerk_user_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-}, (t) => [unique("users_email_unique").on(t.email)]);
+}, (t) => [
+  unique("users_email_unique").on(t.email),
+  unique("users_clerk_user_id_unique").on(t.clerkUserId),
+]);
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true, passwordHash: true });
 export type InsertUser = z.infer<typeof insertUserSchema>;

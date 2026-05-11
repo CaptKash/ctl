@@ -55,15 +55,16 @@
     "zod-validation-error": "^3.4.0"
   },
   "dependencies": {
+    "@clerk/clerk-expo": "^2.19.31",
     "@react-native-community/datetimepicker": "8.4.4",
     "expo-calendar": "~15.0.8",
-    "react-native-purchases": "9.14.0",
     "expo-file-system": "^19.0.21",
     "expo-local-authentication": "~17.0.8",
     "expo-notifications": "^0.32.16",
     "expo-print": "~15.0.8",
     "expo-secure-store": "~15.0.8",
     "expo-sharing": "~14.0.8",
+    "react-native-purchases": "9.14.0",
     "xlsx-js-style": "^1.2.0"
   }
 }
