@@ -71,3 +71,9 @@ id = "rUMxGQHyOeIgVcTO4XXH9"
 uri = "file://exports/ctl_instagram_story.png"
 type = "image"
 title = "CTL Instagram Story (Centered)"
+
+[[outputs]]
+id = "2HJ78s3B3AqOZcAvgJbwD"
+uri = "file://exports/CTL-Clerk-Migration-Plan.pdf"
+type = "pdf"
+title = "CTL Clerk Migration Plan — Build 28"
