@@ -10,12 +10,12 @@ import { db, usersTable } from "@workspace/db";
 // of the Clerk migration ships (rotating now would log out all 71 prod users
 // on the old pre-Clerk login UI). After Phase 3, a follow-up will rotate
 // JWT_SECRET to a fresh strong value once legacy JWTs are no longer accepted.
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
+if (!process.env.JWT_SECRET) {
   throw new Error(
     "JWT_SECRET env var is required. Refusing to start with a default secret.",
   );
 }
+const JWT_SECRET: string = process.env.JWT_SECRET;
 
 export interface AuthPayload {
   id: number;
@@ -49,7 +49,9 @@ async function authenticate(req: Request): Promise<AuthPayload | null> {
   if (header?.startsWith("Bearer ")) {
     const token = header.slice(7);
     try {
-      const payload = jwt.verify(token, JWT_SECRET) as AuthPayload;
+      // jwt.verify's return type is Jwt | JwtPayload | string. Cast through
+      // unknown — we re-validate the shape immediately below before trusting.
+      const payload = jwt.verify(token, JWT_SECRET) as unknown as AuthPayload;
       if (typeof payload?.id === "number") return payload;
     } catch {
       // Not a legacy JWT — fall through to Clerk path.
@@ -93,10 +95,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       return res.status(401).json({ error: "Authentication required." });
     }
     req.user = user;
-    next();
+    return next();
   } catch (err) {
     console.error("requireAuth error:", err);
-    res.status(500).json({ error: "Authentication check failed." });
+    return res.status(500).json({ error: "Authentication check failed." });
   }
 }
 

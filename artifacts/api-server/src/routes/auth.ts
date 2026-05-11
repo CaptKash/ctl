@@ -6,6 +6,22 @@ import { db } from "@workspace/db";
 import { usersTable, passwordResetTokensTable } from "@workspace/db";
 import { eq, and, gt, isNull } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { CLERK_MANAGED_SENTINEL } from "./clerkAuth";
+
+/**
+ * True if a users row should NOT participate in legacy email+password flows
+ * any more — either because it was migrated to Clerk (`clerk_user_id` set)
+ * or because it originated in Clerk and has the sentinel hash. We block these
+ * accounts at /auth/login, /auth/change-password, and the forgot/reset flows
+ * so a Clerk-managed account can never have credentials drift between the
+ * two systems or fall back to the legacy login path.
+ */
+function isClerkManaged(u: {
+  clerkUserId: string | null;
+  passwordHash: string;
+}): boolean {
+  return u.clerkUserId !== null || u.passwordHash === CLERK_MANAGED_SENTINEL;
+}
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const RESET_BASE_URL = process.env.RESET_BASE_URL ?? "http://localhost:3000";
@@ -103,6 +119,15 @@ router.post("/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
+    // Clerk-managed (migrated or Clerk-native): legacy /auth/login must never
+    // succeed for these accounts, otherwise a stale legacy JWT could keep
+    // working alongside their new Clerk session and the two could diverge.
+    // Generic error string — same as wrong-password — so we don't leak which
+    // accounts have already migrated.
+    if (isClerkManaged(user)) {
+      return res.status(401).json({ error: "Invalid email or password." });
+    }
+
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return res.status(401).json({ error: "Invalid email or password." });
@@ -138,10 +163,10 @@ router.get("/auth/me", requireAuth, async (req, res) => {
 
     if (!user) return res.status(404).json({ error: "User not found." });
 
-    res.json({ user });
+    return res.json({ user });
   } catch (err) {
     console.error("/auth/me error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
 
@@ -219,6 +244,14 @@ router.post("/auth/change-password", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
+    // Migrated/Clerk-native users must change their password through Clerk.
+    // We refuse here so the local hash never diverges from Clerk's.
+    if (isClerkManaged(user)) {
+      return res.status(409).json({
+        error: "Please change your password from your account settings.",
+      });
+    }
+
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) {
       return res.status(401).json({ error: "Current password is incorrect." });
@@ -249,12 +282,21 @@ router.post("/auth/forgot-password", async (req, res) => {
     }
 
     const [user] = await db
-      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        email: usersTable.email,
+        clerkUserId: usersTable.clerkUserId,
+        passwordHash: usersTable.passwordHash,
+      })
       .from(usersTable)
       .where(eq(usersTable.email, email.toLowerCase().trim()))
       .limit(1);
 
-    if (user) {
+    // Skip the token+email entirely for Clerk-managed users — they must reset
+    // through Clerk. We still return the same opaque success below to avoid
+    // revealing whether the account exists or which auth system owns it.
+    if (user && !isClerkManaged(user)) {
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
       const [record] = await db
         .insert(passwordResetTokensTable)
@@ -329,6 +371,21 @@ router.post("/auth/reset-password", async (req, res) => {
       .limit(1);
 
     if (!record) {
+      return res.status(400).json({ error: "This reset link is invalid or has expired." });
+    }
+
+    // Token is valid, but the underlying account may have been migrated to
+    // Clerk after the link was generated. Do NOT mutate the local hash for
+    // Clerk-managed users — return the same opaque error as an expired link.
+    const [target] = await db
+      .select({
+        clerkUserId: usersTable.clerkUserId,
+        passwordHash: usersTable.passwordHash,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, record.userId))
+      .limit(1);
+    if (!target || isClerkManaged(target)) {
       return res.status(400).json({ error: "This reset link is invalid or has expired." });
     }
 

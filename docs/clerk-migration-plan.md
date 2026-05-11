@@ -94,6 +94,25 @@ Add three new routes (legacy `/auth/*` routes stay live):
 
 - (Optional) `POST /auth/clerk/link` — for users who want to add Apple/Google to their existing email account from settings.
 
+#### Phase 2 — shipped
+
+Implemented in `artifacts/api-server/src/routes/clerkAuth.ts`, wired in `routes/index.ts`. Architect-reviewed and hardened. Highlights:
+
+- **Spike confirmed**: Clerk Backend API accepts `$2b$10$` digests via `password_digest` + `password_hasher: "bcrypt"`. POST /v1/users → POST /v1/users/{id}/verify_password returns `verified:true` for the original password, `incorrect_password` for wrong. The lazy-migration design is viable.
+- **Sentinel `__CLERK_MANAGED__`** stored in `users.password_hash` for Clerk-native rows (no schema migration needed; bcrypt.compare always fails it). Phase 4 drops the column entirely.
+- **`/auth/clerk/sync-user`** is gated by Clerk session via local `requireClerkSession` middleware. Lookup order: by `clerk_user_id` (idempotent fast path) → by email (legacy match → link) → insert. Race-safe: linking is `WHERE id=? AND clerk_user_id IS NULL`; SQLSTATE 23505 on insert re-reads by clerkUserId.
+- **Email-verification gate (security)**: linking a pre-existing local row to a Clerk identity requires Clerk's primary email `verification.status === "verified"`. Without this, an attacker could claim a victim's account by signing up an unverified Clerk session with the victim's email.
+- **`/auth/clerk/migrate`** is unauthenticated by design (the user has no Clerk session yet). bcrypt-compare against the local hash; if valid, import the same hash into Clerk preserving the password, mark email verified (admin strategy, warn-only on failure), set `clerk_user_id`. Generic 401 on missing-account / wrong-password / sentinel-account (no enumeration).
+- **Idempotent on Clerk-side conflict**: if Clerk POST /users returns 422/400 with `form_identifier_exists`, we look up the existing Clerk user by email and link it instead of failing with 502. Handles partial-failure retries cleanly.
+- **Rate-limited**: in-memory per-(IP, email) limiter — 5 attempts per 15 min, 429 thereafter. Single-process; if api-server ever scales horizontally, must move to Redis.
+- **Legacy routes are now Clerk-aware** (`routes/auth.ts` `isClerkManaged()` helper):
+  - `/auth/login` returns generic 401 for migrated/Clerk-native rows (so a stale legacy JWT path can't keep minting tokens alongside Clerk and drift).
+  - `/auth/change-password` returns 409 for Clerk-managed rows (must change via Clerk so hashes don't diverge).
+  - `/auth/forgot-password` silently skips token issuance + email send for Clerk-managed rows (still returns the same opaque success message — no enumeration leak).
+  - `/auth/reset-password` re-checks the target user at submit time and refuses with the same "invalid or expired" error if the user migrated after the link was generated.
+
+E2E verified end-to-end: register → migrate → Clerk verify_password 200 verified → email verified → 2nd-call 409 alreadyMigrated → wrong-pw 401 → /auth/login on migrated user 401 → /auth/forgot-password silent → /auth/reset-password with valid pre-migration token rejected (hash unchanged, token still unused) → Clerk-side duplicate triggers lookup-and-link recovery → 6th rate-limit attempt 429.
+
 ### Phase 3 — New TestFlight build
 
 Mobile app changes:
