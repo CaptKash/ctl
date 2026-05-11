@@ -152,13 +152,27 @@ Each phase is independently revertible:
 3. **Clerk MAU pricing**: Replit-managed Clerk — pricing handled at the Replit subscription tier level. Will check current limits before Phase 3 ship.
 4. **Prod test account cleanup**: ✅ **Decision: clean before Phase 3** (queued, not done yet). Targets: `testuser@example.com`, the two Test-icloud accounts, `mkashour@gmail.com (Test)`, `mkashour@icloud.com`. **Excluded (keep)**: `mkashour.apple@gmail.com` (admin, prod user id 11). Agent's `executeSql` is read-only against prod, so the actual delete will be done either via a one-shot admin endpoint triggered manually or via the Publish-time SQL window.
 
-## Phase 0 status (in flight)
+## Phase 0 status — complete
 
 - [x] `clerk_user_id text unique nullable` column added to dev DB + schema file (`lib/db/src/schema/cars.ts`)
 - [x] `@clerk/clerk-expo` installed in `artifacts/car-logbook`
 - [x] `@clerk/express` installed in `artifacts/api-server`
-- [ ] **(user)** Set up Clerk in the Auth pane (workspace toolbar)
-- [ ] **(user)** Enable Google + Apple providers in the Auth pane
+- [x] Replit-managed Clerk provisioned (`setupClerkWhitelabelAuth`); status now `managed`. `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY` set as Replit secrets.
+
+## Phase 1 status — complete
+
+- [x] `clerkMiddleware()` mounted in `artifacts/api-server/src/app.ts` (gated on env presence — safe in environments without Clerk keys).
+- [x] `requireAuth` and `optionalAuth` in `artifacts/api-server/src/middlewares/auth.ts` rewritten as dual-auth: try legacy JWT first (in-memory verify, cheap), fall back to Clerk session via `getAuth(req)` + `usersTable.clerkUserId` lookup. Single `AuthPayload` shape returned to handlers — credential-agnostic.
+- [x] `/auth/me` route migrated to use `requireAuth` instead of inline JWT verification (response shape unchanged).
+- [x] Smoke-tested against running API (port 8080):
+  - Valid legacy JWT → 200 with full user object ✅
+  - Missing Authorization header → 401 ✅
+  - Garbage Bearer token → 401 (no crash) ✅
+  - Valid signature, unknown user id → 404 from `/auth/me` (auth layer correctly delegated to handler) ✅
+  - `/healthz` (no auth) → 200 ✅
+- [x] No new TypeScript errors introduced (15 pre-existing errors in `cars.ts` are out of scope).
+
+Phase 1 is invisible to all users — no mobile app changes, no behavior change for the 71 existing accounts. The API is now *ready* to accept Clerk sessions but no real one will appear until Phase 3 ships.
 
 ---
 

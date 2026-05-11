@@ -112,26 +112,29 @@ router.post("/auth/login", async (req, res) => {
   }
 });
 
-router.get("/auth/me", async (req, res) => {
+// Routes through the shared dual-auth `requireAuth` so the same endpoint
+// works for legacy-JWT users (today's 71) and Clerk-session users (after
+// Phase 3 ships). The shape of the response is unchanged.
+router.get("/auth/me", requireAuth, async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "No token provided." });
-    }
-    const token = authHeader.slice(7);
-    const payload = jwt.verify(token, JWT_SECRET) as { id: number; email: string; name: string };
-
     const [user] = await db
-      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email, isAdmin: usersTable.isAdmin, passwordUpgradeRequired: usersTable.passwordUpgradeRequired })
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        email: usersTable.email,
+        isAdmin: usersTable.isAdmin,
+        passwordUpgradeRequired: usersTable.passwordUpgradeRequired,
+      })
       .from(usersTable)
-      .where(eq(usersTable.id, payload.id))
+      .where(eq(usersTable.id, req.user!.id))
       .limit(1);
 
     if (!user) return res.status(404).json({ error: "User not found." });
 
     res.json({ user });
-  } catch {
-    res.status(401).json({ error: "Invalid or expired token." });
+  } catch (err) {
+    console.error("/auth/me error:", err);
+    res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
 
