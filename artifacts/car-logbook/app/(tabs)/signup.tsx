@@ -198,6 +198,9 @@ export default function SignupScreen() {
       }
       // No createdSessionId means the user cancelled — silent no-op.
     } catch (err: unknown) {
+      if (__DEV__) {
+        console.log("[SSO error]", strategy, JSON.stringify(err, null, 2), err);
+      }
       setError(formatSignUpError(err, "Sign-in failed. Please try again."));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
