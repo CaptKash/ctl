@@ -333,9 +333,23 @@ export default function LoginScreen() {
             </View>
 
             {error !== "" && (
-              <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+              <View
+                style={[
+                  styles.errorBox,
+                  { backgroundColor: C.dangerLight },
+                  i18n.language === "ar" && { flexDirection: "row-reverse" },
+                ]}
+              >
                 <Feather name="alert-circle" size={15} color={C.danger} />
-                <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+                <Text
+                  style={[
+                    styles.errorText,
+                    { color: C.danger },
+                    i18n.language === "ar" && { textAlign: "right", writingDirection: "rtl" },
+                  ]}
+                >
+                  {error}
+                </Text>
               </View>
             )}
 
