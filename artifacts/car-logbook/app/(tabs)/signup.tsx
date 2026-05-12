@@ -350,11 +350,11 @@ export default function SignupScreen() {
 
             {/* Name */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.nameLabel")}</Text>
-              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("signup.nameLabel")}</Text>
+              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="user" size={16} color={C.textSecondary} />
                 <TextInput
-                  style={[styles.input, { color: C.text }]}
+                  style={[styles.input, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}
                   placeholder={t("signup.namePlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={name}
@@ -369,11 +369,11 @@ export default function SignupScreen() {
 
             {/* Email */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.emailLabel")}</Text>
-              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("signup.emailLabel")}</Text>
+              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="mail" size={16} color={C.textSecondary} />
                 <TextInput
-                  style={[styles.input, { color: C.text }]}
+                  style={[styles.input, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}
                   placeholder={t("signup.emailPlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={email}
@@ -390,11 +390,11 @@ export default function SignupScreen() {
 
             {/* Password */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.passwordLabel")}</Text>
-              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("signup.passwordLabel")}</Text>
+              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="lock" size={16} color={C.textSecondary} />
                 <TextInput
-                  style={[styles.input, { color: C.text }]}
+                  style={[styles.input, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}
                   placeholder={t("signup.passwordPlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={password}
@@ -412,7 +412,7 @@ export default function SignupScreen() {
               {password.length > 0 && (
                 <View style={styles.pwRules}>
                   {passwordRules.map((r) => (
-                    <View key={r.key} style={styles.pwRuleRow}>
+                    <View key={r.key} style={[styles.pwRuleRow, isRTL && { flexDirection: "row-reverse" }]}>
                       <Feather
                         name={r.met ? "check-circle" : "circle"}
                         size={13}
@@ -422,6 +422,7 @@ export default function SignupScreen() {
                         style={[
                           styles.pwRuleText,
                           { color: r.met ? C.success : C.textSecondary },
+                          isRTL && { textAlign: "right", writingDirection: "rtl" },
                         ]}
                       >
                         {r.label}
@@ -436,7 +437,7 @@ export default function SignupScreen() {
 
             {/* Confirm Password */}
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.confirmPasswordLabel")}</Text>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("signup.confirmPasswordLabel")}</Text>
               <View
                 style={[
                   styles.inputRow,
@@ -444,6 +445,7 @@ export default function SignupScreen() {
                     borderColor: !passwordsMatch ? C.danger : C.border,
                     backgroundColor: C.backgroundTertiary,
                   },
+                  isRTL && { flexDirection: "row-reverse" },
                 ]}
               >
                 <Feather
@@ -452,7 +454,7 @@ export default function SignupScreen() {
                   color={!passwordsMatch ? C.danger : C.textSecondary}
                 />
                 <TextInput
-                  style={[styles.input, { color: C.text }]}
+                  style={[styles.input, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}
                   placeholder={t("signup.passwordPlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={confirmPassword}
@@ -508,8 +510,8 @@ export default function SignupScreen() {
           <>
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
             <View style={styles.welcomeBlock}>
-              <Text style={[styles.welcomeTitle, { color: C.text }]}>{t("signup.verifyTitle")}</Text>
-              <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
+              <Text style={[styles.welcomeTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("signup.verifyTitle")}</Text>
+              <Text style={[styles.welcomeSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
                 {t("signup.verifySubtitle", { email: email.trim() })}
               </Text>
             </View>
@@ -536,11 +538,11 @@ export default function SignupScreen() {
             )}
 
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("signup.verifyCodeLabel")}</Text>
-              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+              <Text style={[styles.fieldLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("signup.verifyCodeLabel")}</Text>
+              <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="hash" size={16} color={C.textSecondary} />
                 <TextInput
-                  style={[styles.input, { color: C.text, letterSpacing: 4 }]}
+                  style={[styles.input, { color: C.text, letterSpacing: 4 }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}
                   placeholder={t("signup.verifyCodePlaceholder")}
                   placeholderTextColor={C.textTertiary}
                   value={code}
