@@ -477,25 +477,31 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          {/* Tiny language link — primary switcher lives in Settings, but
-              users who land in the wrong language pre-login still need an
-              escape hatch. Keep this minimal. */}
-          <View style={styles.langLinkRow}>
-            <Pressable
-              hitSlop={8}
-              onPress={async () => {
-                const target: SupportedLanguage = i18n.language === "ar" ? "en" : "ar";
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                const { requiresReload } = await setLanguage(target);
-                if (requiresReload && Platform.OS !== "web") {
-                  Alert.alert(t("common.restartRequiredTitle"), t("common.restartRequiredMessage"));
-                }
-              }}
-            >
-              <Text style={[styles.langLink, { color: C.tint }]}>
-                {i18n.language === "ar" ? "English" : "العربية"}
-              </Text>
-            </Pressable>
+          {/* Pre-login language toggle. App defaults to English; once the
+              user picks a side here it's persisted, and they can change it
+              again later from Settings. */}
+          <View style={[styles.langSwitch, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
+            {(["en", "ar"] as const).map((lng) => {
+              const active = i18n.language === lng;
+              return (
+                <Pressable
+                  key={lng}
+                  onPress={async () => {
+                    if (active) return;
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    const { requiresReload } = await setLanguage(lng);
+                    if (requiresReload && Platform.OS !== "web") {
+                      Alert.alert(t("common.restartRequiredTitle"), t("common.restartRequiredMessage"));
+                    }
+                  }}
+                  style={[styles.langSwitchBtn, active && { backgroundColor: C.tint }]}
+                >
+                  <Text style={[styles.langSwitchText, { color: active ? "#fff" : C.textSecondary }]}>
+                    {lng === "ar" ? "العربية" : "English"}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
 
           <Text style={[styles.versionText, { color: C.textTertiary }]}>{t("common.version")}</Text>
@@ -622,6 +628,18 @@ const styles = StyleSheet.create({
 
   versionText: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center" },
 
-  langLinkRow: { alignItems: "center", marginTop: 4 },
-  langLink: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  langSwitch: {
+    flexDirection: "row",
+    alignSelf: "center",
+    borderRadius: 999,
+    borderWidth: 1,
+    padding: 3,
+    marginTop: 4,
+  },
+  langSwitchBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  langSwitchText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });

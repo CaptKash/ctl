@@ -13,14 +13,14 @@ export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 const STORAGE_KEY = "ctl.language";
 const RTL_LANGUAGES = new Set<SupportedLanguage>(["ar"]);
 
+// Default to English regardless of device locale. Once the user explicitly
+// chooses a language (login-screen toggle or Settings), that choice is
+// persisted in AsyncStorage and used on every subsequent launch.
 function pickInitialLanguage(stored: string | null): SupportedLanguage {
   if (stored && (SUPPORTED_LANGUAGES as readonly string[]).includes(stored)) {
     return stored as SupportedLanguage;
   }
-  const device = Localization.getLocales()[0]?.languageCode ?? "en";
-  return (SUPPORTED_LANGUAGES as readonly string[]).includes(device)
-    ? (device as SupportedLanguage)
-    : "en";
+  return "en";
 }
 
 export async function initI18n(): Promise<void> {
