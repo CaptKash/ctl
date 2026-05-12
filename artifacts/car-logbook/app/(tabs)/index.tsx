@@ -342,7 +342,15 @@ export default function LoginScreen() {
             <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
 
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("login.emailLabel")}</Text>
+              <Text
+                style={[
+                  styles.fieldLabel,
+                  { color: C.textSecondary },
+                  i18n.language === "ar" && { textAlign: "right", writingDirection: "rtl" },
+                ]}
+              >
+                {t("login.emailLabel")}
+              </Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="mail" size={16} color={C.textSecondary} />
                 <TextInput
@@ -362,7 +370,15 @@ export default function LoginScreen() {
             <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
 
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>{t("login.passwordLabel")}</Text>
+              <Text
+                style={[
+                  styles.fieldLabel,
+                  { color: C.textSecondary },
+                  i18n.language === "ar" && { textAlign: "right", writingDirection: "rtl" },
+                ]}
+              >
+                {t("login.passwordLabel")}
+              </Text>
               <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="lock" size={16} color={C.textSecondary} />
                 <TextInput
