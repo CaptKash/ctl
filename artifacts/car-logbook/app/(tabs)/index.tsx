@@ -273,9 +273,23 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
-            <View style={styles.welcomeBlock}>
-              <Text style={[styles.welcomeTitle, { color: C.text }]}>{t("login.title")}</Text>
-              <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
+            <View style={[styles.welcomeBlock, i18n.language === "ar" && { alignItems: "flex-end" }]}>
+              <Text
+                style={[
+                  styles.welcomeTitle,
+                  { color: C.text },
+                  i18n.language === "ar" && { textAlign: "right", writingDirection: "rtl" },
+                ]}
+              >
+                {t("login.title")}
+              </Text>
+              <Text
+                style={[
+                  styles.welcomeSub,
+                  { color: C.textSecondary },
+                  i18n.language === "ar" && { textAlign: "right", writingDirection: "rtl" },
+                ]}
+              >
                 {t("login.subtitle")}
               </Text>
             </View>
