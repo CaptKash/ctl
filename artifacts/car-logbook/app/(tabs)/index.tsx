@@ -489,10 +489,9 @@ export default function LoginScreen() {
                   onPress={async () => {
                     if (active) return;
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    const { requiresReload } = await setLanguage(lng);
-                    if (requiresReload && Platform.OS !== "web") {
-                      Alert.alert(t("common.restartRequiredTitle"), t("common.restartRequiredMessage"));
-                    }
+                    // setLanguage auto-reloads the JS bundle when the
+                    // writing direction flips, so no alert is needed.
+                    await setLanguage(lng);
                   }}
                   style={[styles.langSwitchBtn, active && { backgroundColor: C.tint }]}
                 >

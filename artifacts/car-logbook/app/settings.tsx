@@ -336,11 +336,9 @@ function CountryRow() {
 }
 
 // Lets the user switch between English and Arabic. Uses the shared
-// select-picker. When switching to/from Arabic, the underlying
-// `setLanguage` helper toggles I18nManager.forceRTL — that requires a
-// JS reload to actually re-mount the layout, so we surface an Alert
-// asking the user to close and reopen the app. Bare in-language
-// string changes (e.g. en → fr later) wouldn't need this.
+// select-picker. When the writing direction flips (LTR↔RTL), the
+// `setLanguage` helper auto-reloads the JS bundle so the layout
+// re-mounts in the new direction — no user-facing alert needed.
 function LanguageRow() {
   const C = useColors();
   const { t, i18n } = useTranslation();
@@ -360,10 +358,7 @@ function LanguageRow() {
       async (selected) => {
         const lng = codeFor(selected);
         if (lng === i18n.language) return;
-        const { requiresReload } = await setLanguage(lng);
-        if (requiresReload && Platform.OS !== "web") {
-          Alert.alert(t("common.restartRequiredTitle"), t("common.restartRequiredMessage"));
-        }
+        await setLanguage(lng);
       },
     );
     router.push("/select-picker");

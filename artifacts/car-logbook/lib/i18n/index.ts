@@ -2,7 +2,8 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import * as Localization from "expo-localization";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { I18nManager } from "react-native";
+import { DevSettings, I18nManager, Platform } from "react-native";
+import * as Updates from "expo-updates";
 
 import en from "./locales/en.json";
 import ar from "./locales/ar.json";
@@ -55,13 +56,36 @@ function applyRTLForLanguage(lng: string): void {
   }
 }
 
+// Switch language and, if the writing direction flipped (LTR↔RTL), reload
+// the JS bundle automatically so the user never sees a "restart required"
+// alert. React Native applies `I18nManager.forceRTL` only on bundle reload,
+// so we drive that ourselves: `Updates.reloadAsync()` in production builds,
+// `DevSettings.reload()` in dev / Expo Go.
 export async function setLanguage(lng: SupportedLanguage): Promise<{ requiresReload: boolean }> {
   await AsyncStorage.setItem(STORAGE_KEY, lng).catch(() => undefined);
   const wasRTL = I18nManager.isRTL;
   await i18n.changeLanguage(lng);
   applyRTLForLanguage(lng);
   const isNowRTL = isRTLLanguage(lng);
-  return { requiresReload: wasRTL !== isNowRTL };
+  const requiresReload = wasRTL !== isNowRTL;
+
+  if (requiresReload && Platform.OS !== "web") {
+    // Tiny delay so the caller's UI (haptic, button state) settles before
+    // the bundle tears down.
+    setTimeout(() => {
+      try {
+        if (__DEV__ && typeof DevSettings?.reload === "function") {
+          DevSettings.reload();
+        } else {
+          Updates.reloadAsync().catch(() => undefined);
+        }
+      } catch {
+        // No-op — worst case the user closes/reopens manually.
+      }
+    }, 150);
+  }
+
+  return { requiresReload };
 }
 
 export default i18n;
