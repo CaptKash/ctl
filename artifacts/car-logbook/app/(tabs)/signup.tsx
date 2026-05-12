@@ -318,9 +318,23 @@ export default function SignupScreen() {
 
             {/* Error */}
             {error !== "" && (
-              <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+              <View
+                style={[
+                  styles.errorBox,
+                  { backgroundColor: C.dangerLight },
+                  isRTL && { flexDirection: "row-reverse" },
+                ]}
+              >
                 <Feather name="alert-circle" size={15} color={C.danger} />
-                <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+                <Text
+                  style={[
+                    styles.errorText,
+                    { color: C.danger },
+                    isRTL && { textAlign: "right", writingDirection: "rtl" },
+                  ]}
+                >
+                  {error}
+                </Text>
               </View>
             )}
 
@@ -491,9 +505,23 @@ export default function SignupScreen() {
             </View>
 
             {error !== "" && (
-              <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+              <View
+                style={[
+                  styles.errorBox,
+                  { backgroundColor: C.dangerLight },
+                  isRTL && { flexDirection: "row-reverse" },
+                ]}
+              >
                 <Feather name="alert-circle" size={15} color={C.danger} />
-                <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+                <Text
+                  style={[
+                    styles.errorText,
+                    { color: C.danger },
+                    isRTL && { textAlign: "right", writingDirection: "rtl" },
+                  ]}
+                >
+                  {error}
+                </Text>
               </View>
             )}
 
