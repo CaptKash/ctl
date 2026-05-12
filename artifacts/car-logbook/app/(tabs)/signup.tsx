@@ -135,6 +135,16 @@ export default function SignupScreen() {
       setResendCooldown(60);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: unknown) {
+      // Dev-only: surface the real Clerk error code to the JS console
+      // so we can debug. Production users only ever see the generic
+      // safe message returned by formatSignUpError.
+      if (__DEV__) {
+        if (isClerkAPIResponseError(err)) {
+          console.log("[signup.create] Clerk error:", JSON.stringify(err.errors, null, 2));
+        } else {
+          console.log("[signup.create] error:", err);
+        }
+      }
       setError(formatSignUpError(err, t("signup.errorCreateFailed")));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
