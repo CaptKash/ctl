@@ -487,9 +487,18 @@ export default function LoginScreen() {
                   onPress={async () => {
                     if (active) return;
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    // setLanguage auto-reloads the JS bundle when the
-                    // writing direction flips, so no alert is needed.
-                    await setLanguage(lng);
+                    const { requiresReload } = await setLanguage(lng);
+                    // Bilingual alert: forcing RTL takes effect only
+                    // after a true native restart, which Expo Go won't
+                    // do for us. The message is shown in both
+                    // languages so the user understands regardless of
+                    // which direction they switched.
+                    if (requiresReload && Platform.OS !== "web") {
+                      Alert.alert(
+                        t("common.restartRequiredTitle"),
+                        t("common.restartRequiredMessage"),
+                      );
+                    }
                   }}
                   style={[styles.langSwitchBtn, active && { backgroundColor: C.tint }]}
                 >

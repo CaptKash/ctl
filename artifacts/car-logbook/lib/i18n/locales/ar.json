@@ -6,8 +6,8 @@
     "cancel": "إلغاء",
     "ok": "حسناً",
     "dash": "—",
-    "restartRequiredTitle": "إعادة تشغيل مطلوبة",
-    "restartRequiredMessage": "يرجى إغلاق التطبيق وإعادة فتحه لتطبيق التخطيط من اليمين إلى اليسار."
+    "restartRequiredTitle": "إعادة تشغيل مطلوبة  •  Restart required",
+    "restartRequiredMessage": "يرجى إغلاق التطبيق وإعادة فتحه لتطبيق اللغة الجديدة.\n\nPlease close and reopen the app to apply the new language."
   },
   "login": {
     "title": "تسجيل الدخول",

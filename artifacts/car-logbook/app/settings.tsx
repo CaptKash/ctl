@@ -358,7 +358,13 @@ function LanguageRow() {
       async (selected) => {
         const lng = codeFor(selected);
         if (lng === i18n.language) return;
-        await setLanguage(lng);
+        const { requiresReload } = await setLanguage(lng);
+        if (requiresReload && Platform.OS !== "web") {
+          Alert.alert(
+            t("common.restartRequiredTitle"),
+            t("common.restartRequiredMessage"),
+          );
+        }
       },
     );
     router.push("/select-picker");

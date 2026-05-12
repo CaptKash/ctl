@@ -56,11 +56,13 @@ function applyRTLForLanguage(lng: string): void {
   }
 }
 
-// Switch language and, if the writing direction flipped (LTR↔RTL), reload
-// the JS bundle automatically so the user never sees a "restart required"
-// alert. React Native applies `I18nManager.forceRTL` only on bundle reload,
-// so we drive that ourselves: `Updates.reloadAsync()` in production builds,
-// `DevSettings.reload()` in dev / Expo Go.
+// Switch language. When the writing direction flips (LTR↔RTL) we try to
+// reload the JS bundle so `I18nManager.forceRTL` actually re-applies the
+// new layout. In a production / custom-dev build `Updates.reloadAsync()`
+// does the right thing. In Expo Go this is unreliable — RN's RTL flip
+// requires a true native restart — so the caller should also surface the
+// bilingual `common.restartRequired*` alert telling the user to close and
+// reopen the app.
 export async function setLanguage(lng: SupportedLanguage): Promise<{ requiresReload: boolean }> {
   await AsyncStorage.setItem(STORAGE_KEY, lng).catch(() => undefined);
   const wasRTL = I18nManager.isRTL;
@@ -70,19 +72,20 @@ export async function setLanguage(lng: SupportedLanguage): Promise<{ requiresRel
   const requiresReload = wasRTL !== isNowRTL;
 
   if (requiresReload && Platform.OS !== "web") {
-    // Tiny delay so the caller's UI (haptic, button state) settles before
-    // the bundle tears down.
+    // Best-effort programmatic reload. Works on production / custom dev
+    // builds; in Expo Go the user will still need to manually close and
+    // reopen the app, which is why callers also show the bilingual alert.
     setTimeout(() => {
       try {
-        if (__DEV__ && typeof DevSettings?.reload === "function") {
-          DevSettings.reload();
-        } else {
-          Updates.reloadAsync().catch(() => undefined);
-        }
+        Updates.reloadAsync().catch(() => {
+          if (__DEV__ && typeof DevSettings?.reload === "function") {
+            DevSettings.reload();
+          }
+        });
       } catch {
-        // No-op — worst case the user closes/reopens manually.
+        // No-op
       }
-    }, 150);
+    }, 1500);
   }
 
   return { requiresReload };

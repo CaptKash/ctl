@@ -6,8 +6,8 @@
     "cancel": "Cancel",
     "ok": "OK",
     "dash": "—",
-    "restartRequiredTitle": "Restart required",
-    "restartRequiredMessage": "Please close and reopen the app to apply the right-to-left layout."
+    "restartRequiredTitle": "Restart required  •  إعادة تشغيل مطلوبة",
+    "restartRequiredMessage": "Please close and reopen the app to apply the new language.\n\nيرجى إغلاق التطبيق وإعادة فتحه لتطبيق اللغة الجديدة."
   },
   "login": {
     "title": "Sign in",
