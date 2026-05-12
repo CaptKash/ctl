@@ -388,12 +388,12 @@ export default function LoginScreen() {
             onPress={() => setRememberMe((v) => !v)}
             hitSlop={8}
           >
-            <View style={i18n.language === "ar" && { alignItems: "flex-end" }}>
+            <View style={[{ flex: 1 }, i18n.language === "ar" && { alignItems: "flex-end" }]}>
               <Text
                 style={[
                   styles.rememberLabel,
                   { color: C.text },
-                  i18n.language === "ar" && { textAlign: "right" },
+                  i18n.language === "ar" && { textAlign: "right", writingDirection: "rtl" },
                 ]}
               >
                 {t("login.rememberMe")}
@@ -402,7 +402,7 @@ export default function LoginScreen() {
                 style={[
                   styles.rememberSub,
                   { color: C.textSecondary },
-                  i18n.language === "ar" && { textAlign: "right" },
+                  i18n.language === "ar" && { textAlign: "right", writingDirection: "rtl" },
                 ]}
               >
                 {t("login.rememberMeSub")}
