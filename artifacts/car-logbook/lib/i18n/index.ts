@@ -1,9 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import * as Localization from "expo-localization";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DevSettings, I18nManager, Platform } from "react-native";
-import * as Updates from "expo-updates";
+import { I18nManager } from "react-native";
 
 import en from "./locales/en.json";
 import ar from "./locales/ar.json";
@@ -37,58 +35,34 @@ export async function initI18n(): Promise<void> {
     compatibilityJSON: "v4",
   });
 
-  applyRTLForLanguage(lng);
+  // Neutralize any leftover native RTL state from earlier app versions
+  // that called `I18nManager.forceRTL(true)`. We now drive RTL purely
+  // from per-component styles, so the platform must stay LTR.
+  try {
+    if (I18nManager.isRTL) {
+      I18nManager.allowRTL(false);
+      I18nManager.forceRTL(false);
+    }
+  } catch {
+    // No-op on web / unsupported
+  }
 }
 
 export function isRTLLanguage(lng: string): boolean {
   return RTL_LANGUAGES.has(lng as SupportedLanguage);
 }
 
-function applyRTLForLanguage(lng: string): void {
-  const shouldBeRTL = isRTLLanguage(lng);
-  if (I18nManager.isRTL !== shouldBeRTL) {
-    try {
-      I18nManager.allowRTL(shouldBeRTL);
-      I18nManager.forceRTL(shouldBeRTL);
-    } catch {
-      // No-op on web / unsupported
-    }
-  }
-}
-
-// Switch language. When the writing direction flips (LTR↔RTL) we try to
-// reload the JS bundle so `I18nManager.forceRTL` actually re-applies the
-// new layout. In a production / custom-dev build `Updates.reloadAsync()`
-// does the right thing. In Expo Go this is unreliable — RN's RTL flip
-// requires a true native restart — so the caller should also surface the
-// bilingual `common.restartRequired*` alert telling the user to close and
-// reopen the app.
+// Switch language. We deliberately DO NOT call `I18nManager.forceRTL` —
+// that API is unreliable in Expo Go (requires a native restart) and forces
+// the entire app into auto-flip mode which then double-flips our manual
+// styles. Instead, every screen reads `i18n.language` and explicitly
+// applies RTL styling (flexDirection: row-reverse, textAlign: right,
+// writingDirection: rtl) where appropriate. This makes language switching
+// instant and identical between Expo Go, custom dev builds, and prod.
 export async function setLanguage(lng: SupportedLanguage): Promise<{ requiresReload: boolean }> {
   await AsyncStorage.setItem(STORAGE_KEY, lng).catch(() => undefined);
-  const wasRTL = I18nManager.isRTL;
   await i18n.changeLanguage(lng);
-  applyRTLForLanguage(lng);
-  const isNowRTL = isRTLLanguage(lng);
-  const requiresReload = wasRTL !== isNowRTL;
-
-  if (requiresReload && Platform.OS !== "web") {
-    // Best-effort programmatic reload. Works on production / custom dev
-    // builds; in Expo Go the user will still need to manually close and
-    // reopen the app, which is why callers also show the bilingual alert.
-    setTimeout(() => {
-      try {
-        Updates.reloadAsync().catch(() => {
-          if (__DEV__ && typeof DevSettings?.reload === "function") {
-            DevSettings.reload();
-          }
-        });
-      } catch {
-        // No-op
-      }
-    }, 1500);
-  }
-
-  return { requiresReload };
+  return { requiresReload: false };
 }
 
 export default i18n;

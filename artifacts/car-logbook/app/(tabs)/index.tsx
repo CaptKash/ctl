@@ -236,9 +236,8 @@ export default function LoginScreen() {
 
         {/* ── Brand hero ─────────────────────────────────────────────── */}
         {/* Brand mark is a Latin wordmark ("CTL" + tagline + accent dashes)
-            and should NOT mirror in RTL. We pin the whole hero block to
-            LTR via the `direction` style so the dashed accent stays under
-            the C of CTL on the left, regardless of app language. */}
+            — same in any language. With forceRTL disabled, the layout
+            stays LTR by default, so no extra mirroring guards needed. */}
         <View style={[
           styles.hero,
           {
@@ -246,7 +245,6 @@ export default function LoginScreen() {
             backgroundColor: C.heroBg,
             borderBottomColor: C.heroBorder,
             borderBottomWidth: C.heroBorder === "transparent" ? 0 : 2,
-            direction: "ltr",
           },
         ]}>
           <Svg
@@ -338,7 +336,13 @@ export default function LoginScreen() {
             </View>
 
             {error !== "" && (
-              <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+              <View
+                style={[
+                  styles.errorBox,
+                  { backgroundColor: C.dangerLight },
+                  i18n.language === "ar" && { flexDirection: "row-reverse" },
+                ]}
+              >
                 <Feather name="alert-circle" size={15} color={C.danger} />
                 <Text
                   style={[
@@ -424,11 +428,14 @@ export default function LoginScreen() {
           </View>
 
           <Pressable
-            style={styles.rememberRow}
+            style={[
+              styles.rememberRow,
+              i18n.language === "ar" && { flexDirection: "row-reverse" },
+            ]}
             onPress={() => setRememberMe((v) => !v)}
             hitSlop={8}
           >
-            <View style={{ flex: 1 }}>
+            <View style={[{ flex: 1 }, i18n.language === "ar" && { alignItems: "flex-end" }]}>
               <Text
                 style={[
                   styles.rememberLabel,
@@ -475,10 +482,8 @@ export default function LoginScreen() {
 
           {/* Pre-login language toggle. App defaults to English; once the
               user picks a side here it's persisted, and they can change it
-              again later from Settings. Locked to LTR so the option order
-              (English, then العربية) stays consistent regardless of the
-              currently-active language. */}
-          <View style={[styles.langSwitch, { backgroundColor: C.backgroundTertiary, borderColor: C.border, direction: "ltr" }]}>
+              again later from Settings. */}
+          <View style={[styles.langSwitch, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
             {(["en", "ar"] as const).map((lng) => {
               const active = i18n.language === lng;
               return (
@@ -487,18 +492,7 @@ export default function LoginScreen() {
                   onPress={async () => {
                     if (active) return;
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    const { requiresReload } = await setLanguage(lng);
-                    // Bilingual alert: forcing RTL takes effect only
-                    // after a true native restart, which Expo Go won't
-                    // do for us. The message is shown in both
-                    // languages so the user understands regardless of
-                    // which direction they switched.
-                    if (requiresReload && Platform.OS !== "web") {
-                      Alert.alert(
-                        t("common.restartRequiredTitle"),
-                        t("common.restartRequiredMessage"),
-                      );
-                    }
+                    await setLanguage(lng);
                   }}
                   style={[styles.langSwitchBtn, active && { backgroundColor: C.tint }]}
                 >
