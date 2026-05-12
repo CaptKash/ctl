@@ -235,6 +235,10 @@ export default function LoginScreen() {
       <View style={[styles.container, { backgroundColor: C.background }]}>
 
         {/* ── Brand hero ─────────────────────────────────────────────── */}
+        {/* Brand mark is a Latin wordmark ("CTL" + tagline + accent dashes)
+            and should NOT mirror in RTL. We pin the whole hero block to
+            LTR via the `direction` style so the dashed accent stays under
+            the C of CTL on the left, regardless of app language. */}
         <View style={[
           styles.hero,
           {
@@ -242,6 +246,7 @@ export default function LoginScreen() {
             backgroundColor: C.heroBg,
             borderBottomColor: C.heroBorder,
             borderBottomWidth: C.heroBorder === "transparent" ? 0 : 2,
+            direction: "ltr",
           },
         ]}>
           <Svg
@@ -333,13 +338,7 @@ export default function LoginScreen() {
             </View>
 
             {error !== "" && (
-              <View
-                style={[
-                  styles.errorBox,
-                  { backgroundColor: C.dangerLight },
-                  i18n.language === "ar" && { flexDirection: "row-reverse" },
-                ]}
-              >
+              <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
                 <Feather name="alert-circle" size={15} color={C.danger} />
                 <Text
                   style={[
@@ -425,14 +424,11 @@ export default function LoginScreen() {
           </View>
 
           <Pressable
-            style={[
-              styles.rememberRow,
-              i18n.language === "ar" && { flexDirection: "row-reverse" },
-            ]}
+            style={styles.rememberRow}
             onPress={() => setRememberMe((v) => !v)}
             hitSlop={8}
           >
-            <View style={[{ flex: 1 }, i18n.language === "ar" && { alignItems: "flex-end" }]}>
+            <View style={{ flex: 1 }}>
               <Text
                 style={[
                   styles.rememberLabel,
@@ -479,8 +475,10 @@ export default function LoginScreen() {
 
           {/* Pre-login language toggle. App defaults to English; once the
               user picks a side here it's persisted, and they can change it
-              again later from Settings. */}
-          <View style={[styles.langSwitch, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
+              again later from Settings. Locked to LTR so the option order
+              (English, then العربية) stays consistent regardless of the
+              currently-active language. */}
+          <View style={[styles.langSwitch, { backgroundColor: C.backgroundTertiary, borderColor: C.border, direction: "ltr" }]}>
             {(["en", "ar"] as const).map((lng) => {
               const active = i18n.language === lng;
               return (
