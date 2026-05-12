@@ -10,6 +10,12 @@ const USER_KEY = "ctl_auth_user";
 const REMEMBER_KEY = "ctl_remember_session";
 const INSTALL_SENTINEL_KEY = "ctl_install_sentinel";
 const INSTALL_SENTINEL_SECURE_KEY = "ctl_install_id";
+// Pending name typed at signup. Stashed by the signup screen right before
+// it activates the Clerk session, then read+deleted by the sync-user call
+// below — the Replit-managed Clerk instance does not accept first/last
+// name on signUp.create, so we forward the user's typed name through our
+// own server instead.
+export const SIGNUP_NAME_KEY = "ctl_pending_signup_name";
 
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -30,16 +36,36 @@ async function verifyTokenWithServer(token: string): Promise<AuthUser | null> {
 
 async function syncUserWithServer(clerkSessionToken: string): Promise<AuthUser | null> {
   try {
+    // Read any pending signup name. The signup screen stashes the user's
+    // typed name here right before activating the Clerk session because
+    // the Replit-managed Clerk instance rejects first/last name on
+    // signUp.create — so we hand the name to our own server instead.
+    // We deliberately delete AFTER the request succeeds so transient
+    // network failures (which trigger the outer retry loop) still carry
+    // the typed name through; otherwise a single failed attempt would
+    // permanently lose the name.
+    let pendingName: string | null = null;
+    try {
+      pendingName = await secureGet(SIGNUP_NAME_KEY);
+    } catch { /* non-fatal */ }
+
+    const body: Record<string, string> = {};
+    if (pendingName && pendingName.trim()) body.name = pendingName.trim();
+
     const res = await fetch(`${BASE_URL}/auth/clerk/sync-user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${clerkSessionToken}`,
       },
-      body: JSON.stringify({}),
+      body: JSON.stringify(body),
     });
     if (!res.ok) return null;
     const data = await res.json();
+    // Successful sync — safe to clear the pending name now.
+    if (pendingName) {
+      try { await secureDelete(SIGNUP_NAME_KEY); } catch { /* non-fatal */ }
+    }
     return data.user ?? null;
   } catch {
     return null;

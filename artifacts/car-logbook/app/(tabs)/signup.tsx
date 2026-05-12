@@ -18,8 +18,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
 import { useSignUp, useSSO, isClerkAPIResponseError } from "@clerk/clerk-expo";
 import { useTranslation } from "react-i18next";
+import * as SecureStore from "expo-secure-store";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { SIGNUP_NAME_KEY } from "@/context/AuthContext";
 
 export default function SignupScreen() {
   const insets = useSafeAreaInsets();
@@ -121,14 +123,17 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       const trimmedName = name.trim();
-      const [firstName, ...rest] = trimmedName.split(/\s+/);
-      const lastName = rest.join(" ") || undefined;
+      // NOTE: this Clerk instance does NOT accept firstName/lastName on
+      // signUp.create (returns form_param_unknown). We stash the typed
+      // name in SecureStore instead — AuthContext's sync-user call reads
+      // and forwards it when creating the local DB row after setActive.
       await signUp.create({
         emailAddress: email.trim(),
         password,
-        firstName: firstName || trimmedName,
-        lastName,
       });
+      try {
+        await SecureStore.setItemAsync(SIGNUP_NAME_KEY, trimmedName);
+      } catch { /* non-fatal: server falls back to email local-part */ }
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setStep("verify");
       setCode("");

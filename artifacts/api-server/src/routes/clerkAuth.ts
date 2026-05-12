@@ -164,8 +164,21 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: "Clerk account has no email address." });
     }
+    // Name source priority:
+    //   1. Clerk's first_name/last_name (set when the Clerk instance has the
+    //      name fields enabled in its sign-up schema).
+    //   2. Optional `name` in the request body — the mobile signup screen
+    //      passes the name the user typed at sign-up time. Used because the
+    //      Replit-managed Clerk instance does NOT accept first/last name on
+    //      signUp.create, so we'd otherwise lose the user's typed name.
+    //   3. Email local-part as last-resort fallback.
+    const bodyName =
+      typeof (req.body as { name?: unknown })?.name === "string"
+        ? ((req.body as { name?: string }).name ?? "").trim()
+        : "";
     const name =
       [clerkUser.first_name, clerkUser.last_name].filter(Boolean).join(" ").trim() ||
+      bodyName ||
       email.split("@")[0];
 
     // 3. Match by email — link if unlinked, conflict if cross-linked.
