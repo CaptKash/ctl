@@ -61,6 +61,8 @@ function NavRow({
   danger?: boolean;
 }) {
   const C = useColors();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   return (
     <Pressable
       onPress={() => {
@@ -68,21 +70,21 @@ function NavRow({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPress();
       }}
-      style={({ pressed }) => [styles.row, { opacity: pressed && onPress ? 0.75 : 1 }]}
+      style={({ pressed }) => [styles.row, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed && onPress ? 0.75 : 1 }]}
     >
       <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
         <Feather name={icon} size={16} color={iconColor} />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: danger ? C.danger : C.text }]}>{label}</Text>
-        {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }]}>{subtitle}</Text> : null}
+        <Text style={[styles.rowTitle, { color: danger ? C.danger : C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{label}</Text>
+        {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{subtitle}</Text> : null}
       </View>
       {badge ? (
         <View style={[styles.pill, { backgroundColor: danger ? C.dangerLight : C.tint + "18" }]}>
           <Text style={[styles.pillText, { color: danger ? C.danger : C.tint }]}>{badge}</Text>
         </View>
       ) : onPress ? (
-        <Feather name="chevron-right" size={16} color={C.textTertiary} />
+        <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
       ) : null}
     </Pressable>
   );
@@ -97,7 +99,8 @@ function NavRow({
 // to Clerk's own server-side guard, which surfaces an error we show.
 function ConnectedAccountsCard() {
   const C = useColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { user, isLoaded } = useUser();
   const [pending, setPending] = useState<string | null>(null);
 
@@ -189,14 +192,14 @@ function ConnectedAccountsCard() {
           if (isPending) return;
           onPress();
         }}
-        style={({ pressed }) => [styles.row, { opacity: pressed && !isPending ? 0.75 : 1 }]}
+        style={({ pressed }) => [styles.row, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed && !isPending ? 0.75 : 1 }]}
       >
         <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
           <Ionicons name={icon} size={18} color={iconColor} />
         </View>
         <View style={styles.rowBody}>
-          <Text style={[styles.rowTitle, { color: C.text }]}>{label}</Text>
-          <Text style={[styles.rowSub, { color: C.textSecondary }]} numberOfLines={1}>
+          <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{label}</Text>
+          <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]} numberOfLines={1}>
             {subtitle}
           </Text>
         </View>
@@ -217,7 +220,7 @@ function ConnectedAccountsCard() {
 
   return (
     <>
-      <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.signInMethods")}</Text>
+      <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.signInMethods")}</Text>
       <View style={[styles.card, { backgroundColor: C.card }]}>
         <Row
           icon="logo-apple"
@@ -227,7 +230,7 @@ function ConnectedAccountsCard() {
           account={apple}
           strategy="oauth_apple"
         />
-        <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+        <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
         <Row
           icon="logo-google"
           iconColor="#1A1A1A"
@@ -261,15 +264,16 @@ function ToggleRow({
   comingSoon?: boolean;
 }) {
   const C = useColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, isRTL && { flexDirection: "row-reverse" }]}>
       <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
         <Feather name={icon} size={16} color={iconColor} />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>{label}</Text>
-        {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }]}>{subtitle}</Text> : null}
+        <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{label}</Text>
+        {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{subtitle}</Text> : null}
       </View>
       {comingSoon ? (
         <View style={[styles.pill, { backgroundColor: C.tint + "18" }]}>
@@ -303,7 +307,8 @@ const DISTANCE_OPTIONS: { value: "km" | "mi"; label: string }[] = [
 
 function CountryRow() {
   const C = useColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { country, setCountry } = useCountry();
 
   const handlePress = () => {
@@ -320,17 +325,17 @@ function CountryRow() {
   };
 
   return (
-    <TouchableOpacity style={styles.row} onPress={handlePress} activeOpacity={0.7}>
+    <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
       <View style={[styles.rowIcon, { backgroundColor: "#EDE9FE" }]}>
         <Feather name="globe" size={16} color="#7C3AED" />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.account.country")}</Text>
-        <Text style={[styles.rowSub, { color: C.textSecondary }]}>
+        <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.account.country")}</Text>
+        <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
           {country ? `${country.flag} ${country.name}` : t("settings.account.countryPlaceholder")}
         </Text>
       </View>
-      <Feather name="chevron-right" size={16} color={C.textTertiary} />
+      <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
     </TouchableOpacity>
   );
 }
@@ -342,6 +347,7 @@ function CountryRow() {
 function LanguageRow() {
   const C = useColors();
   const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
 
   const optionFor = (lng: SupportedLanguage) =>
     lng === "ar" ? t("settings.account.languageArabic") : t("settings.account.languageEnglish");
@@ -365,22 +371,23 @@ function LanguageRow() {
   };
 
   return (
-    <TouchableOpacity style={styles.row} onPress={handlePress} activeOpacity={0.7}>
+    <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
       <View style={[styles.rowIcon, { backgroundColor: "#FCE7F3" }]}>
         <Feather name="message-circle" size={16} color="#DB2777" />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.account.language")}</Text>
-        <Text style={[styles.rowSub, { color: C.textSecondary }]}>{optionFor(current)}</Text>
+        <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.account.language")}</Text>
+        <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{optionFor(current)}</Text>
       </View>
-      <Feather name="chevron-right" size={16} color={C.textTertiary} />
+      <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
     </TouchableOpacity>
   );
 }
 
 function CurrencyRow() {
   const C = useColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { currency, setCurrency } = useCurrency();
 
   const handlePress = () => {
@@ -397,33 +404,34 @@ function CurrencyRow() {
   };
 
   return (
-    <TouchableOpacity style={styles.row} onPress={handlePress} activeOpacity={0.7}>
+    <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
       <View style={[styles.rowIcon, { backgroundColor: "#D1FAE5" }]}>
         <Feather name="dollar-sign" size={16} color="#059669" />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.preferences.currency")}</Text>
-        <Text style={[styles.rowSub, { color: C.textSecondary }]}>
+        <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.preferences.currency")}</Text>
+        <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
           {currency.code} · {currency.name}
         </Text>
       </View>
-      <Feather name="chevron-right" size={16} color={C.textTertiary} />
+      <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
     </TouchableOpacity>
   );
 }
 
 function DistanceRow() {
   const C = useColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { unit, setUnit } = useDistanceUnit();
 
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, isRTL && { flexDirection: "row-reverse" }]}>
       <View style={[styles.rowIcon, { backgroundColor: "#CFFAFE" }]}>
         <Feather name="navigation" size={16} color="#0891B2" />
       </View>
       <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.preferences.distanceUnit")}</Text>
+        <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.preferences.distanceUnit")}</Text>
       </View>
       <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
         {DISTANCE_OPTIONS.map((opt) => {
@@ -451,16 +459,17 @@ function DistanceRow() {
 
 function ThemeRow() {
   const C = useColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { preference, setPreference } = useTheme();
 
   return (
     <View style={[styles.row, { alignItems: "flex-start", flexDirection: "column", gap: 10 }]}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+      <View style={{ flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12, alignSelf: "stretch" }}>
         <View style={[styles.rowIcon, { backgroundColor: "#FEF3C7" }]}>
           <Feather name="sun" size={16} color="#D97706" />
         </View>
-        <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.preferences.theme")}</Text>
+        <Text style={[styles.rowTitle, { color: C.text, flex: 1 }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.preferences.theme")}</Text>
       </View>
       <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border, alignSelf: "stretch" }]}>
         {THEME_VALUES.map((opt) => {
@@ -493,7 +502,8 @@ function ThemeRow() {
 
 export default function SettingsScreen() {
   const C = useColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -537,13 +547,13 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <View style={[styles.iconBox, { backgroundColor: C.backgroundTertiary }]}>
             <Feather name="settings" size={22} color={C.textSecondary} />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>{t("settings.title")}</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>{t("settings.subtitle")}</Text>
+            <Text style={[styles.headerTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.subtitle")}</Text>
           </View>
         </View>
       </View>
@@ -553,13 +563,13 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile card */}
-        <View style={[styles.profileCard, { backgroundColor: C.card }]}>
+        <View style={[styles.profileCard, { backgroundColor: C.card }, isRTL && { flexDirection: "row-reverse" }]}>
           <View style={[styles.avatar, { backgroundColor: C.tint }]}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={[styles.profileName, { color: C.text }]}>{user?.name ?? t("common.dash")}</Text>
-            <Text style={[styles.profileEmail, { color: C.textSecondary }]}>{user?.email ?? t("common.dash")}</Text>
+            <Text style={[styles.profileName, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{user?.name ?? t("common.dash")}</Text>
+            <Text style={[styles.profileEmail, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{user?.email ?? t("common.dash")}</Text>
           </View>
           <View style={[styles.statBubble, { backgroundColor: C.tint + "15" }]}>
             <Text style={[styles.statValue, { color: C.tint }]}>{cars.length}</Text>
@@ -568,7 +578,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Account */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.account")}</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.account")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <NavRow
             icon="edit-2"
@@ -578,9 +588,9 @@ export default function SettingsScreen() {
             subtitle={t("settings.account.editProfileSub")}
             onPress={() => router.push("/edit-profile")}
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
           <CountryRow />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
           <LanguageRow />
         </View>
 
@@ -619,17 +629,17 @@ export default function SettingsScreen() {
         </Pressable>
 
         {/* Preferences */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.preferences")}</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.preferences")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <ThemeRow />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
           <DistanceRow />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
           <CurrencyRow />
         </View>
 
         {/* Notifications */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.notifications")}</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.notifications")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <ToggleRow
             icon="bell"
@@ -643,18 +653,18 @@ export default function SettingsScreen() {
         </View>
 
         {/* About */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.about")}</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.about")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
-          <View style={styles.row}>
+          <View style={[styles.row, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.rowIcon, { backgroundColor: C.backgroundTertiary }]}>
               <Feather name="info" size={16} color={C.textSecondary} />
             </View>
             <View style={styles.rowBody}>
-              <Text style={[styles.rowTitle, { color: C.text }]}>{t("settings.about.appVersion")}</Text>
-              <Text style={[styles.rowSub, { color: C.textSecondary }]}>{t("common.version")}</Text>
+              <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.about.appVersion")}</Text>
+              <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("common.version")}</Text>
             </View>
           </View>
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
           <NavRow
             icon="message-square"
             iconColor="#7C3AED"
@@ -663,7 +673,7 @@ export default function SettingsScreen() {
             subtitle={t("settings.about.feedbackSub")}
             onPress={() => router.push("/feedback")}
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
           <NavRow
             icon="lock"
             iconColor="#6B7280"
@@ -674,7 +684,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Sign out + danger */}
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>{t("settings.sections.session")}</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.session")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <NavRow
             icon="log-out"
@@ -685,7 +695,7 @@ export default function SettingsScreen() {
             onPress={() => setShowSignOutModal(true)}
             danger
           />
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+          <View style={[styles.divider, { backgroundColor: C.borderLight }, isRTL && { marginLeft: 0, marginRight: 44 }]} />
           <NavRow
             icon="trash-2"
             iconColor="#DC2626"

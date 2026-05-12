@@ -287,8 +287,8 @@ export default function SignupScreen() {
           <View style={[styles.formCard, { backgroundColor: C.card }]}>
             {/* Heading */}
             <View style={styles.welcomeBlock}>
-              <Text style={[styles.welcomeTitle, { color: C.text }]}>{t("signup.title")}</Text>
-              <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
+              <Text style={[styles.welcomeTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("signup.title")}</Text>
+              <Text style={[styles.welcomeSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
                 {t("signup.subtitle")}
               </Text>
             </View>

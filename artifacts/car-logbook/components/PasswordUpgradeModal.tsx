@@ -9,21 +9,29 @@ import {
   Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useAuth as useClerkAuth } from "@clerk/clerk-expo";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/context/ThemeContext";
 import { apiPost } from "@/hooks/useApi";
 
 export function PasswordUpgradeModal() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { isSignedIn: isClerkSignedIn } = useClerkAuth();
   const C = useColors();
   const [dismissed, setDismissed] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Suppress for any user already on Clerk: their password is now managed
+  // by Clerk and meets Clerk's strength rules, so the legacy
+  // passwordUpgradeRequired flag (set when the bcrypt hash failed the new
+  // policy) is moot. Only legacy users still on the old JWT path should
+  // see this modal.
   const visible =
     Platform.OS !== "web" &&
     isAuthenticated &&
+    !isClerkSignedIn &&
     !!user?.passwordUpgradeRequired &&
     !dismissed;
 
