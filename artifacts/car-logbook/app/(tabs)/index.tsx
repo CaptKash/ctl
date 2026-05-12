@@ -24,6 +24,7 @@ import { isClerkAPIResponseError } from "@clerk/clerk-expo";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
+import { setLanguage, type SupportedLanguage } from "@/lib/i18n";
 
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -432,6 +433,27 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
+          {/* Tiny language link — primary switcher lives in Settings, but
+              users who land in the wrong language pre-login still need an
+              escape hatch. Keep this minimal. */}
+          <View style={styles.langLinkRow}>
+            <Pressable
+              hitSlop={8}
+              onPress={async () => {
+                const target: SupportedLanguage = i18n.language === "ar" ? "en" : "ar";
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                const { requiresReload } = await setLanguage(target);
+                if (requiresReload && Platform.OS !== "web") {
+                  Alert.alert(t("common.restartRequiredTitle"), t("common.restartRequiredMessage"));
+                }
+              }}
+            >
+              <Text style={[styles.langLink, { color: C.tint }]}>
+                {i18n.language === "ar" ? "English" : "العربية"}
+              </Text>
+            </Pressable>
+          </View>
+
           <Text style={[styles.versionText, { color: C.textTertiary }]}>{t("common.version")}</Text>
         </ScrollView>
       </View>
@@ -555,4 +577,7 @@ const styles = StyleSheet.create({
   rememberSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   versionText: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center" },
+
+  langLinkRow: { alignItems: "center", marginTop: 4 },
+  langLink: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
