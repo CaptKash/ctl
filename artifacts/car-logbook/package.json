@@ -68,7 +68,6 @@
     "expo-print": "~15.0.8",
     "expo-secure-store": "~15.0.8",
     "expo-sharing": "~14.0.8",
-    "expo-updates": "^55.0.21",
     "i18next": "^26.0.10",
     "react-i18next": "^17.0.7",
     "react-native-purchases": "9.14.0",
