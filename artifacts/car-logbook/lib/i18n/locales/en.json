@@ -138,7 +138,7 @@
     },
     "notifications": {
       "eventReminders": "Upcoming Event Reminders",
-      "eventRemindersSub": "30d, 7d and 1d before due dates",
+      "eventRemindersSub": "Registration, insurance, inspections, warranty & part changes — 30d, 7d and 1d before due",
       "disabledTitle": "Notifications Disabled",
       "disabledMessage": "To receive service reminders, enable notifications for CTL in your device Settings.",
       "primerTitle": "Never miss a service date",

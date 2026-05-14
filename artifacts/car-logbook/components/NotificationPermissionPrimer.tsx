@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import { Modal, View, Text, Pressable, StyleSheet, Platform, Alert } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
 import { Feather } from "@expo/vector-icons";
@@ -59,8 +59,15 @@ export function NotificationPermissionPrimer() {
 
   const enable = async () => {
     const granted = await requestNotificationPermissions();
-    if (granted) await setEnabled(true);
+    await setEnabled(true);
     await dismiss();
+    if (!granted) {
+      Alert.alert(
+        t("settings.notifications.disabledTitle"),
+        t("settings.notifications.disabledMessage"),
+        [{ text: t("common.ok") }]
+      );
+    }
   };
 
   return (
