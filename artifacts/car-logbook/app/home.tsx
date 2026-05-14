@@ -240,7 +240,7 @@ export default function MenuDashboardScreen() {
               >
                 {fleetCount === 0
                   ? t("home.noCarsYet")
-                  : t("home.carsRegistered", { count: fleetCount })}
+                  : t("home.carsRegisteredCount", { count: fleetCount })}
               </Text>
             </View>
             <Pressable
