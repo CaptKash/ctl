@@ -194,25 +194,25 @@ export default function MenuDashboardScreen() {
               ? t("home.helloUser", { name: user.name.split(" ")[0] })
               : "CTL"}
           </Text>
+          <Text
+            style={[
+              styles.headerSub,
+              { color: C.textSecondary, marginTop: 2 },
+              isRTL && { textAlign: "right", writingDirection: "rtl" },
+            ]}
+          >
+            {t("common.appTagline")}
+          </Text>
           <View
             style={[
-              styles.taglineRow,
+              styles.tierPill,
+              { backgroundColor: tierColors.bg, borderColor: tierColors.border, alignSelf: "flex-start", marginTop: 8 },
               isRTL && { alignSelf: "flex-end" },
             ]}
           >
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-              {t("common.appTagline")}
+            <Text style={[styles.tierPillText, { color: tierColors.text }]}>
+              {tierLabel}
             </Text>
-            <View
-              style={[
-                styles.tierPill,
-                { backgroundColor: tierColors.bg, borderColor: tierColors.border },
-              ]}
-            >
-              <Text style={[styles.tierPillText, { color: tierColors.text }]}>
-                {tierLabel}
-              </Text>
-            </View>
           </View>
         </View>
       </View>
