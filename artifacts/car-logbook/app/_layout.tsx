@@ -30,6 +30,7 @@ import { SubscriptionProvider, initializeRevenueCat } from "@/lib/revenuecat";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
 import { NotificationPermissionPrimer } from "@/components/NotificationPermissionPrimer";
 import { PasswordUpgradeModal } from "@/components/PasswordUpgradeModal";
+import { DevLanguageToggle } from "@/components/DevLanguageToggle";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -129,6 +130,7 @@ export default function RootLayout() {
                       <RootLayoutNav />
                       <PasswordUpgradeModal />
                       <NotificationPermissionPrimer />
+                      <DevLanguageToggle />
                     </KeyboardProvider>
                   </GestureHandlerRootView>
                   </SubscriptionProvider>
