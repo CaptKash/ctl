@@ -168,5 +168,30 @@
       "deleting": "Deleting…",
       "deleteConfirm": "Delete Everything"
     }
+  },
+  "home": {
+    "helloUser": "Hello, {{name}}!",
+    "myFleet": "My Fleet",
+    "noCarsYet": "No cars registered yet",
+    "carsRegistered_one": "{{count}} car registered",
+    "carsRegistered_other": "{{count}} cars registered",
+    "addCar": "Add Car",
+    "quickActions": "Quick Actions",
+    "logEvent": "Log Event",
+    "logEventSub": "Log a fault, repair, or renewal",
+    "generateReport": "Generate Report",
+    "generateReportSub": "Export faults & repair history",
+    "upcomingEvents": "Upcoming Events",
+    "loadingEvents": "Loading events…",
+    "noUpcoming": "No upcoming events scheduled.",
+    "overdue": "{{count}}d overdue",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "dueInDays": "In {{count}} days",
+    "addToCal": "Add",
+    "chooseCalendar": "Choose Calendar",
+    "chooseCalendarSub": "Select which calendar to add this reminder to",
+    "addedToCalendarTitle": "Added to Calendar",
+    "addedToCalendarMessage": "\"{{title}}\" has been saved to your calendar."
   }
 }
