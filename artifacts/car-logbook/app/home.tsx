@@ -417,7 +417,7 @@ export default function MenuDashboardScreen() {
           ]}
         >
           <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="plus-circle" size={24} color="#2563EB" />
+            <Feather name="book-open" size={24} color="#2563EB" />
           </View>
           <View style={styles.tileBody}>
             <Text
