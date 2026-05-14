@@ -9,7 +9,7 @@ import { useEventReminders } from "@/context/EventRemindersContext";
 import { useColors } from "@/context/ThemeContext";
 import { requestNotificationPermissions } from "@/lib/notifications";
 
-const PRIMER_KEY = "ctl_notif_primer_v1_shown";
+const PRIMER_KEY = "ctl_notif_primer_v2_shown";
 
 async function wasPrimerShown(): Promise<boolean> {
   try {
