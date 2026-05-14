@@ -378,7 +378,7 @@ export default function MenuDashboardScreen() {
                         style={[
                           styles.dot,
                           i === activeCarIndex
-                            ? { backgroundColor: C.tint, width: 16 }
+                            ? { backgroundColor: "#64748B", width: 16 }
                             : { backgroundColor: C.border, width: 6 },
                         ]}
                       />
