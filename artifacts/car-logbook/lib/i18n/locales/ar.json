@@ -201,8 +201,8 @@
     "addedToCalendarTitle": "تمت الإضافة إلى التقويم",
     "addedToCalendarMessage": "تم حفظ \"{{title}}\" في تقويمك.",
     "eventType": {
-      "licenseExpiry": "انتهاء الرخصة",
-      "insuranceExpiry": "انتهاء التأمين",
+      "licenseExpiry": "انتهاء الترخيص",
+      "insuranceExpiry": "انتهاء عقد التأمين",
       "nextInspection": "الفحص القادم"
     }
   }
