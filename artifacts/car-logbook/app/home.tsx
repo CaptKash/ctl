@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { localizeDigits } from "@/lib/i18n";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
 import type { ColorScheme } from "@/constants/colors";
@@ -240,7 +241,7 @@ export default function MenuDashboardScreen() {
               >
                 {fleetCount === 0
                   ? t("home.noCarsYet")
-                  : t("home.carsRegisteredCount", { count: fleetCount })}
+                  : t("home.carsRegisteredCount", { count: localizeDigits(fleetCount, i18n.language) })}
               </Text>
             </View>
             <Pressable

@@ -52,6 +52,17 @@ export function isRTLLanguage(lng: string): boolean {
   return RTL_LANGUAGES.has(lng as SupportedLanguage);
 }
 
+const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"] as const;
+
+// Convert Latin digits in a number/string to Arabic-Indic digits when the
+// active language is Arabic. Non-digit characters (commas, dots, dashes,
+// kilometre units, etc.) pass through unchanged.
+export function localizeDigits(value: number | string, lng: string): string {
+  const str = typeof value === "number" ? String(value) : value;
+  if (lng !== "ar") return str;
+  return str.replace(/[0-9]/g, (d) => ARABIC_INDIC[Number(d)]);
+}
+
 // Switch language. We deliberately DO NOT call `I18nManager.forceRTL` —
 // that API is unreliable in Expo Go (requires a native restart) and forces
 // the entire app into auto-flip mode which then double-flips our manual
