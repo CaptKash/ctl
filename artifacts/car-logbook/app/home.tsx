@@ -281,14 +281,24 @@ export default function MenuDashboardScreen() {
                 }
               }}
               hitSlop={6}
-              style={[
-                styles.addCarChip,
-                { backgroundColor: C.tint },
-                isRTL && { flexDirection: "row-reverse" },
-              ]}
+              style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
             >
-              <Feather name="plus" size={13} color="#fff" />
-              <Text style={styles.addCarChipText}>{t("home.addCar")}</Text>
+              <LinearGradient
+                colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0.15, y: 0 }}
+                end={{ x: 0.85, y: 1 }}
+                style={[
+                  styles.addCarChip,
+                  styles.addCarChipMetallic,
+                  isRTL && { flexDirection: "row-reverse" },
+                ]}
+              >
+                <Feather name="plus" size={13} color="#334155" />
+                <Text style={[styles.addCarChipText, { color: "#334155" }]}>
+                  {t("home.addCar")}
+                </Text>
+              </LinearGradient>
             </Pressable>
           </View>
 
@@ -837,8 +847,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 10,
   },
+  addCarChipMetallic: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#CBD5E1",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+  },
   addCarChipText: {
-    color: "#fff",
     fontSize: 13,
     fontFamily: "Inter_600SemiBold",
   },
