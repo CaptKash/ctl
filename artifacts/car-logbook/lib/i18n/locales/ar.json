@@ -170,7 +170,7 @@
     }
   },
   "home": {
-    "helloUser": "مرحباً، {{name}}!",
+    "helloUser": "مرحباً {{name}}!",
     "myFleet": "أسطولي",
     "noCarsYet": "لا توجد سيارات مسجلة بعد",
     "carsRegistered_zero": "لا توجد سيارات مسجلة",
