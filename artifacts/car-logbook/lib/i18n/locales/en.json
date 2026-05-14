@@ -191,6 +191,11 @@
     "chooseCalendar": "Choose Calendar",
     "chooseCalendarSub": "Select which calendar to add this reminder to",
     "addedToCalendarTitle": "Added to Calendar",
-    "addedToCalendarMessage": "\"{{title}}\" has been saved to your calendar."
+    "addedToCalendarMessage": "\"{{title}}\" has been saved to your calendar.",
+    "eventType": {
+      "licenseExpiry": "License Expiry",
+      "insuranceExpiry": "Insurance Expiry",
+      "nextInspection": "Next Inspection"
+    }
   }
 }

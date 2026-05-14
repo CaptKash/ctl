@@ -199,6 +199,11 @@
     "chooseCalendar": "اختر التقويم",
     "chooseCalendarSub": "اختر التقويم الذي تريد إضافة هذا التذكير إليه",
     "addedToCalendarTitle": "تمت الإضافة إلى التقويم",
-    "addedToCalendarMessage": "تم حفظ \"{{title}}\" في تقويمك."
+    "addedToCalendarMessage": "تم حفظ \"{{title}}\" في تقويمك.",
+    "eventType": {
+      "licenseExpiry": "انتهاء الرخصة",
+      "insuranceExpiry": "انتهاء التأمين",
+      "nextInspection": "الفحص القادم"
+    }
   }
 }

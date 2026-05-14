@@ -69,6 +69,13 @@ function urgencyColor(days: number, C: ColorScheme): string {
   return C.success;
 }
 
+function localizedEventType(item: UpcomingItem, t: (k: string, o?: any) => string): string {
+  if (item.itemKind === "license") return t("home.eventType.licenseExpiry");
+  if (item.itemKind === "insurance") return t("home.eventType.insuranceExpiry");
+  if (item.itemKind === "inspection") return t("home.eventType.nextInspection");
+  return item.type;
+}
+
 function urgencyLabel(days: number, t: (k: string, o?: any) => string): string {
   if (days < 0) return t("home.overdue", { count: Math.abs(days) });
   if (days === 0) return t("home.dueToday");
@@ -571,7 +578,7 @@ export default function MenuDashboardScreen() {
                       ]}
                       numberOfLines={1}
                     >
-                      {item.type}
+                      {localizedEventType(item, t)}
                     </Text>
                     <View style={[styles.urgencyBadge, { backgroundColor: color + "22" }]}>
                       <Text style={[styles.urgencyText, { color }]}>{label}</Text>
@@ -591,7 +598,7 @@ export default function MenuDashboardScreen() {
                     <View style={[styles.eventCardMeta, isRTL && { flexDirection: "row-reverse" }]}>
                       <Ionicons name="car-outline" size={13} color={C.textTertiary} />
                       <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                        {item.year} {item.make} {item.model}
+                        {localizeDigits(item.year, i18n.language)} {item.make} {item.model}
                       </Text>
                       <Feather
                         name="calendar"
@@ -600,7 +607,7 @@ export default function MenuDashboardScreen() {
                         style={isRTL ? { marginRight: 8 } : { marginLeft: 8 }}
                       />
                       <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                        {dueDate}
+                        {localizeDigits(dueDate, i18n.language)}
                       </Text>
                       {item.nextDueMileage != null && (
                         <>
@@ -611,7 +618,7 @@ export default function MenuDashboardScreen() {
                             style={isRTL ? { marginRight: 8 } : { marginLeft: 8 }}
                           />
                           <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                            {item.nextDueMileage.toLocaleString()} {unit}
+                            {localizeDigits(item.nextDueMileage.toLocaleString(), i18n.language)} {unit}
                           </Text>
                         </>
                       )}
