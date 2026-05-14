@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -343,9 +344,15 @@ export default function ReportScreen() {
           >
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#D1FAE5" }]}>
-            <Feather name="file-text" size={22} color="#059669" />
-          </View>
+          <LinearGradient
+            colors={["#ECFDF5", "#34D399", "#047857"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, styles.iconBoxMetallicGreen]}
+          >
+            <Feather name="file-text" size={22} color="#064E3B" />
+          </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Generate Report</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>
@@ -481,6 +488,14 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   backBtn: { marginRight: 2 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  iconBoxMetallicGreen: {
+    borderWidth: 1,
+    borderColor: "#064E3B",
+    shadowColor: "#064E3B",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+  },
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
