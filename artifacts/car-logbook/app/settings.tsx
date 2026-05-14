@@ -603,13 +603,13 @@ export default function SettingsScreen() {
           style={({ pressed }) => [styles.fleetCard, { opacity: pressed ? 0.92 : 1 }]}
           onPress={() => router.push("/fleet-upgrade" as any)}
         >
-          <View style={styles.fleetHeader}>
+          <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={styles.fleetIconWrap}>
               <Feather name="star" size={16} color="#92400E" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.fleetTitle}>{t("settings.fleet.title")}</Text>
-              <Text style={styles.fleetTagline}>{t("settings.fleet.tagline")}</Text>
+              <Text style={[styles.fleetTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.title")}</Text>
+              <Text style={[styles.fleetTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.tagline")}</Text>
             </View>
           </View>
           <View style={styles.fleetFeatures}>
@@ -620,9 +620,9 @@ export default function SettingsScreen() {
               t("settings.fleet.feature4"),
               t("settings.fleet.feature5"),
             ].map((f) => (
-              <View key={f} style={styles.fleetFeatureRow}>
+              <View key={f} style={[styles.fleetFeatureRow, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="check-circle" size={13} color="#D97706" />
-                <Text style={styles.fleetFeatureText}>{f}</Text>
+                <Text style={[styles.fleetFeatureText, isRTL && { textAlign: "right", writingDirection: "rtl", flex: 1 }]}>{f}</Text>
               </View>
             ))}
           </View>
