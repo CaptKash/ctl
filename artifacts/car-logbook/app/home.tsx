@@ -783,11 +783,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tileIconMetallic: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#CBD5E1",
+    borderWidth: 1,
+    borderColor: "#64748B",
     shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.18,
     shadowRadius: 2,
   },
   tileBody: {
@@ -821,6 +821,8 @@ const styles = StyleSheet.create({
     gap: 10,
     minWidth: 140,
     maxWidth: 200,
+    borderWidth: 1,
+    borderColor: "#64748B",
   },
   carChipPhoto: {
     width: 44,
