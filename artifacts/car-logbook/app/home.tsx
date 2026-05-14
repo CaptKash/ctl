@@ -416,9 +416,15 @@ export default function MenuDashboardScreen() {
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 1, borderColor: "#2563EB" },
           ]}
         >
-          <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="book-open" size={24} color="#2563EB" />
-          </View>
+          <LinearGradient
+            colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.tileIcon, styles.tileIconMetallicBlue]}
+          >
+            <Feather name="book-open" size={24} color="#FFFFFF" />
+          </LinearGradient>
           <View style={styles.tileBody}>
             <Text
               style={[
@@ -797,6 +803,14 @@ const styles = StyleSheet.create({
     shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.18,
+    shadowRadius: 2,
+  },
+  tileIconMetallicBlue: {
+    borderWidth: 1,
+    borderColor: "#1E3A8A",
+    shadowColor: "#1E3A8A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
     shadowRadius: 2,
   },
   tileBody: {
