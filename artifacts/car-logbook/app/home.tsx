@@ -134,8 +134,14 @@ export default function MenuDashboardScreen() {
   };
 
   const { isFleet, FREE_CAR_LIMIT } = useSubscription();
+  // Tier pill palette — matches the Subscription cards on the Settings page.
+  // Free  : muted neutral
+  // Fleet : amber (text #92400E on amber-100 bg, like settings.fleetCard)
+  // Ent.  : indigo (text #312E81 on indigo-100 bg, like settings.enterpriseCard)
   const tierLabel = isFleet ? "CTL Fleet" : "CTL Free";
-  const tierColor = isFleet ? C.tint : C.textTertiary;
+  const tierColors = isFleet
+    ? { text: "#92400E", bg: "#FEF3C7", border: "#FCD34D" }
+    : { text: C.textTertiary, bg: C.backgroundTertiary, border: C.border };
 
   const { data: cars } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -198,11 +204,11 @@ export default function MenuDashboardScreen() {
           <View
             style={[
               styles.tierPill,
-              { backgroundColor: tierColor + "1A", borderColor: tierColor + "55" },
+              { backgroundColor: tierColors.bg, borderColor: tierColors.border },
               isRTL && { alignSelf: "flex-end" },
             ]}
           >
-            <Text style={[styles.tierPillText, { color: tierColor }]}>
+            <Text style={[styles.tierPillText, { color: tierColors.text }]}>
               {tierLabel}
             </Text>
           </View>
