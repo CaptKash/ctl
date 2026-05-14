@@ -80,7 +80,7 @@
       "signInMethods": "SIGN-IN METHODS",
       "subscriptions": "SUBSCRIPTIONS",
       "preferences": "PREFERENCES",
-      "notifications": "NOTIFICATIONS",
+      "notifications": "PUSH NOTIFICATIONS",
       "about": "ABOUT",
       "session": "SESSION"
     },
@@ -140,7 +140,11 @@
       "eventReminders": "Upcoming Event Reminders",
       "eventRemindersSub": "30d, 7d and 1d before due dates",
       "disabledTitle": "Notifications Disabled",
-      "disabledMessage": "To receive service reminders, enable notifications for CTL in your device Settings."
+      "disabledMessage": "To receive service reminders, enable notifications for CTL in your device Settings.",
+      "primerTitle": "Never miss a service date",
+      "primerBody": "CTL sends a quiet reminder 30, 7 and 1 day before your insurance, registration and maintenance is due — so nothing slips through.",
+      "primerEnable": "Turn on reminders",
+      "primerLater": "Maybe later"
     },
     "about": {
       "appVersion": "App Version",

@@ -28,6 +28,7 @@ import { EventRemindersProvider } from "@/context/EventRemindersContext";
 import { CountryProvider } from "@/context/CountryContext";
 import { SubscriptionProvider, initializeRevenueCat } from "@/lib/revenuecat";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
+import { NotificationPermissionPrimer } from "@/components/NotificationPermissionPrimer";
 import { PasswordUpgradeModal } from "@/components/PasswordUpgradeModal";
 
 SplashScreen.preventAutoHideAsync();
@@ -127,6 +128,7 @@ export default function RootLayout() {
                       <NotificationSyncer />
                       <RootLayoutNav />
                       <PasswordUpgradeModal />
+                      <NotificationPermissionPrimer />
                     </KeyboardProvider>
                   </GestureHandlerRootView>
                   </SubscriptionProvider>
