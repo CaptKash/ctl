@@ -193,25 +193,31 @@ export default function MenuDashboardScreen() {
               ? t("home.helloUser", { name: user.name.split(" ")[0] })
               : "CTL"}
           </Text>
-          <Text
-            style={[
-              styles.headerSub,
-              { color: C.textSecondary },
-              isRTL && { textAlign: "right", writingDirection: "rtl" },
-            ]}
-          >
-            {t("common.appTagline")}
-          </Text>
           <View
             style={[
-              styles.tierPill,
-              { backgroundColor: tierColors.bg, borderColor: tierColors.border },
-              isRTL && { alignSelf: "flex-end" },
+              styles.taglineRow,
+              isRTL && { flexDirection: "row-reverse" },
             ]}
           >
-            <Text style={[styles.tierPillText, { color: tierColors.text }]}>
-              {tierLabel}
+            <Text
+              style={[
+                styles.headerSub,
+                { color: C.textSecondary },
+                isRTL && { textAlign: "right", writingDirection: "rtl" },
+              ]}
+            >
+              {t("common.appTagline")}
             </Text>
+            <View
+              style={[
+                styles.tierPill,
+                { backgroundColor: tierColors.bg, borderColor: tierColors.border },
+              ]}
+            >
+              <Text style={[styles.tierPillText, { color: tierColors.text }]}>
+                {tierLabel}
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -727,13 +733,17 @@ const styles = StyleSheet.create({
   headerSub: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
+  },
+  taglineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
     marginTop: 2,
   },
   tierPill: {
-    alignSelf: "flex-start",
-    marginTop: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 9,
+    paddingVertical: 2,
     borderRadius: 999,
     borderWidth: StyleSheet.hairlineWidth,
   },
