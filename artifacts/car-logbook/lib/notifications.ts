@@ -1,6 +1,21 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
+// TODO(notifications-v2): The primer (NotificationPermissionPrimer.tsx) promises
+// reminders for: registration renewal, insurance renewal, upcoming inspections,
+// warranty expiry, and next-part-change due dates. Today this module only fires
+// for the unified "events" stream from /maintenance/upcoming, so as long as a
+// car has those rows entered, the primer is honest. Extensive work to do later:
+//   1. Add per-event-TYPE notification copy (currently every event uses the
+//      same "Due in Nd · {car}" template) so the user sees "🛡️ Insurance
+//      renewal due in 7d" vs "🔧 Brake pads due in 1d", etc.
+//   2. Surface warranty as a first-class event type on the server (today it's
+//      lumped into generic events; needs its own type + UI for entry).
+//   3. Per-category opt-in toggles in Settings (e.g. mute warranty pings but
+//      keep insurance pings) — requires schema for per-type preferences.
+//   4. Push (APNs/FCM) channel for server-driven nudges that don't depend on
+//      the app being opened weekly to refresh the local schedule.
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,

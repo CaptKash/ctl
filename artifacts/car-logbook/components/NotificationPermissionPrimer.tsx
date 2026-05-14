@@ -31,29 +31,26 @@ export function NotificationPermissionPrimer() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
   const { user } = useAuth();
-  const { setEnabled } = useEventReminders();
+  const { enabled, loading, setEnabled } = useEventReminders();
   const C = useColors();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     if (Platform.OS === "web") return;
+    if (loading) return;
+    if (enabled) return;
 
     let cancelled = false;
     (async () => {
       if (await wasPrimerShown()) return;
-      const { status } = await Notifications.getPermissionsAsync();
-      if (status !== "undetermined") {
-        await markPrimerShown();
-        return;
-      }
       if (!cancelled) setVisible(true);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, enabled, loading]);
 
   const dismiss = async () => {
     setVisible(false);
@@ -86,7 +83,7 @@ export function NotificationPermissionPrimer() {
             style={[
               styles.body,
               { color: C.textSecondary },
-              isRTL && { textAlign: "right", writingDirection: "rtl" },
+              isRTL && { writingDirection: "rtl" },
             ]}
           >
             {t("settings.notifications.primerBody")}
@@ -147,8 +144,9 @@ const styles = StyleSheet.create({
   },
   body: {
     fontSize: 15,
-    lineHeight: 22,
-    textAlign: "center",
+    lineHeight: 24,
+    textAlign: "left",
+    alignSelf: "stretch",
     marginBottom: 24,
   },
   primaryBtn: {
