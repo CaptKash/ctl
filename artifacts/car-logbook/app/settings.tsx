@@ -29,7 +29,7 @@ import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { useCurrency, CURRENCIES, currencyOption, findCurrencyByOption } from "@/context/CurrencyContext";
 import { useEventReminders } from "@/context/EventRemindersContext";
-import { useCountry, COUNTRIES, countryOption, findCountryByOption } from "@/context/CountryContext";
+import { useCountry, COUNTRIES, countryOption, countryName, findCountryByOption } from "@/context/CountryContext";
 import { registerPicker } from "@/components/ui/selectPickerStore";
 import { requestNotificationPermissions } from "@/lib/notifications";
 import { apiGet, apiDelete } from "@/hooks/useApi";
@@ -314,10 +314,10 @@ function CountryRow() {
   const handlePress = () => {
     registerPicker(
       t("settings.account.country"),
-      COUNTRIES.map(countryOption),
-      country ? countryOption(country) : "",
+      COUNTRIES.map((c) => countryOption(c, i18n.language)),
+      country ? countryOption(country, i18n.language) : "",
       (selected) => {
-        const found = findCountryByOption(selected);
+        const found = findCountryByOption(selected, i18n.language);
         if (found) setCountry(found);
       }
     );
@@ -332,7 +332,7 @@ function CountryRow() {
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.account.country")}</Text>
         <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
-          {country ? `${country.flag} ${country.name}` : t("settings.account.countryPlaceholder")}
+          {country ? `${country.flag} ${countryName(country, i18n.language)}` : t("settings.account.countryPlaceholder")}
         </Text>
       </View>
       <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
