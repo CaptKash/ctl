@@ -240,13 +240,13 @@ export default function MenuDashboardScreen() {
           {/* Header row */}
           <View style={[styles.tileRow, isRTL && { flexDirection: "row-reverse" }]}>
             <LinearGradient
-              colors={["#F3F4F6", "#94A3B8", "#475569"]}
+              colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
               locations={[0, 0.55, 1]}
               start={{ x: 0.15, y: 0 }}
               end={{ x: 0.85, y: 1 }}
               style={[styles.tileIcon, styles.tileIconMetallic]}
             >
-              <Ionicons name="car-sport" size={26} color="#0F172A" />
+              <Ionicons name="car" size={26} color="#334155" />
             </LinearGradient>
             <View style={styles.tileBody}>
               <Text
@@ -774,10 +774,10 @@ const styles = StyleSheet.create({
   },
   tileIconMetallic: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#94A3B8",
+    borderColor: "#CBD5E1",
     shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.12,
     shadowRadius: 2,
   },
   tileBody: {
