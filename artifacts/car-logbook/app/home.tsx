@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -238,9 +239,15 @@ export default function MenuDashboardScreen() {
         >
           {/* Header row */}
           <View style={[styles.tileRow, isRTL && { flexDirection: "row-reverse" }]}>
-            <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
-              <Ionicons name="car-outline" size={26} color={C.tint} />
-            </View>
+            <LinearGradient
+              colors={["#F3F4F6", "#94A3B8", "#475569"]}
+              locations={[0, 0.55, 1]}
+              start={{ x: 0.15, y: 0 }}
+              end={{ x: 0.85, y: 1 }}
+              style={[styles.tileIcon, styles.tileIconMetallic]}
+            >
+              <Ionicons name="car-sport" size={26} color="#0F172A" />
+            </LinearGradient>
             <View style={styles.tileBody}>
               <Text
                 style={[
@@ -764,6 +771,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
+  },
+  tileIconMetallic: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#94A3B8",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.18,
+    shadowRadius: 2,
   },
   tileBody: {
     flex: 1,
