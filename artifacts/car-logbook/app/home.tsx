@@ -848,11 +848,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   addCarChipMetallic: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#CBD5E1",
+    borderWidth: 1,
+    borderColor: "#64748B",
     shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.18,
     shadowRadius: 2,
   },
   addCarChipText: {
