@@ -413,7 +413,7 @@ export default function MenuDashboardScreen() {
           style={({ pressed }) => [
             styles.tile,
             isRTL && { flexDirection: "row-reverse" },
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 1, borderColor: "#2563EB" },
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 1, borderColor: "#312E81" },
           ]}
         >
           <LinearGradient
@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
   },
   tileIconMetallic: {
     borderWidth: 1,
-    borderColor: "#312E81",
+    borderColor: "#64748B",
     shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.18,
