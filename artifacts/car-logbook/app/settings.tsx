@@ -625,6 +625,10 @@ export default function SettingsScreen() {
                 <Text style={[styles.fleetFeatureText, isRTL && { textAlign: "right", writingDirection: "rtl", flex: 1 }]}>{f}</Text>
               </View>
             ))}
+            <View style={[styles.fleetCta, isRTL && { flexDirection: "row-reverse" }]}>
+              <Text style={styles.fleetCtaText}>{t("settings.fleet.cta")}</Text>
+              <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={14} color="#78350F" />
+            </View>
           </View>
         </Pressable>
 
@@ -885,4 +889,15 @@ const styles = StyleSheet.create({
   fleetFeatures: { paddingHorizontal: 16, paddingBottom: 14, gap: 7 },
   fleetFeatureRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   fleetFeatureText: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#78350F" },
+  fleetCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#FCD34D",
+  },
+  fleetCtaText: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#78350F" },
 });
