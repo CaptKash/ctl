@@ -123,7 +123,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
             hitSlop={4}
           >
             <Feather name="plus" size={12} color="#2563EB" />
-            <Text style={styles.logBtnText}>Log Event</Text>
+            <Text style={styles.logBtnText}>Logbook</Text>
           </Pressable>
         ) : (
           <Feather name="chevron-right" size={18} color={C.textTertiary} />

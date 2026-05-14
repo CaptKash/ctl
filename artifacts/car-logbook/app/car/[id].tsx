@@ -515,7 +515,7 @@ export default function CarDetailScreen() {
             icon="clock"
             title="No events yet"
             description="Faults, maintenance, and inspections will appear here."
-            actionLabel="Log Event"
+            actionLabel="Logbook"
             onAction={() => router.push({ pathname: "/event/add", params: { carId: String(carId) } })}
             btnColor="#FEE2E2"
             btnTextColor="#DC2626"
