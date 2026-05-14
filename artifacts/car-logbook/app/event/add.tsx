@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -84,9 +85,15 @@ export default function AddEventScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
-            <Feather name="plus-circle" size={22} color="#DC2626" />
-          </View>
+          <LinearGradient
+            colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, styles.iconBoxMetallicBlue]}
+          >
+            <Feather name="book-open" size={22} color="#312E81" />
+          </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Technical Log</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>Select an event type</Text>
@@ -145,6 +152,14 @@ const styles = StyleSheet.create({
   },
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  iconBoxMetallicBlue: {
+    borderWidth: 1,
+    borderColor: "#312E81",
+    shadowColor: "#1E3A8A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+  },
   headerText: { flex: 1 },
   backBtn: {},
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
