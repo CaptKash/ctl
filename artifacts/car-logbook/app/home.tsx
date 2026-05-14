@@ -28,6 +28,7 @@ import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { addToCalendar, getWritableCalendars, WritableCalendar } from "@/lib/addToCalendar";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type Car = {
   id: number;
@@ -340,9 +341,13 @@ export default function MenuDashboardScreen() {
                         {firstPhoto ? (
                           <Image source={{ uri: firstPhoto }} style={styles.carChipPhoto} />
                         ) : (
-                          <View style={[styles.carChipPhotoPlaceholder, { backgroundColor: "#DBEAFE" }]}>
-                            <Ionicons name="car-outline" size={18} color={C.tint} />
-                          </View>
+                          <BrandLogo
+                            make={car.make}
+                            size={44}
+                            style={styles.carChipPhotoPlaceholder}
+                            fallbackBg="#DBEAFE"
+                            fallbackIconColor={C.tint}
+                          />
                         )}
                         <View style={styles.carChipBody}>
                           <Text

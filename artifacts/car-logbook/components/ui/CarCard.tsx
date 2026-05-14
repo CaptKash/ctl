@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { useColors } from "@/context/ThemeContext";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type Car = {
   id: number;
@@ -74,12 +75,12 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
       ]}
     >
       {/* Thumbnail */}
-      <View style={[styles.iconContainer, { backgroundColor: thumbBg }]}>
+      <View style={[styles.iconContainer, { backgroundColor: firstPhoto ? thumbBg : "#FFFFFF" }]}>
         {firstPhoto ? (
           <Image source={{ uri: firstPhoto }} style={styles.photo} resizeMode="cover" />
         ) : (
           <>
-            <Ionicons name="car-outline" size={32} color={thumbIcon} />
+            <BrandLogo make={car.make} size={56} fallbackBg={thumbBg} fallbackIconColor={thumbIcon} />
             {car.color && (
               <View style={[styles.colorDot, { backgroundColor: getCarColor(car.color) }]} />
             )}

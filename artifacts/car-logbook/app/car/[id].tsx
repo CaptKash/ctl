@@ -25,6 +25,7 @@ import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { BrandLogo } from "@/components/BrandLogo";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
@@ -404,9 +405,13 @@ export default function CarDetailScreen() {
             return firstPhoto ? (
               <Image source={{ uri: firstPhoto }} style={styles.iconBox} />
             ) : (
-              <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-                <Ionicons name="car-outline" size={26} color="#1A56DB" />
-              </View>
+              <BrandLogo
+                make={car.make}
+                size={48}
+                style={styles.iconBox}
+                fallbackBg="#DBEAFE"
+                fallbackIconColor="#1A56DB"
+              />
             );
           })()}
           <View style={styles.headerText}>
