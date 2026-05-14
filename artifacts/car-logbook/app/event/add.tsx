@@ -88,7 +88,7 @@ export default function AddEventScreen() {
             <Feather name="plus-circle" size={22} color="#DC2626" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Logbook</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Technical Log</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>Select an event type</Text>
           </View>
         </View>

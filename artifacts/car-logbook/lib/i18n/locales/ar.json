@@ -176,7 +176,7 @@
     "carsRegisteredCount": "عدد السيارات المسجلة: {{count}}",
     "addCar": "إضافة سيارة",
     "quickActions": "إجراءات سريعة",
-    "logEvent": "السجل",
+    "logEvent": "السجل التقني",
     "logEventSub": "سجّل عطلاً أو إصلاحاً أو تجديداً",
     "generateReport": "إنشاء تقرير",
     "generateReportSub": "تصدير الأعطال وسجل الإصلاحات",

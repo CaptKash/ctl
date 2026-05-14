@@ -176,7 +176,7 @@
     "carsRegisteredCount": "Number of registered cars: {{count}}",
     "addCar": "Add Car",
     "quickActions": "Quick Actions",
-    "logEvent": "Logbook",
+    "logEvent": "Technical Log",
     "logEventSub": "Log a fault, repair, or renewal",
     "generateReport": "Generate Report",
     "generateReportSub": "Export faults & repair history",
