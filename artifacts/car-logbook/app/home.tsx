@@ -134,6 +134,8 @@ export default function MenuDashboardScreen() {
   };
 
   const { isFleet, FREE_CAR_LIMIT } = useSubscription();
+  const tierLabel = isFleet ? "CTL Fleet" : "CTL Free";
+  const tierColor = isFleet ? C.tint : C.textTertiary;
 
   const { data: cars } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -193,6 +195,17 @@ export default function MenuDashboardScreen() {
           >
             {t("common.appTagline")}
           </Text>
+          <View
+            style={[
+              styles.tierPill,
+              { backgroundColor: tierColor + "1A", borderColor: tierColor + "55" },
+              isRTL && { alignSelf: "flex-end" },
+            ]}
+          >
+            <Text style={[styles.tierPillText, { color: tierColor }]}>
+              {tierLabel}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -692,6 +705,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_400Regular",
     marginTop: 2,
+  },
+  tierPill: {
+    alignSelf: "flex-start",
+    marginTop: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  tierPillText: {
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.5,
   },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 24 },
 
