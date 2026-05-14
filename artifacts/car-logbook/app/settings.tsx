@@ -520,7 +520,10 @@ export default function SettingsScreen() {
         Alert.alert(
           t("settings.notifications.disabledTitle"),
           t("settings.notifications.disabledMessage"),
-          [{ text: t("common.ok") }]
+          [
+            { text: t("common.cancel"), style: "cancel" },
+            { text: t("settings.notifications.openSettings"), onPress: () => Linking.openSettings() },
+          ]
         );
         return;
       }

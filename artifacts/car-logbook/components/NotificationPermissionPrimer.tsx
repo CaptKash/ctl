@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, View, Text, Pressable, StyleSheet, Platform, Alert } from "react-native";
+import { Modal, View, Text, Pressable, StyleSheet, Platform, Alert, Linking } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
 import { Feather } from "@expo/vector-icons";
@@ -65,7 +65,10 @@ export function NotificationPermissionPrimer() {
       Alert.alert(
         t("settings.notifications.disabledTitle"),
         t("settings.notifications.disabledMessage"),
-        [{ text: t("common.ok") }]
+        [
+          { text: t("common.cancel"), style: "cancel" },
+          { text: t("settings.notifications.openSettings"), onPress: () => Linking.openSettings() },
+        ]
       );
     }
   };
