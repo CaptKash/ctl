@@ -20,6 +20,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { localizeDigits } from "@/lib/i18n";
+import { localizeBrand } from "@/lib/carBrandLogo";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
 import type { ColorScheme } from "@/constants/colors";
@@ -329,8 +330,10 @@ export default function MenuDashboardScreen() {
                   {cars.map((car) => {
                     let firstPhoto: string | null = null;
                     try { firstPhoto = car.photos ? JSON.parse(car.photos)[0] ?? null : null; } catch {}
-                    const label = car.nickname ?? `${car.year} ${car.make}`;
-                    const sub = car.nickname ? `${car.year} ${car.make} ${car.model}` : car.model;
+                    const brand = localizeBrand(car.make, i18n.language);
+                    const yr = localizeDigits(car.year, i18n.language);
+                    const label = car.nickname ?? `${yr} ${brand}`;
+                    const sub = car.nickname ? `${yr} ${brand} ${car.model}` : car.model;
                     return (
                       <Pressable
                         key={car.id}
@@ -598,7 +601,7 @@ export default function MenuDashboardScreen() {
                     <View style={[styles.eventCardMeta, isRTL && { flexDirection: "row-reverse" }]}>
                       <Ionicons name="car-outline" size={13} color={C.textTertiary} />
                       <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                        {localizeDigits(item.year, i18n.language)} {item.make} {item.model}
+                        {localizeDigits(item.year, i18n.language)} {localizeBrand(item.make, i18n.language)} {item.model}
                       </Text>
                       <Feather
                         name="calendar"

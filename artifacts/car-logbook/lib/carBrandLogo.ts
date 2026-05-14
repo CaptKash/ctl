@@ -58,3 +58,66 @@ export function getRemoteBrandLogoUrl(make: string | null | undefined): string |
   const slug = normalize(make);
   return `https://cdn.jsdelivr.net/gh/filippofilip95/car-logos-dataset@master/logos/optimized/${slug}.png`;
 }
+
+const BRAND_AR: Record<string, string> = {
+  toyota: "تويوتا",
+  lexus: "لكزس",
+  nissan: "نيسان",
+  hyundai: "هيونداي",
+  kia: "كيا",
+  "mercedes-benz": "مرسيدس بنز",
+  bmw: "بي إم دبليو",
+  "land-rover": "لاند روفر",
+  gmc: "جي إم سي",
+  chevrolet: "شيفروليه",
+  ford: "فورد",
+  honda: "هوندا",
+  mitsubishi: "ميتسوبيشي",
+  audi: "أودي",
+  porsche: "بورش",
+  mazda: "مازدا",
+  infiniti: "إنفينيتي",
+  mg: "إم جي",
+  byd: "بي واي دي",
+  geely: "جيلي",
+  chery: "شيري",
+  haval: "هافال",
+  changan: "شانجان",
+  "great-wall": "جريت وول",
+  volkswagen: "فولكس فاجن",
+  tesla: "تسلا",
+  jeep: "جيب",
+  dodge: "دودج",
+  "lynk-co": "لينك آند كو",
+  hongqi: "هونغتشي",
+  nio: "نيو",
+  xpeng: "إكس بنج",
+  zeekr: "زيكر",
+  gac: "جي إيه سي",
+  lucid: "لوسيد",
+  rolls: "رولز رويس",
+  "rolls-royce": "رولز رويس",
+  bentley: "بنتلي",
+  ferrari: "فيراري",
+  lamborghini: "لامبورجيني",
+  maserati: "مازيراتي",
+  jaguar: "جاكوار",
+  volvo: "فولفو",
+  subaru: "سوبارو",
+  suzuki: "سوزوكي",
+  renault: "رينو",
+  peugeot: "بيجو",
+  citroen: "ستروين",
+  fiat: "فيات",
+  skoda: "سكودا",
+  seat: "سيات",
+  cupra: "كوبرا",
+  mclaren: "ماكلارين",
+  "aston-martin": "أستون مارتن",
+};
+
+export function localizeBrand(make: string | null | undefined, lang: string): string {
+  if (!make) return "";
+  if (lang !== "ar") return make;
+  return BRAND_AR[normalize(make)] ?? make;
+}

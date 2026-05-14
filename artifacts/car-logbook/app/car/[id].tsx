@@ -19,7 +19,10 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
+import { localizeBrand } from "@/lib/carBrandLogo";
+import { localizeDigits } from "@/lib/i18n";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
@@ -102,6 +105,7 @@ export default function CarDetailScreen() {
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { i18n } = useTranslation();
   const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -416,10 +420,10 @@ export default function CarDetailScreen() {
           })()}
           <View style={styles.headerText}>
             <Text style={[styles.carName, { color: C.text }]} numberOfLines={1}>
-              {car.nickname ?? `${car.year} ${car.make} ${car.model}`}
+              {car.nickname ?? `${localizeDigits(car.year, i18n.language)} ${localizeBrand(car.make, i18n.language)} ${car.model}`}
             </Text>
             <Text style={[styles.plate, { color: C.textSecondary }]} numberOfLines={1}>
-              {car.nickname ? `${car.year} ${car.make} ${car.model}` : car.licensePlate ?? ""}
+              {car.nickname ? `${localizeDigits(car.year, i18n.language)} ${localizeBrand(car.make, i18n.language)} ${car.model}` : car.licensePlate ?? ""}
             </Text>
           </View>
           <View style={styles.headerActions}>

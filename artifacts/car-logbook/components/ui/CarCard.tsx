@@ -9,6 +9,9 @@ import {
 } from "react-native";
 import { useColors } from "@/context/ThemeContext";
 import { BrandLogo } from "@/components/BrandLogo";
+import { useTranslation } from "react-i18next";
+import { localizeBrand } from "@/lib/carBrandLogo";
+import { localizeDigits } from "@/lib/i18n";
 
 type Car = {
   id: number;
@@ -62,6 +65,8 @@ function getFirstPhoto(photos?: string | null): string | null {
 
 export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Props) {
   const C = useColors();
+  const { i18n } = useTranslation();
+  const brand = localizeBrand(car.make, i18n.language);
   const firstPhoto = getFirstPhoto(car.photos);
   const thumbBg = accentBg ?? C.infoLight;
   const thumbIcon = accentIcon ?? C.info;
@@ -91,16 +96,16 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
       {/* Info */}
       <View style={styles.info}>
         <Text style={[styles.makeModel, { color: C.text }]} numberOfLines={1}>
-          {car.make} {car.model}
+          {brand} {car.model}
         </Text>
         <Text style={[styles.sub, { color: C.textSecondary }]} numberOfLines={1}>
-          {[car.nickname, car.year != null ? String(car.year) : null].filter(Boolean).join("  |  ")}
+          {[car.nickname, car.year != null ? localizeDigits(car.year, i18n.language) : null].filter(Boolean).join("  |  ")}
         </Text>
         {(car.licensePlate || car.mileage != null) && (
           <Text style={[styles.detail, { color: C.textTertiary }]} numberOfLines={1}>
             {[
               car.licensePlate,
-              car.mileage != null ? `${car.mileage.toLocaleString()} km` : null,
+              car.mileage != null ? `${localizeDigits(car.mileage.toLocaleString(), i18n.language)} km` : null,
             ]
               .filter(Boolean)
               .join("   ·   ")}
