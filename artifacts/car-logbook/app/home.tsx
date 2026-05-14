@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
 import type { ColorScheme } from "@/constants/colors";
@@ -65,16 +66,18 @@ function urgencyColor(days: number, C: ColorScheme): string {
   return C.success;
 }
 
-function urgencyLabel(days: number): string {
-  if (days < 0) return `${Math.abs(days)}d overdue`;
-  if (days === 0) return "Due today";
-  if (days === 1) return "Due tomorrow";
-  return `In ${days} days`;
+function urgencyLabel(days: number, t: (k: string, o?: any) => string): string {
+  if (days < 0) return t("home.overdue", { count: Math.abs(days) });
+  if (days === 0) return t("home.dueToday");
+  if (days === 1) return t("home.dueTomorrow");
+  return t("home.dueInDays", { count: days });
 }
 
 export default function MenuDashboardScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { unit } = useDistanceUnit();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { user, isAuthenticated } = useAuth();
@@ -122,7 +125,10 @@ export default function MenuDashboardScreen() {
     const title = `${item.type} — ${carLabel}`;
     const added = await addToCalendar(title, item.nextDueDate, calendarId, item.description).catch(() => false);
     if (added) {
-      Alert.alert("Added to Calendar", `"${item.type}" has been saved to your calendar.`);
+      Alert.alert(
+        t("home.addedToCalendarTitle"),
+        t("home.addedToCalendarMessage", { title }),
+      );
     }
   };
 
@@ -147,7 +153,7 @@ export default function MenuDashboardScreen() {
 
   const fleetCount = cars?.length ?? 0;
 
-  const today = new Date().toLocaleDateString("en-US", {
+  const today = new Date().toLocaleDateString(isRTL ? "ar" : "en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -157,11 +163,35 @@ export default function MenuDashboardScreen() {
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.headerEyebrow, { color: C.textSecondary }]}>{today}</Text>
-          <Text style={[styles.headerTitle, { color: C.text }]}>
-            {isAuthenticated && user ? `Hello, ${user.name.split(" ")[0]}!` : "CTL"}
+          <Text
+            style={[
+              styles.headerEyebrow,
+              { color: C.textSecondary },
+              isRTL && { textAlign: "right", writingDirection: "rtl" },
+            ]}
+          >
+            {today}
           </Text>
-          <Text style={[styles.headerSub, { color: C.textSecondary }]}>Car Technical Log</Text>
+          <Text
+            style={[
+              styles.headerTitle,
+              { color: C.text },
+              isRTL && { textAlign: "right", writingDirection: "rtl" },
+            ]}
+          >
+            {isAuthenticated && user
+              ? t("home.helloUser", { name: user.name.split(" ")[0] })
+              : "CTL"}
+          </Text>
+          <Text
+            style={[
+              styles.headerSub,
+              { color: C.textSecondary },
+              isRTL && { textAlign: "right", writingDirection: "rtl" },
+            ]}
+          >
+            {t("common.appTagline")}
+          </Text>
         </View>
       </View>
 
@@ -187,16 +217,30 @@ export default function MenuDashboardScreen() {
           ]}
         >
           {/* Header row */}
-          <View style={styles.tileRow}>
+          <View style={[styles.tileRow, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.tileIcon, { backgroundColor: "#DBEAFE" }]}>
               <Ionicons name="car-outline" size={26} color={C.tint} />
             </View>
             <View style={styles.tileBody}>
-              <Text style={[styles.tileTitle, { color: C.text }]}>My Fleet</Text>
-              <Text style={[styles.tileSub, { color: C.textSecondary }]}>
+              <Text
+                style={[
+                  styles.tileTitle,
+                  { color: C.text },
+                  isRTL && { textAlign: "right", writingDirection: "rtl" },
+                ]}
+              >
+                {t("home.myFleet")}
+              </Text>
+              <Text
+                style={[
+                  styles.tileSub,
+                  { color: C.textSecondary },
+                  isRTL && { textAlign: "right", writingDirection: "rtl" },
+                ]}
+              >
                 {fleetCount === 0
-                  ? "No cars registered yet"
-                  : `${fleetCount} car${fleetCount === 1 ? "" : "s"} registered`}
+                  ? t("home.noCarsYet")
+                  : t("home.carsRegistered", { count: fleetCount })}
               </Text>
             </View>
             <Pressable
@@ -210,10 +254,14 @@ export default function MenuDashboardScreen() {
                 }
               }}
               hitSlop={6}
-              style={[styles.addCarChip, { backgroundColor: C.tint }]}
+              style={[
+                styles.addCarChip,
+                { backgroundColor: C.tint },
+                isRTL && { flexDirection: "row-reverse" },
+              ]}
             >
               <Feather name="plus" size={13} color="#fff" />
-              <Text style={styles.addCarChipText}>Add Car</Text>
+              <Text style={styles.addCarChipText}>{t("home.addCar")}</Text>
             </Pressable>
           </View>
 
@@ -246,7 +294,11 @@ export default function MenuDashboardScreen() {
                           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           router.push(`/car/${car.id}`);
                         }}
-                        style={[styles.carChip, { backgroundColor: C.backgroundTertiary }]}
+                        style={[
+                          styles.carChip,
+                          { backgroundColor: C.backgroundTertiary },
+                          isRTL && { flexDirection: "row-reverse" },
+                        ]}
                       >
                         {firstPhoto ? (
                           <Image source={{ uri: firstPhoto }} style={styles.carChipPhoto} />
@@ -256,8 +308,26 @@ export default function MenuDashboardScreen() {
                           </View>
                         )}
                         <View style={styles.carChipBody}>
-                          <Text style={[styles.carChipName, { color: C.text }]} numberOfLines={1}>{label}</Text>
-                          <Text style={[styles.carChipSub, { color: C.textSecondary }]} numberOfLines={1}>{sub}</Text>
+                          <Text
+                            style={[
+                              styles.carChipName,
+                              { color: C.text },
+                              isRTL && { textAlign: "right", writingDirection: "rtl" },
+                            ]}
+                            numberOfLines={1}
+                          >
+                            {label}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.carChipSub,
+                              { color: C.textSecondary },
+                              isRTL && { textAlign: "right", writingDirection: "rtl" },
+                            ]}
+                            numberOfLines={1}
+                          >
+                            {sub}
+                          </Text>
                         </View>
                       </Pressable>
                     );
@@ -283,7 +353,15 @@ export default function MenuDashboardScreen() {
           )}
         </Pressable>
 
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Quick Actions</Text>
+        <Text
+          style={[
+            styles.sectionLabel,
+            { color: C.textSecondary },
+            isRTL && { textAlign: "right", writingDirection: "rtl" },
+          ]}
+        >
+          {t("home.quickActions")}
+        </Text>
 
         <Pressable
           onPress={() => {
@@ -292,6 +370,7 @@ export default function MenuDashboardScreen() {
           }}
           style={({ pressed }) => [
             styles.tile,
+            isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 1, borderColor: "#2563EB" },
           ]}
         >
@@ -299,13 +378,27 @@ export default function MenuDashboardScreen() {
             <Feather name="plus-circle" size={24} color="#2563EB" />
           </View>
           <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Log Event</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              Log a fault, repair, or renewal
+            <Text
+              style={[
+                styles.tileTitle,
+                { color: C.text },
+                isRTL && { textAlign: "right", writingDirection: "rtl" },
+              ]}
+            >
+              {t("home.logEvent")}
+            </Text>
+            <Text
+              style={[
+                styles.tileSub,
+                { color: C.textSecondary },
+                isRTL && { textAlign: "right", writingDirection: "rtl" },
+              ]}
+            >
+              {t("home.logEventSub")}
             </Text>
           </View>
           <View style={styles.tileArrow}>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+            <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
           </View>
         </Pressable>
 
@@ -316,6 +409,7 @@ export default function MenuDashboardScreen() {
           }}
           style={({ pressed }) => [
             styles.tile,
+            isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
           ]}
         >
@@ -323,71 +417,145 @@ export default function MenuDashboardScreen() {
             <Feather name="file-text" size={24} color="#059669" />
           </View>
           <View style={styles.tileBody}>
-            <Text style={[styles.tileTitle, { color: C.text }]}>Generate Report</Text>
-            <Text style={[styles.tileSub, { color: C.textSecondary }]}>
-              Export faults &amp; repair history
+            <Text
+              style={[
+                styles.tileTitle,
+                { color: C.text },
+                isRTL && { textAlign: "right", writingDirection: "rtl" },
+              ]}
+            >
+              {t("home.generateReport")}
+            </Text>
+            <Text
+              style={[
+                styles.tileSub,
+                { color: C.textSecondary },
+                isRTL && { textAlign: "right", writingDirection: "rtl" },
+              ]}
+            >
+              {t("home.generateReportSub")}
             </Text>
           </View>
           <View style={styles.tileArrow}>
-            <Feather name="chevron-right" size={18} color={C.textTertiary} />
+            <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
           </View>
         </Pressable>
 
-        <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>
-          Upcoming Events
+        <Text
+          style={[
+            styles.sectionLabel,
+            { color: C.textSecondary, marginTop: 10 },
+            isRTL && { textAlign: "right", writingDirection: "rtl" },
+          ]}
+        >
+          {t("home.upcomingEvents")}
         </Text>
 
         {upcomingLoading ? (
-          <View style={[styles.emptyState, { backgroundColor: C.card, shadowColor: C.shadow }]}>
+          <View
+            style={[
+              styles.emptyState,
+              isRTL && { flexDirection: "row-reverse" },
+              { backgroundColor: C.card, shadowColor: C.shadow },
+            ]}
+          >
             <ActivityIndicator size="small" color={C.tint} />
-            <Text style={[styles.emptyText, { color: C.textSecondary }]}>Loading events…</Text>
+            <Text
+              style={[
+                styles.emptyText,
+                { color: C.textSecondary },
+                isRTL && { textAlign: "right", writingDirection: "rtl" },
+              ]}
+            >
+              {t("home.loadingEvents")}
+            </Text>
           </View>
         ) : (!upcoming || upcoming.length === 0) ? (
-          <View style={[styles.emptyState, { backgroundColor: C.card, shadowColor: C.shadow }]}>
+          <View
+            style={[
+              styles.emptyState,
+              isRTL && { flexDirection: "row-reverse" },
+              { backgroundColor: C.card, shadowColor: C.shadow },
+            ]}
+          >
             <Feather name="check-circle" size={22} color={C.success} />
-            <Text style={[styles.emptyText, { color: C.textSecondary }]}>
-              No upcoming events scheduled.
+            <Text
+              style={[
+                styles.emptyText,
+                { color: C.textSecondary },
+                isRTL && { textAlign: "right", writingDirection: "rtl" },
+              ]}
+            >
+              {t("home.noUpcoming")}
             </Text>
           </View>
         ) : (
           upcoming.map((item) => {
             const days = daysFromNow(item.nextDueDate);
             const color = urgencyColor(days, C);
-            const label = urgencyLabel(days);
+            const label = urgencyLabel(days, t);
             const dueDate = formatDate(item.nextDueDate);
 
             return (
               <Pressable
                 key={`${item.itemKind}-${item.id}`}
                 onPress={() => handleCardPress(item)}
-                style={({ pressed }) => [styles.eventCard, { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 }]}
+                style={({ pressed }) => [
+                  styles.eventCard,
+                  isRTL && { flexDirection: "row-reverse" },
+                  { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
+                ]}
               >
                 <View style={[styles.urgencyBar, { backgroundColor: color }]} />
                 <View style={styles.eventCardBody}>
-                  <View style={styles.eventCardTop}>
-                    <Text style={[styles.eventCardType, { color: C.text }]} numberOfLines={1}>
+                  <View style={[styles.eventCardTop, isRTL && { flexDirection: "row-reverse" }]}>
+                    <Text
+                      style={[
+                        styles.eventCardType,
+                        { color: C.text },
+                        isRTL && { textAlign: "right", writingDirection: "rtl" },
+                      ]}
+                      numberOfLines={1}
+                    >
                       {item.type}
                     </Text>
                     <View style={[styles.urgencyBadge, { backgroundColor: color + "22" }]}>
                       <Text style={[styles.urgencyText, { color }]}>{label}</Text>
                     </View>
                   </View>
-                  <Text style={[styles.eventCardDesc, { color: C.textSecondary }]} numberOfLines={2}>
+                  <Text
+                    style={[
+                      styles.eventCardDesc,
+                      { color: C.textSecondary },
+                      isRTL && { textAlign: "right", writingDirection: "rtl" },
+                    ]}
+                    numberOfLines={2}
+                  >
                     {item.description}
                   </Text>
-                  <View style={styles.eventCardBottom}>
-                    <View style={styles.eventCardMeta}>
+                  <View style={[styles.eventCardBottom, isRTL && { flexDirection: "row-reverse" }]}>
+                    <View style={[styles.eventCardMeta, isRTL && { flexDirection: "row-reverse" }]}>
                       <Ionicons name="car-outline" size={13} color={C.textTertiary} />
                       <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
                         {item.year} {item.make} {item.model}
                       </Text>
-                      <Feather name="calendar" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                      <Feather
+                        name="calendar"
+                        size={12}
+                        color={C.textTertiary}
+                        style={isRTL ? { marginRight: 8 } : { marginLeft: 8 }}
+                      />
                       <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
                         {dueDate}
                       </Text>
                       {item.nextDueMileage != null && (
                         <>
-                          <Feather name="activity" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
+                          <Feather
+                            name="activity"
+                            size={12}
+                            color={C.textTertiary}
+                            style={isRTL ? { marginRight: 8 } : { marginLeft: 8 }}
+                          />
                           <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
                             {item.nextDueMileage.toLocaleString()} {unit}
                           </Text>
@@ -397,14 +565,18 @@ export default function MenuDashboardScreen() {
                     <Pressable
                       onPress={() => handleAddToCalendar(item)}
                       hitSlop={8}
-                      style={[styles.calBtn, { backgroundColor: "#DBEAFE" }]}
+                      style={[
+                        styles.calBtn,
+                        { backgroundColor: "#DBEAFE" },
+                        isRTL && { marginLeft: 0, marginRight: 8 },
+                      ]}
                     >
                       {calendarLoading === `${item.itemKind}-${item.id}` ? (
                         <ActivityIndicator size={13} color="#2563EB" />
                       ) : (
                         <>
                           <Feather name="calendar" size={14} color="#2563EB" />
-                          <Text style={styles.calBtnText}>Add</Text>
+                          <Text style={styles.calBtnText}>{t("home.addToCal")}</Text>
                         </>
                       )}
                     </Pressable>
@@ -430,9 +602,23 @@ export default function MenuDashboardScreen() {
         />
         <View style={[calStyles.sheet, { backgroundColor: C.card }]}>
           <View style={[calStyles.handle, { backgroundColor: C.border }]} />
-          <Text style={[calStyles.title, { color: C.text }]}>Choose Calendar</Text>
-          <Text style={[calStyles.sub, { color: C.textSecondary }]}>
-            Select which calendar to add this reminder to
+          <Text
+            style={[
+              calStyles.title,
+              { color: C.text },
+              isRTL && { textAlign: "right", writingDirection: "rtl" },
+            ]}
+          >
+            {t("home.chooseCalendar")}
+          </Text>
+          <Text
+            style={[
+              calStyles.sub,
+              { color: C.textSecondary },
+              isRTL && { textAlign: "right", writingDirection: "rtl" },
+            ]}
+          >
+            {t("home.chooseCalendarSub")}
           </Text>
           {writableCalendars.map((cal) => (
             <Pressable
@@ -446,23 +632,31 @@ export default function MenuDashboardScreen() {
               }}
               style={({ pressed }) => [
                 calStyles.calRow,
+                isRTL && { flexDirection: "row-reverse" },
                 { borderColor: C.border, opacity: pressed ? 0.7 : 1 },
               ]}
             >
               <View
                 style={[calStyles.calDot, { backgroundColor: cal.color ?? C.tint }]}
               />
-              <Text style={[calStyles.calName, { color: C.text }]} numberOfLines={1}>
+              <Text
+                style={[
+                  calStyles.calName,
+                  { color: C.text },
+                  isRTL && { textAlign: "right", writingDirection: "rtl" },
+                ]}
+                numberOfLines={1}
+              >
                 {cal.title}
               </Text>
-              <Feather name="chevron-right" size={16} color={C.textTertiary} />
+              <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
             </Pressable>
           ))}
           <Pressable
             onPress={() => setCalendarPickerVisible(false)}
             style={({ pressed }) => [calStyles.cancelBtn, { opacity: pressed ? 0.6 : 1 }]}
           >
-            <Text style={[calStyles.cancelText, { color: C.textSecondary }]}>Cancel</Text>
+            <Text style={[calStyles.cancelText, { color: C.textSecondary }]}>{t("common.cancel")}</Text>
           </Pressable>
         </View>
       </Modal>
