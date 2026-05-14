@@ -594,10 +594,6 @@ export default function SettingsScreen() {
           <LanguageRow />
         </View>
 
-        {/* Connected accounts (Clerk-only — legacy users only see this once
-            they've migrated and have a Clerk session). */}
-        <ConnectedAccountsCard />
-
         {/* Subscriptions */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.subscriptions")}</Text>
 
@@ -696,6 +692,10 @@ export default function SettingsScreen() {
             onChange={handleRemindersToggle}
           />
         </View>
+
+        {/* Connected accounts (Clerk-only — legacy users only see this once
+            they've migrated and have a Clerk session). */}
+        <ConnectedAccountsCard />
 
         {/* About */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.about")}</Text>
