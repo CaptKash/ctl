@@ -423,7 +423,7 @@ export default function MenuDashboardScreen() {
             end={{ x: 0.85, y: 1 }}
             style={[styles.tileIcon, styles.tileIconMetallicBlue]}
           >
-            <Feather name="book-open" size={24} color="#FFFFFF" />
+            <Feather name="book-open" size={24} color="#312E81" />
           </LinearGradient>
           <View style={styles.tileBody}>
             <Text
