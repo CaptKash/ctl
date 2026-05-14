@@ -196,16 +196,10 @@ export default function MenuDashboardScreen() {
           <View
             style={[
               styles.taglineRow,
-              isRTL && { flexDirection: "row-reverse" },
+              isRTL && { alignSelf: "flex-end" },
             ]}
           >
-            <Text
-              style={[
-                styles.headerSub,
-                { color: C.textSecondary },
-                isRTL && { textAlign: "right", writingDirection: "rtl" },
-              ]}
-            >
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
               {t("common.appTagline")}
             </Text>
             <View
