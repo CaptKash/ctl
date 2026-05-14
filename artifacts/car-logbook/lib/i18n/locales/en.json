@@ -78,6 +78,7 @@
     "sections": {
       "account": "ACCOUNT",
       "signInMethods": "SIGN-IN METHODS",
+      "subscriptions": "SUBSCRIPTIONS",
       "preferences": "PREFERENCES",
       "notifications": "NOTIFICATIONS",
       "about": "ABOUT",
@@ -115,6 +116,14 @@
       "feature4": "PDF & CSV export",
       "feature5": "All current & future tools",
       "cta": "Subscribe now"
+    },
+    "enterprise": {
+      "title": "CTL Enterprise",
+      "tagline": "For dealerships, fleets & workshops",
+      "feature1": "Multi-user access & roles",
+      "feature2": "Centralized fleet dashboard",
+      "feature3": "Priority support & onboarding",
+      "cta": "Contact sales"
     },
     "preferences": {
       "theme": "Theme",

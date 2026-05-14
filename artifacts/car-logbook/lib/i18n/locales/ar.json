@@ -78,6 +78,7 @@
     "sections": {
       "account": "الحساب",
       "signInMethods": "طرق تسجيل الدخول",
+      "subscriptions": "الاشتراكات",
       "preferences": "التفضيلات",
       "notifications": "الإشعارات",
       "about": "حول التطبيق",
@@ -115,6 +116,14 @@
       "feature4": "تصدير PDF و CSV",
       "feature5": "جميع الأدوات الحالية والمستقبلية",
       "cta": "اشترك الآن"
+    },
+    "enterprise": {
+      "title": "CTL Enterprise",
+      "tagline": "للمعارض والأساطيل وورش الصيانة",
+      "feature1": "وصول متعدد المستخدمين والأدوار",
+      "feature2": "لوحة تحكم مركزية للأسطول",
+      "feature3": "دعم وتدريب بأولوية",
+      "cta": "تواصل مع المبيعات"
     },
     "preferences": {
       "theme": "المظهر",

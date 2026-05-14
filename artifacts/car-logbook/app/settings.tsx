@@ -598,6 +598,9 @@ export default function SettingsScreen() {
             they've migrated and have a Clerk session). */}
         <ConnectedAccountsCard />
 
+        {/* Subscriptions */}
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.subscriptions")}</Text>
+
         {/* CTL Fleet upgrade card */}
         <Pressable
           style={({ pressed }) => [styles.fleetCard, { opacity: pressed ? 0.92 : 1 }]}
@@ -628,6 +631,44 @@ export default function SettingsScreen() {
             <View style={[styles.fleetCta, isRTL && { flexDirection: "row-reverse" }]}>
               <Text style={styles.fleetCtaText}>{t("settings.fleet.cta")}</Text>
               <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={14} color="#78350F" />
+            </View>
+          </View>
+        </Pressable>
+
+        {/* CTL Enterprise upgrade card (placeholder — content TBD) */}
+        <Pressable
+          style={({ pressed }) => [styles.enterpriseCard, { opacity: pressed ? 0.92 : 1 }]}
+          onPress={() =>
+            Alert.alert(
+              t("settings.enterprise.title"),
+              t("settings.enterprise.tagline"),
+              [{ text: t("common.ok") }],
+            )
+          }
+        >
+          <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
+            <View style={styles.enterpriseIconWrap}>
+              <Feather name="briefcase" size={16} color="#312E81" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.enterpriseTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.title")}</Text>
+              <Text style={[styles.enterpriseTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.tagline")}</Text>
+            </View>
+          </View>
+          <View style={styles.fleetFeatures}>
+            {[
+              t("settings.enterprise.feature1"),
+              t("settings.enterprise.feature2"),
+              t("settings.enterprise.feature3"),
+            ].map((f) => (
+              <View key={f} style={[styles.fleetFeatureRow, isRTL && { flexDirection: "row-reverse" }]}>
+                <Feather name="check-circle" size={13} color="#4338CA" />
+                <Text style={[styles.enterpriseFeatureText, isRTL && { textAlign: "right", writingDirection: "rtl", flex: 1 }]}>{f}</Text>
+              </View>
+            ))}
+            <View style={[styles.enterpriseCta, isRTL && { flexDirection: "row-reverse" }]}>
+              <Text style={styles.enterpriseCtaText}>{t("settings.enterprise.cta")}</Text>
+              <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={14} color="#FFFFFF" />
             </View>
           </View>
         </Pressable>
@@ -900,4 +941,37 @@ const styles = StyleSheet.create({
     backgroundColor: "#FCD34D",
   },
   fleetCtaText: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#78350F" },
+
+  enterpriseCard: {
+    borderRadius: 16,
+    backgroundColor: "#EEF2FF",
+    borderWidth: 1.5,
+    borderColor: "#A5B4FC",
+    overflow: "hidden",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  enterpriseIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: "#E0E7FF",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  enterpriseTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#312E81" },
+  enterpriseTagline: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#4338CA", marginTop: 1 },
+  enterpriseFeatureText: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#312E81" },
+  enterpriseCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#4F46E5",
+  },
+  enterpriseCtaText: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
 });
