@@ -458,12 +458,18 @@ export default function MenuDashboardScreen() {
           style={({ pressed }) => [
             styles.tile,
             isRTL && { flexDirection: "row-reverse" },
-            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1 },
+            { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.9 : 1, borderWidth: 1, borderColor: "#064E3B" },
           ]}
         >
-          <View style={[styles.tileIcon, { backgroundColor: "#D1FAE5" }]}>
-            <Feather name="file-text" size={24} color="#059669" />
-          </View>
+          <LinearGradient
+            colors={["#ECFDF5", "#34D399", "#047857"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.tileIcon, styles.tileIconMetallicGreen]}
+          >
+            <Feather name="file-text" size={24} color="#064E3B" />
+          </LinearGradient>
           <View style={styles.tileBody}>
             <Text
               style={[
@@ -809,6 +815,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#312E81",
     shadowColor: "#1E3A8A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+  },
+  tileIconMetallicGreen: {
+    borderWidth: 1,
+    borderColor: "#064E3B",
+    shadowColor: "#064E3B",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.25,
     shadowRadius: 2,
