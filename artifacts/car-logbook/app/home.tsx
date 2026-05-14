@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
   },
   tileIconMetallic: {
     borderWidth: 1,
-    borderColor: "#64748B",
+    borderColor: "#312E81",
     shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.18,
