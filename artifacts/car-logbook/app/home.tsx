@@ -1,4 +1,4 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
@@ -660,19 +660,16 @@ export default function MenuDashboardScreen() {
                       ]}
                     >
                       <LinearGradient
-                        colors={["#94A3B8", "#475569", "#1E293B"]}
+                        colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
                         locations={[0, 0.55, 1]}
                         start={{ x: 0.15, y: 0 }}
                         end={{ x: 0.85, y: 1 }}
-                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#0F172A" }]}
+                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#64748B" }]}
                       >
                         {calendarLoading === `${item.itemKind}-${item.id}` ? (
-                          <ActivityIndicator size={14} color="#FFFFFF" />
+                          <ActivityIndicator size={16} color="#334155" />
                         ) : (
-                          <>
-                            <Feather name="calendar" size={15} color="#FFFFFF" />
-                            <Text style={[styles.calBtnText, { color: "#FFFFFF" }]}>{t("home.addToCal")}</Text>
-                          </>
+                          <MaterialCommunityIcons name="calendar-plus" size={22} color="#334155" />
                         )}
                       </LinearGradient>
                     </Pressable>
@@ -977,14 +974,12 @@ const styles = StyleSheet.create({
   eventCardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   calBtn: {
-    minWidth: 56,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
+    width: 40,
+    height: 40,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
-    gap: 3,
   },
   calBtnText: {
     fontSize: 11,
