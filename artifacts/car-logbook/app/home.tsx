@@ -319,7 +319,7 @@ export default function MenuDashboardScreen() {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={[styles.carList, isRTL && { flexDirection: "row-reverse" }]}
+                  contentContainerStyle={[styles.carList, isRTL && { flexDirection: "row-reverse", flexGrow: 1 }]}
                   onStartShouldSetResponder={() => true}
                   scrollEventThrottle={16}
                   onScroll={(e) => {
