@@ -352,7 +352,7 @@ export default function MaintenanceFormScreen() {
             <Text style={[styles.costTitle, { color: C.text }]}>Cost ({currency.symbol})</Text>
           </View>
           <View style={styles.costRow}>
-            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Parts</Text>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Parts ({currency.symbol})</Text>
             <TextInput
               value={costOfParts}
               onChangeText={setCostOfParts}
@@ -363,7 +363,7 @@ export default function MaintenanceFormScreen() {
             />
           </View>
           <View style={styles.costRow}>
-            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Labor</Text>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Labor ({currency.symbol})</Text>
             <TextInput
               value={laborCost}
               onChangeText={setLaborCost}
