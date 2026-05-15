@@ -660,18 +660,18 @@ export default function MenuDashboardScreen() {
                       ]}
                     >
                       <LinearGradient
-                        colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+                        colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
                         locations={[0, 0.55, 1]}
                         start={{ x: 0.15, y: 0 }}
                         end={{ x: 0.85, y: 1 }}
-                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#64748B" }]}
+                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#312E81" }]}
                       >
                         {calendarLoading === `${item.itemKind}-${item.id}` ? (
-                          <ActivityIndicator size={13} color="#334155" />
+                          <ActivityIndicator size={14} color="#FFFFFF" />
                         ) : (
                           <>
-                            <Feather name="calendar" size={14} color="#334155" />
-                            <Text style={[styles.calBtnText, { color: "#334155" }]}>{t("home.addToCal")}</Text>
+                            <Feather name="calendar" size={15} color="#FFFFFF" />
+                            <Text style={[styles.calBtnText, { color: "#FFFFFF" }]}>{t("home.addToCal")}</Text>
                           </>
                         )}
                       </LinearGradient>
@@ -977,18 +977,19 @@ const styles = StyleSheet.create({
   eventCardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   calBtn: {
-    width: 44,
-    paddingVertical: 5,
-    borderRadius: 8,
+    minWidth: 56,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
-    gap: 2,
+    gap: 3,
   },
   calBtnText: {
-    fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
-    color: "#2563EB",
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    color: "#FFFFFF",
   },
 });
 
