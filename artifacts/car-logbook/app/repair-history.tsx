@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
@@ -42,6 +43,7 @@ type MaintenanceLog = {
 export default function RepairHistoryScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { currency } = useCurrency();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const { data: logs, isLoading } = useQuery<MaintenanceLog[]>({
@@ -126,7 +128,7 @@ export default function RepairHistoryScreen() {
                     {log.cost != null && (
                       <View style={[styles.costChip, { backgroundColor: "#D1FAE5" }]}>
                         <Text style={[styles.costChipText, { color: "#065F46" }]}>
-                          ${log.cost.toFixed(2)}
+                          {currency.symbol}{log.cost.toFixed(2)}
                         </Text>
                       </View>
                     )}

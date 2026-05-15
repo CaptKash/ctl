@@ -18,6 +18,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import * as ImagePicker from "expo-image-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 
@@ -88,6 +89,7 @@ export default function MaintenanceFormScreen() {
   const carId = parseInt(carIdParam ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { currency } = useCurrency();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -347,7 +349,7 @@ export default function MaintenanceFormScreen() {
         {/* Cost */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
           <View style={styles.costHeader}>
-            <Text style={[styles.costTitle, { color: C.text }]}>Cost</Text>
+            <Text style={[styles.costTitle, { color: C.text }]}>Cost ({currency.symbol})</Text>
           </View>
           <View style={styles.costRow}>
             <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Parts</Text>
@@ -375,7 +377,7 @@ export default function MaintenanceFormScreen() {
             <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Total</Text>
             <View style={[styles.costRowInput, { backgroundColor: C.backgroundTertiary, borderColor: C.border, justifyContent: "center" }]}>
               <Text style={[styles.totalValue, { color: totalCost > 0 ? C.text : C.textTertiary, textAlign: "right" }]}>
-                {totalCost > 0 ? `$${totalCost.toFixed(2)}` : "—"}
+                {totalCost > 0 ? `${currency.symbol}${totalCost.toFixed(2)}` : "—"}
               </Text>
             </View>
           </View>
