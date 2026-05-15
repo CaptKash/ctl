@@ -659,19 +659,13 @@ export default function MenuDashboardScreen() {
                         isRTL && { marginLeft: 0, marginRight: 8 },
                       ]}
                     >
-                      <LinearGradient
-                        colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
-                        locations={[0, 0.55, 1]}
-                        start={{ x: 0.15, y: 0 }}
-                        end={{ x: 0.85, y: 1 }}
-                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#64748B" }]}
-                      >
+                      <View style={[styles.calBtn, { backgroundColor: "#E5E7EB", borderWidth: 1, borderColor: "#9CA3AF" }]}>
                         {calendarLoading === `${item.itemKind}-${item.id}` ? (
-                          <ActivityIndicator size={16} color="#334155" />
+                          <ActivityIndicator size={16} color="#374151" />
                         ) : (
-                          <MaterialCommunityIcons name="calendar-plus" size={22} color="#334155" />
+                          <MaterialCommunityIcons name="calendar-plus" size={22} color="#374151" />
                         )}
-                      </LinearGradient>
+                      </View>
                     </Pressable>
                   </View>
                 </View>
