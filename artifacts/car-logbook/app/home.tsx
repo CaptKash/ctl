@@ -319,7 +319,7 @@ export default function MenuDashboardScreen() {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.carList}
+                  contentContainerStyle={[styles.carList, isRTL && { flexDirection: "row-reverse" }]}
                   onStartShouldSetResponder={() => true}
                   scrollEventThrottle={16}
                   onScroll={(e) => {
@@ -386,7 +386,7 @@ export default function MenuDashboardScreen() {
                   })}
                 </ScrollView>
                 {fleetCount > 1 && (
-                  <View style={styles.dotRow}>
+                  <View style={[styles.dotRow, isRTL && { flexDirection: "row-reverse" }]}>
                     {cars.map((_, i) => (
                       <View
                         key={i}
