@@ -612,6 +612,18 @@ export default function MenuDashboardScreen() {
                     <View style={[styles.urgencyBadge, { backgroundColor: color + "22" }]}>
                       <Text style={[styles.urgencyText, { color }]}>{label}</Text>
                     </View>
+                    <Pressable
+                      onPress={() => handleAddToCalendar(item)}
+                      hitSlop={8}
+                    >
+                      <View style={[styles.calBtn, { backgroundColor: "#E5E7EB", borderWidth: 1, borderColor: "#9CA3AF" }]}>
+                        {calendarLoading === `${item.itemKind}-${item.id}` ? (
+                          <ActivityIndicator size={16} color="#374151" />
+                        ) : (
+                          <MaterialCommunityIcons name="calendar-plus" size={22} color="#374151" />
+                        )}
+                      </View>
+                    </Pressable>
                   </View>
                   <Text
                     style={[
@@ -652,21 +664,6 @@ export default function MenuDashboardScreen() {
                         </>
                       )}
                     </View>
-                    <Pressable
-                      onPress={() => handleAddToCalendar(item)}
-                      hitSlop={8}
-                      style={[
-                        isRTL && { marginLeft: 0, marginRight: 8 },
-                      ]}
-                    >
-                      <View style={[styles.calBtn, { backgroundColor: "#E5E7EB", borderWidth: 1, borderColor: "#9CA3AF" }]}>
-                        {calendarLoading === `${item.itemKind}-${item.id}` ? (
-                          <ActivityIndicator size={16} color="#374151" />
-                        ) : (
-                          <MaterialCommunityIcons name="calendar-plus" size={22} color="#374151" />
-                        )}
-                      </View>
-                    </Pressable>
                   </View>
                 </View>
               </Pressable>
@@ -968,12 +965,11 @@ const styles = StyleSheet.create({
   eventCardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   calBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 8,
   },
   calBtnText: {
     fontSize: 11,
