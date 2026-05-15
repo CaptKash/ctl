@@ -14,37 +14,42 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/lib/revenuecat";
+import { localizeDigits } from "@/lib/i18n";
 import { PurchasesPackage } from "react-native-purchases";
 
-const FREE_FEATURES = [
-  "Up to 2 vehicles",
-  "Full maintenance logging",
-  "Service Centers Nearby",
-  "Basic reminders",
-];
-
-const FLEET_FEATURES = [
-  { icon: "layers" as const, label: "Unlimited vehicles" },
-  { icon: "bar-chart-2" as const, label: "Fuel Consumption analytics" },
-  { icon: "dollar-sign" as const, label: "Service Cost Tracker" },
-  { icon: "download" as const, label: "PDF & CSV export" },
-  { icon: "star" as const, label: "All current & future tools" },
-  { icon: "bell" as const, label: "Priority reminders" },
-];
-
 const PACKAGE_ORDER = ["$rc_monthly", "$rc_annual", "$rc_lifetime"];
-const PACKAGE_META: Record<string, { label: string; sub: string; highlight: boolean }> = {
-  "$rc_monthly": { label: "Monthly", sub: "per month", highlight: false },
-  "$rc_annual": { label: "Annual", sub: "per year · save 44%", highlight: false },
-  "$rc_lifetime": { label: "Lifetime", sub: "one-time payment", highlight: true },
-};
 
 export default function FleetUpgradeScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 20 : insets.top;
+
+  const FREE_FEATURES = [
+    t("fleetUpgrade.freeFeature1"),
+    t("fleetUpgrade.freeFeature2"),
+    t("fleetUpgrade.freeFeature3"),
+    t("fleetUpgrade.freeFeature4"),
+  ];
+
+  const FLEET_FEATURES = [
+    { icon: "layers" as const, label: t("fleetUpgrade.fleetFeature1") },
+    { icon: "bar-chart-2" as const, label: t("fleetUpgrade.fleetFeature2") },
+    { icon: "dollar-sign" as const, label: t("fleetUpgrade.fleetFeature3") },
+    { icon: "download" as const, label: t("fleetUpgrade.fleetFeature4") },
+    { icon: "star" as const, label: t("fleetUpgrade.fleetFeature5") },
+    { icon: "bell" as const, label: t("fleetUpgrade.fleetFeature6") },
+  ];
+
+  const PACKAGE_META: Record<string, { label: string; sub: string; highlight: boolean }> = {
+    "$rc_monthly": { label: t("fleetUpgrade.monthlyLabel"), sub: t("fleetUpgrade.perMonth"), highlight: false },
+    "$rc_annual": { label: t("fleetUpgrade.annualLabel"), sub: t("fleetUpgrade.perYearSave", { percent: localizeDigits(44, i18n.language) }), highlight: false },
+    "$rc_lifetime": { label: t("fleetUpgrade.lifetimeLabel"), sub: t("fleetUpgrade.oneTime"), highlight: true },
+  };
 
   const { isLoading, purchase, isPurchasing, restore, isRestoring, isFleet, offeringsFailed, usingMockPackages, refetchOfferings, mockPackages, realPackages, diagnostics, offeringsError } = useSubscription();
   const [selectedId, setSelectedId] = React.useState("$rc_lifetime");
@@ -76,7 +81,7 @@ export default function FleetUpgradeScreen() {
       router.back();
     } catch (e: any) {
       if (!e.userCancelled) {
-        setError(e.message ?? "Purchase failed. Please try again.");
+        setError(e.message ?? t("fleetUpgrade.purchaseFailed"));
       }
     }
   };
@@ -87,7 +92,7 @@ export default function FleetUpgradeScreen() {
     try {
       await restore();
     } catch (e: any) {
-      setError("Restore failed. Please try again.");
+      setError(t("fleetUpgrade.restoreFailed"));
     }
   };
 
@@ -97,15 +102,15 @@ export default function FleetUpgradeScreen() {
         <View style={styles.heroIconWrap}>
           <Feather name="check-circle" size={32} color="#D97706" />
         </View>
-        <Text style={[styles.heroTitle, { color: C.text, marginTop: 16 }]}>You're on CTL Fleet!</Text>
+        <Text style={[styles.heroTitle, { color: C.text, marginTop: 16 }]}>{t("fleetUpgrade.alreadyTitle")}</Text>
         <Text style={[styles.heroSub, { color: C.textSecondary, marginTop: 8 }]}>
-          Enjoy unlimited vehicles and all premium tools.
+          {t("fleetUpgrade.alreadySub")}
         </Text>
         <Pressable
           onPress={() => router.back()}
-          style={[styles.ctaBtn, { marginTop: 32 }]}
+          style={[styles.ctaBtn, { marginTop: 32, paddingHorizontal: 32 }]}
         >
-          <Text style={styles.ctaBtnText}>Back</Text>
+          <Text style={styles.ctaBtnText}>{t("fleetUpgrade.back")}</Text>
         </Pressable>
       </View>
     );
@@ -119,7 +124,7 @@ export default function FleetUpgradeScreen() {
       >
         <Pressable
           onPress={() => router.back()}
-          style={[styles.closeBtn, { backgroundColor: C.card }]}
+          style={[styles.closeBtn, { backgroundColor: C.card, alignSelf: isRTL ? "flex-start" : "flex-end" }]}
           hitSlop={8}
         >
           <Feather name="x" size={18} color={C.textSecondary} />
@@ -129,47 +134,47 @@ export default function FleetUpgradeScreen() {
           <View style={styles.heroIconWrap}>
             <Feather name="star" size={28} color="#92400E" />
           </View>
-          <Text style={[styles.heroTitle, { color: C.text }]}>CTL Fleet</Text>
+          <Text style={[styles.heroTitle, { color: C.text }]}>{t("fleetUpgrade.ctlFleetTitle")}</Text>
           <Text style={[styles.heroSub, { color: C.textSecondary }]}>
-            Manage every vehicle without limits
+            {t("fleetUpgrade.tagline")}
           </Text>
         </View>
 
-        <View style={[styles.comparisonCard, { backgroundColor: C.card }]}>
+        <View style={[styles.comparisonCard, { backgroundColor: C.card }, isRTL && { flexDirection: "row-reverse" }]}>
           <View style={styles.comparisonCol}>
-            <Text style={[styles.comparisonHeader, { color: C.textSecondary }]}>Free</Text>
+            <Text style={[styles.comparisonHeader, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("fleetUpgrade.freeHeader")}</Text>
             {FREE_FEATURES.map((f) => (
-              <View key={f} style={styles.comparisonRow}>
+              <View key={f} style={[styles.comparisonRow, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="check" size={13} color={C.textTertiary} />
-                <Text style={[styles.comparisonText, { color: C.textSecondary }]}>{f}</Text>
+                <Text style={[styles.comparisonText, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{f}</Text>
               </View>
             ))}
           </View>
           <View style={[styles.dividerV, { backgroundColor: C.border }]} />
           <View style={styles.comparisonCol}>
-            <Text style={[styles.comparisonHeader, { color: "#D97706" }]}>Fleet</Text>
+            <Text style={[styles.comparisonHeader, { color: "#D97706" }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("fleetUpgrade.fleetHeader")}</Text>
             {FLEET_FEATURES.map((f) => (
-              <View key={f.label} style={styles.comparisonRow}>
+              <View key={f.label} style={[styles.comparisonRow, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="check-circle" size={13} color="#D97706" />
-                <Text style={[styles.comparisonText, { color: C.text }]}>{f.label}</Text>
+                <Text style={[styles.comparisonText, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{f.label}</Text>
               </View>
             ))}
           </View>
         </View>
 
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>CHOOSE A PLAN</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("fleetUpgrade.choosePlan")}</Text>
 
         {usingMockPackages && __DEV__ && (
           <View style={[styles.devNotice, { backgroundColor: "#FEF3C7" }]}>
-            <Text style={styles.devNoticeText}>Dev mode · RevenueCat not connected · prices are test values</Text>
+            <Text style={styles.devNoticeText}>{t("fleetUpgrade.devNotice")}</Text>
           </View>
         )}
 
         {usingMockPackages && !__DEV__ && (
           <View style={[styles.devNotice, { backgroundColor: C.card }]}>
             <Text style={[styles.devNoticeText, { color: C.textSecondary }]}>
-              Connecting to App Store…{" "}
-              <Text onPress={() => refetchOfferings()} style={{ color: C.tint }}>Retry</Text>
+              {t("fleetUpgrade.connectingStore")}{" "}
+              <Text onPress={() => refetchOfferings()} style={{ color: C.tint }}>{t("fleetUpgrade.retry")}</Text>
             </Text>
           </View>
         )}
@@ -177,7 +182,7 @@ export default function FleetUpgradeScreen() {
         {isLoading ? (
           <View style={styles.loadingRow}>
             <ActivityIndicator color={C.tint} />
-            <Text style={[styles.loadingText, { color: C.textSecondary }]}>Loading plans...</Text>
+            <Text style={[styles.loadingText, { color: C.textSecondary }]}>{t("fleetUpgrade.loadingPlans")}</Text>
           </View>
         ) : (
           orderedPackages.map((pkg) => {
@@ -199,19 +204,20 @@ export default function FleetUpgradeScreen() {
                     borderColor: active ? "#D97706" : C.border,
                     borderWidth: active ? 2 : 1,
                   },
+                  isRTL && { flexDirection: "row-reverse" },
                 ]}
               >
                 {meta.highlight && (
-                  <View style={styles.popularBadge}>
-                    <Text style={styles.popularText}>Best Value</Text>
+                  <View style={[styles.popularBadge, isRTL && { right: undefined, left: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 10 }]}>
+                    <Text style={styles.popularText}>{t("fleetUpgrade.bestValue")}</Text>
                   </View>
                 )}
                 <View style={[styles.planRadio, { borderColor: active ? "#D97706" : C.textTertiary }]}>
                   {active && <View style={styles.planRadioInner} />}
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.planLabel, { color: C.text }]}>{meta.label}</Text>
-                  <Text style={[styles.planSub, { color: C.textSecondary }]}>{sub}</Text>
+                  <Text style={[styles.planLabel, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{meta.label}</Text>
+                  <Text style={[styles.planSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{sub}</Text>
                 </View>
                 <Text style={[styles.planPrice, { color: C.text }]}>{price}</Text>
               </Pressable>
@@ -226,7 +232,7 @@ export default function FleetUpgradeScreen() {
         {offeringsError && !__DEV__ && (
           <View style={[styles.devNotice, { backgroundColor: "#FEF2F2", marginTop: 4 }]}>
             <Text style={[styles.devNoticeText, { color: "#991B1B", fontSize: 11 }]} selectable>
-              {"Store error: " + offeringsError}
+              {t("fleetUpgrade.storeError", { msg: offeringsError })}
             </Text>
             {diagnostics && (
               <Text style={[styles.devNoticeText, { color: "#6B7280", fontSize: 10, marginTop: 2 }]} selectable>
@@ -251,7 +257,7 @@ export default function FleetUpgradeScreen() {
           {isPurchasing ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.ctaBtnText}>Get CTL Fleet</Text>
+            <Text style={styles.ctaBtnText}>{t("fleetUpgrade.getCtlFleet")}</Text>
           )}
         </Pressable>
 
@@ -261,21 +267,21 @@ export default function FleetUpgradeScreen() {
           style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1, alignSelf: "center" })}
         >
           <Text style={[styles.restoreText, { color: C.textSecondary }]}>
-            {isRestoring ? "Restoring..." : "Restore Purchases"}
+            {isRestoring ? t("fleetUpgrade.restoring") : t("fleetUpgrade.restorePurchases")}
           </Text>
         </Pressable>
 
         <Text style={[styles.legalText, { color: C.textTertiary }]}>
-          Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store / Play Store account settings.{"\n"}
+          {t("fleetUpgrade.legal")}{"\n"}
           <Text
             style={[styles.legalLink, { color: C.tint }]}
             onPress={() => Linking.openURL("https://ctl-car-technical-log.replit.app/privacy")}
-          >Privacy Policy</Text>
+          >{t("fleetUpgrade.privacy")}</Text>
           {"  ·  "}
           <Text
             style={[styles.legalLink, { color: C.tint }]}
             onPress={() => Linking.openURL("https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")}
-          >Terms of Use</Text>
+          >{t("fleetUpgrade.terms")}</Text>
         </Text>
       </ScrollView>
 
@@ -288,24 +294,19 @@ export default function FleetUpgradeScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, { backgroundColor: C.card }]}>
-            <Text style={[styles.modalTitle, { color: C.text }]}>Test Purchase</Text>
-            <Text style={[styles.modalBody, { color: C.textSecondary }]}>
-              You are in development mode. This will simulate purchasing{" "}
-              <Text style={{ fontFamily: "Inter_600SemiBold", color: C.text }}>
-                {confirmPkg ? (PACKAGE_META[confirmPkg.identifier]?.label ?? confirmPkg.identifier) : ""}
-              </Text>{" "}
-              for{" "}
-              <Text style={{ fontFamily: "Inter_600SemiBold", color: C.text }}>
-                {confirmPkg?.product.priceString}
-              </Text>{" "}
-              using the RevenueCat test store.
+            <Text style={[styles.modalTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("fleetUpgrade.testTitle")}</Text>
+            <Text style={[styles.modalBody, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
+              {t("fleetUpgrade.testBody", {
+                label: confirmPkg ? (PACKAGE_META[confirmPkg.identifier]?.label ?? confirmPkg.identifier) : "",
+                price: confirmPkg?.product.priceString ?? "",
+              })}
             </Text>
-            <View style={styles.modalActions}>
+            <View style={[styles.modalActions, isRTL && { flexDirection: "row-reverse" }]}>
               <Pressable
                 onPress={() => setConfirmPkg(null)}
                 style={[styles.modalBtn, { backgroundColor: C.background }]}
               >
-                <Text style={[styles.modalBtnText, { color: C.textSecondary }]}>Cancel</Text>
+                <Text style={[styles.modalBtnText, { color: C.textSecondary }]}>{t("common.cancel")}</Text>
               </Pressable>
               <Pressable
                 onPress={async () => {
@@ -315,7 +316,7 @@ export default function FleetUpgradeScreen() {
                 }}
                 style={[styles.modalBtn, { backgroundColor: "#D97706" }]}
               >
-                <Text style={[styles.modalBtnText, { color: "#fff" }]}>Confirm Purchase</Text>
+                <Text style={[styles.modalBtnText, { color: "#fff" }]}>{t("fleetUpgrade.confirmPurchase")}</Text>
               </Pressable>
             </View>
           </View>
