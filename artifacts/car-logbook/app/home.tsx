@@ -656,19 +656,25 @@ export default function MenuDashboardScreen() {
                       onPress={() => handleAddToCalendar(item)}
                       hitSlop={8}
                       style={[
-                        styles.calBtn,
-                        { backgroundColor: "#DBEAFE" },
                         isRTL && { marginLeft: 0, marginRight: 8 },
                       ]}
                     >
-                      {calendarLoading === `${item.itemKind}-${item.id}` ? (
-                        <ActivityIndicator size={13} color="#2563EB" />
-                      ) : (
-                        <>
-                          <Feather name="calendar" size={14} color="#2563EB" />
-                          <Text style={styles.calBtnText}>{t("home.addToCal")}</Text>
-                        </>
-                      )}
+                      <LinearGradient
+                        colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+                        locations={[0, 0.55, 1]}
+                        start={{ x: 0.15, y: 0 }}
+                        end={{ x: 0.85, y: 1 }}
+                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#64748B" }]}
+                      >
+                        {calendarLoading === `${item.itemKind}-${item.id}` ? (
+                          <ActivityIndicator size={13} color="#334155" />
+                        ) : (
+                          <>
+                            <Feather name="calendar" size={14} color="#334155" />
+                            <Text style={[styles.calBtnText, { color: "#334155" }]}>{t("home.addToCal")}</Text>
+                          </>
+                        )}
+                      </LinearGradient>
                     </Pressable>
                   </View>
                 </View>
