@@ -964,7 +964,7 @@ const styles = StyleSheet.create({
   urgencyBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
   urgencyText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
   eventCardDesc: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  eventCardBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 4 },
+  eventCardBottom: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginTop: 4 },
   eventCardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   calBtn: {
