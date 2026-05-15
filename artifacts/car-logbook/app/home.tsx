@@ -960,7 +960,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  urgencyBar: { width: 6 },
+  urgencyBar: { width: 12 },
   eventCardBody: { flex: 1, padding: 14, gap: 5 },
   eventCardTop: { flexDirection: "row", alignItems: "center", gap: 8 },
   eventCardType: { flex: 1, fontSize: 15, fontFamily: "Inter_600SemiBold" },
