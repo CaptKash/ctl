@@ -620,7 +620,7 @@ export default function MenuDashboardScreen() {
                         {calendarLoading === `${item.itemKind}-${item.id}` ? (
                           <ActivityIndicator size={16} color="#374151" />
                         ) : (
-                          <Ionicons name="alarm-outline" size={22} color="#374151" />
+                          <Ionicons name="calendar-outline" size={22} color="#374151" />
                         )}
                       </View>
                     </Pressable>
