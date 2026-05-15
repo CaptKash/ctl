@@ -660,11 +660,11 @@ export default function MenuDashboardScreen() {
                       ]}
                     >
                       <LinearGradient
-                        colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
+                        colors={["#94A3B8", "#475569", "#1E293B"]}
                         locations={[0, 0.55, 1]}
                         start={{ x: 0.15, y: 0 }}
                         end={{ x: 0.85, y: 1 }}
-                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#312E81" }]}
+                        style={[styles.calBtn, { borderWidth: 1, borderColor: "#0F172A" }]}
                       >
                         {calendarLoading === `${item.itemKind}-${item.id}` ? (
                           <ActivityIndicator size={14} color="#FFFFFF" />
