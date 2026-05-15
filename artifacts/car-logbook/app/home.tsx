@@ -63,6 +63,19 @@ function daysFromNow(dateStr: string): number {
   return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+function urgencyMetallic(days: number): { gradient: [string, string, string]; outline: string } {
+  if (days < 0) {
+    return { gradient: ["#FEE2E2", "#F87171", "#B91C1C"], outline: "#991B1B" };
+  }
+  if (days <= 14) {
+    return { gradient: ["#FFEDD5", "#FB923C", "#C2410C"], outline: "#9A3412" };
+  }
+  if (days <= 30) {
+    return { gradient: ["#FEF3C7", "#FBBF24", "#B45309"], outline: "#92400E" };
+  }
+  return { gradient: ["#D1FAE5", "#34D399", "#047857"], outline: "#064E3B" };
+}
+
 function urgencyColor(days: number, C: ColorScheme): string {
   if (days < 0) return C.danger;
   if (days <= 7) return "#F97316";
@@ -557,6 +570,7 @@ export default function MenuDashboardScreen() {
           upcoming.map((item) => {
             const days = daysFromNow(item.nextDueDate);
             const color = urgencyColor(days, C);
+            const metal = urgencyMetallic(days);
             const label = urgencyLabel(days, t);
             const dueDate = formatDate(item.nextDueDate);
 
@@ -567,10 +581,22 @@ export default function MenuDashboardScreen() {
                 style={({ pressed }) => [
                   styles.eventCard,
                   isRTL && { flexDirection: "row-reverse" },
-                  { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
+                  {
+                    backgroundColor: C.card,
+                    shadowColor: C.shadow,
+                    opacity: pressed ? 0.85 : 1,
+                    borderWidth: 1.5,
+                    borderColor: metal.outline,
+                  },
                 ]}
               >
-                <View style={[styles.urgencyBar, { backgroundColor: color }]} />
+                <LinearGradient
+                  colors={metal.gradient}
+                  locations={[0, 0.55, 1]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={styles.urgencyBar}
+                />
                 <View style={styles.eventCardBody}>
                   <View style={[styles.eventCardTop, isRTL && { flexDirection: "row-reverse" }]}>
                     <Text
@@ -934,7 +960,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  urgencyBar: { width: 4 },
+  urgencyBar: { width: 6 },
   eventCardBody: { flex: 1, padding: 14, gap: 5 },
   eventCardTop: { flexDirection: "row", alignItems: "center", gap: 8 },
   eventCardType: { flex: 1, fontSize: 15, fontFamily: "Inter_600SemiBold" },
