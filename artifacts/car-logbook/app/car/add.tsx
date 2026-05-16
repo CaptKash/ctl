@@ -2,6 +2,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Platform,
   Pressable,
   StyleSheet,
@@ -197,15 +198,29 @@ export default function AddCarScreen() {
 
           <View style={[
             styles.toggleRow,
-            isElectric && styles.toggleRowActive,
+            styles.toggleRowActive,
             isRTL && { flexDirection: "row-reverse" },
           ]}>
             <View style={[styles.toggleLeft, isRTL && { flexDirection: "row-reverse" }]}>
-              <View style={[styles.evBadge, { backgroundColor: isElectric ? "#D1FAE5" : C.backgroundTertiary }]}>
-                <Text style={{ fontSize: 16 }}>⚡</Text>
-              </View>
-              <View>
-                <Text style={[styles.toggleLabel, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.ev.label")}</Text>
+              <LinearGradient
+                colors={["#ECFDF5", "#34D399", "#047857"]}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0.15, y: 0 }}
+                end={{ x: 0.85, y: 1 }}
+                style={[styles.evBadge, styles.evBadgeMetallic]}
+              >
+                <Feather name="zap" size={18} color="#064E3B" />
+              </LinearGradient>
+              <View style={{ flex: 1 }}>
+                <View style={[{ flexDirection: "row", alignItems: "center", gap: 6 }, isRTL && { flexDirection: "row-reverse" }]}>
+                  <Text style={[styles.toggleLabel, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.ev.label")}</Text>
+                  <Pressable
+                    onPress={() => Alert.alert(t("addCar.ev.helpTitle"), t("addCar.ev.helpBody"), [{ text: t("addCar.ev.helpClose") }])}
+                    hitSlop={8}
+                  >
+                    <Feather name="help-circle" size={15} color={C.textTertiary} />
+                  </Pressable>
+                </View>
                 <Text style={[styles.toggleSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
                   {isElectric ? t("addCar.ev.subOn") : t("addCar.ev.subOff")}
                 </Text>
@@ -386,6 +401,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  evBadgeMetallic: {
+    borderWidth: 1,
+    borderColor: "#047857",
+    shadowColor: "#064E3B",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   toggleLabel: {
     fontSize: 15,

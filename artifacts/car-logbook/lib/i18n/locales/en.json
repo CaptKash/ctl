@@ -236,7 +236,10 @@
     "ev": {
       "label": "Electric Vehicle",
       "subOn": "EV — no fuel records",
-      "subOff": "Combustion or hybrid"
+      "subOff": "Combustion or hybrid",
+      "helpTitle": "Electric Vehicle",
+      "helpBody": "Turn this on if your car is fully electric. EVs are hidden from the Fuel Log so you don't see irrelevant fuel entries. (Charging tracking is coming soon.)",
+      "helpClose": "Got it"
     },
     "submit": "Add to Logbook",
     "error": "Failed to add car. Please try again."
