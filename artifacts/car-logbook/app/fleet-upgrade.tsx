@@ -208,7 +208,7 @@ export default function FleetUpgradeScreen() {
                 ]}
               >
                 {meta.highlight && (
-                  <View style={[styles.popularBadge, isRTL && { right: undefined, left: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 10 }]}>
+                  <View style={[styles.popularBadge, isRTL && { right: "auto", left: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 10 }]}>
                     <Text style={styles.popularText}>{t("fleetUpgrade.bestValue")}</Text>
                   </View>
                 )}
