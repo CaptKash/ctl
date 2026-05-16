@@ -181,7 +181,7 @@ export default function AddCarScreen() {
                 <Feather name="zap" size={18} color="#064E3B" />
               </LinearGradient>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.toggleLabel, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.ev.label")}{isRTL ? "؟" : "?"}</Text>
+                <Text style={[styles.toggleLabel, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.ev.label")}</Text>
                 <Text style={[styles.toggleSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
                   {isElectric ? t("addCar.ev.subOn") : t("addCar.ev.subOff")}
                 </Text>

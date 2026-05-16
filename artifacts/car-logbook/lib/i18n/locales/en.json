@@ -235,7 +235,7 @@
       "notesPlaceholder": "Any additional notes…"
     },
     "ev": {
-      "label": "Electric Vehicle",
+      "label": "Electric Vehicle?",
       "subOn": "EV — no fuel records",
       "subOff": "Combustion or hybrid",
       "helpTitle": "Electric Vehicle",
