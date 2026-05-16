@@ -42,7 +42,6 @@ export default function FleetUpgradeScreen() {
     { icon: "dollar-sign" as const, label: t("fleetUpgrade.fleetFeature3") },
     { icon: "download" as const, label: t("fleetUpgrade.fleetFeature4") },
     { icon: "star" as const, label: t("fleetUpgrade.fleetFeature5") },
-    { icon: "bell" as const, label: t("fleetUpgrade.fleetFeature6") },
   ];
 
   const PACKAGE_META: Record<string, { label: string; sub: string; highlight: boolean }> = {
