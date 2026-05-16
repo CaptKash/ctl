@@ -224,26 +224,14 @@ export default function AddCarScreen() {
               thumbColor={isElectric ? "#059669" : "#fff"}
             />
           </View>
-        </View>
 
-        {/* License */}
-        <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.license")}</Text>
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
             label={t("addCar.fields.plate")}
             value={licensePlate}
             onChangeText={setLicensePlate}
             placeholder={t("addCar.fields.platePlaceholder")}
-          />
-
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-
-          <DatePickerField
-            label={t("addCar.fields.validUntil")}
-            value={licenseValidUntil}
-            onChange={setLicenseValidUntil}
-            placeholder={t("addCar.fields.expiryPlaceholder")}
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
@@ -255,8 +243,23 @@ export default function AddCarScreen() {
             placeholder={t("addCar.fields.vinPlaceholder")}
             autoCapitalize="characters"
           />
+        </View>
 
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+        {/* License */}
+        <View style={[styles.section, { backgroundColor: C.card }]}>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.license")}</Text>
+
+          <DatePickerField
+            label={t("addCar.fields.validUntil")}
+            value={licenseValidUntil}
+            onChange={setLicenseValidUntil}
+            placeholder={t("addCar.fields.expiryPlaceholder")}
+          />
+        </View>
+
+        {/* Insurance */}
+        <View style={[styles.section, { backgroundColor: C.card }]}>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.insurance")}</Text>
 
           <FormField
             label={t("addCar.fields.insuredWith")}

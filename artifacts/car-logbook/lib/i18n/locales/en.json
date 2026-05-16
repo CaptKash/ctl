@@ -204,6 +204,7 @@
     "sections": {
       "basic": "Basic Info",
       "license": "License",
+      "insurance": "Insurance",
       "photos": "Photos",
       "notes": "Notes"
     },

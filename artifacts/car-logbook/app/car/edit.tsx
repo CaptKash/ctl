@@ -271,26 +271,14 @@ export default function EditCarScreen() {
               thumbColor={isElectric ? "#059669" : "#fff"}
             />
           </View>
-        </View>
 
-        {/* License */}
-        <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>License</Text>
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
             label="Plate Number"
             value={licensePlate}
             onChangeText={setLicensePlate}
             placeholder="e.g. ABC 1234"
-          />
-
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-
-          <DatePickerField
-            label="Valid Until"
-            value={licenseValidUntil}
-            onChange={setLicenseValidUntil}
-            placeholder="Select expiry date…"
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
@@ -302,8 +290,23 @@ export default function EditCarScreen() {
             placeholder="Vehicle Identification Number"
             autoCapitalize="characters"
           />
+        </View>
 
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+        {/* License */}
+        <View style={[styles.section, { backgroundColor: C.card }]}>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>License</Text>
+
+          <DatePickerField
+            label="Valid Until"
+            value={licenseValidUntil}
+            onChange={setLicenseValidUntil}
+            placeholder="Select expiry date…"
+          />
+        </View>
+
+        {/* Insurance */}
+        <View style={[styles.section, { backgroundColor: C.card }]}>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Insurance</Text>
 
           <FormField
             label="Insured With"
