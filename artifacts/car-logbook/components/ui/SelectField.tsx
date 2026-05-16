@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { registerPicker } from "@/components/ui/selectPickerStore";
 
@@ -39,6 +40,8 @@ export function SelectField({
 }: Props) {
   const C = useColors();
   const insets = useSafeAreaInsets();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -71,7 +74,7 @@ export function SelectField({
   return (
     <>
       <View style={styles.wrapper}>
-        <Text style={[styles.label, { color: C.textSecondary }]}>
+        <Text style={[styles.label, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>
           {label}
           {required && <Text style={{ color: C.danger }}> *</Text>}
         </Text>
@@ -80,6 +83,7 @@ export function SelectField({
           activeOpacity={0.7}
           style={[
             styles.trigger,
+            isRTL && { flexDirection: "row-reverse" },
             {
               borderColor: C.border,
               backgroundColor: disabled ? C.backgroundTertiary : C.backgroundSecondary,
@@ -89,7 +93,7 @@ export function SelectField({
           <Text
             style={[
               styles.triggerText,
-              { color: value ? C.text : C.textTertiary },
+              { color: value ? C.text : C.textTertiary, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" },
             ]}
             numberOfLines={1}
           >
@@ -122,7 +126,7 @@ export function SelectField({
               <View style={[styles.searchBox, { backgroundColor: C.backgroundTertiary }]}>
                 <Feather name="search" size={16} color={C.textSecondary} style={{ marginRight: 8 }} />
                 <TextInput
-                  style={[styles.searchInput, { color: C.text }]}
+                  style={[styles.searchInput, { color: C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}
                   placeholder={allowCustom ? `+ Add ${label.toLowerCase()}` : `Search ${label.toLowerCase()}…`}
                   placeholderTextColor={C.textTertiary}
                   value={search}

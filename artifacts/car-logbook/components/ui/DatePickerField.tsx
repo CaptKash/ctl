@@ -10,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { formatDate, toISODate } from "@/lib/dateUtils";
 
@@ -181,6 +182,8 @@ function CustomCalendar({
 export function DatePickerField({ label, value, onChange, placeholder = "Select date" }: Props) {
   const C = useColors();
   const { resolvedTheme } = useTheme();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const [show, setShow] = useState(false);
 
   const dateObj = value ? new Date(value + "T12:00:00") : new Date();
@@ -194,8 +197,8 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
   if (Platform.OS === "web") {
     return (
       <View style={styles.wrapper}>
-        <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>
-        <View style={[styles.field, { backgroundColor: C.backgroundSecondary, borderColor: C.border }]}>
+        <Text style={[styles.label, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>{label}</Text>
+        <View style={[styles.field, isRTL && { flexDirection: "row-reverse" }, { backgroundColor: C.backgroundSecondary, borderColor: C.border }]}>
           <Feather name="calendar" size={16} color={C.textTertiary} />
           <input
             type="date"
@@ -223,7 +226,7 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
 
   return (
     <View style={styles.wrapper}>
-      <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>
+      <Text style={[styles.label, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>{label}</Text>
       <Pressable
         onPress={() => {
           Keyboard.dismiss();
@@ -231,6 +234,7 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
         }}
         style={({ pressed }) => [
           styles.field,
+          isRTL && { flexDirection: "row-reverse" },
           {
             backgroundColor: C.backgroundSecondary,
             borderColor: show ? C.tint : C.border,
@@ -239,7 +243,7 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
         ]}
       >
         <Feather name="calendar" size={16} color={show ? C.tint : C.textTertiary} />
-        <Text style={[styles.displayText, { color: value ? C.text : C.textTertiary }]}>
+        <Text style={[styles.displayText, { color: value ? C.text : C.textTertiary, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>
           {display || placeholder}
         </Text>
         <Feather name={show ? "chevron-up" : "chevron-down"} size={14} color={C.textTertiary} />
