@@ -145,19 +145,21 @@ function CustomCalendar({
                 <Pressable
                   key={`day-${day}`}
                   onPress={() => selectDay(day)}
-                  style={[
-                    calStyles.cell,
-                    sel && { backgroundColor: C.tint, borderRadius: 20 },
-                    !sel && tod && { borderWidth: 1.5, borderColor: C.tint, borderRadius: 20 },
-                  ]}
+                  style={calStyles.cell}
                 >
-                  <Text style={[
-                    calStyles.dayNum,
-                    { color: sel ? "#fff" : tod ? C.tint : C.text },
-                    sel && { fontFamily: "Inter_600SemiBold" },
+                  <View style={[
+                    calStyles.dayPill,
+                    sel && { backgroundColor: C.tint },
+                    !sel && tod && { borderWidth: 1.5, borderColor: C.tint },
                   ]}>
-                    {day}
-                  </Text>
+                    <Text style={[
+                      calStyles.dayNum,
+                      { color: sel ? "#fff" : tod ? C.tint : C.text },
+                      sel && { fontFamily: "Inter_600SemiBold" },
+                    ]}>
+                      {day}
+                    </Text>
+                  </View>
                 </Pressable>
               );
             })}
@@ -350,6 +352,13 @@ const calStyles = StyleSheet.create({
   cell: {
     width: `${100 / 7}%` as any,
     aspectRatio: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dayPill: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
