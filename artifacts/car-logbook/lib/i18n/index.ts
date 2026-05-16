@@ -57,10 +57,8 @@ const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"
 // Convert Latin digits in a number/string to Arabic-Indic digits when the
 // active language is Arabic. Non-digit characters (commas, dots, dashes,
 // kilometre units, etc.) pass through unchanged.
-export function localizeDigits(value: number | string, lng: string): string {
-  const str = typeof value === "number" ? String(value) : value;
-  if (lng !== "ar") return str;
-  return str.replace(/[0-9]/g, (d) => ARABIC_INDIC[Number(d)]);
+export function localizeDigits(value: number | string, _lng: string): string {
+  return typeof value === "number" ? String(value) : value;
 }
 
 // Switch language. We deliberately DO NOT call `I18nManager.forceRTL` —
