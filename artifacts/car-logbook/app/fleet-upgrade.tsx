@@ -202,6 +202,7 @@ export default function FleetUpgradeScreen() {
                     backgroundColor: C.card,
                     borderColor: active ? "#D97706" : C.border,
                     borderWidth: active ? 2 : 1,
+                    paddingTop: meta.highlight ? 26 : 16,
                   },
                   isRTL && { flexDirection: "row-reverse" },
                 ]}
