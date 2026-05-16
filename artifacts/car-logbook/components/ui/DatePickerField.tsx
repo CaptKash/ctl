@@ -275,10 +275,8 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
 const styles = StyleSheet.create({
   wrapper: { gap: 6 },
   label: {
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
   },
   field: {
     flexDirection: "row",

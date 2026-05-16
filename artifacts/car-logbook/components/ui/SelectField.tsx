@@ -190,7 +190,7 @@ export function SelectField({
 
 const styles = StyleSheet.create({
   wrapper: { gap: 6 },
-  label: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  label: { fontSize: 13, fontFamily: "Inter_400Regular" },
   trigger: {
     flexDirection: "row",
     alignItems: "center",
