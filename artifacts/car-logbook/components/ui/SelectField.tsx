@@ -123,7 +123,7 @@ export function SelectField({
                 <Feather name="search" size={16} color={C.textSecondary} style={{ marginRight: 8 }} />
                 <TextInput
                   style={[styles.searchInput, { color: C.text }]}
-                  placeholder={allowCustom ? `Add ${label.toLowerCase()}` : `Search ${label.toLowerCase()}…`}
+                  placeholder={allowCustom ? `+ Add ${label.toLowerCase()}` : `Search ${label.toLowerCase()}…`}
                   placeholderTextColor={C.textTertiary}
                   value={search}
                   onChangeText={setSearch}
