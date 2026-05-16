@@ -160,6 +160,7 @@ export default function AddCarScreen() {
             placeholder={make ? t("addCar.fields.modelPlaceholder") : t("addCar.fields.modelDisabledPlaceholder")}
             disabled={!make}
             required
+            allowCustom
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />

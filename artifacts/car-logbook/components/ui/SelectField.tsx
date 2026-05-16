@@ -24,6 +24,7 @@ type Props = {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+  allowCustom?: boolean;
 };
 
 export function SelectField({
@@ -34,6 +35,7 @@ export function SelectField({
   placeholder = "Select…",
   required,
   disabled,
+  allowCustom,
 }: Props) {
   const C = useColors();
   const insets = useSafeAreaInsets();
@@ -158,6 +160,22 @@ export function SelectField({
                   <Text style={{ color: C.textSecondary }}>No results for "{search}"</Text>
                 </View>
               }
+              ListFooterComponent={
+                allowCustom && search.trim() && !options.some((o) => o.toLowerCase() === search.trim().toLowerCase()) ? (
+                  <TouchableOpacity
+                    onPress={() => handleSelect(search.trim())}
+                    activeOpacity={0.6}
+                    style={[styles.option, styles.customOption, { backgroundColor: C.backgroundSecondary, borderBottomColor: C.borderLight }]}
+                  >
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                      <Feather name="plus-circle" size={18} color={C.tint} />
+                      <Text style={[styles.optionText, { color: C.tint }]} numberOfLines={1}>
+                        Use "{search.trim()}"
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ) : null
+              }
             />
           </View>
         </Modal>
@@ -216,5 +234,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   optionText: { fontSize: 15, fontFamily: "Inter_400Regular" },
+  customOption: { paddingVertical: 16 },
   empty: { padding: 32, alignItems: "center" },
 });

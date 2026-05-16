@@ -210,6 +210,7 @@ export default function EditCarScreen() {
             placeholder={make ? "Select model…" : "Select a make first"}
             disabled={!make}
             required
+            allowCustom
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
