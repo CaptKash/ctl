@@ -116,8 +116,7 @@ const BRAND_AR: Record<string, string> = {
   "aston-martin": "أستون مارتن",
 };
 
-export function localizeBrand(make: string | null | undefined, lang: string): string {
+export function localizeBrand(make: string | null | undefined, _lang: string): string {
   if (!make) return "";
-  if (lang !== "ar") return make;
-  return BRAND_AR[normalize(make)] ?? make;
+  return make;
 }
