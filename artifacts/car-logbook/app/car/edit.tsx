@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Platform,
   Pressable,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useColors } from "@/context/ThemeContext";
@@ -245,13 +247,31 @@ export default function EditCarScreen() {
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
-          <View style={styles.toggleRow}>
+          <View style={[styles.toggleRow, styles.toggleRowActive]}>
             <View style={styles.toggleLeft}>
-              <View style={[styles.evBadge, { backgroundColor: isElectric ? "#D1FAE5" : C.backgroundTertiary }]}>
-                <Text style={{ fontSize: 16 }}>⚡</Text>
-              </View>
-              <View>
-                <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle</Text>
+              <LinearGradient
+                colors={["#ECFDF5", "#34D399", "#047857"]}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0.15, y: 0 }}
+                end={{ x: 0.85, y: 1 }}
+                style={[styles.evBadge, styles.evBadgeMetallic]}
+              >
+                <Feather name="zap" size={18} color="#064E3B" />
+              </LinearGradient>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle</Text>
+                  <Pressable
+                    onPress={() => Alert.alert(
+                      "Electric Vehicle",
+                      "Turn this on if your car is fully electric. EVs are hidden from the Fuel Log so you don't see irrelevant fuel entries. (Charging tracking is coming soon.)",
+                      [{ text: "Got it" }]
+                    )}
+                    hitSlop={8}
+                  >
+                    <Feather name="help-circle" size={15} color={C.textTertiary} />
+                  </Pressable>
+                </View>
                 <Text style={[styles.toggleSub, { color: C.textSecondary }]}>
                   {isElectric ? "EV — no fuel records" : "Combustion or hybrid"}
                 </Text>
@@ -404,6 +424,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "transparent",
+    marginHorizontal: -8,
+  },
+  toggleRowActive: {
+    borderColor: "#34D399",
   },
   toggleLeft: {
     flexDirection: "row",
@@ -417,6 +445,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  evBadgeMetallic: {
+    borderWidth: 1,
+    borderColor: "#047857",
+    shadowColor: "#064E3B",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   toggleLabel: {
     fontSize: 15,
