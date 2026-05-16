@@ -245,6 +245,62 @@
     "submit": "Add to Logbook",
     "error": "Failed to add car. Please try again."
   },
+  "carDetail": {
+    "notFound": "Car not found",
+    "events": {
+      "fault": "Fault",
+      "maintenance": "Maintenance",
+      "inspection": "Inspection"
+    },
+    "fields": {
+      "plate": "Plate",
+      "color": "Color",
+      "vin": "VIN",
+      "license": "Lic.",
+      "insurance": "Ins."
+    },
+    "fault": {
+      "dashboardMessage": "Dashboard message: "
+    },
+    "maintenance": {
+      "billLabel": "Bill",
+      "warrantyLabel": "Warranty"
+    },
+    "inspection": {
+      "next": "Next: "
+    },
+    "empty": {
+      "title": "No events yet",
+      "description": "Faults, maintenance, and inspections will appear here.",
+      "action": "Technical Log"
+    },
+    "delete": {
+      "title": "Delete Record",
+      "message": "This record will be permanently deleted.",
+      "confirm": "Delete"
+    },
+    "photo": {
+      "saveFailed": "Save failed",
+      "save": "Save",
+      "tapToEnlarge": "Tap to enlarge",
+      "billPhoto": "Bill Photo",
+      "warrantyPhoto": "Warranty Photo",
+      "saveDialogTitle": "Save Photo"
+    },
+    "rows": {
+      "correctiveAction": "Corrective Action",
+      "shop": "Shop",
+      "address": "Address",
+      "phone": "Phone",
+      "cost": "Cost",
+      "partsReplaced": "Parts Replaced",
+      "warrantyPeriod": "Warranty Period",
+      "warrantyDetails": "Warranty Details",
+      "location": "Location",
+      "requiredRepairs": "Required Repairs",
+      "nextInspection": "Next Inspection"
+    }
+  },
   "photoPicker": {
     "label": "Photos",
     "addPhoto": "Add Photo",

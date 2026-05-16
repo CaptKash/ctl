@@ -1,0 +1,861 @@
+     1	import { Feather, Ionicons } from "@expo/vector-icons";
+     2	import { useQuery, useQueryClient } from "@tanstack/react-query";
+     3	import * as Haptics from "expo-haptics";
+     4	import { router, useLocalSearchParams } from "expo-router";
+     5	import * as FileSystem from "expo-file-system/legacy";
+     6	import * as Sharing from "expo-sharing";
+     7	import React, { useState } from "react";
+     8	import {
+     9	  ActivityIndicator,
+    10	  Alert,
+    11	  Image,
+    12	  Modal,
+    13	  Platform,
+    14	  Pressable,
+    15	  ScrollView,
+    16	  StyleSheet,
+    17	  Text,
+    18	  TouchableOpacity,
+    19	  View,
+    20	} from "react-native";
+    21	import { useSafeAreaInsets } from "react-native-safe-area-context";
+    22	import { useTranslation } from "react-i18next";
+    23	import { useColors } from "@/context/ThemeContext";
+    24	import { localizeBrand } from "@/lib/carBrandLogo";
+    25	import { localizeDigits } from "@/lib/i18n";
+    26	import BottomNav from "@/components/ui/BottomNav";
+    27	import { SwipeBackView } from "@/components/ui/SwipeBackView";
+    28	import { formatDate } from "@/lib/dateUtils";
+    29	import { EmptyState } from "@/components/ui/EmptyState";
+    30	import { ConfirmModal } from "@/components/ui/ConfirmModal";
+    31	import { BrandLogo } from "@/components/BrandLogo";
+    32	import { apiGet, apiDelete } from "@/hooks/useApi";
+    33	import { useDistanceUnit } from "@/context/DistanceUnitContext";
+    34	import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
+    35	
+    36	type Car = {
+    37	  id: number;
+    38	  make: string;
+    39	  model: string;
+    40	  year: number;
+    41	  nickname?: string | null;
+    42	  color?: string | null;
+    43	  licensePlate?: string | null;
+    44	  licenseValidUntil?: string | null;
+    45	  vin?: string | null;
+    46	  insuredWith?: string | null;
+    47	  insuredUntil?: string | null;
+    48	  mileage?: number | null;
+    49	  notes?: string | null;
+    50	  photos?: string | null;
+    51	};
+    52	
+    53	type FaultRecord = {
+    54	  id: number;
+    55	  carId: number;
+    56	  date: string;
+    57	  description: string;
+    58	  completed: boolean;
+    59	  dashboardMessage?: string | null;
+    60	  warningMessage?: string | null;
+    61	};
+    62	
+    63	type MaintenanceRecord = {
+    64	  id: number;
+    65	  carId: number;
+    66	  type: string;
+    67	  description: string;
+    68	  date: string;
+    69	  cost?: number | null;
+    70	  shop?: string | null;
+    71	  shopAddress?: string | null;
+    72	  shopPhone?: string | null;
+    73	  correctiveAction?: string | null;
+    74	  partsReplaced?: string | null;
+    75	  warrantyPeriod?: string | null;
+    76	  warrantyDetails?: string | null;
+    77	  billPhoto?: string | null;
+    78	  warrantyPhoto?: string | null;
+    79	};
+    80	
+    81	type InspectionRecord = {
+    82	  id: number;
+    83	  carId: number;
+    84	  date: string;
+    85	  place?: string | null;
+    86	  results?: string | null;
+    87	  cost?: number | null;
+    88	  requiredRepairs?: string | null;
+    89	  nextInspectionDate?: string | null;
+    90	};
+    91	
+    92	type EventItem =
+    93	  | { kind: "fault"; data: FaultRecord }
+    94	  | { kind: "maintenance"; data: MaintenanceRecord }
+    95	  | { kind: "inspection"; data: InspectionRecord };
+    96	
+    97	const EVENT_META = {
+    98	  fault:       { label: "Fault",       icon: "alert-triangle" as const, bg: "#FEE2E2", color: "#DC2626" },
+    99	  maintenance: { label: "Maintenance", icon: "tool" as const,           bg: "#FEF3C7", color: "#D97706" },
+   100	  inspection:  { label: "Inspection",  icon: "clipboard" as const,      bg: "#FEF3C7", color: "#D97706" },
+   101	};
+   102	
+   103	export default function CarDetailScreen() {
+   104	  const { id } = useLocalSearchParams<{ id: string }>();
+   105	  const carId = parseInt(id ?? "0");
+   106	  const insets = useSafeAreaInsets();
+   107	  const C = useColors();
+   108	  const { i18n } = useTranslation();
+   109	  const { unit } = useDistanceUnit();
+   110	  const qc = useQueryClient();
+   111	  const topPad = Platform.OS === "web" ? 67 : insets.top;
+   112	
+   113	  const [confirmModal, setConfirmModal] = useState<{
+   114	    visible: boolean;
+   115	    title: string;
+   116	    message: string;
+   117	    onConfirm: () => void;
+   118	  }>({ visible: false, title: "", message: "", onConfirm: () => {} });
+   119	
+   120	  const [detailEvent, setDetailEvent] = useState<EventItem | null>(null);
+   121	  const [photoViewer, setPhotoViewer] = useState<string | null>(null);
+   122	  const [downloadingPhoto, setDownloadingPhoto] = useState(false);
+   123	  const handleDownloadPhoto = (url: string) => {
+   124	    if (!url || downloadingPhoto) return;
+   125	    setPhotoViewer(null);
+   126	    setTimeout(() => doShare(url), 600);
+   127	  };
+   128	
+   129	  const doShare = async (url: string) => {
+   130	    setDownloadingPhoto(true);
+   131	    try {
+   132	      const filename = `ctl_photo_${Date.now()}.jpg`;
+   133	      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+   134	
+   135	      if (url.startsWith("data:")) {
+   136	        const base64 = url.split(",")[1];
+   137	        await FileSystem.writeAsStringAsync(fileUri, base64, {
+   138	          encoding: "base64",
+   139	        });
+   140	      } else {
+   141	        await FileSystem.downloadAsync(url, fileUri);
+   142	      }
+   143	
+   144	      const available = await Sharing.isAvailableAsync();
+   145	      if (!available) throw new Error("Sharing not available on this device");
+   146	
+   147	      await Sharing.shareAsync(fileUri, {
+   148	        mimeType: "image/jpeg",
+   149	        UTI: "public.jpeg",
+   150	        dialogTitle: "Save Photo",
+   151	      });
+   152	    } catch (e: unknown) {
+   153	      const msg = e instanceof Error ? e.message : String(e);
+   154	      Alert.alert("Save failed", msg);
+   155	    } finally {
+   156	      setDownloadingPhoto(false);
+   157	    }
+   158	  };
+   159	
+   160	  const carQuery = useQuery<Car>({
+   161	    queryKey: ["car", carId],
+   162	    queryFn: () => apiGet<Car>(`/cars/${carId}`),
+   163	  });
+   164	
+   165	  const faultsQuery = useQuery<FaultRecord[]>({
+   166	    queryKey: ["malfunctions", carId],
+   167	    queryFn: () => apiGet<FaultRecord[]>(`/cars/${carId}/malfunctions`),
+   168	  });
+   169	
+   170	  const maintenanceQuery = useQuery<MaintenanceRecord[]>({
+   171	    queryKey: ["maintenance", carId],
+   172	    queryFn: () => apiGet<MaintenanceRecord[]>(`/cars/${carId}/maintenance`),
+   173	  });
+   174	
+   175	  const inspectionsQuery = useQuery<InspectionRecord[]>({
+   176	    queryKey: ["inspections", carId],
+   177	    queryFn: () => apiGet<InspectionRecord[]>(`/cars/${carId}/inspections`),
+   178	  });
+   179	
+   180	  const events: EventItem[] = React.useMemo(() => {
+   181	    const list: EventItem[] = [];
+   182	    (faultsQuery.data ?? [])
+   183	      .filter((r) => !r.completed)
+   184	      .forEach((r) => list.push({ kind: "fault", data: r }));
+   185	    (maintenanceQuery.data ?? []).forEach((r) => list.push({ kind: "maintenance", data: r }));
+   186	    (inspectionsQuery.data ?? []).forEach((r) => list.push({ kind: "inspection", data: r }));
+   187	    return list.sort((a, b) => b.data.date.localeCompare(a.data.date));
+   188	  }, [faultsQuery.data, maintenanceQuery.data, inspectionsQuery.data]);
+   189	
+   190	  const isLoading = faultsQuery.isLoading || maintenanceQuery.isLoading || inspectionsQuery.isLoading;
+   191	
+   192	  const confirmDelete = (path: string, queryKey: string) => {
+   193	    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+   194	    setConfirmModal({
+   195	      visible: true,
+   196	      title: "Delete Record",
+   197	      message: "This record will be permanently deleted.",
+   198	      onConfirm: async () => {
+   199	        setConfirmModal((s) => ({ ...s, visible: false }));
+   200	        await apiDelete(path);
+   201	        qc.invalidateQueries({ queryKey: [queryKey, carId] });
+   202	      },
+   203	    });
+   204	  };
+   205	
+   206	  const renderEvent = (ev: EventItem) => {
+   207	    const meta = EVENT_META[ev.kind];
+   208	    const key = `${ev.kind}-${ev.data.id}`;
+   209	
+   210	    if (ev.kind === "fault") {
+   211	      const r = ev.data;
+   212	      return (
+   213	        <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+   214	          <View style={styles.cardHeader}>
+   215	            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+   216	              <Feather name={meta.icon} size={11} color={meta.color} />
+   217	              <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+   218	            </View>
+   219	            <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+   220	          </View>
+   221	          <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
+   222	          {!!r.warningMessage && (
+   223	            <Text style={[styles.warningMsgText, { color: C.textSecondary }]} numberOfLines={2}>
+   224	              <Text style={styles.warningMsgLabel}>Dashboard message: </Text>
+   225	              {r.warningMessage}
+   226	            </Text>
+   227	          )}
+   228	          {!!r.dashboardMessage && (() => {
+   229	            const ids = r.dashboardMessage.split(",").map((s) => s.trim()).filter(Boolean);
+   230	            const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
+   231	            if (!lights.length) return null;
+   232	            return (
+   233	              <View style={styles.iconsRow}>
+   234	                {lights.map((l) => (
+   235	                  <DashboardIcon key={l.id} id={l.id} color={l.warningColor} size={20} />
+   236	                ))}
+   237	              </View>
+   238	            );
+   239	          })()}
+   240	          <View style={styles.cardFooter}>
+   241	            <View style={{ flex: 1 }} />
+   242	            <View style={styles.cardActions}>
+   243	              <Pressable
+   244	                onPress={() => router.push({
+   245	                  pathname: "/maintenance/form",
+   246	                  params: { carId: String(carId), faultDescription: r.description, faultId: String(r.id) },
+   247	                } as any)}
+   248	                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+   249	              >
+   250	                <Feather name="tool" size={14} color={meta.color} />
+   251	              </Pressable>
+   252	              <Pressable
+   253	                onPress={() => confirmDelete(`/cars/${carId}/malfunctions/${r.id}`, "malfunctions")}
+   254	                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+   255	              >
+   256	                <Feather name="trash-2" size={14} color={meta.color} />
+   257	              </Pressable>
+   258	            </View>
+   259	          </View>
+   260	        </View>
+   261	      );
+   262	    }
+   263	
+   264	    if (ev.kind === "maintenance") {
+   265	      const r = ev.data;
+   266	      return (
+   267	        <Pressable
+   268	          key={key}
+   269	          onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
+   270	          style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+   271	        >
+   272	          <View style={styles.cardHeader}>
+   273	            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+   274	              <Feather name={meta.icon} size={11} color={meta.color} />
+   275	              <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || meta.label}</Text>
+   276	            </View>
+   277	            <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+   278	          </View>
+   279	          <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
+   280	          {(r.shop || r.cost != null) && (
+   281	            <View style={styles.cardMeta}>
+   282	              {r.shop && (
+   283	                <>
+   284	                  <Feather name="map-pin" size={12} color={C.textTertiary} />
+   285	                  <Text style={[styles.metaText, { color: C.textSecondary }]}>{r.shop}</Text>
+   286	                </>
+   287	              )}
+   288	              {r.cost != null && (
+   289	                <>
+   290	                  {r.shop && <View style={styles.metaDot} />}
+   291	                  <Text style={[styles.metaText, { color: C.textSecondary }]}>${r.cost.toFixed(2)}</Text>
+   292	                </>
+   293	              )}
+   294	            </View>
+   295	          )}
+   296	          <View style={styles.cardFooter}>
+   297	            <View style={styles.photoBadges}>
+   298	              {r.billPhoto && (
+   299	                <View style={[styles.photoBadge, { backgroundColor: meta.bg }]}>
+   300	                  <Feather name="image" size={11} color={meta.color} />
+   301	                  <Text style={[styles.photoBadgeText, { color: meta.color }]}>Bill</Text>
+   302	                </View>
+   303	              )}
+   304	              {r.warrantyPhoto && (
+   305	                <View style={[styles.photoBadge, { backgroundColor: "#EDE9FE" }]}>
+   306	                  <Feather name="shield" size={11} color="#7C3AED" />
+   307	                  <Text style={[styles.photoBadgeText, { color: "#7C3AED" }]}>Warranty</Text>
+   308	                </View>
+   309	              )}
+   310	              {!r.billPhoto && !r.warrantyPhoto && <View style={{ flex: 1 }} />}
+   311	            </View>
+   312	            <View style={styles.cardActions}>
+   313	              <TouchableOpacity
+   314	                onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
+   315	                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+   316	              >
+   317	                <Feather name="trash-2" size={14} color={meta.color} />
+   318	              </TouchableOpacity>
+   319	            </View>
+   320	          </View>
+   321	        </Pressable>
+   322	      );
+   323	    }
+   324	
+   325	    if (ev.kind === "inspection") {
+   326	      const r = ev.data;
+   327	      return (
+   328	        <Pressable
+   329	          key={key}
+   330	          onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
+   331	          style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+   332	        >
+   333	          <View style={styles.cardHeader}>
+   334	            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+   335	              <Feather name={meta.icon} size={11} color={meta.color} />
+   336	              <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+   337	            </View>
+   338	            <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+   339	          </View>
+   340	          {r.results && (
+   341	            <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.results}</Text>
+   342	          )}
+   343	          {(r.place || r.cost != null) && (
+   344	            <View style={styles.cardMeta}>
+   345	              {r.place && (
+   346	                <>
+   347	                  <Feather name="map-pin" size={12} color={C.textTertiary} />
+   348	                  <Text style={[styles.metaText, { color: C.textSecondary }]}>{r.place}</Text>
+   349	                </>
+   350	              )}
+   351	              {r.cost != null && (
+   352	                <>
+   353	                  {r.place && <View style={styles.metaDot} />}
+   354	                  <Text style={[styles.metaText, { color: C.textSecondary }]}>${r.cost.toFixed(2)}</Text>
+   355	                </>
+   356	              )}
+   357	            </View>
+   358	          )}
+   359	          {r.nextInspectionDate && (
+   360	            <View style={styles.cardMeta}>
+   361	              <Feather name="calendar" size={12} color={C.textTertiary} />
+   362	              <Text style={[styles.metaText, { color: C.textSecondary }]}>Next: {formatDate(r.nextInspectionDate)}</Text>
+   363	            </View>
+   364	          )}
+   365	          <View style={styles.cardFooter}>
+   366	            <View style={{ flex: 1 }} />
+   367	            <TouchableOpacity
+   368	              onPress={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
+   369	              style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+   370	            >
+   371	              <Feather name="trash-2" size={14} color={meta.color} />
+   372	            </TouchableOpacity>
+   373	          </View>
+   374	        </Pressable>
+   375	      );
+   376	    }
+   377	
+   378	    return null;
+   379	  };
+   380	
+   381	  const car = carQuery.data;
+   382	
+   383	  if (carQuery.isLoading) {
+   384	    return (
+   385	      <View style={[styles.centered, { backgroundColor: C.background }]}>
+   386	        <ActivityIndicator size="large" color={C.tint} />
+   387	      </View>
+   388	    );
+   389	  }
+   390	
+   391	  if (!car) {
+   392	    return (
+   393	      <View style={[styles.centered, { backgroundColor: C.background }]}>
+   394	        <Text style={{ color: C.text }}>Car not found</Text>
+   395	      </View>
+   396	    );
+   397	  }
+   398	
+   399	  return (
+   400	    <SwipeBackView style={{ backgroundColor: C.background }}>
+   401	      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
+   402	        <View style={styles.headerRow}>
+   403	          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+   404	            <Feather name="arrow-left" size={22} color={C.text} />
+   405	          </Pressable>
+   406	          {(() => {
+   407	            let firstPhoto: string | null = null;
+   408	            try { firstPhoto = car.photos ? JSON.parse(car.photos)[0] ?? null : null; } catch {}
+   409	            return firstPhoto ? (
+   410	              <Image source={{ uri: firstPhoto }} style={styles.iconBox} />
+   411	            ) : (
+   412	              <BrandLogo
+   413	                make={car.make}
+   414	                size={48}
+   415	                style={styles.iconBox}
+   416	                fallbackBg="#DBEAFE"
+   417	                fallbackIconColor="#1A56DB"
+   418	              />
+   419	            );
+   420	          })()}
+   421	          <View style={styles.headerText}>
+   422	            <Text style={[styles.carName, { color: C.text }]} numberOfLines={1}>
+   423	              {car.nickname ?? `${localizeDigits(car.year, i18n.language)} ${localizeBrand(car.make, i18n.language)} ${car.model}`}
+   424	            </Text>
+   425	            <Text style={[styles.plate, { color: C.textSecondary }]} numberOfLines={1}>
+   426	              {car.nickname ? `${localizeDigits(car.year, i18n.language)} ${localizeBrand(car.make, i18n.language)} ${car.model}` : car.licensePlate ?? ""}
+   427	            </Text>
+   428	          </View>
+   429	          <View style={styles.headerActions}>
+   430	            <Pressable
+   431	              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
+   432	              hitSlop={8}
+   433	              style={[styles.headerBtn, { backgroundColor: C.backgroundTertiary }]}
+   434	            >
+   435	              <Feather name="edit-2" size={16} color={C.text} />
+   436	            </Pressable>
+   437	            <Pressable
+   438	              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report", params: { carId: String(carId) } }); }}
+   439	              hitSlop={8}
+   440	              style={[styles.headerBtn, { backgroundColor: C.infoLight }]}
+   441	            >
+   442	              <Feather name="file-text" size={16} color={C.info} />
+   443	            </Pressable>
+   444	          </View>
+   445	        </View>
+   446	      </View>
+   447	
+   448	      {/* Stats Strip — 2-row compact layout */}
+   449	      {(() => {
+   450	        const expiryColor = (iso: string | null | undefined): string => {
+   451	          if (!iso) return C.text;
+   452	          const days = Math.floor((new Date(iso).getTime() - Date.now()) / 86_400_000);
+   453	          if (days <= 0) return "#DC2626";
+   454	          if (days <= 60) return "#D97706";
+   455	          return "#16A34A";
+   456	        };
+   457	        const hasExpiry = !!(car.licenseValidUntil || car.insuredUntil);
+   458	        return (
+   459	          <View style={[styles.statsStrip, { backgroundColor: C.card }]}>
+   460	            {/* Row 1: Car info pills */}
+   461	            <View style={styles.statsRow}>
+   462	              {car.mileage != null && (
+   463	                <View style={[styles.infoPill, { marginRight: 16 }]}>
+   464	                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{unit} </Text>
+   465	                  <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.mileage.toLocaleString()}</Text>
+   466	                </View>
+   467	              )}
+   468	              {car.licensePlate && (
+   469	                <View style={[styles.infoPill, { marginRight: 16 }]}>
+   470	                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Plate </Text>
+   471	                  <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.licensePlate}</Text>
+   472	                </View>
+   473	              )}
+   474	              {car.color && (
+   475	                <View style={[styles.infoPill, { marginRight: 16 }]}>
+   476	                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Color </Text>
+   477	                  <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.color}</Text>
+   478	                </View>
+   479	              )}
+   480	              {car.vin && (
+   481	                <View style={styles.infoPill}>
+   482	                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>VIN </Text>
+   483	                  <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.vin.slice(-6)}</Text>
+   484	                </View>
+   485	              )}
+   486	            </View>
+   487	            {/* Row 2: Expiry date pills */}
+   488	            {hasExpiry && (
+   489	              <View style={[styles.statsRow, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border }]}>
+   490	                {car.licenseValidUntil && (
+   491	                  <View style={[styles.expiryPill, { marginRight: 20 }]}>
+   492	                    <View style={[styles.expiryDot, { backgroundColor: expiryColor(car.licenseValidUntil) }]} />
+   493	                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginLeft: 5 }]}>Lic. </Text>
+   494	                    <Text style={[styles.expiryValue, { color: expiryColor(car.licenseValidUntil) }]} numberOfLines={1}>{formatDate(car.licenseValidUntil)}</Text>
+   495	                  </View>
+   496	                )}
+   497	                {car.insuredUntil && (
+   498	                  <View style={styles.expiryPill}>
+   499	                    <View style={[styles.expiryDot, { backgroundColor: expiryColor(car.insuredUntil) }]} />
+   500	                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginLeft: 5 }]}>Ins. </Text>
+   501	                    <Text style={[styles.expiryValue, { color: expiryColor(car.insuredUntil) }]} numberOfLines={1}>{formatDate(car.insuredUntil)}</Text>
+   502	                  </View>
+   503	                )}
+   504	              </View>
+   505	            )}
+   506	          </View>
+   507	        );
+   508	      })()}
+   509	
+   510	      <ScrollView
+   511	        style={styles.content}
+   512	        contentContainerStyle={[styles.contentPadding, { paddingBottom: insets.bottom + 40 }]}
+   513	        showsVerticalScrollIndicator={false}
+   514	      >
+   515	        {isLoading ? (
+   516	          <ActivityIndicator color={C.tint} style={{ marginTop: 24 }} />
+   517	        ) : events.length === 0 ? (
+   518	          <EmptyState
+   519	            icon="clock"
+   520	            title="No events yet"
+   521	            description="Faults, maintenance, and inspections will appear here."
+   522	            actionLabel="Technical Log"
+   523	            onAction={() => router.push({ pathname: "/event/add", params: { carId: String(carId) } })}
+   524	            btnColor="#FEE2E2"
+   525	            btnTextColor="#DC2626"
+   526	            btnIcon="plus-circle"
+   527	          />
+   528	        ) : (
+   529	          events.map(renderEvent)
+   530	        )}
+   531	      </ScrollView>
+   532	
+   533	      <ConfirmModal
+   534	        visible={confirmModal.visible}
+   535	        title={confirmModal.title}
+   536	        message={confirmModal.message}
+   537	        confirmLabel="Delete"
+   538	        onConfirm={confirmModal.onConfirm}
+   539	        onCancel={() => setConfirmModal((s) => ({ ...s, visible: false }))}
+   540	        destructive
+   541	      />
+   542	
+   543	      {/* Event Detail Sheet */}
+   544	      <Modal
+   545	        visible={!!detailEvent}
+   546	        animationType="slide"
+   547	        presentationStyle="pageSheet"
+   548	        onRequestClose={() => setDetailEvent(null)}
+   549	      >
+   550	        {detailEvent && (() => {
+   551	          const meta = EVENT_META[detailEvent.kind];
+   552	          if (detailEvent.kind === "maintenance") {
+   553	            const r = detailEvent.data;
+   554	            const rows: { label: string; value: string }[] = [];
+   555	            if (r.correctiveAction && r.correctiveAction !== r.description) rows.push({ label: "Corrective Action", value: r.correctiveAction });
+   556	            if (r.shop) rows.push({ label: "Shop", value: r.shop });
+   557	            if (r.shopAddress) rows.push({ label: "Address", value: r.shopAddress });
+   558	            if (r.shopPhone) rows.push({ label: "Phone", value: r.shopPhone });
+   559	            if (r.cost != null) rows.push({ label: "Cost", value: `$${r.cost.toFixed(2)}` });
+   560	            if (r.partsReplaced) rows.push({ label: "Parts Replaced", value: r.partsReplaced });
+   561	            if (r.warrantyPeriod) rows.push({ label: "Warranty Period", value: r.warrantyPeriod });
+   562	            if (r.warrantyDetails) rows.push({ label: "Warranty Details", value: r.warrantyDetails });
+   563	            return (
+   564	              <View style={[detailStyles.sheet, { backgroundColor: C.backgroundSecondary }]}>
+   565	                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+   566	                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+   567	                    <Feather name={meta.icon} size={12} color={meta.color} />
+   568	                    <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || meta.label}</Text>
+   569	                  </View>
+   570	                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary }]}>{formatDate(r.date)}</Text>
+   571	                  <Pressable onPress={() => setDetailEvent(null)} hitSlop={12}>
+   572	                    <Feather name="x" size={22} color={C.textSecondary} />
+   573	                  </Pressable>
+   574	                </View>
+   575	                <ScrollView contentContainerStyle={detailStyles.body} showsVerticalScrollIndicator={false}>
+   576	                  <Text style={[detailStyles.title, { color: C.text }]}>{r.description}</Text>
+   577	                  {rows.map((row) => (
+   578	                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }]}>
+   579	                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary }]}>{row.label}</Text>
+   580	                      <Text style={[detailStyles.rowValue, { color: C.text }]}>{row.value}</Text>
+   581	                    </View>
+   582	                  ))}
+   583	                  {r.billPhoto && (
+   584	                    <View style={detailStyles.photoSection}>
+   585	                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary }]}>Bill Photo</Text>
+   586	                      <Pressable onPress={() => setPhotoViewer(r.billPhoto!)} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+   587	                        <Image source={{ uri: r.billPhoto }} style={detailStyles.photoThumb} resizeMode="cover" />
+   588	                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }]}>
+   589	                          <Feather name="maximize-2" size={14} color="#fff" />
+   590	                          <Text style={detailStyles.photoHintText}>Tap to enlarge</Text>
+   591	                        </View>
+   592	                      </Pressable>
+   593	                    </View>
+   594	                  )}
+   595	                  {r.warrantyPhoto && (
+   596	                    <View style={detailStyles.photoSection}>
+   597	                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary }]}>Warranty Photo</Text>
+   598	                      <Pressable onPress={() => setPhotoViewer(r.warrantyPhoto!)} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+   599	                        <Image source={{ uri: r.warrantyPhoto }} style={detailStyles.photoThumb} resizeMode="cover" />
+   600	                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }]}>
+   601	                          <Feather name="maximize-2" size={14} color="#fff" />
+   602	                          <Text style={detailStyles.photoHintText}>Tap to enlarge</Text>
+   603	                        </View>
+   604	                      </Pressable>
+   605	                    </View>
+   606	                  )}
+   607	                </ScrollView>
+   608	              </View>
+   609	            );
+   610	          }
+   611	          if (detailEvent.kind === "inspection") {
+   612	            const r = detailEvent.data;
+   613	            const rows: { label: string; value: string }[] = [];
+   614	            if (r.place) rows.push({ label: "Location", value: r.place });
+   615	            if (r.cost != null) rows.push({ label: "Cost", value: `$${r.cost.toFixed(2)}` });
+   616	            if (r.requiredRepairs) rows.push({ label: "Required Repairs", value: r.requiredRepairs });
+   617	            if (r.nextInspectionDate) rows.push({ label: "Next Inspection", value: formatDate(r.nextInspectionDate) });
+   618	            return (
+   619	              <View style={[detailStyles.sheet, { backgroundColor: C.backgroundSecondary }]}>
+   620	                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+   621	                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+   622	                    <Feather name={meta.icon} size={12} color={meta.color} />
+   623	                    <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+   624	                  </View>
+   625	                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary }]}>{formatDate(r.date)}</Text>
+   626	                  <Pressable onPress={() => setDetailEvent(null)} hitSlop={12}>
+   627	                    <Feather name="x" size={22} color={C.textSecondary} />
+   628	                  </Pressable>
+   629	                </View>
+   630	                <ScrollView contentContainerStyle={detailStyles.body} showsVerticalScrollIndicator={false}>
+   631	                  {r.results && <Text style={[detailStyles.title, { color: C.text }]}>{r.results}</Text>}
+   632	                  {rows.map((row) => (
+   633	                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }]}>
+   634	                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary }]}>{row.label}</Text>
+   635	                      <Text style={[detailStyles.rowValue, { color: C.text }]}>{row.value}</Text>
+   636	                    </View>
+   637	                  ))}
+   638	                </ScrollView>
+   639	              </View>
+   640	            );
+   641	          }
+   642	          return null;
+   643	        })()}
+   644	
+   645	        {/* Full-screen photo viewer — nested here to work on top of pageSheet on iOS */}
+   646	        <Modal
+   647	          visible={!!photoViewer}
+   648	          animationType="fade"
+   649	          onRequestClose={() => setPhotoViewer(null)}
+   650	          statusBarTranslucent
+   651	        >
+   652	          <View style={detailStyles.photoModal}>
+   653	            <Pressable onPress={() => setPhotoViewer(null)} style={detailStyles.photoModalClose} hitSlop={12}>
+   654	              <Feather name="x" size={24} color="#fff" />
+   655	            </Pressable>
+   656	            {photoViewer && (
+   657	              <Image source={{ uri: photoViewer }} style={detailStyles.photoFull} resizeMode="contain" />
+   658	            )}
+   659	            <Pressable
+   660	              onPress={() => photoViewer && handleDownloadPhoto(photoViewer)}
+   661	              disabled={downloadingPhoto}
+   662	              style={detailStyles.photoModalDownload}
+   663	              hitSlop={12}
+   664	            >
+   665	              {downloadingPhoto ? (
+   666	                <ActivityIndicator size={18} color="#fff" />
+   667	              ) : (
+   668	                <>
+   669	                  <Feather name="download" size={20} color="#fff" />
+   670	                  <Text style={detailStyles.photoModalDownloadText}>Save</Text>
+   671	                </>
+   672	              )}
+   673	            </Pressable>
+   674	          </View>
+   675	        </Modal>
+   676	      </Modal>
+   677	
+   678	      <BottomNav />
+   679	    </SwipeBackView>
+   680	  );
+   681	}
+   682	
+   683	const styles = StyleSheet.create({
+   684	  container: { flex: 1 },
+   685	  centered: { flex: 1, alignItems: "center", justifyContent: "center" },
+   686	  header: {
+   687	    paddingHorizontal: 20,
+   688	    paddingBottom: 14,
+   689	    borderBottomWidth: StyleSheet.hairlineWidth,
+   690	  },
+   691	  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+   692	  iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+   693	  headerText: { flex: 1 },
+   694	  backBtn: {},
+   695	  carName: { fontSize: 17, fontFamily: "Inter_700Bold" },
+   696	  plate: { fontSize: 13, fontFamily: "Inter_500Medium" },
+   697	  headerActions: { flexDirection: "row", gap: 8 },
+   698	  headerBtn: {
+   699	    width: 34, height: 34, borderRadius: 10,
+   700	    alignItems: "center", justifyContent: "center",
+   701	  },
+   702	  statsStrip: {
+   703	    marginHorizontal: 16,
+   704	    borderRadius: 14,
+   705	    marginBottom: 4,
+   706	    overflow: "hidden",
+   707	    shadowColor: "rgba(0,0,0,0.04)",
+   708	    shadowOffset: { width: 0, height: 1 },
+   709	    shadowOpacity: 1,
+   710	    shadowRadius: 4,
+   711	    elevation: 1,
+   712	  },
+   713	  statsRow: {
+   714	    flexDirection: "row",
+   715	    alignItems: "center",
+   716	    flexWrap: "nowrap",
+   717	    paddingHorizontal: 14,
+   718	    paddingVertical: 8,
+   719	  },
+   720	  infoPill: {
+   721	    flexDirection: "row",
+   722	    alignItems: "center",
+   723	  },
+   724	  pillLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
+   725	  pillValue: { fontSize: 13, fontFamily: "Inter_700Bold" },
+   726	  expiryPill: {
+   727	    flexDirection: "row",
+   728	    alignItems: "center",
+   729	  },
+   730	  expiryDot: {
+   731	    width: 7,
+   732	    height: 7,
+   733	    borderRadius: 4,
+   734	  },
+   735	  expiryValue: { fontSize: 13, fontFamily: "Inter_700Bold" },
+   736	  content: { flex: 1 },
+   737	  contentPadding: { padding: 16, gap: 0 },
+   738	
+   739	  card: {
+   740	    borderRadius: 14,
+   741	    borderLeftWidth: 4,
+   742	    borderWidth: 1,
+   743	    paddingHorizontal: 14,
+   744	    paddingVertical: 12,
+   745	    gap: 8,
+   746	    marginBottom: 10,
+   747	  },
+   748	  cardHeader: {
+   749	    flexDirection: "row",
+   750	    alignItems: "center",
+   751	    justifyContent: "space-between",
+   752	    gap: 6,
+   753	  },
+   754	  badge: {
+   755	    flexDirection: "row",
+   756	    alignItems: "center",
+   757	    gap: 4,
+   758	    borderRadius: 6,
+   759	    paddingHorizontal: 8,
+   760	    paddingVertical: 3,
+   761	  },
+   762	  badgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+   763	  dateText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+   764	  cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
+   765	  cardMeta: { flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
+   766	  metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+   767	  metaDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#CBD5E1", marginHorizontal: 2 },
+   768	  cardFooter: { flexDirection: "row", alignItems: "center" },
+   769	  cardActions: { flexDirection: "row", gap: 8 },
+   770	  warningMsgText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
+   771	  warningMsgLabel: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
+   772	  iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", alignSelf: "flex-start", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
+   773	  actionBtn: {
+   774	    width: 30, height: 30,
+   775	    alignItems: "center", justifyContent: "center",
+   776	    borderRadius: 8, borderWidth: 1,
+   777	  },
+   778	  photoBadges: {
+   779	    flex: 1,
+   780	    flexDirection: "row",
+   781	    gap: 6,
+   782	    alignItems: "center",
+   783	  },
+   784	  photoBadge: {
+   785	    flexDirection: "row",
+   786	    alignItems: "center",
+   787	    gap: 4,
+   788	    borderRadius: 6,
+   789	    paddingHorizontal: 8,
+   790	    paddingVertical: 3,
+   791	  },
+   792	  photoBadgeText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+   793	});
+   794	
+   795	const detailStyles = StyleSheet.create({
+   796	  sheet: { flex: 1 },
+   797	  sheetHeader: {
+   798	    flexDirection: "row",
+   799	    alignItems: "center",
+   800	    gap: 10,
+   801	    paddingHorizontal: 20,
+   802	    paddingTop: 16,
+   803	    paddingBottom: 14,
+   804	    borderBottomWidth: StyleSheet.hairlineWidth,
+   805	  },
+   806	  dateLabel: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
+   807	  body: { padding: 20, gap: 0, paddingBottom: 48 },
+   808	  title: { fontSize: 17, fontFamily: "Inter_700Bold", lineHeight: 24, marginBottom: 16 },
+   809	  row: {
+   810	    flexDirection: "row",
+   811	    alignItems: "flex-start",
+   812	    paddingVertical: 12,
+   813	    gap: 12,
+   814	    borderBottomWidth: StyleSheet.hairlineWidth,
+   815	  },
+   816	  rowLabel: { fontSize: 13, fontFamily: "Inter_500Medium", width: 130 },
+   817	  rowValue: { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
+   818	  photoSection: { marginTop: 24, gap: 10 },
+   819	  photoLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+   820	  photoThumb: { width: "100%", height: 220, borderRadius: 12 },
+   821	  photoHint: {
+   822	    position: "absolute",
+   823	    bottom: 10,
+   824	    right: 10,
+   825	    flexDirection: "row",
+   826	    alignItems: "center",
+   827	    gap: 5,
+   828	    paddingHorizontal: 10,
+   829	    paddingVertical: 5,
+   830	    borderRadius: 8,
+   831	  },
+   832	  photoHintText: { color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" },
+   833	  photoModal: { flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" },
+   834	  photoModalClose: {
+   835	    position: "absolute",
+   836	    top: 56,
+   837	    right: 20,
+   838	    backgroundColor: "rgba(255,255,255,0.2)",
+   839	    borderRadius: 20,
+   840	    width: 40,
+   841	    height: 40,
+   842	    alignItems: "center",
+   843	    justifyContent: "center",
+   844	    zIndex: 10,
+   845	  },
+   846	  photoFull: { width: "100%", height: "80%" },
+   847	  photoModalDownload: {
+   848	    position: "absolute",
+   849	    bottom: 56,
+   850	    right: 24,
+   851	    backgroundColor: "rgba(255,255,255,0.18)",
+   852	    borderRadius: 12,
+   853	    paddingHorizontal: 16,
+   854	    paddingVertical: 10,
+   855	    flexDirection: "row",
+   856	    alignItems: "center",
+   857	    gap: 6,
+   858	    zIndex: 10,
+   859	  },
+   860	  photoModalDownloadText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
+   861	});

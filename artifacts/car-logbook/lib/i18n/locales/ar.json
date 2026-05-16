@@ -253,6 +253,62 @@
     "submit": "إضافة إلى السجل",
     "error": "تعذّر إضافة السيارة. يرجى المحاولة مرة أخرى."
   },
+  "carDetail": {
+    "notFound": "لم يتم العثور على السيارة",
+    "events": {
+      "fault": "عطل",
+      "maintenance": "صيانة",
+      "inspection": "فحص"
+    },
+    "fields": {
+      "plate": "اللوحة",
+      "color": "اللون",
+      "vin": "رقم الهيكل",
+      "license": "الرخصة",
+      "insurance": "التأمين"
+    },
+    "fault": {
+      "dashboardMessage": "رسالة لوحة العدادات: "
+    },
+    "maintenance": {
+      "billLabel": "فاتورة",
+      "warrantyLabel": "ضمان"
+    },
+    "inspection": {
+      "next": "التالي: "
+    },
+    "empty": {
+      "title": "لا توجد أحداث بعد",
+      "description": "ستظهر الأعطال والصيانة والفحوصات هنا.",
+      "action": "السجل الفني"
+    },
+    "delete": {
+      "title": "حذف السجل",
+      "message": "سيتم حذف هذا السجل نهائياً.",
+      "confirm": "حذف"
+    },
+    "photo": {
+      "saveFailed": "فشل الحفظ",
+      "save": "حفظ",
+      "tapToEnlarge": "انقر للتكبير",
+      "billPhoto": "صورة الفاتورة",
+      "warrantyPhoto": "صورة الضمان",
+      "saveDialogTitle": "حفظ الصورة"
+    },
+    "rows": {
+      "correctiveAction": "الإجراء التصحيحي",
+      "shop": "الورشة",
+      "address": "العنوان",
+      "phone": "الهاتف",
+      "cost": "التكلفة",
+      "partsReplaced": "القطع المستبدلة",
+      "warrantyPeriod": "مدة الضمان",
+      "warrantyDetails": "تفاصيل الضمان",
+      "location": "الموقع",
+      "requiredRepairs": "الإصلاحات المطلوبة",
+      "nextInspection": "الفحص التالي"
+    }
+  },
   "photoPicker": {
     "label": "الصور",
     "addPhoto": "إضافة صورة",

@@ -1,0 +1,427 @@
+diff --git a/artifacts/car-logbook/app/car/[id].tsx b/artifacts/car-logbook/app/car/[id].tsx
+index 418aee8..5521056 100644
+--- a/artifacts/car-logbook/app/car/[id].tsx
++++ b/artifacts/car-logbook/app/car/[id].tsx
+@@ -105,7 +105,8 @@ export default function CarDetailScreen() {
+   const carId = parseInt(id ?? "0");
+   const insets = useSafeAreaInsets();
+   const C = useColors();
+-  const { i18n } = useTranslation();
++  const { t, i18n } = useTranslation();
++  const isRTL = i18n.language === "ar";
+   const { unit } = useDistanceUnit();
+   const qc = useQueryClient();
+   const topPad = Platform.OS === "web" ? 67 : insets.top;
+@@ -147,11 +148,11 @@ export default function CarDetailScreen() {
+       await Sharing.shareAsync(fileUri, {
+         mimeType: "image/jpeg",
+         UTI: "public.jpeg",
+-        dialogTitle: "Save Photo",
++        dialogTitle: t("carDetail.photo.saveDialogTitle"),
+       });
+     } catch (e: unknown) {
+       const msg = e instanceof Error ? e.message : String(e);
+-      Alert.alert("Save failed", msg);
++      Alert.alert(t("carDetail.photo.saveFailed"), msg);
+     } finally {
+       setDownloadingPhoto(false);
+     }
+@@ -193,8 +194,8 @@ export default function CarDetailScreen() {
+     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+     setConfirmModal({
+       visible: true,
+-      title: "Delete Record",
+-      message: "This record will be permanently deleted.",
++      title: t("carDetail.delete.title"),
++      message: t("carDetail.delete.message"),
+       onConfirm: async () => {
+         setConfirmModal((s) => ({ ...s, visible: false }));
+         await apiDelete(path);
+@@ -205,23 +206,24 @@ export default function CarDetailScreen() {
+ 
+   const renderEvent = (ev: EventItem) => {
+     const meta = EVENT_META[ev.kind];
++    const metaLabel = t(`carDetail.events.${ev.kind}`);
+     const key = `${ev.kind}-${ev.data.id}`;
+ 
+     if (ev.kind === "fault") {
+       const r = ev.data;
+       return (
+         <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+-          <View style={styles.cardHeader}>
+-            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
++          <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
++            <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
+               <Feather name={meta.icon} size={11} color={meta.color} />
+-              <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
++              <Text style={[styles.badgeText, { color: meta.color }]}>{metaLabel}</Text>
+             </View>
+             <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+           </View>
+-          <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
++          <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={3}>{r.description}</Text>
+           {!!r.warningMessage && (
+-            <Text style={[styles.warningMsgText, { color: C.textSecondary }]} numberOfLines={2}>
+-              <Text style={styles.warningMsgLabel}>Dashboard message: </Text>
++            <Text style={[styles.warningMsgText, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>
++              <Text style={styles.warningMsgLabel}>{t("carDetail.fault.dashboardMessage")}</Text>
+               {r.warningMessage}
+             </Text>
+           )}
+@@ -237,9 +239,9 @@ export default function CarDetailScreen() {
+               </View>
+             );
+           })()}
+-          <View style={styles.cardFooter}>
++          <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
+             <View style={{ flex: 1 }} />
+-            <View style={styles.cardActions}>
++            <View style={[styles.cardActions, isRTL && { flexDirection: "row-reverse" }]}>
+               <Pressable
+                 onPress={() => router.push({
+                   pathname: "/maintenance/form",
+@@ -269,16 +271,16 @@ export default function CarDetailScreen() {
+           onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
+           style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+         >
+-          <View style={styles.cardHeader}>
+-            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
++          <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
++            <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
+               <Feather name={meta.icon} size={11} color={meta.color} />
+-              <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || meta.label}</Text>
++              <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || metaLabel}</Text>
+             </View>
+             <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+           </View>
+-          <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.description}</Text>
++          <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={3}>{r.description}</Text>
+           {(r.shop || r.cost != null) && (
+-            <View style={styles.cardMeta}>
++            <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
+               {r.shop && (
+                 <>
+                   <Feather name="map-pin" size={12} color={C.textTertiary} />
+@@ -293,23 +295,23 @@ export default function CarDetailScreen() {
+               )}
+             </View>
+           )}
+-          <View style={styles.cardFooter}>
+-            <View style={styles.photoBadges}>
++          <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
++            <View style={[styles.photoBadges, isRTL && { flexDirection: "row-reverse" }]}>
+               {r.billPhoto && (
+-                <View style={[styles.photoBadge, { backgroundColor: meta.bg }]}>
++                <View style={[styles.photoBadge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
+                   <Feather name="image" size={11} color={meta.color} />
+-                  <Text style={[styles.photoBadgeText, { color: meta.color }]}>Bill</Text>
++                  <Text style={[styles.photoBadgeText, { color: meta.color }]}>{t("carDetail.maintenance.billLabel")}</Text>
+                 </View>
+               )}
+               {r.warrantyPhoto && (
+-                <View style={[styles.photoBadge, { backgroundColor: "#EDE9FE" }]}>
++                <View style={[styles.photoBadge, { backgroundColor: "#EDE9FE" }, isRTL && { flexDirection: "row-reverse" }]}>
+                   <Feather name="shield" size={11} color="#7C3AED" />
+-                  <Text style={[styles.photoBadgeText, { color: "#7C3AED" }]}>Warranty</Text>
++                  <Text style={[styles.photoBadgeText, { color: "#7C3AED" }]}>{t("carDetail.maintenance.warrantyLabel")}</Text>
+                 </View>
+               )}
+               {!r.billPhoto && !r.warrantyPhoto && <View style={{ flex: 1 }} />}
+             </View>
+-            <View style={styles.cardActions}>
++            <View style={[styles.cardActions, isRTL && { flexDirection: "row-reverse" }]}>
+               <TouchableOpacity
+                 onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
+                 style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+@@ -330,18 +332,18 @@ export default function CarDetailScreen() {
+           onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
+           style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+         >
+-          <View style={styles.cardHeader}>
+-            <View style={[styles.badge, { backgroundColor: meta.bg }]}>
++          <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
++            <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
+               <Feather name={meta.icon} size={11} color={meta.color} />
+-              <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
++              <Text style={[styles.badgeText, { color: meta.color }]}>{metaLabel}</Text>
+             </View>
+             <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(r.date)}</Text>
+           </View>
+           {r.results && (
+-            <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={3}>{r.results}</Text>
++            <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={3}>{r.results}</Text>
+           )}
+           {(r.place || r.cost != null) && (
+-            <View style={styles.cardMeta}>
++            <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
+               {r.place && (
+                 <>
+                   <Feather name="map-pin" size={12} color={C.textTertiary} />
+@@ -357,12 +359,12 @@ export default function CarDetailScreen() {
+             </View>
+           )}
+           {r.nextInspectionDate && (
+-            <View style={styles.cardMeta}>
++            <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
+               <Feather name="calendar" size={12} color={C.textTertiary} />
+-              <Text style={[styles.metaText, { color: C.textSecondary }]}>Next: {formatDate(r.nextInspectionDate)}</Text>
++              <Text style={[styles.metaText, { color: C.textSecondary }]}>{t("carDetail.inspection.next")}{formatDate(r.nextInspectionDate)}</Text>
+             </View>
+           )}
+-          <View style={styles.cardFooter}>
++          <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
+             <View style={{ flex: 1 }} />
+             <TouchableOpacity
+               onPress={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
+@@ -391,7 +393,7 @@ export default function CarDetailScreen() {
+   if (!car) {
+     return (
+       <View style={[styles.centered, { backgroundColor: C.background }]}>
+-        <Text style={{ color: C.text }}>Car not found</Text>
++        <Text style={{ color: C.text }}>{t("carDetail.notFound")}</Text>
+       </View>
+     );
+   }
+@@ -399,9 +401,9 @@ export default function CarDetailScreen() {
+   return (
+     <SwipeBackView style={{ backgroundColor: C.background }}>
+       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
+-        <View style={styles.headerRow}>
++        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
+           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+-            <Feather name="arrow-left" size={22} color={C.text} />
++            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
+           </Pressable>
+           {(() => {
+             let firstPhoto: string | null = null;
+@@ -419,14 +421,14 @@ export default function CarDetailScreen() {
+             );
+           })()}
+           <View style={styles.headerText}>
+-            <Text style={[styles.carName, { color: C.text }]} numberOfLines={1}>
++            <Text style={[styles.carName, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>
+               {car.nickname ?? `${localizeDigits(car.year, i18n.language)} ${localizeBrand(car.make, i18n.language)} ${car.model}`}
+             </Text>
+-            <Text style={[styles.plate, { color: C.textSecondary }]} numberOfLines={1}>
++            <Text style={[styles.plate, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>
+               {car.nickname ? `${localizeDigits(car.year, i18n.language)} ${localizeBrand(car.make, i18n.language)} ${car.model}` : car.licensePlate ?? ""}
+             </Text>
+           </View>
+-          <View style={styles.headerActions}>
++          <View style={[styles.headerActions, isRTL && { flexDirection: "row-reverse" }]}>
+             <Pressable
+               onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
+               hitSlop={8}
+@@ -458,46 +460,46 @@ export default function CarDetailScreen() {
+         return (
+           <View style={[styles.statsStrip, { backgroundColor: C.card }]}>
+             {/* Row 1: Car info pills */}
+-            <View style={styles.statsRow}>
++            <View style={[styles.statsRow, isRTL && { flexDirection: "row-reverse" }]}>
+               {car.mileage != null && (
+-                <View style={[styles.infoPill, { marginRight: 16 }]}>
++                <View style={[styles.infoPill, { marginEnd: 16 }, isRTL && { flexDirection: "row-reverse" }]}>
+                   <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{unit} </Text>
+                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.mileage.toLocaleString()}</Text>
+                 </View>
+               )}
+               {car.licensePlate && (
+-                <View style={[styles.infoPill, { marginRight: 16 }]}>
+-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Plate </Text>
++                <View style={[styles.infoPill, { marginEnd: 16 }, isRTL && { flexDirection: "row-reverse" }]}>
++                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{t("carDetail.fields.plate")} </Text>
+                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.licensePlate}</Text>
+                 </View>
+               )}
+               {car.color && (
+-                <View style={[styles.infoPill, { marginRight: 16 }]}>
+-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>Color </Text>
++                <View style={[styles.infoPill, { marginEnd: 16 }, isRTL && { flexDirection: "row-reverse" }]}>
++                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{t("carDetail.fields.color")} </Text>
+                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.color}</Text>
+                 </View>
+               )}
+               {car.vin && (
+-                <View style={styles.infoPill}>
+-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>VIN </Text>
++                <View style={[styles.infoPill, isRTL && { flexDirection: "row-reverse" }]}>
++                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{t("carDetail.fields.vin")} </Text>
+                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.vin.slice(-6)}</Text>
+                 </View>
+               )}
+             </View>
+             {/* Row 2: Expiry date pills */}
+             {hasExpiry && (
+-              <View style={[styles.statsRow, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border }]}>
++              <View style={[styles.statsRow, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
+                 {car.licenseValidUntil && (
+-                  <View style={[styles.expiryPill, { marginRight: 20 }]}>
++                  <View style={[styles.expiryPill, { marginEnd: 20 }, isRTL && { flexDirection: "row-reverse" }]}>
+                     <View style={[styles.expiryDot, { backgroundColor: expiryColor(car.licenseValidUntil) }]} />
+-                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginLeft: 5 }]}>Lic. </Text>
++                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginHorizontal: 5 }]}>{t("carDetail.fields.license")} </Text>
+                     <Text style={[styles.expiryValue, { color: expiryColor(car.licenseValidUntil) }]} numberOfLines={1}>{formatDate(car.licenseValidUntil)}</Text>
+                   </View>
+                 )}
+                 {car.insuredUntil && (
+-                  <View style={styles.expiryPill}>
++                  <View style={[styles.expiryPill, isRTL && { flexDirection: "row-reverse" }]}>
+                     <View style={[styles.expiryDot, { backgroundColor: expiryColor(car.insuredUntil) }]} />
+-                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginLeft: 5 }]}>Ins. </Text>
++                    <Text style={[styles.pillLabel, { color: C.textSecondary, marginHorizontal: 5 }]}>{t("carDetail.fields.insurance")} </Text>
+                     <Text style={[styles.expiryValue, { color: expiryColor(car.insuredUntil) }]} numberOfLines={1}>{formatDate(car.insuredUntil)}</Text>
+                   </View>
+                 )}
+@@ -517,9 +519,9 @@ export default function CarDetailScreen() {
+         ) : events.length === 0 ? (
+           <EmptyState
+             icon="clock"
+-            title="No events yet"
+-            description="Faults, maintenance, and inspections will appear here."
+-            actionLabel="Technical Log"
++            title={t("carDetail.empty.title")}
++            description={t("carDetail.empty.description")}
++            actionLabel={t("carDetail.empty.action")}
+             onAction={() => router.push({ pathname: "/event/add", params: { carId: String(carId) } })}
+             btnColor="#FEE2E2"
+             btnTextColor="#DC2626"
+@@ -534,7 +536,7 @@ export default function CarDetailScreen() {
+         visible={confirmModal.visible}
+         title={confirmModal.title}
+         message={confirmModal.message}
+-        confirmLabel="Delete"
++        confirmLabel={t("carDetail.delete.confirm")}
+         onConfirm={confirmModal.onConfirm}
+         onCancel={() => setConfirmModal((s) => ({ ...s, visible: false }))}
+         destructive
+@@ -549,57 +551,58 @@ export default function CarDetailScreen() {
+       >
+         {detailEvent && (() => {
+           const meta = EVENT_META[detailEvent.kind];
++          const metaLabel = t(`carDetail.events.${detailEvent.kind}`);
+           if (detailEvent.kind === "maintenance") {
+             const r = detailEvent.data;
+             const rows: { label: string; value: string }[] = [];
+-            if (r.correctiveAction && r.correctiveAction !== r.description) rows.push({ label: "Corrective Action", value: r.correctiveAction });
+-            if (r.shop) rows.push({ label: "Shop", value: r.shop });
+-            if (r.shopAddress) rows.push({ label: "Address", value: r.shopAddress });
+-            if (r.shopPhone) rows.push({ label: "Phone", value: r.shopPhone });
+-            if (r.cost != null) rows.push({ label: "Cost", value: `$${r.cost.toFixed(2)}` });
+-            if (r.partsReplaced) rows.push({ label: "Parts Replaced", value: r.partsReplaced });
+-            if (r.warrantyPeriod) rows.push({ label: "Warranty Period", value: r.warrantyPeriod });
+-            if (r.warrantyDetails) rows.push({ label: "Warranty Details", value: r.warrantyDetails });
++            if (r.correctiveAction && r.correctiveAction !== r.description) rows.push({ label: t("carDetail.rows.correctiveAction"), value: r.correctiveAction });
++            if (r.shop) rows.push({ label: t("carDetail.rows.shop"), value: r.shop });
++            if (r.shopAddress) rows.push({ label: t("carDetail.rows.address"), value: r.shopAddress });
++            if (r.shopPhone) rows.push({ label: t("carDetail.rows.phone"), value: r.shopPhone });
++            if (r.cost != null) rows.push({ label: t("carDetail.rows.cost"), value: `$${r.cost.toFixed(2)}` });
++            if (r.partsReplaced) rows.push({ label: t("carDetail.rows.partsReplaced"), value: r.partsReplaced });
++            if (r.warrantyPeriod) rows.push({ label: t("carDetail.rows.warrantyPeriod"), value: r.warrantyPeriod });
++            if (r.warrantyDetails) rows.push({ label: t("carDetail.rows.warrantyDetails"), value: r.warrantyDetails });
+             return (
+               <View style={[detailStyles.sheet, { backgroundColor: C.backgroundSecondary }]}>
+-                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+-                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
++                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }, isRTL && { flexDirection: "row-reverse" }]}>
++                  <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
+                     <Feather name={meta.icon} size={12} color={meta.color} />
+-                    <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || meta.label}</Text>
++                    <Text style={[styles.badgeText, { color: meta.color }]}>{r.type || metaLabel}</Text>
+                   </View>
+-                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary }]}>{formatDate(r.date)}</Text>
++                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{formatDate(r.date)}</Text>
+                   <Pressable onPress={() => setDetailEvent(null)} hitSlop={12}>
+                     <Feather name="x" size={22} color={C.textSecondary} />
+                   </Pressable>
+                 </View>
+                 <ScrollView contentContainerStyle={detailStyles.body} showsVerticalScrollIndicator={false}>
+-                  <Text style={[detailStyles.title, { color: C.text }]}>{r.description}</Text>
++                  <Text style={[detailStyles.title, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{r.description}</Text>
+                   {rows.map((row) => (
+-                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }]}>
+-                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary }]}>{row.label}</Text>
+-                      <Text style={[detailStyles.rowValue, { color: C.text }]}>{row.value}</Text>
++                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }, isRTL && { flexDirection: "row-reverse" }]}>
++                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{row.label}</Text>
++                      <Text style={[detailStyles.rowValue, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{row.value}</Text>
+                     </View>
+                   ))}
+                   {r.billPhoto && (
+                     <View style={detailStyles.photoSection}>
+-                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary }]}>Bill Photo</Text>
++                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("carDetail.photo.billPhoto")}</Text>
+                       <Pressable onPress={() => setPhotoViewer(r.billPhoto!)} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+                         <Image source={{ uri: r.billPhoto }} style={detailStyles.photoThumb} resizeMode="cover" />
+-                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }]}>
++                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }, isRTL && { right: undefined, left: 10, flexDirection: "row-reverse" }]}>
+                           <Feather name="maximize-2" size={14} color="#fff" />
+-                          <Text style={detailStyles.photoHintText}>Tap to enlarge</Text>
++                          <Text style={detailStyles.photoHintText}>{t("carDetail.photo.tapToEnlarge")}</Text>
+                         </View>
+                       </Pressable>
+                     </View>
+                   )}
+                   {r.warrantyPhoto && (
+                     <View style={detailStyles.photoSection}>
+-                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary }]}>Warranty Photo</Text>
++                      <Text style={[detailStyles.photoLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("carDetail.photo.warrantyPhoto")}</Text>
+                       <Pressable onPress={() => setPhotoViewer(r.warrantyPhoto!)} style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+                         <Image source={{ uri: r.warrantyPhoto }} style={detailStyles.photoThumb} resizeMode="cover" />
+-                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }]}>
++                        <View style={[detailStyles.photoHint, { backgroundColor: "rgba(0,0,0,0.55)" }, isRTL && { right: undefined, left: 10, flexDirection: "row-reverse" }]}>
+                           <Feather name="maximize-2" size={14} color="#fff" />
+-                          <Text style={detailStyles.photoHintText}>Tap to enlarge</Text>
++                          <Text style={detailStyles.photoHintText}>{t("carDetail.photo.tapToEnlarge")}</Text>
+                         </View>
+                       </Pressable>
+                     </View>
+@@ -611,28 +614,28 @@ export default function CarDetailScreen() {
+           if (detailEvent.kind === "inspection") {
+             const r = detailEvent.data;
+             const rows: { label: string; value: string }[] = [];
+-            if (r.place) rows.push({ label: "Location", value: r.place });
+-            if (r.cost != null) rows.push({ label: "Cost", value: `$${r.cost.toFixed(2)}` });
+-            if (r.requiredRepairs) rows.push({ label: "Required Repairs", value: r.requiredRepairs });
+-            if (r.nextInspectionDate) rows.push({ label: "Next Inspection", value: formatDate(r.nextInspectionDate) });
++            if (r.place) rows.push({ label: t("carDetail.rows.location"), value: r.place });
++            if (r.cost != null) rows.push({ label: t("carDetail.rows.cost"), value: `$${r.cost.toFixed(2)}` });
++            if (r.requiredRepairs) rows.push({ label: t("carDetail.rows.requiredRepairs"), value: r.requiredRepairs });
++            if (r.nextInspectionDate) rows.push({ label: t("carDetail.rows.nextInspection"), value: formatDate(r.nextInspectionDate) });
+             return (
+               <View style={[detailStyles.sheet, { backgroundColor: C.backgroundSecondary }]}>
+-                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }]}>
+-                  <View style={[styles.badge, { backgroundColor: meta.bg }]}>
++                <View style={[detailStyles.sheetHeader, { borderBottomColor: C.border, backgroundColor: C.card }, isRTL && { flexDirection: "row-reverse" }]}>
++                  <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
+                     <Feather name={meta.icon} size={12} color={meta.color} />
+-                    <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
++                    <Text style={[styles.badgeText, { color: meta.color }]}>{metaLabel}</Text>
+                   </View>
+-                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary }]}>{formatDate(r.date)}</Text>
++                  <Text style={[detailStyles.dateLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{formatDate(r.date)}</Text>
+                   <Pressable onPress={() => setDetailEvent(null)} hitSlop={12}>
+                     <Feather name="x" size={22} color={C.textSecondary} />
+                   </Pressable>
+                 </View>
+                 <ScrollView contentContainerStyle={detailStyles.body} showsVerticalScrollIndicator={false}>
+-                  {r.results && <Text style={[detailStyles.title, { color: C.text }]}>{r.results}</Text>}
++                  {r.results && <Text style={[detailStyles.title, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{r.results}</Text>}
+                   {rows.map((row) => (
+-                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }]}>
+-                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary }]}>{row.label}</Text>
+-                      <Text style={[detailStyles.rowValue, { color: C.text }]}>{row.value}</Text>
++                    <View key={row.label} style={[detailStyles.row, { borderBottomColor: C.borderLight }, isRTL && { flexDirection: "row-reverse" }]}>
++                      <Text style={[detailStyles.rowLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{row.label}</Text>
++                      <Text style={[detailStyles.rowValue, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{row.value}</Text>
+                     </View>
+                   ))}
+                 </ScrollView>
+@@ -667,7 +670,7 @@ export default function CarDetailScreen() {
+               ) : (
+                 <>
+                   <Feather name="download" size={20} color="#fff" />
+-                  <Text style={detailStyles.photoModalDownloadText}>Save</Text>
++                  <Text style={detailStyles.photoModalDownloadText}>{t("carDetail.photo.save")}</Text>
+                 </>
+               )}
+             </Pressable>
