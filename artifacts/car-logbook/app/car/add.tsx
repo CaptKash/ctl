@@ -23,7 +23,8 @@ import { SelectField } from "@/components/ui/SelectField";
 import { PhotoPicker } from "@/components/ui/PhotoPicker";
 import { apiPost } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -103,9 +104,15 @@ export default function AddCarScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="plus-circle" size={22} color="#2563EB" />
-          </View>
+          <LinearGradient
+            colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, styles.iconBoxMetallic]}
+          >
+            <Ionicons name="car" size={24} color="#334155" />
+          </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.title")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.subtitle")}</Text>
@@ -308,6 +315,14 @@ const styles = StyleSheet.create({
   },
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  iconBoxMetallic: {
+    borderWidth: 1,
+    borderColor: "#64748B",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.18,
+    shadowRadius: 2,
+  },
   headerText: { flex: 1 },
   backBtn: {},
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
