@@ -20,7 +20,8 @@ export function SwipeBackView({ children, style }: Props) {
 
   const pan = Gesture.Pan()
     .activeOffsetX([15, 999])
-    .failOffsetY([-15, 15])
+    .failOffsetY([-10, 10])
+    .hitSlop({ left: 0, width: 25 })
     .onEnd((e) => {
       "worklet";
       if (e.translationX > 60 && e.velocityX > 100) {
