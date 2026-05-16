@@ -84,9 +84,13 @@ export default function EditProfileScreen() {
     }
   };
 
-  const initials = name.trim()
-    ? name.trim().split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-    : "?";
+  const initials = (() => {
+    const trimmed = name.trim();
+    if (!trimmed) return "?";
+    const parts = trimmed.split(" ").filter(Boolean).map((n) => n[0]).slice(0, 2);
+    const isArabic = /[\u0600-\u06FF]/.test(trimmed);
+    return isArabic ? parts.join(".") : parts.join("").toUpperCase();
+  })();
 
   return (
     <KeyboardAvoidingView

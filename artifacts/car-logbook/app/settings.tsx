@@ -537,9 +537,12 @@ export default function SettingsScreen() {
     staleTime: 30_000,
   });
 
-  const initials = user?.name
-    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-    : "?";
+  const initials = (() => {
+    if (!user?.name) return "?";
+    const parts = user.name.split(" ").filter(Boolean).map((n) => n[0]).slice(0, 2);
+    const isArabic = /[\u0600-\u06FF]/.test(user.name);
+    return isArabic ? parts.join(".") : parts.join("").toUpperCase();
+  })();
 
   const fleetLabel = cars.length === 0
     ? t("settings.vehicleCount.none")
