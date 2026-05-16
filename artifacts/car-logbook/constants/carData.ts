@@ -90,7 +90,7 @@ export const CAR_DATA: CarMake[] = [
     models: [
       "Atlas","Atlas Pro","Azkarra","Binyue","Boyue","Boyue L","Boyue Pro",
       "Cityray","Coolray","Emgrand","Emgrand 7","Emgrand GS","Emgrand GT","Emgrand X7",
-      "EX5","Galaxy E5","Galaxy E8","Galaxy L6","Galaxy L7","Galaxy L9",
+      "EX2","EX5","Galaxy E5","Galaxy E8","Galaxy L6","Galaxy L7","Galaxy L9",
       "GC9","Geometry A","Geometry C","Geometry E","Geometry M6",
       "GX3","GX3 Pro","Haoyue","Haoyue L","Icon","Jiaji",
       "Manjaro","Monjaro","Okavango","Panda","Panda Mini","Preface",
