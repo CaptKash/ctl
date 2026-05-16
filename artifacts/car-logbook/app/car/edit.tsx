@@ -216,6 +216,34 @@ export default function EditCarScreen() {
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
+          <View style={[styles.toggleRow, styles.toggleRowActive]}>
+            <View style={styles.toggleLeft}>
+              <LinearGradient
+                colors={["#ECFDF5", "#34D399", "#047857"]}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0.15, y: 0 }}
+                end={{ x: 0.85, y: 1 }}
+                style={[styles.evBadge, styles.evBadgeMetallic]}
+              >
+                <Feather name="zap" size={18} color="#064E3B" />
+              </LinearGradient>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle?</Text>
+                <Text style={[styles.toggleSub, { color: C.textSecondary }]}>
+                  {isElectric ? "EV — no fuel records" : "Combustion or hybrid"}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={isElectric}
+              onValueChange={setIsElectric}
+              trackColor={{ false: C.border, true: "#34D399" }}
+              thumbColor={isElectric ? "#059669" : "#fff"}
+            />
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
           <SelectField
             label="Year"
             value={year}
@@ -243,34 +271,6 @@ export default function EditCarScreen() {
             placeholder="e.g. 45000"
             keyboardType="number-pad"
           />
-
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-
-          <View style={[styles.toggleRow, styles.toggleRowActive]}>
-            <View style={styles.toggleLeft}>
-              <LinearGradient
-                colors={["#ECFDF5", "#34D399", "#047857"]}
-                locations={[0, 0.55, 1]}
-                start={{ x: 0.15, y: 0 }}
-                end={{ x: 0.85, y: 1 }}
-                style={[styles.evBadge, styles.evBadgeMetallic]}
-              >
-                <Feather name="zap" size={18} color="#064E3B" />
-              </LinearGradient>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle?</Text>
-                <Text style={[styles.toggleSub, { color: C.textSecondary }]}>
-                  {isElectric ? "EV — no fuel records" : "Combustion or hybrid"}
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={isElectric}
-              onValueChange={setIsElectric}
-              trackColor={{ false: C.border, true: "#34D399" }}
-              thumbColor={isElectric ? "#059669" : "#fff"}
-            />
-          </View>
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 

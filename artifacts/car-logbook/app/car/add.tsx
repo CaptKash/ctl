@@ -165,36 +165,6 @@ export default function AddCarScreen() {
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
-          <SelectField
-            label={t("addCar.fields.year")}
-            value={year}
-            onSelect={setYear}
-            options={YEARS}
-            placeholder={t("addCar.fields.yearPlaceholder")}
-            required
-          />
-
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-
-          <FormField
-            label={t("addCar.fields.color")}
-            value={color}
-            onChangeText={setColor}
-            placeholder={t("addCar.fields.colorPlaceholder")}
-          />
-
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-
-          <FormField
-            label={t("addCar.fields.mileage", { unit })}
-            value={mileage}
-            onChangeText={setMileage}
-            placeholder={t("addCar.fields.mileagePlaceholder")}
-            keyboardType="number-pad"
-          />
-
-          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-
           <View style={[
             styles.toggleRow,
             styles.toggleRowActive,
@@ -224,6 +194,36 @@ export default function AddCarScreen() {
               thumbColor={isElectric ? "#059669" : "#fff"}
             />
           </View>
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
+          <SelectField
+            label={t("addCar.fields.year")}
+            value={year}
+            onSelect={setYear}
+            options={YEARS}
+            placeholder={t("addCar.fields.yearPlaceholder")}
+            required
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
+          <FormField
+            label={t("addCar.fields.color")}
+            value={color}
+            onChangeText={setColor}
+            placeholder={t("addCar.fields.colorPlaceholder")}
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+
+          <FormField
+            label={t("addCar.fields.mileage", { unit })}
+            value={mileage}
+            onChangeText={setMileage}
+            placeholder={t("addCar.fields.mileagePlaceholder")}
+            keyboardType="number-pad"
+          />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
