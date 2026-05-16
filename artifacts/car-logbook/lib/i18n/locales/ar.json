@@ -206,6 +206,13 @@
       "nextInspection": "الفحص القادم"
     }
   },
+  "nav": {
+    "dashboard": "الرئيسية",
+    "faults": "الأعطال",
+    "history": "السجل",
+    "tools": "الأدوات",
+    "settings": "الإعدادات"
+  },
   "fleetUpgrade": {
     "ctlFleetTitle": "CTL Fleet",
     "tagline": "إدارة كل مركباتك بدون قيود",

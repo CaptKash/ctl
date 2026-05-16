@@ -5,6 +5,7 @@ import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { apiGet } from "@/hooks/useApi";
 
@@ -12,16 +13,16 @@ export type BottomNavTab = "dashboard" | "faults" | "history" | "tools" | "setti
 
 const TABS: {
   id: BottomNavTab;
-  label: string;
+  labelKey: string;
   icon: React.ComponentProps<typeof Feather>["name"];
   route: string;
   activeColor?: string;
 }[] = [
-  { id: "dashboard", label: "Dashboard",    icon: "grid",            route: "/home" },
-  { id: "faults",    label: "Active Faults", icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
-  { id: "history",   label: "History",      icon: "clock",           route: "/history" },
-  { id: "tools",     label: "Tools",        icon: "sliders",         route: "/tools" },
-  { id: "settings",  label: "Settings",     icon: "settings",        route: "/settings" },
+  { id: "dashboard", labelKey: "nav.dashboard", icon: "grid",            route: "/home" },
+  { id: "faults",    labelKey: "nav.faults",    icon: "alert-triangle", route: "/faults", activeColor: "#DC2626" },
+  { id: "history",   labelKey: "nav.history",   icon: "clock",           route: "/history" },
+  { id: "tools",     labelKey: "nav.tools",     icon: "sliders",         route: "/tools" },
+  { id: "settings",  labelKey: "nav.settings",  icon: "settings",        route: "/settings" },
 ];
 
 type Props = { active?: BottomNavTab };
@@ -29,7 +30,10 @@ type Props = { active?: BottomNavTab };
 export default function BottomNav({ active }: Props) {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const bottomPad = Platform.OS === "web" ? 8 : insets.bottom > 0 ? insets.bottom : 8;
+  const orderedTabs = isRTL ? [...TABS].reverse() : TABS;
 
   const { data: faults } = useQuery<{ id: number; completed: boolean }[]>({
     queryKey: ["malfunctions-all"],
@@ -49,7 +53,7 @@ export default function BottomNav({ active }: Props) {
         },
       ]}
     >
-      {TABS.map((tab) => {
+      {orderedTabs.map((tab) => {
         const isActive = tab.id === active;
         const isFaultAlert = tab.id === "faults" && hasActiveFaults;
         const iconColor = isFaultAlert
@@ -82,7 +86,7 @@ export default function BottomNav({ active }: Props) {
                 isActive && styles.labelActive,
               ]}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </Text>
           </Pressable>
         );

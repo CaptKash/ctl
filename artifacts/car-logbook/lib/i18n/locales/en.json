@@ -198,6 +198,13 @@
       "nextInspection": "Next Inspection"
     }
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "faults": "Active Faults",
+    "history": "History",
+    "tools": "Tools",
+    "settings": "Settings"
+  },
   "fleetUpgrade": {
     "ctlFleetTitle": "CTL Fleet",
     "tagline": "Manage every vehicle without limits",
