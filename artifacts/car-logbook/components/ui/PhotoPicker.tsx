@@ -112,7 +112,7 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
   return (
     <View style={styles.wrapper}>
       <Text style={[styles.label, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("photoPicker.label")}</Text>
-      <View style={styles.grid}>
+      <View style={[styles.grid, isRTL && { flexDirection: "row-reverse" }]}>
         {photos.map((uri, i) => (
           <Pressable
             key={i}
