@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 
 type Props = {
@@ -22,6 +23,8 @@ type Props = {
 
 export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const [viewingUri, setViewingUri] = useState<string | null>(null);
 
   const pickImage = async (useCamera: boolean) => {
@@ -31,10 +34,10 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
 
     if (!permission.granted) {
       Alert.alert(
-        "Permission required",
+        t("photoPicker.permissionTitle"),
         useCamera
-          ? "Camera access is needed to take a photo."
-          : "Photo library access is needed to select a photo."
+          ? t("photoPicker.permissionCamera")
+          : t("photoPicker.permissionLibrary")
       );
       return;
     }
@@ -70,7 +73,11 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
     if (Platform.OS === "ios") {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ["Cancel", "Take Photo", "Choose from Library"],
+          options: [
+            t("photoPicker.cancel"),
+            t("photoPicker.takePhoto"),
+            t("photoPicker.chooseFromLibrary"),
+          ],
           cancelButtonIndex: 0,
         },
         (index) => {
@@ -79,19 +86,19 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
         }
       );
     } else {
-      Alert.alert("Add Photo", "Choose a source", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Take Photo", onPress: () => pickImage(true) },
-        { text: "Choose from Library", onPress: () => pickImage(false) },
+      Alert.alert(t("photoPicker.addPhoto"), t("photoPicker.chooseSource"), [
+        { text: t("photoPicker.cancel"), style: "cancel" },
+        { text: t("photoPicker.takePhoto"), onPress: () => pickImage(true) },
+        { text: t("photoPicker.chooseFromLibrary"), onPress: () => pickImage(false) },
       ]);
     }
   };
 
   const removePhoto = (index: number) => {
-    Alert.alert("Remove Photo", "Remove this photo?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("photoPicker.removeTitle"), t("photoPicker.removeConfirm"), [
+      { text: t("photoPicker.cancel"), style: "cancel" },
       {
-        text: "Remove",
+        text: t("photoPicker.remove"),
         style: "destructive",
         onPress: () => {
           const updated = [...photos];
@@ -104,7 +111,7 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
 
   return (
     <View style={styles.wrapper}>
-      <Text style={[styles.label, { color: C.textSecondary }]}>Photos</Text>
+      <Text style={[styles.label, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("photoPicker.label")}</Text>
       <View style={styles.grid}>
         {photos.map((uri, i) => (
           <Pressable
@@ -137,14 +144,14 @@ export function PhotoPicker({ photos, onChange, max = 6 }: Props) {
           >
             <Feather name="camera" size={22} color={C.textSecondary} />
             <Text style={[styles.addText, { color: C.textSecondary }]}>
-              {photos.length === 0 ? "Add Photo" : "Add"}
+              {photos.length === 0 ? t("photoPicker.addPhoto") : t("photoPicker.add")}
             </Text>
           </Pressable>
         )}
       </View>
       {photos.length > 0 && (
-        <Text style={[styles.hint, { color: C.textTertiary }]}>
-          Tap to view · Long-press to remove
+        <Text style={[styles.hint, { color: C.textTertiary, textAlign: isRTL ? "right" : "left" }]}>
+          {t("photoPicker.hint")}
         </Text>
       )}
 

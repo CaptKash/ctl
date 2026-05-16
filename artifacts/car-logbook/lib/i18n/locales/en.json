@@ -245,6 +245,22 @@
     "submit": "Add to Logbook",
     "error": "Failed to add car. Please try again."
   },
+  "photoPicker": {
+    "label": "Photos",
+    "addPhoto": "Add Photo",
+    "add": "Add",
+    "hint": "Tap to view · Long-press to remove",
+    "permissionTitle": "Permission required",
+    "permissionCamera": "Camera access is needed to take a photo.",
+    "permissionLibrary": "Photo library access is needed to select a photo.",
+    "cancel": "Cancel",
+    "takePhoto": "Take Photo",
+    "chooseFromLibrary": "Choose from Library",
+    "chooseSource": "Choose a source",
+    "removeTitle": "Remove Photo",
+    "removeConfirm": "Remove this photo?",
+    "remove": "Remove"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "faults": "Active Faults",
