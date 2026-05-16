@@ -198,6 +198,49 @@
       "nextInspection": "Next Inspection"
     }
   },
+  "addCar": {
+    "title": "Add Car",
+    "subtitle": "New vehicle",
+    "sections": {
+      "basic": "Basic Info",
+      "license": "License",
+      "photos": "Photos",
+      "notes": "Notes"
+    },
+    "fields": {
+      "nickname": "Nickname",
+      "nicknamePlaceholder": "e.g. The Beast, Old Faithful",
+      "make": "Make",
+      "makePlaceholder": "Select make…",
+      "model": "Model",
+      "modelPlaceholder": "Select model…",
+      "modelDisabledPlaceholder": "Select a make first",
+      "year": "Year",
+      "yearPlaceholder": "Select year…",
+      "color": "Color",
+      "colorPlaceholder": "e.g. Silver",
+      "mileage": "Current Mileage ({{unit}})",
+      "mileagePlaceholder": "e.g. 45000",
+      "plate": "Plate Number",
+      "platePlaceholder": "e.g. ABC 1234",
+      "validUntil": "Valid Until",
+      "expiryPlaceholder": "Select expiry date…",
+      "vin": "VIN",
+      "vinPlaceholder": "Vehicle Identification Number",
+      "insuredWith": "Insured With",
+      "insuredWithPlaceholder": "e.g. Allianz, AXA",
+      "insuredUntil": "Insured Until",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Any additional notes…"
+    },
+    "ev": {
+      "label": "Electric Vehicle",
+      "subOn": "EV — no fuel records",
+      "subOff": "Combustion or hybrid"
+    },
+    "submit": "Add to Logbook",
+    "error": "Failed to add car. Please try again."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "faults": "Active Faults",
