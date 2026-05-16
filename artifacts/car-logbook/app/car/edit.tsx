@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   Pressable,
   StyleSheet,
@@ -259,19 +258,7 @@ export default function EditCarScreen() {
                 <Feather name="zap" size={18} color="#064E3B" />
               </LinearGradient>
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                  <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle</Text>
-                  <Pressable
-                    onPress={() => Alert.alert(
-                      "Electric Vehicle",
-                      "Turn this on if your car is fully electric. EVs are hidden from the Fuel Log so you don't see irrelevant fuel entries. (Charging tracking is coming soon.)",
-                      [{ text: "Got it" }]
-                    )}
-                    hitSlop={8}
-                  >
-                    <Feather name="help-circle" size={15} color={C.textTertiary} />
-                  </Pressable>
-                </View>
+                <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle?</Text>
                 <Text style={[styles.toggleSub, { color: C.textSecondary }]}>
                   {isElectric ? "EV — no fuel records" : "Combustion or hybrid"}
                 </Text>

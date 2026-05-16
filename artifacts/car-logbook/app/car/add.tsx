@@ -2,7 +2,6 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   StyleSheet,
@@ -212,15 +211,7 @@ export default function AddCarScreen() {
                 <Feather name="zap" size={18} color="#064E3B" />
               </LinearGradient>
               <View style={{ flex: 1 }}>
-                <View style={[{ flexDirection: "row", alignItems: "center", gap: 6 }, isRTL && { flexDirection: "row-reverse" }]}>
-                  <Text style={[styles.toggleLabel, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.ev.label")}</Text>
-                  <Pressable
-                    onPress={() => Alert.alert(t("addCar.ev.helpTitle"), t("addCar.ev.helpBody"), [{ text: t("addCar.ev.helpClose") }])}
-                    hitSlop={8}
-                  >
-                    <Feather name="help-circle" size={15} color={C.textTertiary} />
-                  </Pressable>
-                </View>
+                <Text style={[styles.toggleLabel, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.ev.label")}?</Text>
                 <Text style={[styles.toggleSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
                   {isElectric ? t("addCar.ev.subOn") : t("addCar.ev.subOff")}
                 </Text>
