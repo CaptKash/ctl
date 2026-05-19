@@ -365,6 +365,8 @@ export default function EditCarScreen() {
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
+          variant="metallic-blue"
+          icon="check"
         />
       </KeyboardAwareScrollViewCompat>
       <BottomNav />
