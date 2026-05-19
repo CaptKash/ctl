@@ -245,6 +245,12 @@
     "submit": "Add to Logbook",
     "error": "Failed to add car. Please try again."
   },
+  "editCar": {
+    "title": "Edit Car",
+    "subtitle": "Update vehicle details",
+    "submit": "Save Changes",
+    "error": "Failed to save changes. Please try again."
+  },
   "carDetail": {
     "notFound": "Car not found",
     "events": {

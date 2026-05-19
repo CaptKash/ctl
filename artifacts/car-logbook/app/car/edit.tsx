@@ -26,6 +26,7 @@ import { apiGet, apiPut } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { Feather } from "@expo/vector-icons";
 import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
+import { useTranslation } from "react-i18next";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 1980 + 1 }, (_, i) =>
@@ -56,6 +57,8 @@ export default function EditCarScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const { unit } = useDistanceUnit();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -160,16 +163,22 @@ export default function EditCarScreen() {
   return (
     <SwipeBackView style={{ backgroundColor: C.backgroundSecondary }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="edit-2" size={22} color="#2563EB" />
-          </View>
+          <LinearGradient
+            colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#64748B" }]}
+          >
+            <Feather name="edit-2" size={22} color="#334155" />
+          </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Edit Car</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Update vehicle details</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("editCar.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("editCar.subtitle")}</Text>
           </View>
         </View>
       </View>
@@ -181,34 +190,34 @@ export default function EditCarScreen() {
       >
         {/* Basic Info */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Basic Info</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.basic")}</Text>
 
           <FormField
-            label="Nickname"
+            label={t("addCar.fields.nickname")}
             value={nickname}
             onChangeText={setNickname}
-            placeholder="e.g. The Beast, Old Faithful"
+            placeholder={t("addCar.fields.nicknamePlaceholder")}
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <SelectField
-            label="Make"
+            label={t("addCar.fields.make")}
             value={make}
             onSelect={handleMakeSelect}
             options={ALL_MAKES}
-            placeholder="Select make…"
+            placeholder={t("addCar.fields.makePlaceholder")}
             required
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <SelectField
-            label="Model"
+            label={t("addCar.fields.model")}
             value={model}
             onSelect={setModel}
             options={models}
-            placeholder={make ? "Select model…" : "Select a make first"}
+            placeholder={make ? t("addCar.fields.modelPlaceholder") : t("addCar.fields.modelDisabledPlaceholder")}
             disabled={!make}
             required
             allowCustom
@@ -216,8 +225,8 @@ export default function EditCarScreen() {
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
-          <View style={[styles.toggleRow, styles.toggleRowActive]}>
-            <View style={styles.toggleLeft}>
+          <View style={[styles.toggleRow, styles.toggleRowActive, isRTL && { flexDirection: "row-reverse" }]}>
+            <View style={[styles.toggleLeft, isRTL && { flexDirection: "row-reverse" }]}>
               <LinearGradient
                 colors={["#ECFDF5", "#34D399", "#047857"]}
                 locations={[0, 0.55, 1]}
@@ -228,9 +237,9 @@ export default function EditCarScreen() {
                 <Feather name="zap" size={18} color="#064E3B" />
               </LinearGradient>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.toggleLabel, { color: C.text }]}>Electric Vehicle?</Text>
-                <Text style={[styles.toggleSub, { color: C.textSecondary }]}>
-                  {isElectric ? "EV — no fuel records" : "Combustion or hybrid"}
+                <Text style={[styles.toggleLabel, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.ev.label")}</Text>
+                <Text style={[styles.toggleSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+                  {isElectric ? t("addCar.ev.subOn") : t("addCar.ev.subOff")}
                 </Text>
               </View>
             </View>
@@ -245,100 +254,100 @@ export default function EditCarScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <SelectField
-            label="Year"
+            label={t("addCar.fields.year")}
             value={year}
             onSelect={setYear}
             options={YEARS}
-            placeholder="Select year…"
+            placeholder={t("addCar.fields.yearPlaceholder")}
             required
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label="Color"
+            label={t("addCar.fields.color")}
             value={color}
             onChangeText={setColor}
-            placeholder="e.g. Silver"
+            placeholder={t("addCar.fields.colorPlaceholder")}
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label={`Current Mileage (${unit})`}
+            label={t("addCar.fields.mileage", { unit })}
             value={mileage}
             onChangeText={setMileage}
-            placeholder="e.g. 45000"
+            placeholder={t("addCar.fields.mileagePlaceholder")}
             keyboardType="number-pad"
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label="Plate Number"
+            label={t("addCar.fields.plate")}
             value={licensePlate}
             onChangeText={setLicensePlate}
-            placeholder="e.g. ABC 1234"
+            placeholder={t("addCar.fields.platePlaceholder")}
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label="VIN"
+            label={t("addCar.fields.vin")}
             value={vin}
             onChangeText={setVin}
-            placeholder="Vehicle Identification Number"
+            placeholder={t("addCar.fields.vinPlaceholder")}
             autoCapitalize="characters"
           />
         </View>
 
         {/* License */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>License</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.license")}</Text>
 
           <DatePickerField
-            label="Valid Until"
+            label={t("addCar.fields.validUntil")}
             value={licenseValidUntil}
             onChange={setLicenseValidUntil}
-            placeholder="Select expiry date…"
+            placeholder={t("addCar.fields.expiryPlaceholder")}
           />
         </View>
 
         {/* Insurance */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Insurance</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.insurance")}</Text>
 
           <FormField
-            label="Insured With"
+            label={t("addCar.fields.insuredWith")}
             value={insuredWith}
             onChangeText={setInsuredWith}
-            placeholder="e.g. Allianz, AXA"
+            placeholder={t("addCar.fields.insuredWithPlaceholder")}
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <DatePickerField
-            label="Insured Until"
+            label={t("addCar.fields.insuredUntil")}
             value={insuredUntil}
             onChange={setInsuredUntil}
-            placeholder="Select expiry date…"
+            placeholder={t("addCar.fields.expiryPlaceholder")}
           />
         </View>
 
         {/* Photos */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Photos</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.photos")}</Text>
           <PhotoPicker photos={photos} onChange={setPhotos} max={8} />
         </View>
 
         {/* Notes */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Notes</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.notes")}</Text>
           <FormField
-            label="Notes"
+            label={t("addCar.fields.notesLabel")}
             value={notes}
             onChangeText={setNotes}
-            placeholder="Any additional notes…"
+            placeholder={t("addCar.fields.notesPlaceholder")}
             multiline
           />
         </View>
@@ -346,13 +355,13 @@ export default function EditCarScreen() {
         {mutation.isError && (
           <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
             <Text style={[styles.errorText, { color: C.danger }]}>
-              Failed to save changes. Please try again.
+              {t("editCar.error")}
             </Text>
           </View>
         )}
 
         <PrimaryButton
-          label="Save Changes"
+          label={t("editCar.submit")}
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
