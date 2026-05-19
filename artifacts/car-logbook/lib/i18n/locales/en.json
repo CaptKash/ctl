@@ -270,7 +270,7 @@
   },
   "malfunction": {
     "title": "Log Fault",
-    "selectCar": "Select a vehicle",
+    "selectCar": "Select a car",
     "emptyTitle": "No vehicles yet",
     "emptySub": "Add a car first before reporting a fault.",
     "addCar": "Add Car",
