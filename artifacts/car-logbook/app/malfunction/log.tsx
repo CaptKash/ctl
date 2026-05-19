@@ -102,15 +102,6 @@ export default function MalfunctionLogScreen() {
           </View>
         </View>
 
-        {carName && (
-          <View style={[styles.carBanner, { backgroundColor: "#FEE2E2" }, isRTL && { flexDirection: "row-reverse" }]}>
-            <Feather name="alert-triangle" size={15} color="#DC2626" />
-            <Text style={[styles.carBannerText, { color: "#DC2626", textAlign }]} numberOfLines={1}>
-              {carName}
-            </Text>
-          </View>
-        )}
-
         <KeyboardAwareScrollViewCompat
           contentContainerStyle={[
             styles.form,
