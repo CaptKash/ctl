@@ -402,8 +402,13 @@ export default function CarDetailScreen() {
     <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
-          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1, flexDirection: isRTL ? "row-reverse" : "row" }]}
+            hitSlop={8}
+          >
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={20} color={C.text} />
+            <Text style={[styles.backText, { color: C.text }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
           </Pressable>
           {(() => {
             let firstPhoto: string | null = null;
@@ -707,7 +712,8 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   headerText: { flex: 1 },
-  backBtn: {},
+  backBtn: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
+  backText: { fontSize: 13, fontFamily: "Inter_500Medium" },
   carName: { fontSize: 17, fontFamily: "Inter_700Bold" },
   plate: { fontSize: 13, fontFamily: "Inter_500Medium" },
   headerActions: { flexDirection: "row", gap: 8 },

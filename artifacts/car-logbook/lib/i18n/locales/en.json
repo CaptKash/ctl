@@ -276,6 +276,7 @@
       "action": "Technical Log"
     },
     "addLog": "Add Log",
+    "backToFleet": "Back to My Fleet",
     "delete": {
       "title": "Delete Record",
       "message": "This record will be permanently deleted.",
