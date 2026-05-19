@@ -536,14 +536,14 @@ export default function CarDetailScreen() {
                 style={({ pressed }) => [styles.actionBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
                 <LinearGradient
-                  colors={["#FEE2E2", "#FCA5A5", "#F87171"]}
+                  colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
                   locations={[0, 0.55, 1]}
                   start={{ x: 0.15, y: 0 }}
                   end={{ x: 0.85, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#DC2626" }, isRTL && { flexDirection: "row-reverse" }]}
+                  style={[styles.actionBtn, { borderColor: "#312E81" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
-                  <Feather name="plus-circle" size={16} color="#7F1D1D" />
-                  <Text style={[styles.addLogText, { color: "#7F1D1D" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
+                  <Feather name="plus-circle" size={16} color="#312E81" />
+                  <Text style={[styles.addLogText, { color: "#312E81" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
                 </LinearGradient>
               </Pressable>
             </View>
