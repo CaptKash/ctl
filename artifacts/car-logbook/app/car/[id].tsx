@@ -433,11 +433,11 @@ export default function CarDetailScreen() {
               style={({ pressed }) => [styles.headerBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
             >
               <LinearGradient
-                colors={["#F1F5F9", "#E2E8F0", "#CBD5E1"]}
-                locations={[0, 0.5, 1]}
-                start={{ x: 0.2, y: 0 }}
-                end={{ x: 0.8, y: 1 }}
-                style={[styles.headerBtn, { borderWidth: 1, borderColor: "#94A3B8" }]}
+                colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0.15, y: 0 }}
+                end={{ x: 0.85, y: 1 }}
+                style={[styles.headerBtn, { borderWidth: 1, borderColor: "#64748B" }]}
               >
                 <Feather name="edit-2" size={16} color="#334155" />
               </LinearGradient>
