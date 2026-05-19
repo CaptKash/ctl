@@ -284,6 +284,44 @@
     "saving": "Saving...",
     "error": "Failed to save fault."
   },
+  "inspection": {
+    "titleSelect": "Log Repair / Inspection",
+    "titleInspection": "Log Inspection",
+    "titleRepair": "Log Repair",
+    "selectCar": "Select a car",
+    "emptyTitle": "No cars yet",
+    "emptySub": "Add a car first before logging an inspection.",
+    "addCar": "Add Car",
+    "prompt": "What would you like to log?",
+    "options": {
+      "repair": "Repair",
+      "inspection": "Inspection"
+    },
+    "descriptions": {
+      "repair": "Log a vehicle repair or maintenance service",
+      "inspection": "Log a formal vehicle inspection or roadworthiness check"
+    },
+    "section": "Inspection Details",
+    "fields": {
+      "date": "Date",
+      "center": "Inspection Center",
+      "results": "Results",
+      "cost": "Cost",
+      "nextDate": "Next Inspection Date"
+    },
+    "placeholders": {
+      "center": "e.g. City Inspection Centre",
+      "cost": "e.g. 75.00"
+    },
+    "results": {
+      "pass": "Pass",
+      "marginal": "Marginal",
+      "fail": "Fail"
+    },
+    "logFault": "Log a fault from this inspection",
+    "save": "Save Inspection",
+    "error": "Failed to save. Please check required fields and try again."
+  },
   "carDetail": {
     "notFound": "Car not found",
     "events": {

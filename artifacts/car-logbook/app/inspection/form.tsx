@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -29,17 +31,21 @@ type Car = {
   licensePlate?: string | null;
 };
 
+type ResultOption = "Pass" | "Marginal" | "Fail";
+
 export default function InspectionFormScreen() {
   const { carId: carIdParam } = useLocalSearchParams<{ carId: string }>();
   const carId = parseInt(carIdParam ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
   const qc = useQueryClient();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [place, setPlace] = useState("");
-  const [results, setResults] = useState("");
+  const [results, setResults] = useState<ResultOption | "">("");
   const [cost, setCost] = useState("");
   const [nextInspectionDate, setNextInspectionDate] = useState("");
 
@@ -67,22 +73,37 @@ export default function InspectionFormScreen() {
   });
 
   const car = carQuery.data;
-  const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : "Car";
+  const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : "";
   const canSubmit = date.trim().length > 0;
+  const textAlign = isRTL ? "right" : "left";
+
+  const resultOptions: { value: ResultOption; labelKey: string; color: string; bg: string }[] = [
+    { value: "Pass", labelKey: "inspection.results.pass", color: "#059669", bg: "#D1FAE5" },
+    { value: "Marginal", labelKey: "inspection.results.marginal", color: "#D97706", bg: "#FEF3C7" },
+    { value: "Fail", labelKey: "inspection.results.fail", color: "#DC2626", bg: "#FEE2E2" },
+  ];
 
   return (
     <SwipeBackView style={{ backgroundColor: C.backgroundSecondary }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#FEF3C7" }]}>
-            <Feather name="check-square" size={22} color="#D97706" />
-          </View>
+          <LinearGradient
+            colors={["#FEF3C7", "#FCD34D", "#D97706"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#92400E" }]}
+          >
+            <Feather name="clipboard" size={22} color="#78350F" />
+          </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Log Inspection</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carTitle}</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign }]}>{t("inspection.titleInspection")}</Text>
+            {carTitle ? (
+              <Text style={[styles.headerSub, { color: C.textSecondary, textAlign }]} numberOfLines={1}>{carTitle}</Text>
+            ) : null}
           </View>
         </View>
       </View>
@@ -93,42 +114,40 @@ export default function InspectionFormScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Inspection Details</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>{t("inspection.section")}</Text>
 
           <DatePickerField
-            label="Date"
+            label={t("inspection.fields.date")}
             value={date}
             onChange={setDate}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
-            label="Inspection Center"
+            label={t("inspection.fields.center")}
             value={place}
             onChangeText={setPlace}
-            placeholder="e.g. City Inspection Centre"
+            placeholder={t("inspection.placeholders.center")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <View style={styles.resultField}>
-            <Text style={[styles.resultLabel, { color: C.textSecondary }]}>Results</Text>
-            <View style={[styles.resultBtnRow, { borderColor: C.border }]}>
-              {(["Pass", "Marginal", "Fail"] as const).map((option, i) => {
-                const active = results === option;
-                const color = option === "Pass" ? "#059669" : option === "Marginal" ? "#D97706" : "#DC2626";
-                const bgActive = option === "Pass" ? "#D1FAE5" : option === "Marginal" ? "#FEF3C7" : "#FEE2E2";
+            <Text style={[styles.resultLabel, { color: C.textSecondary, textAlign }]}>{t("inspection.fields.results")}</Text>
+            <View style={[styles.resultBtnRow, { borderColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
+              {resultOptions.map((option, i) => {
+                const active = results === option.value;
                 return (
                   <Pressable
-                    key={option}
-                    onPress={() => { Haptics.selectionAsync(); setResults(active ? "" : option); }}
+                    key={option.value}
+                    onPress={() => { Haptics.selectionAsync(); setResults(active ? "" : option.value); }}
                     style={[
                       styles.resultBtn,
-                      { backgroundColor: active ? bgActive : C.backgroundSecondary },
+                      { backgroundColor: active ? option.bg : C.backgroundSecondary },
                       i === 0 && styles.resultBtnFirst,
                       i === 2 && styles.resultBtnLast,
                       i < 2 && { borderRightWidth: 1, borderRightColor: C.border },
                     ]}
                   >
-                    <Text style={[styles.resultBtnText, { color: active ? color : C.textSecondary, fontFamily: active ? "Inter_600SemiBold" : "Inter_400Regular" }]}>
-                      {option}
+                    <Text style={[styles.resultBtnText, { color: active ? option.color : C.textSecondary, fontFamily: active ? "Inter_600SemiBold" : "Inter_400Regular" }]}>
+                      {t(option.labelKey)}
                     </Text>
                   </Pressable>
                 );
@@ -144,24 +163,28 @@ export default function InspectionFormScreen() {
                   params: { carId: String(carId), carName: carQuery.data?.nickname ?? carQuery.data?.make ?? "" },
                 });
               }}
-              style={({ pressed }) => [styles.logFaultBtn, { opacity: pressed ? 0.8 : 1 }]}
+              style={({ pressed }) => [
+                styles.logFaultBtn,
+                isRTL && { flexDirection: "row-reverse" },
+                { opacity: pressed ? 0.8 : 1 },
+              ]}
             >
               <Feather name="alert-triangle" size={15} color="#DC2626" />
-              <Text style={styles.logFaultText}>Log a fault from this inspection</Text>
-              <Feather name="chevron-right" size={15} color="#DC2626" />
+              <Text style={[styles.logFaultText, { textAlign }]}>{t("inspection.logFault")}</Text>
+              <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={15} color="#DC2626" />
             </Pressable>
           )}
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <FormField
-            label="Cost"
+            label={t("inspection.fields.cost")}
             value={cost}
             onChangeText={setCost}
-            placeholder="e.g. 75.00"
+            placeholder={t("inspection.placeholders.cost")}
             keyboardType="decimal-pad"
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
           <DatePickerField
-            label="Next Inspection Date"
+            label={t("inspection.fields.nextDate")}
             value={nextInspectionDate}
             onChange={setNextInspectionDate}
           />
@@ -170,13 +193,15 @@ export default function InspectionFormScreen() {
         {mutation.isError && (
           <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
             <Text style={[styles.errorText, { color: C.danger }]}>
-              Failed to save. Please check required fields and try again.
+              {t("inspection.error")}
             </Text>
           </View>
         )}
 
         <PrimaryButton
-          label="Save Inspection"
+          variant="metallic-blue"
+          icon="check"
+          label={t("inspection.save")}
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
