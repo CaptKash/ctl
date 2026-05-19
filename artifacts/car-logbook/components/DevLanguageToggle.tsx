@@ -34,8 +34,8 @@ export function DevLanguageToggle() {
         style={({ pressed }) => [
           styles.pill,
           {
-            top: insets.top + 6,
-            right: 12,
+            bottom: insets.bottom + 80,
+            alignSelf: "center",
             opacity: pressed ? 0.7 : 0.92,
           },
         ]}
