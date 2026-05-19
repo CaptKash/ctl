@@ -136,7 +136,7 @@ export default function MalfunctionLogScreen() {
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10, textAlign }]}>{t("malfunction.sectionDashMsg")}</Text>
           <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border, minHeight: 0 }]}>
             <TextInput
-              style={[styles.singleInput, { color: C.text, textAlign: "left", writingDirection: "ltr" }]}
+              style={[styles.singleInput, { color: C.text, textAlign }]}
               placeholder={t("malfunction.placeholderDashMsg")}
               placeholderTextColor={C.textTertiary}
               value={customMessage}
