@@ -377,6 +377,7 @@
     },
     "logFault": "Log a fault from this inspection",
     "save": "Save Inspection",
+    "serviceSave": "Save Service Log",
     "error": "Failed to save. Please check required fields and try again."
   },
   "carDetail": {

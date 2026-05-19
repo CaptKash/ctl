@@ -638,7 +638,7 @@ export default function RepairServiceFormScreen() {
         <PrimaryButton
           variant="metallic-blue"
           icon="check"
-          label={t(mode === "repair" ? "carDetail.maintenanceForm.saveBtn" : "inspection.save")}
+          label={t(mode === "repair" ? "carDetail.maintenanceForm.saveBtn" : "inspection.serviceSave")}
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
