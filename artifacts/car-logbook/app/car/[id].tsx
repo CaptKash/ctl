@@ -542,7 +542,6 @@ export default function CarDetailScreen() {
                   end={{ x: 0.8, y: 1 }}
                   style={[styles.actionBtn, { borderColor: "#1E40AF" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
-                  <Feather name="plus-circle" size={16} color="#312E81" />
                   <Text style={[styles.addLogText, { color: "#312E81" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
                 </LinearGradient>
               </Pressable>
