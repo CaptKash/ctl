@@ -410,11 +410,11 @@
       "titleHeader": "تسجيل إصلاح / خدمة",
       "carFallback": "السيارة",
       "sections": {
-        "service": "الإصلاح",
+        "service": "الصيانة",
         "warranty": "الضمان",
         "cost": "التكلفة",
-        "shop": "ورشة الإصلاح",
-        "nextInspection": "الإصلاح القادم"
+        "shop": "ورشة الصيانة",
+        "nextInspection": "الصيانة القادمة"
       },
       "fields": {
         "date": "التاريخ",
