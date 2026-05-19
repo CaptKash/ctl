@@ -517,7 +517,7 @@ export default function CarDetailScreen() {
           <>
             <View style={[styles.actionRow, isRTL && { flexDirection: "row-reverse" }]}>
               <Pressable
-                onPress={() => { Haptics.selectionAsync(); router.back(); }}
+                onPress={() => { Haptics.selectionAsync(); router.push("/fleet" as any); }}
                 style={({ pressed }) => [
                   styles.actionBtn,
                   { backgroundColor: C.card, borderColor: C.border, opacity: pressed ? 0.85 : 1 },
