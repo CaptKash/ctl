@@ -526,7 +526,7 @@ export default function CarDetailScreen() {
                   locations={[0, 0.55, 1]}
                   start={{ x: 0.15, y: 0 }}
                   end={{ x: 0.85, y: 1 }}
-                  style={[styles.actionBtn, isRTL && { flexDirection: "row-reverse" }]}
+                  style={[styles.actionBtn, { borderColor: "#64748B" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
                   <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color="#334155" />
                   <Text style={[styles.addLogText, { color: "#334155" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
@@ -541,7 +541,7 @@ export default function CarDetailScreen() {
                   locations={[0, 0.55, 1]}
                   start={{ x: 0.15, y: 0 }}
                   end={{ x: 0.85, y: 1 }}
-                  style={[styles.actionBtn, isRTL && { flexDirection: "row-reverse" }]}
+                  style={[styles.actionBtn, { borderColor: "#7F1D1D" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
                   <Feather name="plus-circle" size={16} color="#FFFFFF" />
                   <Text style={[styles.addLogText, { color: "#FFFFFF" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
@@ -840,6 +840,8 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 12,
   },
   addLogText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
