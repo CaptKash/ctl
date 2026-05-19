@@ -256,7 +256,7 @@
     "subtitle": "Select an event type",
     "options": {
       "fault": "Fault / Breakdown / Damage",
-      "inspection": "Repair / Inspection",
+      "inspection": "Repair / Service",
       "renewal": "License / Insurance Renewal"
     },
     "comingSoonTitle": "Coming Soon",

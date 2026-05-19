@@ -264,7 +264,7 @@
     "subtitle": "اختر نوع الحدث",
     "options": {
       "fault": "خلل / تعطّل / ضرر",
-      "inspection": "إصلاح / فحص",
+      "inspection": "صيانة / متابعة دورية",
       "renewal": "تجديد الترخيص / التأمين"
     },
     "comingSoonTitle": "قريباً",
