@@ -74,7 +74,7 @@ export default function AddInspectionSelectCarScreen() {
             end={{ x: 0.85, y: 1 }}
             style={[styles.iconBox, { borderWidth: 1, borderColor: "#92400E" }]}
           >
-            <Feather name="tool" size={22} color="#78350F" />
+            <Feather name="clipboard" size={22} color="#78350F" />
           </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>

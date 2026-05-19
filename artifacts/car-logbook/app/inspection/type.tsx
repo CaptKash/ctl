@@ -271,7 +271,7 @@ export default function RepairServiceFormScreen() {
   const mutation = mode === "repair" ? repairMutation : inspectionMutation;
   const mutationError = mutation.isError;
 
-  const headerIcon = mode === "repair" ? "tool" : "clipboard";
+  const headerIcon = "clipboard";
   const headerTitle = t("inspection.titleSelect");
 
   const resultOptions: { value: ResultOption; labelKey: string; color: string; bg: string }[] = [
