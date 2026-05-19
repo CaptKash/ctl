@@ -349,7 +349,7 @@
     "prompt": "What would you like to log?",
     "options": {
       "repair": "Repair",
-      "inspection": "Inspection"
+      "inspection": "Service"
     },
     "descriptions": {
       "repair": "Log a vehicle repair or maintenance service",
