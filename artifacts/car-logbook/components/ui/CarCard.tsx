@@ -31,6 +31,7 @@ type Props = {
   onLogEvent?: () => void;
   accentBg?: string;
   accentIcon?: string;
+  accentBorder?: string;
 };
 
 const CAR_COLORS: Record<string, string> = {
@@ -63,7 +64,7 @@ function getFirstPhoto(photos?: string | null): string | null {
   }
 }
 
-export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Props) {
+export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accentBorder }: Props) {
   const C = useColors();
   const { i18n } = useTranslation();
   const brand = localizeBrand(car.make, i18n.language);
@@ -77,6 +78,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon }: Prop
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: C.card, opacity: pressed ? 0.92 : 1, shadowColor: C.shadow },
+        accentBorder ? { borderWidth: 1.5, borderColor: accentBorder } : null,
       ]}
     >
       {/* Thumbnail */}
