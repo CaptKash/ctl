@@ -364,12 +364,15 @@
       "inspection": "تسجيل فحص رسمي أو اختبار الصلاحية"
     },
     "section": "تفاصيل الفحص",
+    "serviceSection": "تفاصيل المتابعة",
     "fields": {
       "date": "التاريخ",
       "center": "مركز الفحص",
+      "serviceCenter": "مركز المتابعة",
       "results": "النتيجة",
       "cost": "التكلفة",
-      "nextDate": "تاريخ الفحص القادم"
+      "nextDate": "تاريخ الفحص القادم",
+      "nextServiceDate": "تاريخ المتابعة القادمة"
     },
     "placeholders": {
       "center": "مثال: مركز فحص المدينة",

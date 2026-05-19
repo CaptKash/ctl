@@ -356,12 +356,15 @@
       "inspection": "Log a formal vehicle inspection or roadworthiness check"
     },
     "section": "Inspection Details",
+    "serviceSection": "Service Details",
     "fields": {
       "date": "Date",
       "center": "Inspection Center",
+      "serviceCenter": "Service Center",
       "results": "Results",
       "cost": "Cost",
-      "nextDate": "Next Inspection Date"
+      "nextDate": "Next Inspection Date",
+      "nextServiceDate": "Next Service Date"
     },
     "placeholders": {
       "center": "e.g. City Inspection Centre",

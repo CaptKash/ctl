@@ -550,7 +550,7 @@ export default function RepairServiceFormScreen() {
           </>
         ) : (
           <View style={[styles.section, { backgroundColor: C.card }]}>
-            <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>{t("inspection.section")}</Text>
+            <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>{t("inspection.serviceSection")}</Text>
 
             <DatePickerField
               label={t("inspection.fields.date")}
@@ -559,7 +559,7 @@ export default function RepairServiceFormScreen() {
             />
             <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
             <FormField
-              label={t("inspection.fields.center")}
+              label={t("inspection.fields.serviceCenter")}
               value={place}
               onChangeText={setPlace}
               placeholder={t("inspection.placeholders.center")}
@@ -620,7 +620,7 @@ export default function RepairServiceFormScreen() {
             />
             <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
             <DatePickerField
-              label={t("inspection.fields.nextDate")}
+              label={t("inspection.fields.nextServiceDate")}
               value={inspNextDate}
               onChange={setInspNextDate}
             />
