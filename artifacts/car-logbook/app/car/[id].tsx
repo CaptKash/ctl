@@ -526,9 +526,8 @@ export default function CarDetailScreen() {
                   locations={[0, 0.55, 1]}
                   start={{ x: 0.15, y: 0 }}
                   end={{ x: 0.85, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#64748B" }, isRTL && { flexDirection: "row-reverse" }]}
+                  style={[styles.actionBtn, { borderColor: "#64748B" }]}
                 >
-                  <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color="#334155" />
                   <Text style={[styles.addLogText, { color: "#334155" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
                 </LinearGradient>
               </Pressable>
@@ -537,14 +536,14 @@ export default function CarDetailScreen() {
                 style={({ pressed }) => [styles.actionBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
                 <LinearGradient
-                  colors={["#FCA5A5", "#DC2626", "#7F1D1D"]}
+                  colors={["#FEE2E2", "#FCA5A5", "#F87171"]}
                   locations={[0, 0.55, 1]}
                   start={{ x: 0.15, y: 0 }}
                   end={{ x: 0.85, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#7F1D1D" }, isRTL && { flexDirection: "row-reverse" }]}
+                  style={[styles.actionBtn, { borderColor: "#DC2626" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
-                  <Feather name="plus-circle" size={16} color="#FFFFFF" />
-                  <Text style={[styles.addLogText, { color: "#FFFFFF" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
+                  <Feather name="plus-circle" size={16} color="#7F1D1D" />
+                  <Text style={[styles.addLogText, { color: "#7F1D1D" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
                 </LinearGradient>
               </Pressable>
             </View>
