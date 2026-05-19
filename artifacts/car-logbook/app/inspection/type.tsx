@@ -401,14 +401,18 @@ export default function RepairServiceFormScreen() {
                 ) : (
                   <Pressable
                     onPress={() => showPhotoPicker("warranty")}
-                    style={({ pressed }) => [
-                      styles.warrantyPhotoBtn,
-                      isRTL && { flexDirection: "row-reverse" },
-                      { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.backgroundSecondary },
-                    ]}
+                    style={({ pressed }) => [styles.photoBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
                   >
-                    <Feather name="camera" size={16} color={C.textSecondary} />
-                    <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>{t("carDetail.maintenanceForm.addPhotoWarranty")}</Text>
+                    <LinearGradient
+                      colors={["#FEF3C7", "#FCD34D", "#D97706"]}
+                      locations={[0, 0.55, 1]}
+                      start={{ x: 0.15, y: 0 }}
+                      end={{ x: 0.85, y: 1 }}
+                      style={[styles.photoBtn, isRTL && { flexDirection: "row-reverse" }, { borderColor: "#92400E" }]}
+                    >
+                      <Feather name="camera" size={16} color="#78350F" />
+                      <Text style={[styles.billPhotoBtnText, { color: "#78350F" }]}>{t("carDetail.maintenanceForm.addPhotoWarranty")}</Text>
+                    </LinearGradient>
                   </Pressable>
                 )}
               </View>
@@ -466,14 +470,18 @@ export default function RepairServiceFormScreen() {
               ) : (
                 <Pressable
                   onPress={() => showPhotoPicker("bill")}
-                  style={({ pressed }) => [
-                    styles.billPhotoBtn,
-                    isRTL && { flexDirection: "row-reverse" },
-                    { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.backgroundSecondary },
-                  ]}
+                  style={({ pressed }) => [styles.billPhotoBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
                 >
-                  <Feather name="camera" size={16} color={C.textSecondary} />
-                  <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>{t("carDetail.maintenanceForm.addPhotoBill")}</Text>
+                  <LinearGradient
+                    colors={["#FEF3C7", "#FCD34D", "#D97706"]}
+                    locations={[0, 0.55, 1]}
+                    start={{ x: 0.15, y: 0 }}
+                    end={{ x: 0.85, y: 1 }}
+                    style={[styles.photoBtn, isRTL && { flexDirection: "row-reverse" }, { borderColor: "#92400E" }]}
+                  >
+                    <Feather name="camera" size={16} color="#78350F" />
+                    <Text style={[styles.billPhotoBtnText, { color: "#78350F" }]}>{t("carDetail.maintenanceForm.addPhotoBill")}</Text>
+                  </LinearGradient>
                 </Pressable>
               )}
             </View>
@@ -701,19 +709,17 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   totalValue: { fontSize: 15, fontFamily: "Inter_700Bold" },
-  billPhotoBtn: {
+  billPhotoBtnWrap: {
     marginHorizontal: 16,
     marginBottom: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
     borderRadius: 10,
-    borderWidth: 1,
-    borderStyle: "dashed",
+    overflow: "hidden",
   },
-  warrantyPhotoBtn: {
+  photoBtnWrap: {
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  photoBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -721,7 +727,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 10,
     borderWidth: 1,
-    borderStyle: "dashed",
   },
   billPhotoBtnText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   billThumbRow: {
