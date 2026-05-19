@@ -20,7 +20,14 @@ import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiPost } from "@/hooks/useApi";
-import { DashboardIcon, DASHBOARD_LIGHTS, DASHBOARD_LIGHT_CATEGORIES } from "@/components/ui/DashboardLightIcons";
+import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
+
+const COLOR_GROUPS: { key: string; color: string; swatch: string }[] = [
+  { key: "red", color: "#FF1744", swatch: "#FF1744" },
+  { key: "yellow", color: "#FFE000", swatch: "#FFE000" },
+  { key: "blue", color: "#3B82F6", swatch: "#3B82F6" },
+  { key: "green", color: "#10B981", swatch: "#10B981" },
+];
 
 
 export default function MalfunctionLogScreen() {
@@ -140,12 +147,15 @@ export default function MalfunctionLogScreen() {
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10, textAlign }]}>{t("malfunction.sectionLights")}</Text>
           <Text style={[styles.sectionHint, { color: C.textTertiary, textAlign }]}>{t("malfunction.hintTapLights")}</Text>
           <View style={styles.lightGridBg}>
-            {DASHBOARD_LIGHT_CATEGORIES.map((cat) => {
-              const lights = DASHBOARD_LIGHTS.filter((l) => l.category === cat);
+            {COLOR_GROUPS.map((group) => {
+              const lights = DASHBOARD_LIGHTS.filter((l) => l.warningColor === group.color);
               if (lights.length === 0) return null;
               return (
-                <View key={cat} style={styles.categoryBlock}>
-                  <Text style={[styles.categoryLabel, { textAlign }]}>{t(`dashLightCategory.${cat}`)}</Text>
+                <View key={group.key} style={styles.categoryBlock}>
+                  <View style={[styles.categoryHeader, isRTL && { flexDirection: "row-reverse" }]}>
+                    <View style={[styles.colorSwatch, { backgroundColor: group.swatch }]} />
+                    <Text style={[styles.categoryLabel, { textAlign }]}>{t(`dashLightColor.${group.key}`)}</Text>
+                  </View>
                   <View style={[styles.lightWrap, isRTL && { flexDirection: "row-reverse" }]}>
                     {lights.map((light) => {
                       const selected = selectedLights.has(light.id);
@@ -261,14 +271,26 @@ const styles = StyleSheet.create({
   categoryBlock: {
     marginBottom: 14,
   },
-  categoryLabel: {
-    fontSize: 11,
-    fontFamily: "Inter_700Bold",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#E5E7EB",
+  categoryHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     marginBottom: 8,
     paddingHorizontal: 2,
+  },
+  colorSwatch: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
+  },
+  categoryLabel: {
+    flex: 1,
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.4,
+    color: "#E5E7EB",
   },
   lightWrap: {
     flexDirection: "row",

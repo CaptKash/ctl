@@ -291,6 +291,12 @@
     "hybridEv": "Hybrid / EV",
     "adas": "ADAS / Comfort"
   },
+  "dashLightColor": {
+    "red": "Red — Stop or service immediately",
+    "yellow": "Yellow — Caution, check soon",
+    "blue": "Blue — Information",
+    "green": "Green — System active"
+  },
   "dashLight": {
     "oil": "Oil Pressure",
     "temp": "Engine Temp",
