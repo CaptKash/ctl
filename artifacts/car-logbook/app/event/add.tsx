@@ -138,19 +138,11 @@ export default function AddEventScreen() {
               <Feather name={option.icon} size={34} color={option.iconColor} />
             </LinearGradient>
             <View style={styles.optionBody}>
-              <Text
-                style={[styles.optionTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}
-              >
+              <Text style={[styles.optionTitle, { color: C.text }]}>
                 {t(option.titleKey)}
               </Text>
             </View>
-            {option.available ? (
-              <Feather
-                name={isRTL ? "chevron-left" : "chevron-right"}
-                size={26}
-                color={C.textTertiary}
-              />
-            ) : (
+            {!option.available && (
               <View style={[styles.comingSoonBadge, { backgroundColor: C.backgroundTertiary }]}>
                 <Text style={[styles.comingSoonText, { color: C.textTertiary }]}>
                   {t("technicalLog.soon")}
@@ -179,29 +171,31 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
-  list: { flex: 1, padding: 16, gap: 14 },
+  list: { flex: 1, padding: 16, gap: 16, alignItems: "center", justifyContent: "center" },
   optionRow: {
-    flex: 1,
-    flexDirection: "row",
+    width: "72%",
+    aspectRatio: 1,
+    flexDirection: "column",
     alignItems: "center",
-    gap: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderRadius: 20,
+    justifyContent: "center",
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    borderRadius: 22,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 8,
     elevation: 3,
   },
   optionIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 18,
+    width: 78,
+    height: 78,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  optionBody: { flex: 1, gap: 3 },
-  optionTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  optionBody: { alignItems: "center", gap: 3 },
+  optionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", textAlign: "center" },
   comingSoonBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
