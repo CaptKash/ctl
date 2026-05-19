@@ -411,7 +411,7 @@
       "carFallback": "السيارة",
       "sections": {
         "service": "الصيانة",
-        "warranty": "الضمان",
+        "warranty": "الكفالة",
         "cost": "التكلفة",
         "shop": "ورشة الصيانة",
         "nextInspection": "الصيانة القادمة"
@@ -421,8 +421,8 @@
         "workDone": "وصف العمل المنجز",
         "type": "النوع",
         "description": "الوصف",
-        "warrantyPeriod": "مدة الضمان",
-        "warrantyDetails": "تفاصيل الضمان",
+        "warrantyPeriod": "مدة الكفالة",
+        "warrantyDetails": "تفاصيل الكفالة",
         "parts": "القطع",
         "labor": "الأجرة",
         "total": "الإجمالي",
@@ -437,14 +437,14 @@
         "descGeneric": "أضف أي ملاحظات أو تفاصيل حول هذه الخدمة…",
         "descOther": "صف الخدمة المُنفذة…",
         "warrantyPeriod": "مثال: 6 أشهر / 10,000 كم",
-        "warrantyDetails": "أي شروط أو ملاحظات بخصوص الضمان…",
+        "warrantyDetails": "أي شروط أو ملاحظات بخصوص الكفالة…",
         "amount": "0.00",
         "shopName": "مثال: ورشة المدينة للسيارات",
         "address": "مثال: شارع الملك فهد، الرياض",
         "phone": "مثال: 1234 000 555 966+"
       },
       "addPhotoBill": "إضافة صورة الفاتورة",
-      "addPhotoWarranty": "إضافة صورة الضمان",
+      "addPhotoWarranty": "إضافة صورة الكفالة",
       "tapToReplace": "انقر للاستبدال",
       "saveBtn": "حفظ سجل الإصلاح",
       "errorSave": "فشل الحفظ. يرجى التحقق من الحقول المطلوبة والمحاولة مرة أخرى."
@@ -469,7 +469,7 @@
       "save": "حفظ",
       "tapToEnlarge": "انقر للتكبير",
       "billPhoto": "صورة الفاتورة",
-      "warrantyPhoto": "صورة الضمان",
+      "warrantyPhoto": "صورة الكفالة",
       "saveDialogTitle": "حفظ الصورة"
     },
     "rows": {
@@ -479,8 +479,8 @@
       "phone": "الهاتف",
       "cost": "التكلفة",
       "partsReplaced": "القطع المستبدلة",
-      "warrantyPeriod": "مدة الضمان",
-      "warrantyDetails": "تفاصيل الضمان",
+      "warrantyPeriod": "مدة الكفالة",
+      "warrantyDetails": "تفاصيل الكفالة",
       "location": "الموقع",
       "requiredRepairs": "الإصلاحات المطلوبة",
       "nextInspection": "الفحص التالي"
