@@ -135,7 +135,7 @@ export default function AddEventScreen() {
               end={{ x: 0.85, y: 1 }}
               style={[styles.optionIcon, { borderWidth: 1, borderColor: option.border }]}
             >
-              <Feather name={option.icon} size={34} color={option.iconColor} />
+              <Feather name={option.icon} size={28} color={option.iconColor} />
             </LinearGradient>
             <View style={styles.optionBody}>
               <Text style={[styles.optionTitle, { color: C.text }]}>
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
 
   list: { flex: 1, padding: 16, gap: 16, alignItems: "center", justifyContent: "center" },
   optionRow: {
-    width: "72%",
+    width: "52%",
     aspectRatio: 1,
     flexDirection: "column",
     alignItems: "center",
@@ -188,14 +188,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   optionIcon: {
-    width: 78,
-    height: 78,
-    borderRadius: 20,
+    width: 58,
+    height: 58,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   optionBody: { alignItems: "center", gap: 3 },
-  optionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", textAlign: "center" },
+  optionTitle: { fontSize: 14, fontFamily: "Inter_700Bold", textAlign: "center" },
   comingSoonBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
