@@ -546,5 +546,40 @@
     "testTitle": "Test Purchase",
     "testBody": "You are in development mode. This will simulate purchasing {{label}} for {{price}} using the RevenueCat test store.",
     "confirmPurchase": "Confirm Purchase"
+  },
+  "renewal": {
+    "listTitle": "Log Renewal",
+    "listSub": "Select a vehicle",
+    "emptyTitle": "No vehicles yet",
+    "emptySub": "Add a car first before logging a renewal.",
+    "addCar": "Add Car",
+    "formTitle": "Log Renewal",
+    "typeSection": "Renewal Type",
+    "types": {
+      "license": "License",
+      "insurance": "Insurance"
+    },
+    "detailsSection": "Renewal Details",
+    "fields": {
+      "licenseValidUntil": "License Valid Until",
+      "insuranceValidUntil": "Insurance Valid Until",
+      "issuingAuthority": "Issuing Authority",
+      "insuranceProvider": "Insurance Provider",
+      "referenceNumber": "Reference / Sticker Number",
+      "policyNumber": "Policy Number",
+      "cost": "Cost",
+      "notes": "Notes"
+    },
+    "placeholders": {
+      "expiryDate": "Select expiry date…",
+      "authority": "e.g. City Transport Authority",
+      "provider": "e.g. Allianz, Aviva…",
+      "optional": "Optional",
+      "cost": "e.g. 120.00",
+      "notes": "Any additional notes…"
+    },
+    "saveLicense": "Save License Renewal",
+    "saveInsurance": "Save Insurance Renewal",
+    "errorSave": "Failed to save. Please try again."
   }
 }

@@ -554,5 +554,40 @@
     "testTitle": "شراء تجريبي",
     "testBody": "أنت في وضع التطوير. سيقوم هذا بمحاكاة شراء {{label}} مقابل {{price}} عبر متجر RevenueCat التجريبي.",
     "confirmPurchase": "تأكيد الشراء"
+  },
+  "renewal": {
+    "listTitle": "تسجيل تجديد",
+    "listSub": "اختر سيارة",
+    "emptyTitle": "لا توجد سيارات بعد",
+    "emptySub": "أضف سيارة أولاً قبل تسجيل التجديد.",
+    "addCar": "إضافة سيارة",
+    "formTitle": "تسجيل تجديد",
+    "typeSection": "نوع التجديد",
+    "types": {
+      "license": "الترخيص",
+      "insurance": "التأمين"
+    },
+    "detailsSection": "تفاصيل التجديد",
+    "fields": {
+      "licenseValidUntil": "الترخيص ساري حتى",
+      "insuranceValidUntil": "التأمين ساري حتى",
+      "issuingAuthority": "جهة الإصدار",
+      "insuranceProvider": "شركة التأمين",
+      "referenceNumber": "رقم المرجع / الملصق",
+      "policyNumber": "رقم الوثيقة",
+      "cost": "التكلفة",
+      "notes": "ملاحظات"
+    },
+    "placeholders": {
+      "expiryDate": "اختر تاريخ الانتهاء…",
+      "authority": "مثال: هيئة النقل",
+      "provider": "مثال: أليانز، أفيفا…",
+      "optional": "اختياري",
+      "cost": "مثال: 120.00",
+      "notes": "أي ملاحظات إضافية…"
+    },
+    "saveLicense": "حفظ تجديد الترخيص",
+    "saveInsurance": "حفظ تجديد التأمين",
+    "errorSave": "تعذّر الحفظ. يرجى المحاولة مرة أخرى."
   }
 }
