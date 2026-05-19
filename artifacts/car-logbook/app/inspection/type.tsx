@@ -313,7 +313,7 @@ export default function RepairServiceFormScreen() {
         <View style={[styles.pillRow, isRTL && { flexDirection: "row-reverse" }]}>
           {(["repair", "inspection"] as Mode[]).map((m) => {
             const active = mode === m;
-            const icon = m === "repair" ? "tool" : "clipboard";
+            const icon = m === "repair" ? "tool" : "activity";
             const label = t(m === "repair" ? "inspection.options.repair" : "inspection.options.inspection");
             const gradientColors = active
               ? (["#FEF3C7", "#FCD34D", "#D97706"] as const)
