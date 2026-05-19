@@ -528,7 +528,9 @@ export default function CarDetailScreen() {
                   end={{ x: 0.8, y: 1 }}
                   style={[styles.actionBtn, { borderColor: "#94A3B8" }]}
                 >
-                  <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color="#334155" style={isRTL ? styles.iconRight : styles.iconLeft} />
+                  <View style={[styles.iconCircle, { borderColor: "#334155" }, isRTL ? styles.iconRight : styles.iconLeft]}>
+                    <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={12} color="#334155" />
+                  </View>
                   <Text style={[styles.addLogText, { color: "#334155", textAlign: "center" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
                 </LinearGradient>
               </Pressable>
@@ -543,7 +545,9 @@ export default function CarDetailScreen() {
                   end={{ x: 0.8, y: 1 }}
                   style={[styles.actionBtn, { borderColor: "#1E40AF" }]}
                 >
-                  <Feather name="plus" size={16} color="#312E81" style={isRTL ? styles.iconRight : styles.iconLeft} />
+                  <View style={[styles.iconCircle, { borderColor: "#312E81" }, isRTL ? styles.iconRight : styles.iconLeft]}>
+                    <Feather name="plus" size={12} color="#312E81" />
+                  </View>
                   <Text style={[styles.addLogText, { color: "#312E81", textAlign: "center" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
                 </LinearGradient>
               </Pressable>
@@ -843,8 +847,16 @@ const styles = StyleSheet.create({
     height: 44,
   },
   addLogText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  iconLeft: { position: "absolute", left: 12, top: 13 },
-  iconRight: { position: "absolute", right: 12, top: 13 },
+  iconLeft: { position: "absolute", left: 10, top: 10 },
+  iconRight: { position: "absolute", right: 10, top: 10 },
+  iconCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
 
 const detailStyles = StyleSheet.create({
