@@ -251,6 +251,18 @@
     "submit": "Save Changes",
     "error": "Failed to save changes. Please try again."
   },
+  "technicalLog": {
+    "title": "Technical Log",
+    "subtitle": "Select an event type",
+    "options": {
+      "fault": "Fault / Breakdown / Damage",
+      "inspection": "Repair / Inspection",
+      "renewal": "License / Insurance Renewal"
+    },
+    "comingSoonTitle": "Coming Soon",
+    "comingSoonBody": "{{type}} logging will be available in a future update.",
+    "soon": "Soon"
+  },
   "carDetail": {
     "notFound": "Car not found",
     "events": {

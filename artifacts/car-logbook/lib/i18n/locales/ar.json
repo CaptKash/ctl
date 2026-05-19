@@ -259,6 +259,18 @@
     "submit": "حفظ التغييرات",
     "error": "تعذّر حفظ التغييرات. يرجى المحاولة مرة أخرى."
   },
+  "technicalLog": {
+    "title": "السجل الفني",
+    "subtitle": "اختر نوع الحدث",
+    "options": {
+      "fault": "عطل / تعطّل / ضرر",
+      "inspection": "إصلاح / فحص",
+      "renewal": "تجديد الترخيص / التأمين"
+    },
+    "comingSoonTitle": "قريباً",
+    "comingSoonBody": "ستتاح إضافة {{type}} في تحديث قادم.",
+    "soon": "قريباً"
+  },
   "carDetail": {
     "notFound": "لم يتم العثور على السيارة",
     "events": {

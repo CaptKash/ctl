@@ -12,16 +12,17 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 
 type EventOption = {
-  id: string;
-  title: string;
-  description: string;
+  id: "malfunction" | "inspection" | "registration";
+  titleKey: string;
   icon: keyof typeof Feather.glyphMap;
-  iconBg: string;
+  gradient: readonly [string, string, string];
+  border: string;
   iconColor: string;
   available: boolean;
 };
@@ -29,29 +30,29 @@ type EventOption = {
 const eventOptions: EventOption[] = [
   {
     id: "malfunction",
-    title: "Fault / Breakdown / Damage",
-    description: "",
+    titleKey: "technicalLog.options.fault",
     icon: "alert-triangle",
-    iconBg: "#FEE2E2",
-    iconColor: "#DC2626",
+    gradient: ["#FEE2E2", "#FCA5A5", "#DC2626"],
+    border: "#991B1B",
+    iconColor: "#7F1D1D",
     available: true,
   },
   {
     id: "inspection",
-    title: "Repair / Inspection",
-    description: "",
+    titleKey: "technicalLog.options.inspection",
     icon: "clipboard",
-    iconBg: "#FEF3C7",
-    iconColor: "#D97706",
+    gradient: ["#FEF3C7", "#FCD34D", "#D97706"],
+    border: "#92400E",
+    iconColor: "#78350F",
     available: true,
   },
   {
     id: "registration",
-    title: "License / Insurance Renewal",
-    description: "",
+    titleKey: "technicalLog.options.renewal",
     icon: "refresh-cw",
-    iconBg: "#CCFBF1",
-    iconColor: "#0D9488",
+    gradient: ["#CCFBF1", "#5EEAD4", "#0D9488"],
+    border: "#115E59",
+    iconColor: "#134E4A",
     available: true,
   },
 ];
@@ -59,13 +60,18 @@ const eventOptions: EventOption[] = [
 export default function AddEventScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId } = useLocalSearchParams<{ carId?: string }>();
 
   const handleSelect = (option: EventOption) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (!option.available) {
-      Alert.alert("Coming Soon", `${option.title} logging will be available in a future update.`);
+      Alert.alert(
+        t("technicalLog.comingSoonTitle"),
+        t("technicalLog.comingSoonBody", { type: t(option.titleKey) }),
+      );
       return;
     }
     const params = carId ? { carId } : {};
@@ -81,22 +87,26 @@ export default function AddEventScreen() {
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           <LinearGradient
-            colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
+            colors={["#DBEAFE", "#BFDBFE", "#93C5FD"]}
             locations={[0, 0.55, 1]}
             start={{ x: 0.15, y: 0 }}
             end={{ x: 0.85, y: 1 }}
-            style={[styles.iconBox, styles.iconBoxMetallicBlue]}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#1E40AF" }]}
           >
             <Feather name="book-open" size={22} color="#312E81" />
           </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Technical Log</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Select an event type</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
+              {t("technicalLog.title")}
+            </Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("technicalLog.subtitle")}
+            </Text>
           </View>
         </View>
       </View>
@@ -108,6 +118,7 @@ export default function AddEventScreen() {
             onPress={() => handleSelect(option)}
             style={({ pressed }) => [
               styles.optionRow,
+              isRTL && { flexDirection: "row-reverse" },
               {
                 backgroundColor: C.card,
                 shadowColor: C.shadow,
@@ -117,22 +128,33 @@ export default function AddEventScreen() {
               },
             ]}
           >
-            <View style={[styles.optionIcon, { backgroundColor: option.iconBg }]}>
+            <LinearGradient
+              colors={option.gradient}
+              locations={[0, 0.55, 1]}
+              start={{ x: 0.15, y: 0 }}
+              end={{ x: 0.85, y: 1 }}
+              style={[styles.optionIcon, { borderWidth: 1, borderColor: option.border }]}
+            >
               <Feather name={option.icon} size={24} color={option.iconColor} />
-            </View>
+            </LinearGradient>
             <View style={styles.optionBody}>
-              <Text style={[styles.optionTitle, { color: C.text }]}>{option.title}</Text>
-              {option.description ? (
-                <Text style={[styles.optionDesc, { color: C.textSecondary }]}>
-                  {option.description}
-                </Text>
-              ) : null}
+              <Text
+                style={[styles.optionTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}
+              >
+                {t(option.titleKey)}
+              </Text>
             </View>
             {option.available ? (
-              <Feather name="chevron-right" size={20} color={C.textTertiary} />
+              <Feather
+                name={isRTL ? "chevron-left" : "chevron-right"}
+                size={20}
+                color={C.textTertiary}
+              />
             ) : (
               <View style={[styles.comingSoonBadge, { backgroundColor: C.backgroundTertiary }]}>
-                <Text style={[styles.comingSoonText, { color: C.textTertiary }]}>Soon</Text>
+                <Text style={[styles.comingSoonText, { color: C.textTertiary }]}>
+                  {t("technicalLog.soon")}
+                </Text>
               </View>
             )}
           </Pressable>
@@ -152,28 +174,10 @@ const styles = StyleSheet.create({
   },
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-  iconBoxMetallicBlue: {
-    borderWidth: 1,
-    borderColor: "#312E81",
-    shadowColor: "#1E3A8A",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.25,
-    shadowRadius: 2,
-  },
   headerText: { flex: 1 },
   backBtn: {},
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
-
-  instruction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    margin: 16,
-    padding: 12,
-    borderRadius: 10,
-  },
-  instructionText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
 
   list: { flex: 1, padding: 16, gap: 12 },
   optionRow: {
@@ -196,14 +200,6 @@ const styles = StyleSheet.create({
   },
   optionBody: { flex: 1, gap: 3 },
   optionTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
-  optionDesc: { fontSize: 13, fontFamily: "Inter_400Regular" },
-  goBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   comingSoonBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
