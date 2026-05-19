@@ -513,17 +513,6 @@ export default function CarDetailScreen() {
       >
         {isLoading ? (
           <ActivityIndicator color={C.tint} style={{ marginTop: 24 }} />
-        ) : events.length === 0 ? (
-          <EmptyState
-            icon="clock"
-            title={t("carDetail.empty.title")}
-            description={t("carDetail.empty.description")}
-            actionLabel={t("carDetail.empty.action")}
-            onAction={() => router.push({ pathname: "/event/add", params: { carId: String(carId) } })}
-            btnColor="#FEE2E2"
-            btnTextColor="#DC2626"
-            btnIcon="plus-circle"
-          />
         ) : (
           <>
             <View style={[styles.actionRow, isRTL && { flexDirection: "row-reverse" }]}>
@@ -550,7 +539,15 @@ export default function CarDetailScreen() {
                 <Text style={[styles.addLogText, { color: "#DC2626" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
               </Pressable>
             </View>
-            {events.map(renderEvent)}
+            {events.length === 0 ? (
+              <EmptyState
+                icon="clock"
+                title={t("carDetail.empty.title")}
+                description={t("carDetail.empty.description")}
+              />
+            ) : (
+              events.map(renderEvent)
+            )}
           </>
         )}
       </ScrollView>
