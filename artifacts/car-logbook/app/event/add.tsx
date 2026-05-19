@@ -20,6 +20,7 @@ import { SwipeBackView } from "@/components/ui/SwipeBackView";
 type EventOption = {
   id: "malfunction" | "inspection" | "registration";
   titleKey: string;
+  descKey: string;
   icon: keyof typeof Feather.glyphMap;
   gradient: readonly [string, string, string];
   border: string;
@@ -31,6 +32,7 @@ const eventOptions: EventOption[] = [
   {
     id: "malfunction",
     titleKey: "technicalLog.options.fault",
+    descKey: "technicalLog.descriptions.fault",
     icon: "alert-triangle",
     gradient: ["#FEE2E2", "#FCA5A5", "#DC2626"],
     border: "#991B1B",
@@ -40,6 +42,7 @@ const eventOptions: EventOption[] = [
   {
     id: "inspection",
     titleKey: "technicalLog.options.inspection",
+    descKey: "technicalLog.descriptions.inspection",
     icon: "clipboard",
     gradient: ["#FEF3C7", "#FCD34D", "#D97706"],
     border: "#92400E",
@@ -49,6 +52,7 @@ const eventOptions: EventOption[] = [
   {
     id: "registration",
     titleKey: "technicalLog.options.renewal",
+    descKey: "technicalLog.descriptions.renewal",
     icon: "refresh-cw",
     gradient: ["#CCFBF1", "#5EEAD4", "#0D9488"],
     border: "#115E59",
@@ -138,11 +142,23 @@ export default function AddEventScreen() {
               <Feather name={option.icon} size={28} color={option.iconColor} />
             </LinearGradient>
             <View style={styles.optionBody}>
-              <Text style={[styles.optionTitle, { color: C.text }]}>
+              <Text style={[styles.optionTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
                 {t(option.titleKey)}
               </Text>
+              <Text
+                style={[styles.optionDesc, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}
+                numberOfLines={2}
+              >
+                {t(option.descKey)}
+              </Text>
             </View>
-            {!option.available && (
+            {option.available ? (
+              <Feather
+                name={isRTL ? "chevron-left" : "chevron-right"}
+                size={22}
+                color={C.textTertiary}
+              />
+            ) : (
               <View style={[styles.comingSoonBadge, { backgroundColor: C.backgroundTertiary }]}>
                 <Text style={[styles.comingSoonText, { color: C.textTertiary }]}>
                   {t("technicalLog.soon")}
@@ -171,31 +187,30 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
-  list: { flex: 1, padding: 16, gap: 16, alignItems: "center", justifyContent: "center" },
+  list: { padding: 16, gap: 12 },
   optionRow: {
-    width: "52%",
-    aspectRatio: 1,
-    flexDirection: "column",
+    minHeight: 96,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 14,
+    gap: 16,
     paddingHorizontal: 16,
-    paddingVertical: 18,
-    borderRadius: 22,
-    shadowOffset: { width: 0, height: 3 },
+    paddingVertical: 16,
+    borderRadius: 18,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 6,
+    elevation: 2,
   },
   optionIcon: {
-    width: 58,
-    height: 58,
+    width: 64,
+    height: 64,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  optionBody: { alignItems: "center", gap: 3 },
-  optionTitle: { fontSize: 14, fontFamily: "Inter_700Bold", textAlign: "center" },
+  optionBody: { flex: 1, gap: 4 },
+  optionTitle: { fontSize: 16, fontFamily: "Inter_700Bold" },
+  optionDesc: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
   comingSoonBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,

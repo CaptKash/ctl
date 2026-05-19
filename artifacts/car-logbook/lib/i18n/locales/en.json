@@ -259,6 +259,11 @@
       "inspection": "Repair / Service",
       "renewal": "License / Insurance Renewal"
     },
+    "descriptions": {
+      "fault": "Log a fault, breakdown or damage",
+      "inspection": "Log a repair or scheduled service",
+      "renewal": "Update license or insurance dates"
+    },
     "comingSoonTitle": "Coming Soon",
     "comingSoonBody": "{{type}} logging will be available in a future update.",
     "soon": "Soon"
