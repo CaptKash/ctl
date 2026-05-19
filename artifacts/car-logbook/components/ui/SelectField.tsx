@@ -153,13 +153,14 @@ export function SelectField({
                   activeOpacity={0.6}
                   style={[
                     styles.option,
+                    isRTL && { flexDirection: "row-reverse" },
                     {
                       backgroundColor: item === value ? C.infoLight : C.backgroundSecondary,
                       borderBottomColor: C.borderLight,
                     },
                   ]}
                 >
-                  <Text style={[styles.optionText, { color: item === value ? C.tint : C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>
+                  <Text style={[styles.optionText, { flex: 1, color: item === value ? C.tint : C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>
                     {labelOf(item)}
                   </Text>
                   {item === value && <Feather name="check" size={16} color={C.tint} />}

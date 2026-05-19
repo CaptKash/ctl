@@ -110,6 +110,7 @@ export default function SelectPickerScreen() {
               style={[
                 styles.optionText,
                 {
+                  flex: 1,
                   color: item === value ? C.tint : C.text,
                   textAlign: isRTL ? "right" : "left",
                   writingDirection: isRTL ? "rtl" : "ltr",
