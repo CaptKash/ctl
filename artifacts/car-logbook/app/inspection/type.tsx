@@ -86,6 +86,51 @@ const MAINTENANCE_TYPES = [
   "Other",
 ];
 
+const MAINTENANCE_TYPE_LABELS_AR: Record<string, string> = {
+  "AC / Air Conditioning Repair": "إصلاح المكيف",
+  "Air Filter Replacement": "تغيير فلتر الهواء",
+  "Alternator Replacement": "تغيير الدينمو",
+  "Battery Replacement": "تغيير البطارية",
+  "Belt & Hose Replacement": "تغيير السيور والخراطيم",
+  "Bodywork Repair": "إصلاح هيكل السيارة",
+  "Brake Fluid Flush": "تغيير زيت الفرامل",
+  "Brake Pad Replacement": "تغيير تيل الفرامل",
+  "Brake Repair": "إصلاح الفرامل",
+  "Clutch Repair / Replacement": "إصلاح / تغيير الكلتش",
+  "Coolant Flush": "تغيير سائل التبريد",
+  "CV Joint Replacement": "تغيير عكس الإكسات",
+  "Diagnosis / Fault Scan": "تشخيص / فحص الأعطال",
+  "Electrical Fault Repair": "إصلاح الأعطال الكهربائية",
+  "Engine Repair / Overhaul": "إصلاح / عمرة المحرك",
+  "Exhaust Repair / Replacement": "إصلاح / تغيير الإكزوز",
+  "Fuel Filter Replacement": "تغيير فلتر الوقود",
+  "Fuel Pump Replacement": "تغيير طرمبة البنزين",
+  "Fuel System Service": "صيانة نظام الوقود",
+  "Gearbox / Transmission Repair": "إصلاح الجيربوكس",
+  "General Service": "صيانة عامة",
+  "Headlight Replacement": "تغيير المصابيح الأمامية",
+  "Ignition System Repair": "إصلاح نظام الإشعال",
+  "Oil Change": "تغيير الزيت",
+  "Power Steering Repair": "إصلاح الدركسيون",
+  "Radiator Repair / Replacement": "إصلاح / تغيير الردياتير",
+  "Repair": "إصلاح",
+  "Shock Absorber Replacement": "تغيير المساعدات",
+  "Spark Plug Replacement": "تغيير البواجي",
+  "Starter Motor Replacement": "تغيير السلف",
+  "Steering Rack Repair": "إصلاح علبة الدركسيون",
+  "Suspension Repair": "إصلاح نظام التعليق",
+  "Thermostat Replacement": "تغيير الثرموستات",
+  "Timing Belt / Chain Replacement": "تغيير سير / جنزير التوقيت",
+  "Tyre Repair": "إصلاح الإطارات",
+  "Tyre Replacement": "تغيير الإطارات",
+  "Tyre Rotation": "تدوير الإطارات",
+  "Water Pump Replacement": "تغيير طرمبة المياه",
+  "Wheel Alignment": "ضبط زوايا العجلات",
+  "Wheel Balancing": "توازن العجلات",
+  "Windscreen Repair / Replacement": "إصلاح / تغيير الزجاج الأمامي",
+  "Other": "أخرى",
+};
+
 export default function RepairServiceFormScreen() {
   const { carId: carIdParam } = useLocalSearchParams<{ carId: string }>();
   const carId = parseInt(carIdParam ?? "0");
@@ -319,6 +364,7 @@ export default function RepairServiceFormScreen() {
                   value={type}
                   onSelect={setType}
                   options={MAINTENANCE_TYPES}
+                  optionLabels={isRTL ? MAINTENANCE_TYPE_LABELS_AR : undefined}
                   placeholder={t("carDetail.maintenanceForm.placeholders.type")}
                   required
                 />

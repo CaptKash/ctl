@@ -20,14 +20,18 @@ const ITEM_HEIGHT = 52;
 export default function SelectPickerScreen() {
   const C = useColors();
   const insets = useSafeAreaInsets();
-  const { label, options, value } = getPickerState();
+  const { label, options, value, optionLabels } = getPickerState();
   const [search, setSearch] = useState("");
   const listRef = useRef<FlatList>(null);
+
+  const labelOf = (o: string) => optionLabels?.[o] ?? o;
 
   const filtered = useMemo(() => {
     if (!search.trim()) return options;
     const q = search.trim().toLowerCase();
-    return options.filter((o) => o.toLowerCase().includes(q));
+    return options.filter(
+      (o) => o.toLowerCase().includes(q) || labelOf(o).toLowerCase().includes(q),
+    );
   }, [options, search]);
 
   useEffect(() => {
@@ -99,7 +103,7 @@ export default function SelectPickerScreen() {
             ]}
           >
             <Text style={[styles.optionText, { color: item === value ? C.tint : C.text }]}>
-              {item}
+              {labelOf(item)}
             </Text>
             {item === value && <Feather name="check" size={16} color={C.tint} />}
           </TouchableOpacity>

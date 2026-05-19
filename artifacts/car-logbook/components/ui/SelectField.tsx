@@ -22,6 +22,7 @@ type Props = {
   value: string;
   onSelect: (value: string) => void;
   options: string[];
+  optionLabels?: Record<string, string>;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -33,6 +34,7 @@ export function SelectField({
   value,
   onSelect,
   options,
+  optionLabels,
   placeholder = "Select…",
   required,
   disabled,
@@ -45,11 +47,15 @@ export function SelectField({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
+  const labelOf = (o: string) => optionLabels?.[o] ?? o;
+
   const filtered = useMemo(() => {
     if (!search.trim()) return options;
     const q = search.trim().toLowerCase();
-    return options.filter((o) => o.toLowerCase().includes(q));
-  }, [options, search]);
+    return options.filter(
+      (o) => o.toLowerCase().includes(q) || labelOf(o).toLowerCase().includes(q),
+    );
+  }, [options, search, optionLabels]);
 
   const handleOpen = () => {
     if (disabled) return;
@@ -57,7 +63,7 @@ export function SelectField({
       Keyboard.dismiss();
       registerPicker(label, options, value, (selected) => {
         onSelect(selected);
-      });
+      }, optionLabels);
       router.push("/select-picker");
     } else {
       setOpen(true);
@@ -97,7 +103,7 @@ export function SelectField({
             ]}
             numberOfLines={1}
           >
-            {value || placeholder}
+            {value ? labelOf(value) : placeholder}
           </Text>
           <Feather name="chevron-down" size={17} color={C.textSecondary} />
         </TouchableOpacity>
@@ -153,8 +159,8 @@ export function SelectField({
                     },
                   ]}
                 >
-                  <Text style={[styles.optionText, { color: item === value ? C.tint : C.text }]}>
-                    {item}
+                  <Text style={[styles.optionText, { color: item === value ? C.tint : C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>
+                    {labelOf(item)}
                   </Text>
                   {item === value && <Feather name="check" size={16} color={C.tint} />}
                 </TouchableOpacity>
