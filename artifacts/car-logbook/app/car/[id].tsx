@@ -526,8 +526,9 @@ export default function CarDetailScreen() {
                   locations={[0, 0.5, 1]}
                   start={{ x: 0.2, y: 0 }}
                   end={{ x: 0.8, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#94A3B8" }]}
+                  style={[styles.actionBtn, { borderColor: "#94A3B8" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
+                  <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color="#334155" />
                   <Text style={[styles.addLogText, { color: "#334155" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
                 </LinearGradient>
               </Pressable>
@@ -542,6 +543,7 @@ export default function CarDetailScreen() {
                   end={{ x: 0.8, y: 1 }}
                   style={[styles.actionBtn, { borderColor: "#1E40AF" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
+                  <Feather name="plus-circle" size={16} color="#312E81" />
                   <Text style={[styles.addLogText, { color: "#312E81" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
                 </LinearGradient>
               </Pressable>
