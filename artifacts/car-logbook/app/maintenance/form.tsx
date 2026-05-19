@@ -228,7 +228,7 @@ export default function MaintenanceFormScreen() {
   });
 
   const car = carQuery.data;
-  const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : "";
+  const carTitle = car ? car.nickname ?? car.make ?? "" : "";
   const canSubmit = fromFault
     ? correctiveAction.trim().length > 0
     : type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
