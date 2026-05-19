@@ -285,7 +285,7 @@
     "sectionDescribe": "وصف المشكلة",
     "placeholderDescribe": "صف الخلل بكلماتك الخاصة...",
     "sectionDashMsg": "رسالة لوحة العدادات",
-    "placeholderDashMsg": "مثال: ضغط زيت المحرك منخفض...",
+    "placeholderDashMsg": "مثال: Engine oil pressure low...",
     "sectionLights": "أضواء التحذير في لوحة العدادات",
     "hintTapLights": "اضغط على أي ضوء مُفعَّل",
     "save": "حفظ الخلل",
