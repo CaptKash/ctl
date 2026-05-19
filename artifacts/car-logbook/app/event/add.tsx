@@ -135,7 +135,7 @@ export default function AddEventScreen() {
               end={{ x: 0.85, y: 1 }}
               style={[styles.optionIcon, { borderWidth: 1, borderColor: option.border }]}
             >
-              <Feather name={option.icon} size={24} color={option.iconColor} />
+              <Feather name={option.icon} size={34} color={option.iconColor} />
             </LinearGradient>
             <View style={styles.optionBody}>
               <Text
@@ -147,7 +147,7 @@ export default function AddEventScreen() {
             {option.available ? (
               <Feather
                 name={isRTL ? "chevron-left" : "chevron-right"}
-                size={20}
+                size={26}
                 color={C.textTertiary}
               />
             ) : (
@@ -179,27 +179,29 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
-  list: { flex: 1, padding: 16, gap: 12 },
+  list: { flex: 1, padding: 16, gap: 14 },
   optionRow: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    padding: 16,
-    borderRadius: 16,
-    shadowOffset: { width: 0, height: 2 },
+    gap: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderRadius: 20,
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   optionIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
+    width: 72,
+    height: 72,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
   optionBody: { flex: 1, gap: 3 },
-  optionTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
+  optionTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
   comingSoonBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
