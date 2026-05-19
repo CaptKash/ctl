@@ -270,6 +270,11 @@ export default function RepairServiceFormScreen() {
             const active = mode === m;
             const icon = m === "repair" ? "tool" : "clipboard";
             const label = t(m === "repair" ? "inspection.options.repair" : "inspection.options.inspection");
+            const gradientColors = active
+              ? (["#FEF3C7", "#FCD34D", "#D97706"] as const)
+              : (["#F8FAFC", "#E2E8F0", "#CBD5E1"] as const);
+            const borderColor = active ? "#92400E" : "#94A3B8";
+            const fg = active ? "#78350F" : "#475569";
             return (
               <Pressable
                 key={m}
@@ -279,15 +284,18 @@ export default function RepairServiceFormScreen() {
                   inspectionMutation.reset();
                   setMode(m);
                 }}
-                style={[
-                  styles.pillBtn,
-                  active
-                    ? { backgroundColor: "#FEF3C7", borderColor: "#D97706" }
-                    : { backgroundColor: C.card, borderColor: C.border },
-                ]}
+                style={({ pressed }) => [styles.pillWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
-                <Feather name={icon} size={18} color={active ? "#92400E" : C.textSecondary} />
-                <Text style={[styles.pillText, { color: active ? "#92400E" : C.textSecondary }]}>{label}</Text>
+                <LinearGradient
+                  colors={gradientColors}
+                  locations={[0, 0.55, 1]}
+                  start={{ x: 0.15, y: 0 }}
+                  end={{ x: 0.85, y: 1 }}
+                  style={[styles.pillBtn, { borderColor }, isRTL && { flexDirection: "row-reverse" }]}
+                >
+                  <Feather name={icon} size={18} color={fg} />
+                  <Text style={[styles.pillText, { color: fg }]}>{label}</Text>
+                </LinearGradient>
               </Pressable>
             );
           })}
@@ -602,8 +610,12 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
   form: { padding: 20, gap: 16 },
   pillRow: { flexDirection: "row", gap: 10 },
-  pillBtn: {
+  pillWrap: {
     flex: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  pillBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
