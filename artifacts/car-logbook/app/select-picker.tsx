@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { getPickerState, resolvePickerSelection } from "@/components/ui/selectPickerStore";
@@ -20,6 +21,8 @@ const ITEM_HEIGHT = 52;
 export default function SelectPickerScreen() {
   const C = useColors();
   const insets = useSafeAreaInsets();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { label, options, value, optionLabels } = getPickerState();
   const [search, setSearch] = useState("");
   const listRef = useRef<FlatList>(null);
@@ -96,13 +99,23 @@ export default function SelectPickerScreen() {
             activeOpacity={0.6}
             style={[
               styles.option,
+              isRTL && { flexDirection: "row-reverse" },
               {
                 backgroundColor: item === value ? C.infoLight : C.backgroundSecondary,
                 borderBottomColor: C.borderLight,
               },
             ]}
           >
-            <Text style={[styles.optionText, { color: item === value ? C.tint : C.text }]}>
+            <Text
+              style={[
+                styles.optionText,
+                {
+                  color: item === value ? C.tint : C.text,
+                  textAlign: isRTL ? "right" : "left",
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                },
+              ]}
+            >
               {labelOf(item)}
             </Text>
             {item === value && <Feather name="check" size={16} color={C.tint} />}
