@@ -77,3 +77,4 @@ Bundle these together to minimize EAS credit usage:
 2. Bug fixes from week-1 feedback (license-renewal delete/edit, car-registration crash, Geely EX2)
 3. **CTL Enterprise** — new tier, details TBD with user
 4. **Arabic language + RTL support**
+5. **AI Fault Analyst (CTL Fleet flagship feature, Build 30/31)** — After a user saves a fault, a Fleet-gated "Analyze with AI" button on the fault detail screen calls a server endpoint that returns: plain-language explanation (EN/AR), severity (drive / drive carefully / pull over), top 3 likely causes ranked for that make/model/year/mileage, DIY pre-checks, Gulf-market repair cost range, and questions to ask the mechanic. Cached per-fault. Same pattern later extends to inspection results, renewal reminders, and a fleet-wide health dashboard. Free tier keeps manual entry only — no AI message generator (weak value). Gate via existing `fleet` RC entitlement → existing paywall route.
