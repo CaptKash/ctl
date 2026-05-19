@@ -841,6 +841,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 12,
+    height: 44,
   },
   addLogText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
