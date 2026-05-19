@@ -51,9 +51,7 @@ export default function InspectionTypePickerScreen() {
     enabled: Boolean(carId),
   });
 
-  const carTitle = car
-    ? car.nickname ?? `${car.year} ${car.make} ${car.model}`
-    : "";
+  const carTitle = car ? `${car.year} ${car.make} ${car.model}` : "";
 
   const options: Option[] = [
     {
