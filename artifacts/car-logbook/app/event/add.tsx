@@ -92,11 +92,11 @@ export default function AddEventScreen() {
             <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           <LinearGradient
-            colors={["#DBEAFE", "#BFDBFE", "#93C5FD"]}
+            colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
             locations={[0, 0.55, 1]}
             start={{ x: 0.15, y: 0 }}
             end={{ x: 0.85, y: 1 }}
-            style={[styles.iconBox, { borderWidth: 1, borderColor: "#1E40AF" }]}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#312E81" }]}
           >
             <Feather name="book-open" size={22} color="#312E81" />
           </LinearGradient>
