@@ -309,6 +309,8 @@ export default function AddCarScreen() {
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
+          variant="metallic-blue"
+          icon="plus"
         />
       </KeyboardAwareScrollViewCompat>
       <BottomNav />
