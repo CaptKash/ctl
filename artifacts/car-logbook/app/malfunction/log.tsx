@@ -20,7 +20,7 @@ import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiPost } from "@/hooks/useApi";
-import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
+import { DashboardIcon, DASHBOARD_LIGHTS, DASHBOARD_LIGHT_CATEGORIES } from "@/components/ui/DashboardLightIcons";
 
 
 export default function MalfunctionLogScreen() {
@@ -55,7 +55,10 @@ export default function MalfunctionLogScreen() {
       .map((l) => l.id);
     const dashboardMessage = selectedIds.length > 0 ? selectedIds.join(",") : null;
     const finalDescription = description.trim() ||
-      selectedIds.map((id) => DASHBOARD_LIGHTS.find((l) => l.id === id)?.label).filter(Boolean).join(", ") ||
+      selectedIds.map((id) => {
+        const light = DASHBOARD_LIGHTS.find((l) => l.id === id);
+        return light ? t(light.labelKey) : null;
+      }).filter(Boolean).join(", ") ||
       customMessage.trim();
     try {
       await apiPost(`/cars/${carId}/malfunctions`, {
@@ -137,35 +140,38 @@ export default function MalfunctionLogScreen() {
           <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10, textAlign }]}>{t("malfunction.sectionLights")}</Text>
           <Text style={[styles.sectionHint, { color: C.textTertiary, textAlign }]}>{t("malfunction.hintTapLights")}</Text>
           <View style={styles.lightGridBg}>
-          {(() => {
-            const sorted = [
-              ...DASHBOARD_LIGHTS.filter((l) => l.warningColor === "#FF1744"),
-              ...DASHBOARD_LIGHTS.filter((l) => l.warningColor !== "#FF1744"),
-            ];
-            const rows = [sorted.slice(0, 6), sorted.slice(6)];
-            return rows.map((row, rowIdx) => (
-              <View key={rowIdx} style={[styles.lightGrid, rowIdx === 0 && { marginBottom: 12 }]}>
-                {row.map((light) => {
-                  const selected = selectedLights.has(light.id);
-                  return (
-                    <Pressable
-                      key={light.id}
-                      onPress={() => toggleLight(light.id)}
-                      style={({ pressed }) => [{
-                        opacity: pressed ? 0.5 : selected ? 1 : 0.75,
-                        borderRadius: 30,
-                        borderWidth: selected ? 2 : 0,
-                        borderColor: "#D1D5DB",
-                        padding: selected ? 3 : 5,
-                      }]}
-                    >
-                      <DashboardIcon id={light.id} color={light.warningColor} size={42} />
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ));
-          })()}
+            {DASHBOARD_LIGHT_CATEGORIES.map((cat) => {
+              const lights = DASHBOARD_LIGHTS.filter((l) => l.category === cat);
+              if (lights.length === 0) return null;
+              return (
+                <View key={cat} style={styles.categoryBlock}>
+                  <Text style={[styles.categoryLabel, { textAlign }]}>{t(`dashLightCategory.${cat}`)}</Text>
+                  <View style={[styles.lightWrap, isRTL && { flexDirection: "row-reverse" }]}>
+                    {lights.map((light) => {
+                      const selected = selectedLights.has(light.id);
+                      return (
+                        <Pressable
+                          key={light.id}
+                          onPress={() => toggleLight(light.id)}
+                          style={({ pressed }) => [styles.lightCell, {
+                            opacity: pressed ? 0.55 : 1,
+                            borderColor: selected ? "#93C5FD" : "transparent",
+                            backgroundColor: selected ? "rgba(147,197,253,0.18)" : "transparent",
+                          }]}
+                        >
+                          <View style={styles.lightIconWrap}>
+                            <DashboardIcon id={light.id} color={light.warningColor} size={32} />
+                          </View>
+                          <Text numberOfLines={2} style={styles.lightLabel}>
+                            {t(light.labelKey)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              );
+            })}
           </View>
 
           <View style={{ marginTop: 20 }}>
@@ -247,16 +253,48 @@ const styles = StyleSheet.create({
   lightGridBg: {
     backgroundColor: "#4B5563",
     borderRadius: 16,
-    padding: 16,
+    padding: 14,
     marginTop: 8,
     marginBottom: 4,
   },
 
-  lightGrid: {
+  categoryBlock: {
+    marginBottom: 14,
+  },
+  categoryLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    color: "#E5E7EB",
+    marginBottom: 8,
+    paddingHorizontal: 2,
+  },
+  lightWrap: {
     flexDirection: "row",
-    flexWrap: "nowrap",
-    gap: 10,
-    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  lightCell: {
+    width: 72,
     alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 2,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  lightIconWrap: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lightLabel: {
+    fontSize: 9.5,
+    fontFamily: "Inter_500Medium",
+    color: "#E5E7EB",
+    marginTop: 4,
+    textAlign: "center",
+    lineHeight: 11,
   },
 });

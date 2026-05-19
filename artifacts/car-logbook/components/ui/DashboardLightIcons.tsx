@@ -1,4 +1,5 @@
 import React from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Svg, {
   Path,
   Circle,
@@ -8,25 +9,74 @@ import Svg, {
   Text as SvgText,
 } from "react-native-svg";
 
+export type DashboardLightCategory =
+  | "critical"
+  | "general"
+  | "diesel"
+  | "hybridEv"
+  | "adas";
+
 export interface DashboardLightConfig {
   id: string;
   label: string;
+  labelKey: string;
   warningColor: string;
+  category: DashboardLightCategory;
+  mci?: keyof typeof MaterialCommunityIcons.glyphMap;
 }
 
+export const DASHBOARD_LIGHT_CATEGORIES: DashboardLightCategory[] = [
+  "critical",
+  "general",
+  "diesel",
+  "hybridEv",
+  "adas",
+];
+
 export const DASHBOARD_LIGHTS: DashboardLightConfig[] = [
-  { id: "checkEngine", label: "Check Engine", warningColor: "#FFE000" },
-  { id: "oil", label: "Oil Pressure", warningColor: "#FF1744" },
-  { id: "battery", label: "Battery", warningColor: "#FFE000" },
-  { id: "temp", label: "Engine Temp", warningColor: "#FF1744" },
-  { id: "abs", label: "ABS", warningColor: "#FFE000" },
-  { id: "airbag", label: "Airbag / SRS", warningColor: "#FFE000" },
-  { id: "brake", label: "Brake System", warningColor: "#FF1744" },
-  { id: "tpms", label: "Tyre Pressure", warningColor: "#FFE000" },
-  { id: "fuel", label: "Fuel Low", warningColor: "#FFE000" },
-  { id: "service", label: "Service Due", warningColor: "#FFE000" },
-  { id: "stability", label: "Stability / ESP", warningColor: "#FFE000" },
-  { id: "steering", label: "Power Steering", warningColor: "#FFE000" },
+  { id: "oil", label: "Oil Pressure", labelKey: "dashLight.oil", warningColor: "#FF1744", category: "critical" },
+  { id: "temp", label: "Engine Temp", labelKey: "dashLight.temp", warningColor: "#FF1744", category: "critical" },
+  { id: "brake", label: "Brake System", labelKey: "dashLight.brake", warningColor: "#FF1744", category: "critical" },
+  { id: "coolant", label: "Coolant Level", labelKey: "dashLight.coolant", warningColor: "#FF1744", category: "critical", mci: "car-coolant-level" },
+  { id: "engineFault", label: "Engine Fault Stop", labelKey: "dashLight.engineFault", warningColor: "#FF1744", category: "critical", mci: "engine-off" },
+  { id: "seatbelt", label: "Seatbelt", labelKey: "dashLight.seatbelt", warningColor: "#FF1744", category: "critical", mci: "seatbelt" },
+  { id: "doorOpen", label: "Door Open", labelKey: "dashLight.doorOpen", warningColor: "#FF1744", category: "critical", mci: "car-door" },
+  { id: "trunk", label: "Boot / Trunk Open", labelKey: "dashLight.trunk", warningColor: "#FF1744", category: "critical", mci: "car-back" },
+
+  { id: "checkEngine", label: "Check Engine", labelKey: "dashLight.checkEngine", warningColor: "#FFE000", category: "general" },
+  { id: "battery", label: "Battery", labelKey: "dashLight.battery", warningColor: "#FFE000", category: "general" },
+  { id: "abs", label: "ABS", labelKey: "dashLight.abs", warningColor: "#FFE000", category: "general" },
+  { id: "airbag", label: "Airbag / SRS", labelKey: "dashLight.airbag", warningColor: "#FFE000", category: "general" },
+  { id: "tpms", label: "Tyre Pressure", labelKey: "dashLight.tpms", warningColor: "#FFE000", category: "general" },
+  { id: "fuel", label: "Fuel Low", labelKey: "dashLight.fuel", warningColor: "#FFE000", category: "general" },
+  { id: "service", label: "Service Due", labelKey: "dashLight.service", warningColor: "#FFE000", category: "general" },
+  { id: "stability", label: "Stability / ESP", labelKey: "dashLight.stability", warningColor: "#FFE000", category: "general" },
+  { id: "steering", label: "Power Steering", labelKey: "dashLight.steering", warningColor: "#FFE000", category: "general" },
+  { id: "washerFluid", label: "Washer Fluid", labelKey: "dashLight.washerFluid", warningColor: "#FFE000", category: "general", mci: "wiper-wash" },
+  { id: "brakeFluid", label: "Brake Fluid", labelKey: "dashLight.brakeFluid", warningColor: "#FFE000", category: "general", mci: "car-brake-fluid-level" },
+  { id: "brakePad", label: "Brake Pad Wear", labelKey: "dashLight.brakePad", warningColor: "#FFE000", category: "general", mci: "car-brake-worn-linings" },
+  { id: "lampOut", label: "Lamp Failure", labelKey: "dashLight.lampOut", warningColor: "#FFE000", category: "general", mci: "lightbulb-alert" },
+  { id: "tractionControl", label: "Traction Control", labelKey: "dashLight.tractionControl", warningColor: "#FFE000", category: "general", mci: "car-traction-control" },
+  { id: "parkingBrake", label: "Parking Brake", labelKey: "dashLight.parkingBrake", warningColor: "#FFE000", category: "general", mci: "car-brake-parking" },
+  { id: "keyFob", label: "Key Battery Low", labelKey: "dashLight.keyFob", warningColor: "#FFE000", category: "general", mci: "key-alert" },
+  { id: "transmission", label: "Transmission", labelKey: "dashLight.transmission", warningColor: "#FFE000", category: "general", mci: "car-shift-pattern" },
+  { id: "frost", label: "Frost / Ice", labelKey: "dashLight.frost", warningColor: "#3B82F6", category: "general", mci: "snowflake-alert" },
+
+  { id: "dpf", label: "DPF (Particulate Filter)", labelKey: "dashLight.dpf", warningColor: "#FFE000", category: "diesel", mci: "air-filter" },
+  { id: "adblue", label: "AdBlue / DEF", labelKey: "dashLight.adblue", warningColor: "#3B82F6", category: "diesel", mci: "water" },
+  { id: "glowPlug", label: "Glow Plug Preheat", labelKey: "dashLight.glowPlug", warningColor: "#FFE000", category: "diesel", mci: "flash" },
+  { id: "waterInFuel", label: "Water in Fuel", labelKey: "dashLight.waterInFuel", warningColor: "#FFE000", category: "diesel", mci: "water-alert" },
+
+  { id: "hybridSystem", label: "Hybrid System", labelKey: "dashLight.hybridSystem", warningColor: "#FFE000", category: "hybridEv", mci: "car-electric" },
+  { id: "evCharge", label: "EV Charging", labelKey: "dashLight.evCharge", warningColor: "#10B981", category: "hybridEv", mci: "ev-station" },
+  { id: "evBattery", label: "HV Battery", labelKey: "dashLight.evBattery", warningColor: "#FF1744", category: "hybridEv", mci: "battery-alert-variant-outline" },
+  { id: "regen", label: "Regen Brake", labelKey: "dashLight.regen", warningColor: "#FFE000", category: "hybridEv", mci: "car-brake-retarder" },
+
+  { id: "cruiseControl", label: "Cruise Control", labelKey: "dashLight.cruiseControl", warningColor: "#10B981", category: "adas", mci: "car-cruise-control" },
+  { id: "laneDeparture", label: "Lane Departure", labelKey: "dashLight.laneDeparture", warningColor: "#FFE000", category: "adas", mci: "car-arrow-left" },
+  { id: "parkingSensor", label: "Parking Sensor", labelKey: "dashLight.parkingSensor", warningColor: "#FFE000", category: "adas", mci: "parking" },
+  { id: "blindSpot", label: "Blind Spot", labelKey: "dashLight.blindSpot", warningColor: "#FFE000", category: "adas", mci: "car-side" },
+  { id: "headlightAuto", label: "Auto Headlights", labelKey: "dashLight.headlightAuto", warningColor: "#10B981", category: "adas", mci: "car-light-high" },
 ];
 
 const SW = 1.0;
@@ -259,6 +309,11 @@ interface DashboardIconProps {
 }
 
 export function DashboardIcon({ id, color, size = 28 }: DashboardIconProps) {
+  const light = DASHBOARD_LIGHTS.find((l) => l.id === id);
+  if (!light) return null;
+  if (light.mci) {
+    return <MaterialCommunityIcons name={light.mci} color={color} size={size} />;
+  }
   const Component = ICON_MAP[id];
   if (!Component) return null;
   return <Component color={color} size={size} />;
