@@ -29,6 +29,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { BrandLogo } from "@/components/BrandLogo";
+import { LinearGradient } from "expo-linear-gradient";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
@@ -518,25 +519,33 @@ export default function CarDetailScreen() {
             <View style={[styles.actionRow, isRTL && { flexDirection: "row-reverse" }]}>
               <Pressable
                 onPress={() => { Haptics.selectionAsync(); router.push("/fleet" as any); }}
-                style={({ pressed }) => [
-                  styles.actionBtn,
-                  { backgroundColor: C.card, borderColor: C.border, opacity: pressed ? 0.85 : 1 },
-                  isRTL && { flexDirection: "row-reverse" },
-                ]}
+                style={({ pressed }) => [styles.actionBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
-                <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color={C.text} />
-                <Text style={[styles.addLogText, { color: C.text }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
+                <LinearGradient
+                  colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+                  locations={[0, 0.55, 1]}
+                  start={{ x: 0.15, y: 0 }}
+                  end={{ x: 0.85, y: 1 }}
+                  style={[styles.actionBtn, isRTL && { flexDirection: "row-reverse" }]}
+                >
+                  <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color="#334155" />
+                  <Text style={[styles.addLogText, { color: "#334155" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
+                </LinearGradient>
               </Pressable>
               <Pressable
                 onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/event/add", params: { carId: String(carId) } }); }}
-                style={({ pressed }) => [
-                  styles.actionBtn,
-                  { backgroundColor: "#FEE2E2", opacity: pressed ? 0.85 : 1 },
-                  isRTL && { flexDirection: "row-reverse" },
-                ]}
+                style={({ pressed }) => [styles.actionBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
-                <Feather name="plus-circle" size={16} color="#DC2626" />
-                <Text style={[styles.addLogText, { color: "#DC2626" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
+                <LinearGradient
+                  colors={["#FCA5A5", "#DC2626", "#7F1D1D"]}
+                  locations={[0, 0.55, 1]}
+                  start={{ x: 0.15, y: 0 }}
+                  end={{ x: 0.85, y: 1 }}
+                  style={[styles.actionBtn, isRTL && { flexDirection: "row-reverse" }]}
+                >
+                  <Feather name="plus-circle" size={16} color="#FFFFFF" />
+                  <Text style={[styles.addLogText, { color: "#FFFFFF" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
+                </LinearGradient>
               </Pressable>
             </View>
             {events.length === 0 ? (
@@ -819,17 +828,18 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
-  actionBtn: {
+  actionBtnWrap: {
     flex: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  actionBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 8,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "transparent",
   },
   addLogText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
