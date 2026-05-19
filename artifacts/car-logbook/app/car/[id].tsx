@@ -402,13 +402,8 @@ export default function CarDetailScreen() {
     <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
-          <Pressable
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1, flexDirection: isRTL ? "row-reverse" : "row" }]}
-            hitSlop={8}
-          >
-            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={20} color={C.text} />
-            <Text style={[styles.backText, { color: C.text }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           {(() => {
             let firstPhoto: string | null = null;
@@ -534,17 +529,30 @@ export default function CarDetailScreen() {
           />
         ) : (
           <>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/event/add", params: { carId: String(carId) } }); }}
-              style={({ pressed }) => [
-                styles.addLogBtn,
-                { backgroundColor: "#FEE2E2", opacity: pressed ? 0.85 : 1 },
-                isRTL && { flexDirection: "row-reverse" },
-              ]}
-            >
-              <Feather name="plus-circle" size={16} color="#DC2626" />
-              <Text style={[styles.addLogText, { color: "#DC2626" }]}>{t("carDetail.addLog")}</Text>
-            </Pressable>
+            <View style={[styles.actionRow, isRTL && { flexDirection: "row-reverse" }]}>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); router.back(); }}
+                style={({ pressed }) => [
+                  styles.actionBtn,
+                  { backgroundColor: C.card, borderColor: C.border, opacity: pressed ? 0.85 : 1 },
+                  isRTL && { flexDirection: "row-reverse" },
+                ]}
+              >
+                <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color={C.text} />
+                <Text style={[styles.addLogText, { color: C.text }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/event/add", params: { carId: String(carId) } }); }}
+                style={({ pressed }) => [
+                  styles.actionBtn,
+                  { backgroundColor: "#FEE2E2", opacity: pressed ? 0.85 : 1 },
+                  isRTL && { flexDirection: "row-reverse" },
+                ]}
+              >
+                <Feather name="plus-circle" size={16} color="#DC2626" />
+                <Text style={[styles.addLogText, { color: "#DC2626" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
+              </Pressable>
+            </View>
             {events.map(renderEvent)}
           </>
         )}
@@ -712,8 +720,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   headerText: { flex: 1 },
-  backBtn: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
-  backText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  backBtn: {},
   carName: { fontSize: 17, fontFamily: "Inter_700Bold" },
   plate: { fontSize: 13, fontFamily: "Inter_500Medium" },
   headerActions: { flexDirection: "row", gap: 8 },
@@ -813,16 +820,24 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   photoBadgeText: { fontSize: 11, fontFamily: "Inter_500Medium" },
-  addLogBtn: {
+  actionRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
+  actionBtn: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 12,
-    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "transparent",
   },
-  addLogText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  addLogText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
 
 const detailStyles = StyleSheet.create({
