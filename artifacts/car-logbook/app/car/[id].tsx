@@ -462,19 +462,19 @@ export default function CarDetailScreen() {
             {/* Row 1: Car info pills */}
             <View style={[styles.statsRow, isRTL && { flexDirection: "row-reverse" }]}>
               {car.mileage != null && (
-                <View style={[styles.infoPill, { marginEnd: 16 }, isRTL && { flexDirection: "row-reverse" }]}>
+                <View style={[styles.infoPill, isRTL ? { marginLeft: 16, flexDirection: "row-reverse" } : { marginRight: 16 }]}>
                   <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{isRTL ? `${t("carDetail.fields.odometer")} (${unit})  ` : `${unit} `}</Text>
                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.mileage.toLocaleString()}</Text>
                 </View>
               )}
               {car.licensePlate && (
-                <View style={[styles.infoPill, { marginEnd: 16 }, isRTL && { flexDirection: "row-reverse" }]}>
+                <View style={[styles.infoPill, isRTL ? { marginLeft: 16, flexDirection: "row-reverse" } : { marginRight: 16 }]}>
                   <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{t("carDetail.fields.plate")}{isRTL ? "  " : " "}</Text>
                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.licensePlate}</Text>
                 </View>
               )}
               {car.color && (
-                <View style={[styles.infoPill, { marginEnd: 16 }, isRTL && { flexDirection: "row-reverse" }]}>
+                <View style={[styles.infoPill, isRTL ? { marginLeft: 16, flexDirection: "row-reverse" } : { marginRight: 16 }]}>
                   <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{t("carDetail.fields.color")}{isRTL ? "  " : " "}</Text>
                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.color}</Text>
                 </View>
@@ -490,7 +490,7 @@ export default function CarDetailScreen() {
             {hasExpiry && (
               <View style={[styles.statsRow, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
                 {car.licenseValidUntil && (
-                  <View style={[styles.expiryPill, { marginEnd: 20 }, isRTL && { flexDirection: "row-reverse" }]}>
+                  <View style={[styles.expiryPill, isRTL ? { marginLeft: 20, flexDirection: "row-reverse" } : { marginRight: 20 }]}>
                     <View style={[styles.expiryDot, { backgroundColor: expiryColor(car.licenseValidUntil) }]} />
                     <Text style={[styles.pillLabel, { color: C.textSecondary, marginHorizontal: 5 }]}>{t("carDetail.fields.license")}{isRTL ? "  " : " "}</Text>
                     <Text style={[styles.expiryValue, { color: expiryColor(car.licenseValidUntil) }]} numberOfLines={1}>{formatDate(car.licenseValidUntil)}</Text>
