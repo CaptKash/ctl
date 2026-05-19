@@ -463,7 +463,7 @@ export default function CarDetailScreen() {
             <View style={[styles.statsRow, isRTL && { flexDirection: "row-reverse" }]}>
               {car.mileage != null && (
                 <View style={[styles.infoPill, { marginEnd: 16 }, isRTL && { flexDirection: "row-reverse" }]}>
-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{unit} </Text>
+                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{isRTL ? `${t("carDetail.fields.odometer")} (${unit}) ` : `${unit} `}</Text>
                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.mileage.toLocaleString()}</Text>
                 </View>
               )}

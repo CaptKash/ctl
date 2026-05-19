@@ -261,6 +261,7 @@
       "inspection": "فحص"
     },
     "fields": {
+      "odometer": "العداد",
       "plate": "اللوحة",
       "color": "اللون",
       "vin": "رقم الهيكل",

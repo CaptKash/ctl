@@ -253,6 +253,7 @@
       "inspection": "Inspection"
     },
     "fields": {
+      "odometer": "Odometer",
       "plate": "Plate",
       "color": "Color",
       "vin": "VIN",
