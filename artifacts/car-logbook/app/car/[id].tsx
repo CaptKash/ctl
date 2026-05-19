@@ -430,9 +430,17 @@ export default function CarDetailScreen() {
             <Pressable
               onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
               hitSlop={8}
-              style={[styles.headerBtn, { backgroundColor: C.backgroundTertiary }]}
+              style={({ pressed }) => [styles.headerBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
             >
-              <Feather name="edit-2" size={16} color={C.text} />
+              <LinearGradient
+                colors={["#F1F5F9", "#E2E8F0", "#CBD5E1"]}
+                locations={[0, 0.5, 1]}
+                start={{ x: 0.2, y: 0 }}
+                end={{ x: 0.8, y: 1 }}
+                style={[styles.headerBtn, { borderWidth: 1, borderColor: "#94A3B8" }]}
+              >
+                <Feather name="edit-2" size={16} color="#334155" />
+              </LinearGradient>
             </Pressable>
             <Pressable
               onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report", params: { carId: String(carId) } }); }}
