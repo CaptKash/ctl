@@ -175,11 +175,6 @@ export default function MalfunctionLogScreen() {
                           <Text numberOfLines={2} style={styles.lightLabel}>
                             {t(light.labelKey)}
                           </Text>
-                          {isRTL && t(light.labelKey) !== light.label ? (
-                            <Text numberOfLines={1} style={styles.lightLabelEn}>
-                              {light.label}
-                            </Text>
-                          ) : null}
                         </Pressable>
                       );
                     })}
@@ -323,13 +318,5 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: "center",
     lineHeight: 11,
-  },
-  lightLabelEn: {
-    fontSize: 8,
-    fontFamily: "Inter_400Regular",
-    color: "rgba(229,231,235,0.6)",
-    marginTop: 1,
-    textAlign: "center",
-    lineHeight: 9,
   },
 });
