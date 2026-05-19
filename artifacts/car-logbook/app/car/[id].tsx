@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 8,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1.5,
     borderRadius: 12,
     height: 44,
   },
