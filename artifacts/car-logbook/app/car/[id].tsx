@@ -402,9 +402,6 @@ export default function CarDetailScreen() {
     <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
-          <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
-          </Pressable>
           {(() => {
             let firstPhoto: string | null = null;
             try { firstPhoto = car.photos ? JSON.parse(car.photos)[0] ?? null : null; } catch {}
