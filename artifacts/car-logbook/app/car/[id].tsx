@@ -528,7 +528,20 @@ export default function CarDetailScreen() {
             btnIcon="plus-circle"
           />
         ) : (
-          events.map(renderEvent)
+          <>
+            <Pressable
+              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/event/add", params: { carId: String(carId) } }); }}
+              style={({ pressed }) => [
+                styles.addLogBtn,
+                { backgroundColor: "#FEE2E2", opacity: pressed ? 0.85 : 1 },
+                isRTL && { flexDirection: "row-reverse" },
+              ]}
+            >
+              <Feather name="plus-circle" size={16} color="#DC2626" />
+              <Text style={[styles.addLogText, { color: "#DC2626" }]}>{t("carDetail.addLog")}</Text>
+            </Pressable>
+            {events.map(renderEvent)}
+          </>
         )}
       </ScrollView>
 
@@ -794,6 +807,16 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   photoBadgeText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  addLogBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  addLogText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });
 
 const detailStyles = StyleSheet.create({

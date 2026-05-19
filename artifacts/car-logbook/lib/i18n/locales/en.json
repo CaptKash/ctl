@@ -275,6 +275,7 @@
       "description": "Faults, maintenance, and inspections will appear here.",
       "action": "Technical Log"
     },
+    "addLog": "Add Log",
     "delete": {
       "title": "Delete Record",
       "message": "This record will be permanently deleted.",
