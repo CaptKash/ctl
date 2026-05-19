@@ -337,6 +337,36 @@ export default function RepairServiceFormScreen() {
 
             <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
 
+            {/* Repair Shop */}
+            <View style={[styles.costCard, { backgroundColor: C.card }]}>
+              <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
+                <Text style={[styles.costTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.sections.shop")}</Text>
+              </View>
+              <View style={styles.serviceFields}>
+                <FormField
+                  label={t("carDetail.maintenanceForm.fields.shopName")}
+                  value={shopName}
+                  onChangeText={setShopName}
+                  placeholder={t("carDetail.maintenanceForm.placeholders.shopName")}
+                />
+                <FormField
+                  label={t("carDetail.maintenanceForm.fields.address")}
+                  value={shopAddress}
+                  onChangeText={setShopAddress}
+                  placeholder={t("carDetail.maintenanceForm.placeholders.address")}
+                />
+                <FormField
+                  label={t("carDetail.maintenanceForm.fields.phone")}
+                  value={shopPhone}
+                  onChangeText={setShopPhone}
+                  placeholder={t("carDetail.maintenanceForm.placeholders.phone")}
+                  keyboardType="phone-pad"
+                />
+              </View>
+            </View>
+
+            <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
+
             {/* Warranty */}
             <View style={[styles.costCard, { backgroundColor: C.card }]}>
               <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
@@ -446,36 +476,6 @@ export default function RepairServiceFormScreen() {
                   <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>{t("carDetail.maintenanceForm.addPhotoBill")}</Text>
                 </Pressable>
               )}
-            </View>
-
-            <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
-
-            {/* Repair Shop */}
-            <View style={[styles.costCard, { backgroundColor: C.card }]}>
-              <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
-                <Text style={[styles.costTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.sections.shop")}</Text>
-              </View>
-              <View style={styles.serviceFields}>
-                <FormField
-                  label={t("carDetail.maintenanceForm.fields.shopName")}
-                  value={shopName}
-                  onChangeText={setShopName}
-                  placeholder={t("carDetail.maintenanceForm.placeholders.shopName")}
-                />
-                <FormField
-                  label={t("carDetail.maintenanceForm.fields.address")}
-                  value={shopAddress}
-                  onChangeText={setShopAddress}
-                  placeholder={t("carDetail.maintenanceForm.placeholders.address")}
-                />
-                <FormField
-                  label={t("carDetail.maintenanceForm.fields.phone")}
-                  value={shopPhone}
-                  onChangeText={setShopPhone}
-                  placeholder={t("carDetail.maintenanceForm.placeholders.phone")}
-                  keyboardType="phone-pad"
-                />
-              </View>
             </View>
 
             <View style={[styles.sectionDivider, { backgroundColor: C.border }]} />
