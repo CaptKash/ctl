@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -46,6 +48,9 @@ export default function RenewalFormScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const qc = useQueryClient();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const textAlign = isRTL ? "right" : "left";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [renewalType, setRenewalType] = useState<RenewalType>("license");
@@ -96,31 +101,37 @@ export default function RenewalFormScreen() {
     },
   });
 
-  const carTitle = car
-    ? car.nickname ?? `${car.year} ${car.make} ${car.model}`
-    : "Car";
+  const carTitle = car ? `${car.year} ${car.make} ${car.model}` : "";
 
   const canSubmit = validUntil.trim().length > 0;
 
   return (
     <SwipeBackView style={{ backgroundColor: C.backgroundSecondary }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable
             onPress={() => router.back()}
             style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}
             hitSlop={8}
           >
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#CCFBF1" }]}>
-            <Feather name="refresh-cw" size={22} color="#0D9488" />
-          </View>
+          <LinearGradient
+            colors={["#CCFBF1", "#5EEAD4", "#0D9488"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#115E59" }]}
+          >
+            <Feather name="refresh-cw" size={22} color="#134E4A" />
+          </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Log Renewal</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>
-              {carTitle}
-            </Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign }]}>{t("renewal.formTitle")}</Text>
+            {carTitle ? (
+              <Text style={[styles.headerSub, { color: C.textSecondary, textAlign }]} numberOfLines={1}>
+                {carTitle}
+              </Text>
+            ) : null}
           </View>
         </View>
       </View>
@@ -130,97 +141,86 @@ export default function RenewalFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Type selector */}
-        <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Renewal Type</Text>
-          <View style={styles.typeRow}>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); setRenewalType("license"); }}
-              style={[
-                styles.typeBtn,
-                renewalType === "license"
-                  ? { backgroundColor: "#CCFBF1", borderColor: "#0D9488" }
-                  : { backgroundColor: C.backgroundSecondary, borderColor: C.border },
-              ]}
-            >
-              <Feather
-                name="credit-card"
-                size={18}
-                color={renewalType === "license" ? "#0D9488" : C.textSecondary}
-              />
-              <Text style={[
-                styles.typeBtnText,
-                { color: renewalType === "license" ? "#0D9488" : C.textSecondary },
-              ]}>
-                License
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); setRenewalType("insurance"); }}
-              style={[
-                styles.typeBtn,
-                renewalType === "insurance"
-                  ? { backgroundColor: "#CCFBF1", borderColor: "#0D9488" }
-                  : { backgroundColor: C.backgroundSecondary, borderColor: C.border },
-              ]}
-            >
-              <Feather
-                name="shield"
-                size={18}
-                color={renewalType === "insurance" ? "#0D9488" : C.textSecondary}
-              />
-              <Text style={[
-                styles.typeBtnText,
-                { color: renewalType === "insurance" ? "#0D9488" : C.textSecondary },
-              ]}>
-                Insurance
-              </Text>
-            </Pressable>
-          </View>
+        {/* Type pills */}
+        <View style={[styles.pillRow, isRTL && { flexDirection: "row-reverse" }]}>
+          {(["license", "insurance"] as RenewalType[]).map((rt) => {
+            const active = renewalType === rt;
+            const icon = rt === "license" ? "credit-card" : "shield";
+            const label = t(`renewal.types.${rt}`);
+            const gradientColors = active
+              ? (["#CCFBF1", "#5EEAD4", "#0D9488"] as const)
+              : (["#F8FAFC", "#E2E8F0", "#CBD5E1"] as const);
+            const border = active ? "#115E59" : "#94A3B8";
+            const fg = active ? "#134E4A" : "#475569";
+            return (
+              <Pressable
+                key={rt}
+                onPress={() => { Haptics.selectionAsync(); setRenewalType(rt); mutation.reset(); }}
+                style={({ pressed }) => [styles.pillWrap, { opacity: pressed ? 0.85 : 1 }]}
+              >
+                <LinearGradient
+                  colors={gradientColors}
+                  locations={[0, 0.55, 1]}
+                  start={{ x: 0.15, y: 0 }}
+                  end={{ x: 0.85, y: 1 }}
+                  style={[
+                    styles.pill,
+                    isRTL && { flexDirection: "row-reverse" },
+                    { borderColor: border },
+                  ]}
+                >
+                  <Feather name={icon} size={16} color={fg} />
+                  <Text style={[styles.pillText, { color: fg }]}>{label}</Text>
+                </LinearGradient>
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Renewal Details */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Renewal Details</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>
+            {t("renewal.detailsSection")}
+          </Text>
 
           <DatePickerField
-            label={renewalType === "license" ? "License Valid Until" : "Insurance Valid Until"}
+            label={renewalType === "license" ? t("renewal.fields.licenseValidUntil") : t("renewal.fields.insuranceValidUntil")}
             value={validUntil}
             onChange={setValidUntil}
-            placeholder="Select expiry date…"
+            placeholder={t("renewal.placeholders.expiryDate")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label={renewalType === "license" ? "Issuing Authority" : "Insurance Provider"}
+            label={renewalType === "license" ? t("renewal.fields.issuingAuthority") : t("renewal.fields.insuranceProvider")}
             value={provider}
             onChangeText={setProvider}
-            placeholder={renewalType === "license" ? "e.g. City Transport Authority" : "e.g. Allianz, Aviva…"}
+            placeholder={renewalType === "license" ? t("renewal.placeholders.authority") : t("renewal.placeholders.provider")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label={renewalType === "license" ? "Reference / Sticker Number" : "Policy Number"}
+            label={renewalType === "license" ? t("renewal.fields.referenceNumber") : t("renewal.fields.policyNumber")}
             value={referenceNumber}
             onChangeText={setReferenceNumber}
-            placeholder="Optional"
+            placeholder={t("renewal.placeholders.optional")}
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label="Cost"
+            label={t("renewal.fields.cost")}
             value={cost}
             onChangeText={setCost}
-            placeholder="e.g. 120.00"
+            placeholder={t("renewal.placeholders.cost")}
             keyboardType="decimal-pad"
           />
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label="Notes"
+            label={t("renewal.fields.notes")}
             value={notes}
             onChangeText={setNotes}
-            placeholder="Any additional notes…"
+            placeholder={t("renewal.placeholders.notes")}
             multiline
           />
         </View>
@@ -228,13 +228,15 @@ export default function RenewalFormScreen() {
         {mutation.isError && (
           <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
             <Text style={[styles.errorText, { color: C.danger }]}>
-              Failed to save. Please try again.
+              {t("renewal.errorSave")}
             </Text>
           </View>
         )}
 
         <PrimaryButton
-          label={renewalType === "license" ? "Save License Renewal" : "Save Insurance Renewal"}
+          variant="metallic-blue"
+          icon="check"
+          label={renewalType === "license" ? t("renewal.saveLicense") : t("renewal.saveInsurance")}
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit || !car}
@@ -259,17 +261,9 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
   form: { padding: 20, gap: 16 },
-  section: { borderRadius: 16, padding: 16, gap: 12 },
-  sectionLabel: {
-    fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
-    textTransform: "uppercase",
-    letterSpacing: 0.6,
-    marginBottom: 2,
-  },
-  typeRow: { flexDirection: "row", gap: 10 },
-  typeBtn: {
-    flex: 1,
+  pillRow: { flexDirection: "row", gap: 10 },
+  pillWrap: { flex: 1, borderRadius: 12 },
+  pill: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -278,7 +272,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1.5,
   },
-  typeBtnText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  pillText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  section: { borderRadius: 16, padding: 16, gap: 12 },
+  sectionLabel: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: -4 },
   errorBox: { borderRadius: 10, padding: 14 },
   errorText: { fontSize: 14, fontFamily: "Inter_500Medium", textAlign: "center" },
