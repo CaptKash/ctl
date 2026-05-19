@@ -1,8 +1,10 @@
 import { Feather } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActionSheetIOS,
   Alert,
@@ -91,6 +93,9 @@ export default function MaintenanceFormScreen() {
   const C = useColors();
   const { currency } = useCurrency();
   const qc = useQueryClient();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const textAlign = isRTL ? "right" : "left";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   // Service details
@@ -136,14 +141,14 @@ export default function MaintenanceFormScreen() {
   const showBillPhotoPicker = () => {
     if (Platform.OS === "ios") {
       ActionSheetIOS.showActionSheetWithOptions(
-        { options: ["Cancel", "Take Photo", "Choose from Library"], cancelButtonIndex: 0 },
+        { options: [t("photoPicker.cancel"), t("photoPicker.takePhoto"), t("photoPicker.chooseFromLibrary")], cancelButtonIndex: 0 },
         (i) => { if (i === 1) pickBillPhoto(true); if (i === 2) pickBillPhoto(false); }
       );
     } else {
-      Alert.alert("Bill Photo", "Choose a source", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Take Photo", onPress: () => pickBillPhoto(true) },
-        { text: "Choose from Library", onPress: () => pickBillPhoto(false) },
+      Alert.alert(t("carDetail.photo.billPhoto"), t("photoPicker.chooseSource"), [
+        { text: t("photoPicker.cancel"), style: "cancel" },
+        { text: t("photoPicker.takePhoto"), onPress: () => pickBillPhoto(true) },
+        { text: t("photoPicker.chooseFromLibrary"), onPress: () => pickBillPhoto(false) },
       ]);
     }
   };
@@ -166,14 +171,14 @@ export default function MaintenanceFormScreen() {
   const showWarrantyPhotoPicker = () => {
     if (Platform.OS === "ios") {
       ActionSheetIOS.showActionSheetWithOptions(
-        { options: ["Cancel", "Take Photo", "Choose from Library"], cancelButtonIndex: 0 },
+        { options: [t("photoPicker.cancel"), t("photoPicker.takePhoto"), t("photoPicker.chooseFromLibrary")], cancelButtonIndex: 0 },
         (i) => { if (i === 1) pickWarrantyPhoto(true); if (i === 2) pickWarrantyPhoto(false); }
       );
     } else {
-      Alert.alert("Warranty Photo", "Choose a source", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Take Photo", onPress: () => pickWarrantyPhoto(true) },
-        { text: "Choose from Library", onPress: () => pickWarrantyPhoto(false) },
+      Alert.alert(t("carDetail.photo.warrantyPhoto"), t("photoPicker.chooseSource"), [
+        { text: t("photoPicker.cancel"), style: "cancel" },
+        { text: t("photoPicker.takePhoto"), onPress: () => pickWarrantyPhoto(true) },
+        { text: t("photoPicker.chooseFromLibrary"), onPress: () => pickWarrantyPhoto(false) },
       ]);
     }
   };
@@ -223,7 +228,7 @@ export default function MaintenanceFormScreen() {
   });
 
   const car = carQuery.data;
-  const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : "Car";
+  const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : t("carDetail.maintenanceForm.carFallback");
   const canSubmit = fromFault
     ? correctiveAction.trim().length > 0
     : type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
@@ -232,16 +237,22 @@ export default function MaintenanceFormScreen() {
     <SwipeBackView style={{ backgroundColor: C.backgroundSecondary }}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#FEF3C7" }]}>
-            <Feather name="tool" size={22} color="#D97706" />
-          </View>
+          <LinearGradient
+            colors={["#FEF3C7", "#FCD34D", "#D97706"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#92400E" }]}
+          >
+            <Feather name="tool" size={22} color="#78350F" />
+          </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Add Repair Log</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carTitle}</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.titleHeader")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign }]} numberOfLines={1}>{carTitle}</Text>
           </View>
         </View>
       </View>
@@ -253,40 +264,40 @@ export default function MaintenanceFormScreen() {
       >
         {/* Service */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
-          <View style={styles.costHeader}>
-            <Text style={[styles.costTitle, { color: C.text }]}>Service</Text>
+          <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.sections.service")}</Text>
           </View>
           <View style={styles.serviceFields}>
             <DatePickerField
-              label="Date"
+              label={t("carDetail.maintenanceForm.fields.date")}
               value={date}
               onChange={setDate}
             />
             {fromFault ? (
               <FormField
-                label="Description of Work Done"
+                label={t("carDetail.maintenanceForm.fields.workDone")}
                 value={correctiveAction}
                 onChangeText={setCorrectiveAction}
-                placeholder="Describe the repair or service performed…"
+                placeholder={t("carDetail.maintenanceForm.placeholders.workDone")}
                 multiline
                 required
               />
             ) : (
               <>
                 <SelectField
-                  label="Type"
+                  label={t("carDetail.maintenanceForm.fields.type")}
                   value={type}
                   onSelect={setType}
                   options={MAINTENANCE_TYPES}
-                  placeholder="Select a type of service…"
+                  placeholder={t("carDetail.maintenanceForm.placeholders.type")}
                   required
                 />
                 {type !== "" && (
                   <FormField
-                    label="Description"
+                    label={t("carDetail.maintenanceForm.fields.description")}
                     value={correctiveAction}
                     onChangeText={setCorrectiveAction}
-                    placeholder={type === "Other" ? "Describe the service performed…" : "Add any notes or details about this service…"}
+                    placeholder={type === "Other" ? t("carDetail.maintenanceForm.placeholders.descOther") : t("carDetail.maintenanceForm.placeholders.descGeneric")}
                     multiline
                     required={type === "Other"}
                   />
@@ -300,27 +311,27 @@ export default function MaintenanceFormScreen() {
 
         {/* Warranty */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
-          <View style={styles.costHeader}>
-            <Text style={[styles.costTitle, { color: C.text }]}>Warranty</Text>
+          <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.sections.warranty")}</Text>
           </View>
           <View style={styles.serviceFields}>
             <FormField
-              label="Warranty Period"
+              label={t("carDetail.maintenanceForm.fields.warrantyPeriod")}
               value={warrantyPeriod}
               onChangeText={setWarrantyPeriod}
-              placeholder="e.g. 6 months / 10,000 km"
+              placeholder={t("carDetail.maintenanceForm.placeholders.warrantyPeriod")}
             />
             <FormField
-              label="Warranty Details"
+              label={t("carDetail.maintenanceForm.fields.warrantyDetails")}
               value={warrantyDetails}
               onChangeText={setWarrantyDetails}
-              placeholder="Any conditions or notes about the warranty…"
+              placeholder={t("carDetail.maintenanceForm.placeholders.warrantyDetails")}
               multiline
             />
             {warrantyPhotos.length > 0 ? (
-              <Pressable onPress={showWarrantyPhotoPicker} style={styles.billThumbRow}>
+              <Pressable onPress={showWarrantyPhotoPicker} style={[styles.billThumbRow, isRTL && { flexDirection: "row-reverse" }]}>
                 <Image source={{ uri: warrantyPhotos[0] }} style={styles.billThumb} resizeMode="cover" />
-                <Text style={[styles.billThumbLabel, { color: C.textSecondary }]}>Tap to replace</Text>
+                <Text style={[styles.billThumbLabel, { color: C.textSecondary, textAlign }]}>{t("carDetail.maintenanceForm.tapToReplace")}</Text>
                 <Pressable
                   onPress={() => setWarrantyPhotos([])}
                   style={[styles.billRemoveBtn, { backgroundColor: C.danger }]}
@@ -334,11 +345,12 @@ export default function MaintenanceFormScreen() {
                 onPress={showWarrantyPhotoPicker}
                 style={({ pressed }) => [
                   styles.warrantyPhotoBtn,
+                  isRTL && { flexDirection: "row-reverse" },
                   { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.backgroundSecondary },
                 ]}
               >
                 <Feather name="camera" size={16} color={C.textSecondary} />
-                <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of Warranty</Text>
+                <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>{t("carDetail.maintenanceForm.addPhotoWarranty")}</Text>
               </Pressable>
             )}
           </View>
@@ -348,33 +360,33 @@ export default function MaintenanceFormScreen() {
 
         {/* Cost */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
-          <View style={styles.costHeader}>
-            <Text style={[styles.costTitle, { color: C.text }]}>Cost ({currency.symbol})</Text>
+          <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.sections.cost")} ({currency.symbol})</Text>
           </View>
-          <View style={styles.costRow}>
-            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Parts ({currency.symbol})</Text>
+          <View style={[styles.costRow, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary, textAlign }]}>{t("carDetail.maintenanceForm.fields.parts")} ({currency.symbol})</Text>
             <TextInput
               value={costOfParts}
               onChangeText={setCostOfParts}
-              placeholder="0.00"
+              placeholder={t("carDetail.maintenanceForm.placeholders.amount")}
               placeholderTextColor={C.textTertiary}
               keyboardType="decimal-pad"
               style={[styles.costRowInput, { color: C.text, borderColor: C.border, backgroundColor: C.backgroundTertiary }]}
             />
           </View>
-          <View style={styles.costRow}>
-            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Labor ({currency.symbol})</Text>
+          <View style={[styles.costRow, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary, textAlign }]}>{t("carDetail.maintenanceForm.fields.labor")} ({currency.symbol})</Text>
             <TextInput
               value={laborCost}
               onChangeText={setLaborCost}
-              placeholder="0.00"
+              placeholder={t("carDetail.maintenanceForm.placeholders.amount")}
               placeholderTextColor={C.textTertiary}
               keyboardType="decimal-pad"
               style={[styles.costRowInput, { color: C.text, borderColor: C.border, backgroundColor: C.backgroundTertiary }]}
             />
           </View>
-          <View style={[styles.costRow, { paddingBottom: 10 }]}>
-            <Text style={[styles.costRowLabel, { color: C.textSecondary }]}>Total</Text>
+          <View style={[styles.costRow, { paddingBottom: 10 }, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costRowLabel, { color: C.textSecondary, textAlign }]}>{t("carDetail.maintenanceForm.fields.total")}</Text>
             <View style={[styles.costRowInput, { backgroundColor: C.backgroundTertiary, borderColor: C.border, justifyContent: "center" }]}>
               <Text style={[styles.totalValue, { color: totalCost > 0 ? C.text : C.textTertiary, textAlign: "right" }]}>
                 {totalCost > 0 ? `${currency.symbol}${totalCost.toFixed(2)}` : "—"}
@@ -382,9 +394,9 @@ export default function MaintenanceFormScreen() {
             </View>
           </View>
           {billPhotos.length > 0 ? (
-            <Pressable onPress={showBillPhotoPicker} style={styles.billThumbRow}>
+            <Pressable onPress={showBillPhotoPicker} style={[styles.billThumbRow, isRTL && { flexDirection: "row-reverse" }]}>
               <Image source={{ uri: billPhotos[0] }} style={styles.billThumb} resizeMode="cover" />
-              <Text style={[styles.billThumbLabel, { color: C.textSecondary }]}>Tap to replace</Text>
+              <Text style={[styles.billThumbLabel, { color: C.textSecondary, textAlign }]}>{t("carDetail.maintenanceForm.tapToReplace")}</Text>
               <Pressable
                 onPress={() => setBillPhotos([])}
                 style={[styles.billRemoveBtn, { backgroundColor: C.danger }]}
@@ -398,11 +410,12 @@ export default function MaintenanceFormScreen() {
               onPress={showBillPhotoPicker}
               style={({ pressed }) => [
                 styles.billPhotoBtn,
+                isRTL && { flexDirection: "row-reverse" },
                 { borderColor: C.border, backgroundColor: pressed ? C.backgroundTertiary : C.backgroundSecondary },
               ]}
             >
               <Feather name="camera" size={16} color={C.textSecondary} />
-              <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>Add Photo of Bill</Text>
+              <Text style={[styles.billPhotoBtnText, { color: C.textSecondary }]}>{t("carDetail.maintenanceForm.addPhotoBill")}</Text>
             </Pressable>
           )}
         </View>
@@ -411,27 +424,27 @@ export default function MaintenanceFormScreen() {
 
         {/* Repair Shop */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
-          <View style={styles.costHeader}>
-            <Text style={[styles.costTitle, { color: C.text }]}>Repair Shop</Text>
+          <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.sections.shop")}</Text>
           </View>
           <View style={styles.serviceFields}>
             <FormField
-              label="Shop Name"
+              label={t("carDetail.maintenanceForm.fields.shopName")}
               value={shopName}
               onChangeText={setShopName}
-              placeholder="e.g. City Auto Service"
+              placeholder={t("carDetail.maintenanceForm.placeholders.shopName")}
             />
             <FormField
-              label="Address"
+              label={t("carDetail.maintenanceForm.fields.address")}
               value={shopAddress}
               onChangeText={setShopAddress}
-              placeholder="e.g. 12 Main St, Springfield"
+              placeholder={t("carDetail.maintenanceForm.placeholders.address")}
             />
             <FormField
-              label="Phone"
+              label={t("carDetail.maintenanceForm.fields.phone")}
               value={shopPhone}
               onChangeText={setShopPhone}
-              placeholder="e.g. +1 555 000 1234"
+              placeholder={t("carDetail.maintenanceForm.placeholders.phone")}
               keyboardType="phone-pad"
             />
           </View>
@@ -441,12 +454,12 @@ export default function MaintenanceFormScreen() {
 
         {/* Next Inspection */}
         <View style={[styles.costCard, { backgroundColor: C.card }]}>
-          <View style={styles.costHeader}>
-            <Text style={[styles.costTitle, { color: C.text }]}>Next Inspection</Text>
+          <View style={[styles.costHeader, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.costTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.sections.nextInspection")}</Text>
           </View>
           <View style={styles.serviceFields}>
             <DatePickerField
-              label="Next Inspection Date"
+              label={t("carDetail.maintenanceForm.fields.nextInspectionDate")}
               value={nextInspectionDate}
               onChange={setNextInspectionDate}
             />
@@ -456,16 +469,18 @@ export default function MaintenanceFormScreen() {
         {mutation.isError && (
           <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
             <Text style={[styles.errorText, { color: C.danger }]}>
-              Failed to save. Please check required fields and try again.
+              {t("carDetail.maintenanceForm.errorSave")}
             </Text>
           </View>
         )}
 
         <PrimaryButton
-          label="Save Repair Log"
+          label={t("carDetail.maintenanceForm.saveBtn")}
           onPress={() => mutation.mutate()}
           loading={mutation.isPending}
           disabled={!canSubmit}
+          variant="metallic-blue"
+          icon="check"
         />
       </KeyboardAwareScrollViewCompat>
       <BottomNav />

@@ -398,6 +398,49 @@
       "billLabel": "Bill",
       "warrantyLabel": "Warranty"
     },
+    "maintenanceForm": {
+      "titleHeader": "Add Repair Log",
+      "carFallback": "Car",
+      "sections": {
+        "service": "Service",
+        "warranty": "Warranty",
+        "cost": "Cost",
+        "shop": "Repair Shop",
+        "nextInspection": "Next Inspection"
+      },
+      "fields": {
+        "date": "Date",
+        "workDone": "Description of Work Done",
+        "type": "Type",
+        "description": "Description",
+        "warrantyPeriod": "Warranty Period",
+        "warrantyDetails": "Warranty Details",
+        "parts": "Parts",
+        "labor": "Labor",
+        "total": "Total",
+        "shopName": "Shop Name",
+        "address": "Address",
+        "phone": "Phone",
+        "nextInspectionDate": "Next Inspection Date"
+      },
+      "placeholders": {
+        "workDone": "Describe the repair or service performed…",
+        "type": "Select a type of service…",
+        "descGeneric": "Add any notes or details about this service…",
+        "descOther": "Describe the service performed…",
+        "warrantyPeriod": "e.g. 6 months / 10,000 km",
+        "warrantyDetails": "Any conditions or notes about the warranty…",
+        "amount": "0.00",
+        "shopName": "e.g. City Auto Service",
+        "address": "e.g. 12 Main St, Springfield",
+        "phone": "e.g. +1 555 000 1234"
+      },
+      "addPhotoBill": "Add Photo of Bill",
+      "addPhotoWarranty": "Add Photo of Warranty",
+      "tapToReplace": "Tap to replace",
+      "saveBtn": "Save Repair Log",
+      "errorSave": "Failed to save. Please check required fields and try again."
+    },
     "inspection": {
       "next": "Next: "
     },
