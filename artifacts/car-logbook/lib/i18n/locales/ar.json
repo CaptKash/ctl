@@ -263,7 +263,7 @@
     "title": "السجل الفني",
     "subtitle": "اختر نوع الحدث",
     "options": {
-      "fault": "عطل / تعطّل / ضرر",
+      "fault": "خلل / تعطّل / ضرر",
       "inspection": "إصلاح / فحص",
       "renewal": "تجديد الترخيص / التأمين"
     },
@@ -274,7 +274,7 @@
   "carDetail": {
     "notFound": "لم يتم العثور على السيارة",
     "events": {
-      "fault": "عطل",
+      "fault": "خلل",
       "maintenance": "صيانة",
       "inspection": "فحص"
     },
