@@ -522,11 +522,11 @@ export default function CarDetailScreen() {
                 style={({ pressed }) => [styles.actionBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
                 <LinearGradient
-                  colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
-                  locations={[0, 0.55, 1]}
-                  start={{ x: 0.15, y: 0 }}
-                  end={{ x: 0.85, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#64748B" }]}
+                  colors={["#F1F5F9", "#E2E8F0", "#CBD5E1"]}
+                  locations={[0, 0.5, 1]}
+                  start={{ x: 0.2, y: 0 }}
+                  end={{ x: 0.8, y: 1 }}
+                  style={[styles.actionBtn, { borderColor: "#94A3B8" }]}
                 >
                   <Text style={[styles.addLogText, { color: "#334155" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
                 </LinearGradient>
@@ -536,11 +536,11 @@ export default function CarDetailScreen() {
                 style={({ pressed }) => [styles.actionBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
                 <LinearGradient
-                  colors={["#EFF6FF", "#60A5FA", "#1E40AF"]}
-                  locations={[0, 0.55, 1]}
-                  start={{ x: 0.15, y: 0 }}
-                  end={{ x: 0.85, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#312E81" }, isRTL && { flexDirection: "row-reverse" }]}
+                  colors={["#DBEAFE", "#BFDBFE", "#93C5FD"]}
+                  locations={[0, 0.5, 1]}
+                  start={{ x: 0.2, y: 0 }}
+                  end={{ x: 0.8, y: 1 }}
+                  style={[styles.actionBtn, { borderColor: "#1E40AF" }, isRTL && { flexDirection: "row-reverse" }]}
                 >
                   <Feather name="plus-circle" size={16} color="#312E81" />
                   <Text style={[styles.addLogText, { color: "#312E81" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
