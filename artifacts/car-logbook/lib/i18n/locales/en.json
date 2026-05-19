@@ -399,7 +399,7 @@
       "warrantyLabel": "Warranty"
     },
     "maintenanceForm": {
-      "titleHeader": "Add Repair Log",
+      "titleHeader": "Log Repair / Service",
       "carFallback": "Car",
       "sections": {
         "service": "Service",

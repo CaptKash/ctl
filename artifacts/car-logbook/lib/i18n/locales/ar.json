@@ -407,7 +407,7 @@
       "warrantyLabel": "ضمان"
     },
     "maintenanceForm": {
-      "titleHeader": "إضافة سجل إصلاح",
+      "titleHeader": "تسجيل إصلاح / خدمة",
       "carFallback": "السيارة",
       "sections": {
         "service": "الخدمة",

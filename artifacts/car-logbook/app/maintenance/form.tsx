@@ -228,7 +228,7 @@ export default function MaintenanceFormScreen() {
   });
 
   const car = carQuery.data;
-  const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : t("carDetail.maintenanceForm.carFallback");
+  const carTitle = car ? car.nickname ?? `${car.year} ${car.make} ${car.model}` : "";
   const canSubmit = fromFault
     ? correctiveAction.trim().length > 0
     : type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
@@ -252,7 +252,7 @@ export default function MaintenanceFormScreen() {
           </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text, textAlign }]}>{t("carDetail.maintenanceForm.titleHeader")}</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign }]} numberOfLines={1}>{carTitle}</Text>
+            {carTitle ? <Text style={[styles.headerSub, { color: C.textSecondary, textAlign }]} numberOfLines={1}>{carTitle}</Text> : null}
           </View>
         </View>
       </View>
