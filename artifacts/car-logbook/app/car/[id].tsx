@@ -526,10 +526,10 @@ export default function CarDetailScreen() {
                   locations={[0, 0.5, 1]}
                   start={{ x: 0.2, y: 0 }}
                   end={{ x: 0.8, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#94A3B8" }, isRTL && { flexDirection: "row-reverse" }]}
+                  style={[styles.actionBtn, { borderColor: "#94A3B8" }]}
                 >
-                  <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color="#334155" />
-                  <Text style={[styles.addLogText, { color: "#334155" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
+                  <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={16} color="#334155" style={isRTL ? styles.iconRight : styles.iconLeft} />
+                  <Text style={[styles.addLogText, { color: "#334155", textAlign: "center" }]} numberOfLines={1}>{t("carDetail.backToFleet")}</Text>
                 </LinearGradient>
               </Pressable>
               <Pressable
@@ -541,10 +541,10 @@ export default function CarDetailScreen() {
                   locations={[0, 0.5, 1]}
                   start={{ x: 0.2, y: 0 }}
                   end={{ x: 0.8, y: 1 }}
-                  style={[styles.actionBtn, { borderColor: "#1E40AF" }, isRTL && { flexDirection: "row-reverse" }]}
+                  style={[styles.actionBtn, { borderColor: "#1E40AF" }]}
                 >
-                  <Feather name="plus" size={16} color="#312E81" />
-                  <Text style={[styles.addLogText, { color: "#312E81" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
+                  <Feather name="plus" size={16} color="#312E81" style={isRTL ? styles.iconRight : styles.iconLeft} />
+                  <Text style={[styles.addLogText, { color: "#312E81", textAlign: "center" }]} numberOfLines={1}>{t("carDetail.addLog")}</Text>
                 </LinearGradient>
               </Pressable>
             </View>
@@ -834,10 +834,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   actionBtn: {
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderWidth: 1.5,
@@ -845,6 +843,8 @@ const styles = StyleSheet.create({
     height: 44,
   },
   addLogText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  iconLeft: { position: "absolute", left: 12, top: 13 },
+  iconRight: { position: "absolute", right: 12, top: 13 },
 });
 
 const detailStyles = StyleSheet.create({
