@@ -276,6 +276,22 @@
     "comingSoonBody": "ستتاح إضافة {{type}} في تحديث قادم.",
     "soon": "قريباً"
   },
+  "malfunction": {
+    "title": "تسجيل خلل",
+    "selectCar": "اختر المركبة",
+    "emptyTitle": "لا توجد مركبات بعد",
+    "emptySub": "أضف سيارة أولاً قبل تسجيل الخلل.",
+    "addCar": "إضافة سيارة",
+    "sectionDescribe": "وصف المشكلة",
+    "placeholderDescribe": "صف الخلل بكلماتك الخاصة...",
+    "sectionDashMsg": "رسالة لوحة العدادات",
+    "placeholderDashMsg": "مثال: ضغط زيت المحرك منخفض...",
+    "sectionLights": "أضواء التحذير في لوحة العدادات",
+    "hintTapLights": "اضغط على أي ضوء مُفعَّل",
+    "save": "حفظ الخلل",
+    "saving": "جاري الحفظ...",
+    "error": "تعذّر حفظ الخلل."
+  },
   "carDetail": {
     "notFound": "لم يتم العثور على السيارة",
     "events": {

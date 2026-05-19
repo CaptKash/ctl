@@ -13,6 +13,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -34,6 +36,8 @@ type Car = {
 export default function AddFaultSelectCarScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId: preselectedCarId } = useLocalSearchParams<{ carId?: string }>();
 
@@ -65,16 +69,26 @@ export default function AddFaultSelectCarScreen() {
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
-            <Feather name="alert-triangle" size={22} color="#DC2626" />
-          </View>
+          <LinearGradient
+            colors={["#FEE2E2", "#FCA5A5", "#DC2626"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#991B1B" }]}
+          >
+            <Feather name="alert-triangle" size={22} color="#7F1D1D" />
+          </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Log Fault</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Select a vehicle</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
+              {t("malfunction.title")}
+            </Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("malfunction.selectCar")}
+            </Text>
           </View>
         </View>
       </View>
@@ -87,16 +101,16 @@ export default function AddFaultSelectCarScreen() {
       ) : !cars || cars.length === 0 ? (
         <View style={styles.center}>
           <Ionicons name="car-outline" size={44} color={C.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: C.text }]}>No vehicles yet</Text>
+          <Text style={[styles.emptyTitle, { color: C.text }]}>{t("malfunction.emptyTitle")}</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            Add a car first before reporting a fault.
+            {t("malfunction.emptySub")}
           </Text>
           <Pressable
             onPress={() => router.replace("/car/add")}
             style={[styles.addCarBtn, { backgroundColor: C.tint }]}
           >
             <Feather name="plus" size={16} color="#fff" />
-            <Text style={styles.addCarBtnText}>Add Car</Text>
+            <Text style={styles.addCarBtnText}>{t("malfunction.addCar")}</Text>
           </Pressable>
         </View>
       ) : (
@@ -130,15 +144,6 @@ const styles = StyleSheet.create({
   backBtn: {},
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
-  instruction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    margin: 16,
-    padding: 12,
-    borderRadius: 10,
-  },
-  instructionText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 12 },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
   emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },

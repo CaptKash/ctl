@@ -12,10 +12,13 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
+import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiPost } from "@/hooks/useApi";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
@@ -23,6 +26,8 @@ import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightI
 export default function MalfunctionLogScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId, carName } = useLocalSearchParams<{ carId: string; carName: string }>();
 
@@ -63,36 +68,44 @@ export default function MalfunctionLogScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace("/home");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save fault.";
-      Alert.alert("Error", msg);
+      const msg = err instanceof Error ? err.message : t("malfunction.error");
+      Alert.alert(t("common.error", { defaultValue: "Error" }), msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setSaving(false);
     }
   };
 
+  const textAlign = isRTL ? "right" : "left";
+
   return (
     <SwipeBackView>
       <View style={[styles.container, { backgroundColor: C.background }]}>
         <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-          <View style={styles.headerRow}>
+          <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
             <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-              <Feather name="arrow-left" size={22} color={C.text} />
+              <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
             </Pressable>
-            <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
-              <Feather name="alert-triangle" size={22} color="#DC2626" />
-            </View>
+            <LinearGradient
+              colors={["#FEE2E2", "#FCA5A5", "#DC2626"]}
+              locations={[0, 0.55, 1]}
+              start={{ x: 0.15, y: 0 }}
+              end={{ x: 0.85, y: 1 }}
+              style={[styles.iconBox, { borderWidth: 1, borderColor: "#991B1B" }]}
+            >
+              <Feather name="alert-triangle" size={22} color="#7F1D1D" />
+            </LinearGradient>
             <View style={styles.headerText}>
-              <Text style={[styles.headerTitle, { color: C.text }]}>Log Fault</Text>
-              {carName ? <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carName}</Text> : null}
+              <Text style={[styles.headerTitle, { color: C.text, textAlign }]}>{t("malfunction.title")}</Text>
+              {carName ? <Text style={[styles.headerSub, { color: C.textSecondary, textAlign }]} numberOfLines={1}>{carName}</Text> : null}
             </View>
           </View>
         </View>
 
         {carName && (
-          <View style={[styles.carBanner, { backgroundColor: "#FEE2E2" }]}>
+          <View style={[styles.carBanner, { backgroundColor: "#FEE2E2" }, isRTL && { flexDirection: "row-reverse" }]}>
             <Feather name="alert-triangle" size={15} color="#DC2626" />
-            <Text style={[styles.carBannerText, { color: "#DC2626" }]} numberOfLines={1}>
+            <Text style={[styles.carBannerText, { color: "#DC2626", textAlign }]} numberOfLines={1}>
               {carName}
             </Text>
           </View>
@@ -106,11 +119,11 @@ export default function MalfunctionLogScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>Describe the Issue</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>{t("malfunction.sectionDescribe")}</Text>
           <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border }]}>
             <TextInput
-              style={[styles.textArea, { color: C.text }]}
-              placeholder="Describe the fault in your own words..."
+              style={[styles.textArea, { color: C.text, textAlign }]}
+              placeholder={t("malfunction.placeholderDescribe")}
               placeholderTextColor={C.textTertiary}
               value={description}
               onChangeText={setDescription}
@@ -119,19 +132,19 @@ export default function MalfunctionLogScreen() {
             />
           </View>
 
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Message</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10, textAlign }]}>{t("malfunction.sectionDashMsg")}</Text>
           <View style={[styles.inputBox, { backgroundColor: C.card, borderColor: C.border, minHeight: 0 }]}>
             <TextInput
-              style={[styles.singleInput, { color: C.text }]}
-              placeholder="e.g. Engine oil pressure low..."
+              style={[styles.singleInput, { color: C.text, textAlign }]}
+              placeholder={t("malfunction.placeholderDashMsg")}
               placeholderTextColor={C.textTertiary}
               value={customMessage}
               onChangeText={setCustomMessage}
             />
           </View>
 
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10 }]}>Dashboard Warning Lights</Text>
-          <Text style={[styles.sectionHint, { color: C.textTertiary }]}>Tap any that are active</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 10, textAlign }]}>{t("malfunction.sectionLights")}</Text>
+          <Text style={[styles.sectionHint, { color: C.textTertiary, textAlign }]}>{t("malfunction.hintTapLights")}</Text>
           <View style={styles.lightGridBg}>
           {(() => {
             const sorted = [
@@ -164,33 +177,16 @@ export default function MalfunctionLogScreen() {
           })()}
           </View>
 
-          <Pressable
-            onPress={handleSave}
-            disabled={!canSave || saving}
-            style={[
-              styles.saveBtn,
-              {
-                backgroundColor: canSave ? "#DC2626" : C.backgroundTertiary,
-                opacity: saving ? 0.7 : 1,
-              },
-            ]}
-          >
-            {saving ? (
-              <Text style={styles.saveBtnText}>Saving...</Text>
-            ) : (
-              <>
-                <Feather name="check" size={18} color={canSave ? "#fff" : C.textTertiary} />
-                <Text
-                  style={[
-                    styles.saveBtnText,
-                    { color: canSave ? "#fff" : C.textTertiary },
-                  ]}
-                >
-                  Save Fault
-                </Text>
-              </>
-            )}
-          </Pressable>
+          <View style={{ marginTop: 20 }}>
+            <PrimaryButton
+              variant="metallic-blue"
+              icon="check"
+              label={saving ? t("malfunction.saving") : t("malfunction.save")}
+              onPress={handleSave}
+              disabled={!canSave}
+              loading={saving}
+            />
+          </View>
         </KeyboardAwareScrollViewCompat>
         <BottomNav />
       </View>
@@ -272,15 +268,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
-  saveBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 16,
-    borderRadius: 14,
-    marginTop: 20,
-  },
-  saveBtnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
 });
