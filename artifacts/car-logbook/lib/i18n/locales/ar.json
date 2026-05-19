@@ -414,7 +414,7 @@
         "warranty": "الضمان",
         "cost": "التكلفة",
         "shop": "ورشة الإصلاح",
-        "nextInspection": "الفحص القادم"
+        "nextInspection": "الإصلاح القادم"
       },
       "fields": {
         "date": "التاريخ",
@@ -429,7 +429,7 @@
         "shopName": "اسم الورشة",
         "address": "العنوان",
         "phone": "الهاتف",
-        "nextInspectionDate": "تاريخ الفحص القادم"
+        "nextInspectionDate": "تاريخ الإصلاح القادم"
       },
       "placeholders": {
         "workDone": "صف الإصلاح أو الخدمة التي تمت…",

@@ -406,7 +406,7 @@
         "warranty": "Warranty",
         "cost": "Cost",
         "shop": "Repair Shop",
-        "nextInspection": "Next Inspection"
+        "nextInspection": "Next Repair"
       },
       "fields": {
         "date": "Date",
@@ -421,7 +421,7 @@
         "shopName": "Shop Name",
         "address": "Address",
         "phone": "Phone",
-        "nextInspectionDate": "Next Inspection Date"
+        "nextInspectionDate": "Next Repair Date"
       },
       "placeholders": {
         "workDone": "Describe the repair or service performed…",
