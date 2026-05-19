@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
 
-  list: { padding: 16, gap: 12 },
+  list: { flex: 1, padding: 16, gap: 12 },
   optionRow: {
     minHeight: 96,
     flexDirection: "row",
