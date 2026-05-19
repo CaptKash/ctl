@@ -437,9 +437,17 @@ export default function CarDetailScreen() {
             <Pressable
               onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report", params: { carId: String(carId) } }); }}
               hitSlop={8}
-              style={[styles.headerBtn, { backgroundColor: C.infoLight }]}
+              style={({ pressed }) => [styles.headerBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
             >
-              <Feather name="file-text" size={16} color={C.info} />
+              <LinearGradient
+                colors={["#ECFDF5", "#34D399", "#047857"]}
+                locations={[0, 0.55, 1]}
+                start={{ x: 0.15, y: 0 }}
+                end={{ x: 0.85, y: 1 }}
+                style={[styles.headerBtn, { borderWidth: 1, borderColor: "#047857" }]}
+              >
+                <Feather name="file-text" size={16} color="#064E3B" />
+              </LinearGradient>
             </Pressable>
           </View>
         </View>
@@ -734,6 +742,10 @@ const styles = StyleSheet.create({
   headerBtn: {
     width: 34, height: 34, borderRadius: 10,
     alignItems: "center", justifyContent: "center",
+  },
+  headerBtnWrap: {
+    width: 34, height: 34, borderRadius: 10,
+    overflow: "hidden",
   },
   statsStrip: {
     marginHorizontal: 16,
