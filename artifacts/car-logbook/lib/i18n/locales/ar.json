@@ -357,7 +357,7 @@
     "prompt": "ماذا تريد أن تسجل؟",
     "options": {
       "repair": "صيانة",
-      "inspection": "خدمة"
+      "inspection": "متابعة دورية"
     },
     "descriptions": {
       "repair": "تسجيل صيانة أو خدمة للسيارة",
