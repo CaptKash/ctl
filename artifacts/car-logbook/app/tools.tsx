@@ -130,7 +130,7 @@ export default function ToolsScreen() {
           </View>
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
-              Service Cost Tracker
+              Cost Tracker
             </Text>
             <Text style={[styles.toolSub, { color: C.textSecondary }]}>
               Analyse spending over time

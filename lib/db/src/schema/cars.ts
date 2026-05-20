@@ -219,6 +219,27 @@ export const insertInspectionSchema = createInsertSchema(inspectionsTable).omit(
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
 export type InspectionRecord = typeof inspectionsTable.$inferSelect;
 
+export const renewalsTable = pgTable("renewal_records", {
+  id: serial("id").primaryKey(),
+  carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  date: text("date").notNull(),
+  validUntil: text("valid_until"),
+  provider: text("provider"),
+  referenceNumber: text("reference_number"),
+  cost: real("cost"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertRenewalSchema = createInsertSchema(renewalsTable)
+  .omit({ id: true, createdAt: true })
+  .extend({
+    type: z.enum(["license", "insurance"]),
+  });
+export type InsertRenewal = z.infer<typeof insertRenewalSchema>;
+export type RenewalRecord = typeof renewalsTable.$inferSelect;
+
 export const eventCompletionsTable = pgTable("event_completions", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),

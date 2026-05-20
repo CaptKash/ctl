@@ -20,7 +20,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { apiGet, apiPut } from "@/hooks/useApi";
+import { apiGet, apiPost, apiPut } from "@/hooks/useApi";
 
 type Car = {
   id: number;
@@ -66,8 +66,21 @@ export default function RenewalFormScreen() {
   });
 
   const mutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!car) throw new Error("Car not found");
+
+      const parsedCost = cost.trim() ? Number(cost.replace(/,/g, "")) : null;
+      const today = new Date().toISOString().split("T")[0];
+      await apiPost(`/cars/${carId}/renewals`, {
+        type: renewalType,
+        date: today,
+        validUntil: validUntil || null,
+        provider: provider.trim() || null,
+        referenceNumber: referenceNumber.trim() || null,
+        cost: parsedCost != null && !Number.isNaN(parsedCost) ? parsedCost : null,
+        notes: notes.trim() || null,
+      });
+
       const updatePayload: Partial<Car> = {
         make: car.make,
         model: car.model,
@@ -96,6 +109,7 @@ export default function RenewalFormScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["car", carId] });
       qc.invalidateQueries({ queryKey: ["cars"] });
+      qc.invalidateQueries({ queryKey: ["report", carId] });
       qc.invalidateQueries({ queryKey: ["maintenance", "upcoming"] });
       router.replace({ pathname: "/car/[id]", params: { id: String(carId) } });
     },

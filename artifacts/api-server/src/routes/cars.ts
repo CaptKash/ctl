@@ -10,6 +10,7 @@ import {
   malfunctionsTable,
   inspectionsTable,
   eventCompletionsTable,
+  renewalsTable,
   insertCarSchema,
   insertMaintenanceSchema,
   insertPartsSchema,
@@ -18,6 +19,7 @@ import {
   insertFuelSchema,
   insertMalfunctionSchema,
   insertInspectionSchema,
+  insertRenewalSchema,
 } from "@workspace/db";
 import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
@@ -598,12 +600,19 @@ router.get("/cars/:carId/report", async (req, res) => {
   const insurance = await db.select().from(insuranceTable).where(eq(insuranceTable.carId, carId));
   const fuel = await db.select().from(fuelTable).where(eq(fuelTable.carId, carId));
   const dealerships = await db.select().from(dealershipsTable).where(eq(dealershipsTable.carId, carId));
+  const renewals = await db.select().from(renewalsTable).where(eq(renewalsTable.carId, carId));
 
   const today = new Date().toISOString().split("T")[0];
 
+  const licenseRenewals = renewals.filter((r) => r.type === "license");
+  const insuranceRenewals = renewals.filter((r) => r.type === "insurance");
+
   const totalMaintenanceCost = maintenance.reduce((s, r) => s + (r.cost ?? 0), 0);
   const totalPartsCost = parts.reduce((s, r) => s + (r.cost ?? 0) * (r.quantity ?? 1), 0);
-  const totalInsuranceCost = insurance.reduce((s, r) => s + (r.premium ?? 0), 0);
+  const totalInsuranceCost =
+    insurance.reduce((s, r) => s + (r.premium ?? 0), 0) +
+    insuranceRenewals.reduce((s, r) => s + (r.cost ?? 0), 0);
+  const totalLicenseCost = licenseRenewals.reduce((s, r) => s + (r.cost ?? 0), 0);
   const totalFuelCost = fuel.reduce((s, r) => s + (r.totalCost ?? 0), 0);
 
   const upcomingMaintenanceDue = maintenance.filter(
@@ -615,6 +624,14 @@ router.get("/cars/:carId/report", async (req, res) => {
     ...parts.map((r) => ({ type: "parts", description: r.name, date: r.installedDate ?? r.createdAt.toISOString().split("T")[0], cost: r.cost ?? null })),
     ...fuel.map((r) => ({ type: "fuel", description: `${r.liters}L fuel`, date: r.date, cost: r.totalCost })),
     ...dealerships.map((r) => ({ type: "dealership", description: `${r.name} - ${r.purpose}`, date: r.visitDate, cost: r.cost ?? null })),
+    ...renewals.map((r) => ({
+      type: r.type === "license" ? "license" : "insurance",
+      description: r.type === "license"
+        ? `License renewal${r.provider ? ` - ${r.provider}` : ""}`
+        : `Insurance renewal${r.provider ? ` - ${r.provider}` : ""}`,
+      date: r.date,
+      cost: r.cost ?? null,
+    })),
   ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
 
   const sortedMaintenance = [...maintenance].sort((a, b) => b.date.localeCompare(a.date));
@@ -624,15 +641,46 @@ router.get("/cars/:carId/report", async (req, res) => {
     totalMaintenanceCost,
     totalPartsCost,
     totalInsuranceCost,
+    totalLicenseCost,
     totalFuelCost,
-    totalCost: totalMaintenanceCost + totalPartsCost + totalInsuranceCost + totalFuelCost,
+    totalCost: totalMaintenanceCost + totalPartsCost + totalInsuranceCost + totalLicenseCost + totalFuelCost,
     maintenanceCount: maintenance.length,
     partsCount: parts.length,
     fuelCount: fuel.length,
+    licenseRenewalCount: licenseRenewals.length,
+    insuranceRenewalCount: insuranceRenewals.length,
     lastMaintenance: sortedMaintenance[0]?.date ?? null,
     upcomingMaintenanceDue,
     recentActivity,
   });
+});
+
+// Renewals
+router.post("/cars/:carId/renewals", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+  const userId = req.user!.id;
+  const [car] = await db.select().from(carsTable).where(eq(carsTable.id, carId));
+  if (!car || car.userId !== userId) return res.status(404).json({ error: "Car not found" });
+
+  const parsed = insertRenewalSchema.safeParse({ ...req.body, carId });
+  if (!parsed.success) return res.status(400).json({ error: "Invalid renewal data", details: parsed.error.flatten() });
+
+  const [row] = await db.insert(renewalsTable).values(parsed.data).returning();
+  res.status(201).json(row);
+});
+
+router.get("/cars/:carId/renewals", async (req, res) => {
+  const carId = parseInt(req.params.carId);
+  const userId = req.user!.id;
+  const [car] = await db.select().from(carsTable).where(eq(carsTable.id, carId));
+  if (!car || car.userId !== userId) return res.status(404).json({ error: "Car not found" });
+
+  const rows = await db
+    .select()
+    .from(renewalsTable)
+    .where(eq(renewalsTable.carId, carId))
+    .orderBy(desc(renewalsTable.date));
+  res.json(rows);
 });
 
 export default router;

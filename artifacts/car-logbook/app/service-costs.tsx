@@ -26,11 +26,14 @@ type ReportData = {
   totalMaintenanceCost: number;
   totalPartsCost: number;
   totalInsuranceCost: number;
+  totalLicenseCost: number;
   totalFuelCost: number;
   totalCost: number;
   maintenanceCount: number;
   partsCount: number;
   fuelCount: number;
+  licenseRenewalCount: number;
+  insuranceRenewalCount: number;
   recentActivity: Array<{
     type: string;
     description: string;
@@ -44,10 +47,11 @@ function carLabel(car: Car) {
 }
 
 const CATEGORY_META: Record<string, { label: string; icon: string; color: string; bg: string }> = {
-  maintenance: { label: "Maintenance", icon: "tool",       color: "#2563EB", bg: "#DBEAFE" },
-  parts:       { label: "Parts",        icon: "package",   color: "#7C3AED", bg: "#EDE9FE" },
-  dealership:  { label: "Dealership",   icon: "map-pin",   color: "#D97706", bg: "#FEF3C7" },
-  insurance:   { label: "Insurance",    icon: "shield",    color: "#059669", bg: "#D1FAE5" },
+  maintenance: { label: "Maintenance", icon: "tool",        color: "#2563EB", bg: "#DBEAFE" },
+  parts:       { label: "Parts",        icon: "package",    color: "#7C3AED", bg: "#EDE9FE" },
+  dealership:  { label: "Dealership",   icon: "map-pin",    color: "#D97706", bg: "#FEF3C7" },
+  insurance:   { label: "Insurance",    icon: "shield",     color: "#059669", bg: "#D1FAE5" },
+  license:     { label: "License",      icon: "credit-card", color: "#0D9488", bg: "#CCFBF1" },
 };
 
 export default function ServiceCostsScreen() {
@@ -88,9 +92,15 @@ export default function ServiceCostsScreen() {
     const maintenance = filtered.reduce((s, x) => s + x.data.totalMaintenanceCost, 0);
     const parts       = filtered.reduce((s, x) => s + x.data.totalPartsCost, 0);
     const insurance   = filtered.reduce((s, x) => s + x.data.totalInsuranceCost, 0);
+    const license     = filtered.reduce((s, x) => s + (x.data.totalLicenseCost ?? 0), 0);
     const maintenanceCount = filtered.reduce((s, x) => s + x.data.maintenanceCount, 0);
     const partsCount  = filtered.reduce((s, x) => s + x.data.partsCount, 0);
-    const total       = maintenance + parts + insurance;
+    const insuranceCount = filtered.reduce(
+      (s, x) => s + (x.data.insuranceRenewalCount ?? (x.data.totalInsuranceCost > 0 ? 1 : 0)),
+      0,
+    );
+    const licenseCount = filtered.reduce((s, x) => s + (x.data.licenseRenewalCount ?? 0), 0);
+    const total       = maintenance + parts + insurance + license;
 
     const allActivity = filtered.flatMap((x) =>
       x.data.recentActivity
@@ -101,12 +111,13 @@ export default function ServiceCostsScreen() {
     const categories = [
       { key: "maintenance", cost: maintenance, count: maintenanceCount },
       { key: "parts",       cost: parts,       count: partsCount },
-      { key: "insurance",   cost: insurance,   count: filtered.reduce((s, x) => s + (x.data.totalInsuranceCost > 0 ? 1 : 0), 0) },
+      { key: "insurance",   cost: insurance,   count: insuranceCount },
+      { key: "license",     cost: license,     count: licenseCount },
     ].filter((c) => c.cost > 0);
 
     const topCategory = [...categories].sort((a, b) => b.cost - a.cost)[0] ?? null;
 
-    return { maintenance, parts, insurance, total, categories, allActivity, topCategory };
+    return { maintenance, parts, insurance, license, total, categories, allActivity, topCategory };
   }, [reportQueries, cars, filterCarId, currency]);
 
   const hasData = aggregated.total > 0 || aggregated.allActivity.length > 0;
@@ -122,7 +133,7 @@ export default function ServiceCostsScreen() {
             <Feather name="dollar-sign" size={22} color="#7C3AED" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Service Costs</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>Cost Tracker</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>
               {filterCarId === null
                 ? "All vehicles"
@@ -168,8 +179,8 @@ export default function ServiceCostsScreen() {
         ) : !hasData ? (
           <EmptyState
             icon="dollar-sign"
-            title="No service costs yet"
-            description="Service costs will appear here once you log maintenance, parts, or other records with a cost."
+            title="No costs yet"
+            description="Costs will appear here once you log maintenance, parts, renewals, or other records with a cost."
           />
         ) : (
           <>
