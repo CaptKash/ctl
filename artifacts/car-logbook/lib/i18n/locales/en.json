@@ -581,5 +581,42 @@
     "saveLicense": "Save License Renewal",
     "saveInsurance": "Save Insurance Renewal",
     "errorSave": "Failed to save. Please try again."
+  },
+  "reports": {
+    "eyebrow": "Analysis",
+    "title": "Reports",
+    "selectCar": "Select a car to view its full report",
+    "emptyTitle": "No reports yet",
+    "emptyDesc": "Add a car first to generate maintenance, cost, and activity reports.",
+    "addCar": "Add Car"
+  },
+  "report": {
+    "fullReport": "Full Report",
+    "totalLifetimeCost": "Total Lifetime Cost",
+    "lastService": "Last service: {{date}}",
+    "costBreakdown": "Cost Breakdown",
+    "categories": {
+      "maintenance": "Maintenance",
+      "parts": "Parts",
+      "fuel": "Fuel",
+      "insurance": "Insurance",
+      "license": "License"
+    },
+    "logbookSummary": "Logbook Summary",
+    "counts": {
+      "services": "Services",
+      "parts": "Parts",
+      "fillUps": "Fill-ups",
+      "renewals": "Renewals"
+    },
+    "upcomingServices": "Upcoming Services",
+    "upcomingDue": "{{count}} service(s) due soon",
+    "dueLabel": "Due: {{date}}",
+    "dueSoon": "Due soon",
+    "recentActivity": "Recent Activity",
+    "renewal": {
+      "license": "License renewal",
+      "insurance": "Insurance renewal"
+    }
   }
 }

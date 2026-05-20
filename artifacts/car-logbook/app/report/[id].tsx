@@ -1,6 +1,5 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
@@ -13,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -21,6 +21,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { RecordCard } from "@/components/ui/RecordCard";
 import { apiGet } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 type CarReport = {
   car: {
@@ -34,11 +35,14 @@ type CarReport = {
   totalMaintenanceCost: number;
   totalPartsCost: number;
   totalInsuranceCost: number;
+  totalLicenseCost?: number;
   totalFuelCost: number;
   totalCost: number;
   maintenanceCount: number;
   partsCount: number;
   fuelCount: number;
+  licenseRenewalCount?: number;
+  insuranceRenewalCount?: number;
   lastMaintenance?: string | null;
   upcomingMaintenanceDue: Array<{
     id: number;
@@ -60,6 +64,7 @@ const ACTIVITY_ICON: Record<string, { icon: keyof typeof Feather.glyphMap; color
   fuel: { icon: "droplet", color: "#EF4444", bg: "#FEE2E2" },
   dealership: { icon: "map-pin", color: "#8B5CF6", bg: "#EDE9FE" },
   insurance: { icon: "shield", color: "#3B82F6", bg: "#DBEAFE" },
+  license: { icon: "credit-card", color: "#0D9488", bg: "#CCFBF1" },
 };
 
 export default function ReportScreen() {
@@ -68,6 +73,13 @@ export default function ReportScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const { unit } = useDistanceUnit();
+  const { currency } = useCurrency();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const rtlText = isRTL ? { textAlign: "right" as const, writingDirection: "rtl" as const } : null;
+
+  const fmt = (n: number, digits = 0) =>
+    `${currency.symbol}${n.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 
   const { data: report, isLoading } = useQuery<CarReport>({
     queryKey: ["report", carId],
@@ -87,18 +99,32 @@ export default function ReportScreen() {
   if (!report) return null;
 
   const { car } = report;
+  const licenseCost = report.totalLicenseCost ?? 0;
+  const renewalsCount = (report.licenseRenewalCount ?? 0) + (report.insuranceRenewalCount ?? 0);
+
+  const renewalDescription = (item: { type: string; description: string }) => {
+    if (item.type === "license") return t("report.renewal.license");
+    if (item.type === "insurance" && /renewal/i.test(item.description)) return t("report.renewal.insurance");
+    return item.description;
+  };
 
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
-      <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: C.tint }]}>
+      <View
+        style={[
+          styles.header,
+          { paddingTop: topPad + 8, backgroundColor: C.tint },
+          isRTL && { flexDirection: "row-reverse" },
+        ]}
+      >
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color="#fff" />
+          <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color="#fff" />
         </Pressable>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle} numberOfLines={1}>
+          <Text style={[styles.headerTitle, rtlText]} numberOfLines={1}>
             {car.year} {car.make} {car.model}
           </Text>
-          <Text style={styles.headerSub}>Full Report</Text>
+          <Text style={[styles.headerSub, rtlText]}>{t("report.fullReport")}</Text>
         </View>
         <Feather name="file-text" size={20} color="rgba(255,255,255,0.7)" />
       </View>
@@ -110,35 +136,39 @@ export default function ReportScreen() {
       >
         {/* Summary Banner */}
         <View style={[styles.banner, { backgroundColor: C.tint }]}>
-          <Text style={styles.bannerLabel}>Total Lifetime Cost</Text>
-          <Text style={styles.bannerValue}>${report.totalCost.toFixed(2)}</Text>
-          <View style={styles.bannerRow}>
+          <Text style={styles.bannerLabel}>{t("report.totalLifetimeCost")}</Text>
+          <Text style={styles.bannerValue}>{fmt(report.totalCost, 2)}</Text>
+          <View style={[styles.bannerRow, isRTL && { flexDirection: "row-reverse" }]}>
             {car.mileage != null && (
               <Text style={styles.bannerMeta}>{car.mileage.toLocaleString()} {unit}</Text>
             )}
             {report.lastMaintenance && (
-              <Text style={styles.bannerMeta}>Last service: {report.lastMaintenance}</Text>
+              <Text style={styles.bannerMeta}>
+                {t("report.lastService", { date: formatDate(report.lastMaintenance) })}
+              </Text>
             )}
           </View>
         </View>
 
         {/* Cost Breakdown */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: C.text }]}>Cost Breakdown</Text>
+          <Text style={[styles.sectionTitle, { color: C.text }, rtlText]}>
+            {t("report.costBreakdown")}
+          </Text>
           <View style={styles.statsGrid}>
             <StatCard
               icon="tool"
               iconColor={C.warning}
               iconBg={C.warningLight}
-              label="Maintenance"
-              value={`$${report.totalMaintenanceCost.toFixed(0)}`}
+              label={t("report.categories.maintenance")}
+              value={fmt(report.totalMaintenanceCost)}
             />
             <StatCard
               icon="box"
               iconColor={C.success}
               iconBg={C.successLight}
-              label="Parts"
-              value={`$${report.totalPartsCost.toFixed(0)}`}
+              label={t("report.categories.parts")}
+              value={fmt(report.totalPartsCost)}
             />
           </View>
           <View style={styles.statsGrid}>
@@ -146,46 +176,82 @@ export default function ReportScreen() {
               icon="droplet"
               iconColor="#EF4444"
               iconBg="#FEE2E2"
-              label="Fuel"
-              value={`$${report.totalFuelCost.toFixed(0)}`}
+              label={t("report.categories.fuel")}
+              value={fmt(report.totalFuelCost)}
             />
             <StatCard
               icon="shield"
               iconColor={C.info}
               iconBg={C.infoLight}
-              label="Insurance"
-              value={`$${report.totalInsuranceCost.toFixed(0)}`}
+              label={t("report.categories.insurance")}
+              value={fmt(report.totalInsuranceCost)}
             />
           </View>
+          {licenseCost > 0 && (
+            <View style={styles.statsGrid}>
+              <StatCard
+                icon="credit-card"
+                iconColor="#0D9488"
+                iconBg="#CCFBF1"
+                label={t("report.categories.license")}
+                value={fmt(licenseCost)}
+              />
+              <View style={{ flex: 1 }} />
+            </View>
+          )}
         </View>
 
         {/* Activity Counts */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: C.text }]}>Logbook Summary</Text>
-          <View style={styles.countsRow}>
+          <Text style={[styles.sectionTitle, { color: C.text }, rtlText]}>
+            {t("report.logbookSummary")}
+          </Text>
+          <View style={[styles.countsRow, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.countCard, { backgroundColor: C.card }]}>
               <Text style={[styles.countValue, { color: C.text }]}>{report.maintenanceCount}</Text>
-              <Text style={[styles.countLabel, { color: C.textSecondary }]}>Services</Text>
+              <Text style={[styles.countLabel, { color: C.textSecondary }]}>
+                {t("report.counts.services")}
+              </Text>
             </View>
             <View style={[styles.countCard, { backgroundColor: C.card }]}>
               <Text style={[styles.countValue, { color: C.text }]}>{report.partsCount}</Text>
-              <Text style={[styles.countLabel, { color: C.textSecondary }]}>Parts</Text>
+              <Text style={[styles.countLabel, { color: C.textSecondary }]}>
+                {t("report.counts.parts")}
+              </Text>
             </View>
             <View style={[styles.countCard, { backgroundColor: C.card }]}>
               <Text style={[styles.countValue, { color: C.text }]}>{report.fuelCount}</Text>
-              <Text style={[styles.countLabel, { color: C.textSecondary }]}>Fill-ups</Text>
+              <Text style={[styles.countLabel, { color: C.textSecondary }]}>
+                {t("report.counts.fillUps")}
+              </Text>
             </View>
+            {renewalsCount > 0 && (
+              <View style={[styles.countCard, { backgroundColor: C.card }]}>
+                <Text style={[styles.countValue, { color: C.text }]}>{renewalsCount}</Text>
+                <Text style={[styles.countLabel, { color: C.textSecondary }]}>
+                  {t("report.counts.renewals")}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
         {/* Upcoming Due */}
         {report.upcomingMaintenanceDue.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: C.text }]}>Upcoming Services</Text>
-            <View style={[styles.alertBox, { backgroundColor: C.warningLight }]}>
+            <Text style={[styles.sectionTitle, { color: C.text }, rtlText]}>
+              {t("report.upcomingServices")}
+            </Text>
+            <View
+              style={[
+                styles.alertBox,
+                { backgroundColor: C.warningLight },
+                isRTL && { flexDirection: "row-reverse" },
+              ]}
+            >
               <Feather name="alert-circle" size={16} color={C.warning} />
-              <Text style={[styles.alertText, { color: "#92400E" }]}>
-                {report.upcomingMaintenanceDue.length} service(s) due soon
+              <Text style={[styles.alertText, { color: "#92400E" }, rtlText]}>
+                {t("report.upcomingDue", { count: report.upcomingMaintenanceDue.length })}
               </Text>
             </View>
             {report.upcomingMaintenanceDue.map((item) => (
@@ -195,8 +261,16 @@ export default function ReportScreen() {
                 iconColor={C.warning}
                 iconBg={C.warningLight}
                 title={item.description}
-                subtitle={item.nextDueDate ? `Due: ${formatDate(item.nextDueDate)}` : "Due soon"}
-                rightText={item.nextDueMileage != null ? `${item.nextDueMileage.toLocaleString()} ${unit}` : undefined}
+                subtitle={
+                  item.nextDueDate
+                    ? t("report.dueLabel", { date: formatDate(item.nextDueDate) })
+                    : t("report.dueSoon")
+                }
+                rightText={
+                  item.nextDueMileage != null
+                    ? `${item.nextDueMileage.toLocaleString()} ${unit}`
+                    : undefined
+                }
               />
             ))}
           </View>
@@ -205,7 +279,9 @@ export default function ReportScreen() {
         {/* Recent Activity */}
         {report.recentActivity.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: C.text }]}>Recent Activity</Text>
+            <Text style={[styles.sectionTitle, { color: C.text }, rtlText]}>
+              {t("report.recentActivity")}
+            </Text>
             {report.recentActivity.map((item, idx) => {
               const cfg = ACTIVITY_ICON[item.type] ?? ACTIVITY_ICON.maintenance;
               return (
@@ -214,9 +290,9 @@ export default function ReportScreen() {
                   icon={cfg.icon}
                   iconColor={cfg.color}
                   iconBg={cfg.bg}
-                  title={item.description}
+                  title={renewalDescription(item)}
                   subtitle={formatDate(item.date)}
-                  rightText={item.cost != null ? `$${item.cost.toFixed(2)}` : undefined}
+                  rightText={item.cost != null ? fmt(item.cost, 2) : undefined}
                 />
               );
             })}
@@ -313,9 +389,11 @@ const styles = StyleSheet.create({
   countsRow: {
     flexDirection: "row",
     gap: 10,
+    flexWrap: "wrap",
   },
   countCard: {
     flex: 1,
+    minWidth: 80,
     padding: 16,
     borderRadius: 14,
     alignItems: "center",

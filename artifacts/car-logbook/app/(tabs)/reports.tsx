@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { apiGet } from "@/hooks/useApi";
@@ -28,6 +29,8 @@ type Car = {
 export default function ReportsScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
 
   const { data: cars, isLoading } = useQuery<Car[]>({
     queryKey: ["cars"],
@@ -35,13 +38,18 @@ export default function ReportsScreen() {
   });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const rtlText = isRTL ? { textAlign: "right" as const, writingDirection: "rtl" as const } : null;
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
         <View>
-          <Text style={[styles.headerEyebrow, { color: C.textSecondary }]}>Analysis</Text>
-          <Text style={[styles.headerTitle, { color: C.text }]}>Reports</Text>
+          <Text style={[styles.headerEyebrow, { color: C.textSecondary }, rtlText]}>
+            {t("reports.eyebrow")}
+          </Text>
+          <Text style={[styles.headerTitle, { color: C.text }, rtlText]}>
+            {t("reports.title")}
+          </Text>
         </View>
       </View>
 
@@ -59,17 +67,17 @@ export default function ReportsScreen() {
           ]}
           ListHeaderComponent={
             cars && cars.length > 0 ? (
-              <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>
-                Select a car to view its full report
+              <Text style={[styles.sectionLabel, { color: C.textSecondary }, rtlText]}>
+                {t("reports.selectCar")}
               </Text>
             ) : null
           }
           ListEmptyComponent={
             <EmptyState
               icon="bar-chart-2"
-              title="No reports yet"
-              description="Add a car first to generate maintenance, cost, and activity reports."
-              actionLabel="Add Car"
+              title={t("reports.emptyTitle")}
+              description={t("reports.emptyDesc")}
+              actionLabel={t("reports.addCar")}
               onAction={() => router.push("/car/add")}
             />
           }
@@ -81,6 +89,7 @@ export default function ReportsScreen() {
               }}
               style={({ pressed }) => [
                 styles.reportCard,
+                isRTL && { flexDirection: "row-reverse" },
                 { backgroundColor: C.card, opacity: pressed ? 0.9 : 1 },
               ]}
             >
@@ -88,14 +97,20 @@ export default function ReportsScreen() {
                 <Feather name="file-text" size={22} color={C.info} />
               </View>
               <View style={styles.cardText}>
-                <Text style={[styles.carName, { color: C.text }]}>
+                <Text style={[styles.carName, { color: C.text }, rtlText]}>
                   {item.year} {item.make} {item.model}
                 </Text>
                 {item.licensePlate && (
-                  <Text style={[styles.plate, { color: C.textSecondary }]}>{item.licensePlate}</Text>
+                  <Text style={[styles.plate, { color: C.textSecondary }, rtlText]}>
+                    {item.licensePlate}
+                  </Text>
                 )}
               </View>
-              <Feather name="chevron-right" size={18} color={C.textTertiary} />
+              <Feather
+                name={isRTL ? "chevron-left" : "chevron-right"}
+                size={18}
+                color={C.textTertiary}
+              />
             </Pressable>
           )}
         />

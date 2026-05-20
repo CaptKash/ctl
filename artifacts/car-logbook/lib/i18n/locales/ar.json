@@ -589,5 +589,42 @@
     "saveLicense": "حفظ تجديد الترخيص",
     "saveInsurance": "حفظ تجديد التأمين",
     "errorSave": "تعذّر الحفظ. يرجى المحاولة مرة أخرى."
+  },
+  "reports": {
+    "eyebrow": "تحليل",
+    "title": "التقارير",
+    "selectCar": "اختر سيارة لعرض تقريرها الكامل",
+    "emptyTitle": "لا توجد تقارير بعد",
+    "emptyDesc": "أضف سيارة أولاً لإنشاء تقارير الصيانة والتكاليف والنشاط.",
+    "addCar": "إضافة سيارة"
+  },
+  "report": {
+    "fullReport": "التقرير الكامل",
+    "totalLifetimeCost": "إجمالي التكلفة الكلية",
+    "lastService": "آخر صيانة: {{date}}",
+    "costBreakdown": "توزيع التكاليف",
+    "categories": {
+      "maintenance": "صيانة",
+      "parts": "قطع غيار",
+      "fuel": "وقود",
+      "insurance": "تأمين",
+      "license": "ترخيص"
+    },
+    "logbookSummary": "ملخص السجل",
+    "counts": {
+      "services": "صيانات",
+      "parts": "قطع غيار",
+      "fillUps": "تعبئات",
+      "renewals": "تجديدات"
+    },
+    "upcomingServices": "الصيانات القادمة",
+    "upcomingDue": "{{count}} صيانة مستحقة قريباً",
+    "dueLabel": "الاستحقاق: {{date}}",
+    "dueSoon": "مستحقة قريباً",
+    "recentActivity": "النشاط الأخير",
+    "renewal": {
+      "license": "تجديد الترخيص",
+      "insurance": "تجديد التأمين"
+    }
   }
 }
