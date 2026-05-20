@@ -113,7 +113,7 @@ export default function AddRenewalSelectCarScreen() {
           showsVerticalScrollIndicator={false}
         >
           {cars.map((car) => (
-            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} accentBg="#CCFBF1" accentIcon="#0D9488" />
+            <CarCard key={car.id} car={car} onPress={() => handleSelectCar(car)} accentBg="#CCFBF1" accentIcon="#0D9488" accentBorder="#0D9488" />
           ))}
         </ScrollView>
       )}
