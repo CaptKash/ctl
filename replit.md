@@ -84,3 +84,4 @@ Bundle these together to minimize EAS credit usage:
 - Do not add error handling, comments, logging, tests, or extra features unless explicitly requested.
 - Before starting any task, state the planned steps and wait for approval. Do not begin implementation until confirmed.
 - If an unrelated bug or issue is encountered, stop and report it. Do not fix it unless asked.
+- Address the user as "Kash".
