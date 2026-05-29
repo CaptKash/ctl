@@ -408,9 +408,6 @@ export default function ReportScreen() {
           </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }, rtlText]}>{t("generateReport.title")}</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }, rtlText]}>
-              {isLoading ? t("generateReport.loading") : t("generateReport.recordsSelected", { count: filteredItems.length })}
-            </Text>
           </View>
         </View>
       </View>
