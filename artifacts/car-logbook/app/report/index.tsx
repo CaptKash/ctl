@@ -25,6 +25,15 @@ import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useCurrency } from "@/context/CurrencyContext";
 
+const METALLIC = {
+  silver: ["#FFFFFF", "#CBD5E1", "#94A3B8"] as const,
+  green: ["#ECFDF5", "#34D399", "#047857"] as const,
+  greenSoft: ["#ECFDF5", "#D1FAE5", "#A7F3D0"] as const,
+  fault: ["#FEF2F2", "#F87171", "#B91C1C"] as const,
+  repair: ["#FFFBEB", "#FCD34D", "#B45309"] as const,
+  inspection: ["#F0FDFA", "#5EEAD4", "#0F766E"] as const,
+};
+
 type CarStub = {
   id: number;
   make: string;
@@ -409,84 +418,93 @@ export default function ReportScreen() {
 
           {/* Car filter */}
           <Text style={[styles.sectionLabel, { color: C.textSecondary }, rtlText]}>{t("generateReport.carsLabel")}</Text>
-          <View style={[styles.section, { backgroundColor: C.card, borderColor: C.border }]}>
-            {/* All Cars toggle */}
-            <Pressable
-              onPress={selectAll}
-              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: cars.length > 0 ? StyleSheet.hairlineWidth : 0 }]}
-            >
-              <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.allCars")}</Text>
-              <View style={[styles.checkbox, { borderColor: allSelected ? "#059669" : C.border, backgroundColor: allSelected ? "#059669" : "transparent" }]}>
-                {allSelected && <Feather name="check" size={12} color="#fff" />}
-              </View>
-            </Pressable>
-            {cars.map((car, i) => {
-              const checked = selectedCarIds.includes(car.id);
-              return (
-                <Pressable
-                  key={car.id}
-                  onPress={() => toggleCar(car.id)}
-                  style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: i < cars.length - 1 ? StyleSheet.hairlineWidth : 0 }]}
-                >
-                  <Text style={[styles.optionText, { color: C.text }, rtlText]}>{carLabel(car, unknownCar)}</Text>
-                  <View style={[styles.checkbox, { borderColor: checked ? "#059669" : C.border, backgroundColor: checked ? "#059669" : "transparent" }]}>
-                    {checked && <Feather name="check" size={12} color="#fff" />}
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
+          <LinearGradient colors={METALLIC.silver} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardFrame}>
+            <View style={[styles.cardInner, { backgroundColor: C.card }]}>
+              {/* All Cars toggle */}
+              <Pressable
+                onPress={selectAll}
+                style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: cars.length > 0 ? StyleSheet.hairlineWidth : 0 }]}
+              >
+                <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.allCars")}</Text>
+                <View style={[styles.checkbox, { borderColor: allSelected ? "#059669" : C.border, backgroundColor: allSelected ? "#059669" : "transparent" }]}>
+                  {allSelected && <Feather name="check" size={12} color="#fff" />}
+                </View>
+              </Pressable>
+              {cars.map((car, i) => {
+                const checked = selectedCarIds.includes(car.id);
+                return (
+                  <Pressable
+                    key={car.id}
+                    onPress={() => toggleCar(car.id)}
+                    style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: i < cars.length - 1 ? StyleSheet.hairlineWidth : 0 }]}
+                  >
+                    <Text style={[styles.optionText, { color: C.text }, rtlText]}>{carLabel(car, unknownCar)}</Text>
+                    <View style={[styles.checkbox, { borderColor: checked ? "#059669" : C.border, backgroundColor: checked ? "#059669" : "transparent" }]}>
+                      {checked && <Feather name="check" size={12} color="#fff" />}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </LinearGradient>
 
           {/* Record types */}
           <Text style={[styles.sectionLabel, { color: C.textSecondary }, rtlText]}>{t("generateReport.recordTypesLabel")}</Text>
-          <View style={[styles.section, { backgroundColor: C.card, borderColor: C.border }]}>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); setIncludeFaults((v) => !v); }}
-              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
-            >
-              <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                <View style={[styles.typeDot, { borderColor: "#DC2626", backgroundColor: includeFaults ? "#DC2626" : "transparent" }]}>
-                  <Feather name="alert-triangle" size={14} color={includeFaults ? "#fff" : "#DC2626"} />
+          <LinearGradient colors={METALLIC.silver} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardFrame}>
+            <View style={[styles.cardInner, { backgroundColor: C.card }]}>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); setIncludeFaults((v) => !v); }}
+                style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
+              >
+                <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
+                  <LinearGradient colors={METALLIC.fault} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#7F1D1D", opacity: includeFaults ? 1 : 0.4 }]}>
+                    <Feather name="alert-triangle" size={14} color="#fff" />
+                  </LinearGradient>
+                  <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.faults")}</Text>
                 </View>
-                <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.faults")}</Text>
-              </View>
-              <View style={[styles.checkbox, { borderColor: includeFaults ? "#DC2626" : C.border, backgroundColor: includeFaults ? "#DC2626" : "transparent" }]}>
-                {includeFaults && <Feather name="check" size={12} color="#fff" />}
-              </View>
-            </Pressable>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); setIncludeRepairs((v) => !v); }}
-              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
-            >
-              <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                <View style={[styles.typeDot, { borderColor: "#D97706", backgroundColor: includeRepairs ? "#D97706" : "transparent" }]}>
-                  <Feather name="tool" size={14} color={includeRepairs ? "#fff" : "#D97706"} />
+                <View style={[styles.checkbox, { borderColor: includeFaults ? "#B91C1C" : C.border, backgroundColor: includeFaults ? "#B91C1C" : "transparent" }]}>
+                  {includeFaults && <Feather name="check" size={12} color="#fff" />}
                 </View>
-                <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.repairs")}</Text>
-              </View>
-              <View style={[styles.checkbox, { borderColor: includeRepairs ? "#D97706" : C.border, backgroundColor: includeRepairs ? "#D97706" : "transparent" }]}>
-                {includeRepairs && <Feather name="check" size={12} color="#fff" />}
-              </View>
-            </Pressable>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); setIncludeInspections((v) => !v); }}
-              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }]}
-            >
-              <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                <View style={[styles.typeDot, { borderColor: "#0D9488", backgroundColor: includeInspections ? "#0D9488" : "transparent" }]}>
-                  <Feather name="clipboard" size={14} color={includeInspections ? "#fff" : "#0D9488"} />
+              </Pressable>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); setIncludeRepairs((v) => !v); }}
+                style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
+              >
+                <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
+                  <LinearGradient colors={METALLIC.repair} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#78350F", opacity: includeRepairs ? 1 : 0.4 }]}>
+                    <Feather name="tool" size={14} color="#fff" />
+                  </LinearGradient>
+                  <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.repairs")}</Text>
                 </View>
-                <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.inspections")}</Text>
-              </View>
-              <View style={[styles.checkbox, { borderColor: includeInspections ? "#0D9488" : C.border, backgroundColor: includeInspections ? "#0D9488" : "transparent" }]}>
-                {includeInspections && <Feather name="check" size={12} color="#fff" />}
-              </View>
-            </Pressable>
-          </View>
+                <View style={[styles.checkbox, { borderColor: includeRepairs ? "#B45309" : C.border, backgroundColor: includeRepairs ? "#B45309" : "transparent" }]}>
+                  {includeRepairs && <Feather name="check" size={12} color="#fff" />}
+                </View>
+              </Pressable>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); setIncludeInspections((v) => !v); }}
+                style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }]}
+              >
+                <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
+                  <LinearGradient colors={METALLIC.inspection} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#134E4A", opacity: includeInspections ? 1 : 0.4 }]}>
+                    <Feather name="clipboard" size={14} color="#fff" />
+                  </LinearGradient>
+                  <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.inspections")}</Text>
+                </View>
+                <View style={[styles.checkbox, { borderColor: includeInspections ? "#0F766E" : C.border, backgroundColor: includeInspections ? "#0F766E" : "transparent" }]}>
+                  {includeInspections && <Feather name="check" size={12} color="#fff" />}
+                </View>
+              </Pressable>
+            </View>
+          </LinearGradient>
 
           {/* Summary */}
-          <View style={[styles.summary, isRTL && { flexDirection: "row-reverse" }, { backgroundColor: "#D1FAE5", borderColor: "#6EE7B7" }]}>
-            <Feather name="info" size={15} color="#059669" />
+          <LinearGradient
+            colors={METALLIC.greenSoft}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.summary, isRTL && { flexDirection: "row-reverse" }, { borderColor: "#6EE7B7" }]}
+          >
+            <Feather name="info" size={15} color="#047857" />
             <Text style={[styles.summaryText, rtlText]}>
               {canGenerate
                 ? t("generateReport.willInclude", { count: filteredItems.length })
@@ -494,20 +512,23 @@ export default function ReportScreen() {
                   ? t("generateReport.noMatch")
                   : t("generateReport.selectType")}
             </Text>
-          </View>
+          </LinearGradient>
 
           {/* Generate button */}
           <Pressable
             onPress={handleGenerate}
             disabled={!canGenerate}
-            style={({ pressed }) => [
-              styles.generateBtn,
-              isRTL && { flexDirection: "row-reverse" },
-              { opacity: !canGenerate ? 0.45 : pressed ? 0.8 : 1 },
-            ]}
+            style={({ pressed }) => [styles.generateWrap, { opacity: !canGenerate ? 0.45 : pressed ? 0.85 : 1 }]}
           >
-            <Feather name="file-text" size={17} color="#fff" />
-            <Text style={styles.generateBtnText}>{t("generateReport.generate")}</Text>
+            <LinearGradient
+              colors={METALLIC.green}
+              start={{ x: 0.15, y: 0 }}
+              end={{ x: 0.85, y: 1 }}
+              style={[styles.generateBtn, isRTL && { flexDirection: "row-reverse" }]}
+            >
+              <Feather name="file-text" size={17} color="#fff" />
+              <Text style={styles.generateBtnText}>{t("generateReport.generate")}</Text>
+            </LinearGradient>
           </Pressable>
         </ScrollView>
       )}
@@ -550,15 +571,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     marginLeft: 4,
   },
-  section: {
+  cardFrame: {
     borderRadius: 16,
-    borderWidth: 1,
-    overflow: "hidden",
-    shadowColor: "rgba(0,0,0,0.05)",
+    padding: 1.5,
+    shadowColor: "rgba(0,0,0,0.12)",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  cardInner: {
+    borderRadius: 15,
+    overflow: "hidden",
   },
   optionRow: {
     flexDirection: "row",
@@ -573,9 +597,14 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 9,
-    borderWidth: 1.5,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "rgba(0,0,0,0.3)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 1.5,
+    elevation: 2,
   },
   checkbox: {
     width: 22,
@@ -597,14 +626,23 @@ const styles = StyleSheet.create({
   },
   summaryText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium", color: "#065F46" },
 
-  generateBtn: {
+  generateWrap: {
     marginTop: 12,
+    borderRadius: 14,
+    shadowColor: "#064E3B",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  generateBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#059669",
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#064E3B",
     paddingVertical: 16,
   },
   generateBtnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
