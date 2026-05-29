@@ -78,3 +78,9 @@ Bundle these together to minimize EAS credit usage:
 3. **CTL Enterprise** — new tier, details TBD with user
 4. **Arabic language + RTL support**
 5. **AI Fault Analyst (CTL Fleet flagship feature, Build 30/31)** — After a user saves a fault, a Fleet-gated "Analyze with AI" button on the fault detail screen calls a server endpoint that returns: plain-language explanation (EN/AR), severity (drive / drive carefully / pull over), top 3 likely causes ranked for that make/model/year/mileage, DIY pre-checks, Gulf-market repair cost range, and questions to ask the mechanic. Cached per-fault. Same pattern later extends to inspection results, renewal reminders, and a fleet-wide health dashboard. Free tier keeps manual entry only — no AI message generator (weak value). Gate via existing `fleet` RC entitlement → existing paywall route.
+
+## User Preferences
+- Be as minimal as possible. Make only the changes needed to complete the task. Do not refactor, reorganize, or improve anything not asked about.
+- Do not add error handling, comments, logging, tests, or extra features unless explicitly requested.
+- Before starting any task, state the planned steps and wait for approval. Do not begin implementation until confirmed.
+- If an unrelated bug or issue is encountered, stop and report it. Do not fix it unless asked.
