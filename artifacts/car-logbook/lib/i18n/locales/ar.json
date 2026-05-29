@@ -637,7 +637,7 @@
     "recordsSelected_many": "{{count}} سجلاً محدداً",
     "recordsSelected_other": "{{count}} سجل محدد",
     "carsLabel": "السيارات",
-    "allCars": "كل السيارات",
+    "allCars": "جميع السيارات",
     "recordTypesLabel": "أنواع السجلات",
     "faults": "الأعطال / الأعطال المفاجئة / الأضرار",
     "repairs": "الإصلاح / الصيانة",
@@ -653,7 +653,7 @@
     "generate": "إنشاء وفتح التقرير",
     "unknownCar": "سيارة غير معروفة",
     "filter": {
-      "allCars": "كل السيارات",
+      "allCars": "جميع السيارات",
       "nCars": "{{count}} سيارات",
       "faultsAndRepairs": "الأعطال والإصلاحات",
       "faultsOnly": "الأعطال فقط",
