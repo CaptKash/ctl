@@ -618,5 +618,52 @@
       "license": "License renewal",
       "insurance": "Insurance renewal"
     }
+  },
+  "generateReport": {
+    "title": "Generate Report",
+    "loading": "Loading…",
+    "recordsSelected_one": "{{count}} record selected",
+    "recordsSelected_other": "{{count}} records selected",
+    "carsLabel": "CARS",
+    "allCars": "All Cars",
+    "recordTypesLabel": "RECORD TYPES",
+    "faults": "Faults",
+    "repairs": "Repairs",
+    "inspections": "Inspections",
+    "willInclude_one": "{{count}} record will be included in the report.",
+    "willInclude_other": "{{count}} records will be included in the report.",
+    "noMatch": "No records match the current filters.",
+    "selectType": "Select at least one record type.",
+    "generate": "Generate & Open Report",
+    "unknownCar": "Unknown car",
+    "filter": {
+      "allCars": "All Cars",
+      "nCars": "{{count}} Cars",
+      "faultsAndRepairs": "Faults & Repairs",
+      "faultsOnly": "Faults only",
+      "repairsOnly": "Repairs only"
+    },
+    "doc": {
+      "title": "CTL History Report",
+      "generated": "Generated {{date}}",
+      "records_one": "{{count}} record",
+      "records_other": "{{count}} records",
+      "badgeFault": "Fault",
+      "badgeRepair": "Repair",
+      "badgeInspection": "Inspection",
+      "status": "Status",
+      "resolved": "Resolved",
+      "active": "Active",
+      "phase": "Phase",
+      "description": "Description",
+      "shop": "Shop",
+      "address": "Address",
+      "cost": "Cost",
+      "warranty": "Warranty",
+      "inspectionCenter": "Inspection Center",
+      "nextInspection": "Next Inspection",
+      "inspection": "Inspection",
+      "resultPrefix": "Result: {{result}}"
+    }
   }
 }

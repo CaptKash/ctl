@@ -16,11 +16,14 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
+import { useCurrency } from "@/context/CurrencyContext";
 
 type CarStub = {
   id: number;
@@ -90,8 +93,8 @@ type HistoryItem = {
   nextInspectionDate?: string | null;
 };
 
-function carLabel(car: CarStub | null): string {
-  if (!car) return "Unknown car";
+function carLabel(car: CarStub | null, unknownLabel: string): string {
+  if (!car) return unknownLabel;
   return `${car.year} ${car.make} ${car.model}`;
 }
 
@@ -100,37 +103,56 @@ function field(label: string, value: string | null | undefined) {
   return `<div class="field"><div class="fl">${label}</div><div class="fv">${value}</div></div>`;
 }
 
-function buildHtml(items: HistoryItem[], filterLabel: string): string {
-  const now = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+function buildHtml(
+  items: HistoryItem[],
+  filterLabel: string,
+  t: TFunction,
+  isRTL: boolean,
+  currencySymbol: string
+): string {
+  const now = new Date().toLocaleDateString(isRTL ? "ar" : "en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
   const cards = items.map((ev) => {
-    const typeLabel = ev.type === "malfunction" ? "Fault" : ev.type === "inspection" ? "Inspection" : "Repair";
+    const typeLabel =
+      ev.type === "malfunction"
+        ? t("generateReport.doc.badgeFault")
+        : ev.type === "inspection"
+          ? t("generateReport.doc.badgeInspection")
+          : t("generateReport.doc.badgeRepair");
     let titleHtml = "";
     let fieldsHtml = "";
 
     if (ev.type === "malfunction") {
       titleHtml = ev.title;
       const statusClass = ev.completed ? "resolved" : "active";
-      const statusText = ev.completed ? "Resolved" : "Active";
+      const statusText = ev.completed
+        ? t("generateReport.doc.resolved")
+        : t("generateReport.doc.active");
       fieldsHtml = `
-        <div class="field"><div class="fl">Status</div><div class="fv status-${statusClass}">${statusText}</div></div>
-        ${ev.phase ? field("Phase", ev.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())) : ""}
+        <div class="field"><div class="fl">${t("generateReport.doc.status")}</div><div class="fv status-${statusClass}">${statusText}</div></div>
+        ${ev.phase ? field(t("generateReport.doc.phase"), ev.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())) : ""}
       `;
     } else if (ev.type === "maintenance") {
       titleHtml = ev.serviceType ?? ev.title;
       fieldsHtml = `
-        ${ev.correctiveAction && ev.correctiveAction !== ev.serviceType ? field("Description", ev.correctiveAction) : ""}
-        ${field("Shop", ev.shop)}
-        ${ev.shopAddress ? field("Address", ev.shopAddress) : ""}
-        ${ev.cost != null ? field("Cost", `$${ev.cost.toFixed(2)}`) : ""}
-        ${field("Warranty", ev.warrantyPeriod)}
+        ${ev.correctiveAction && ev.correctiveAction !== ev.serviceType ? field(t("generateReport.doc.description"), ev.correctiveAction) : ""}
+        ${field(t("generateReport.doc.shop"), ev.shop)}
+        ${ev.shopAddress ? field(t("generateReport.doc.address"), ev.shopAddress) : ""}
+        ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
+        ${field(t("generateReport.doc.warranty"), ev.warrantyPeriod)}
       `;
     } else {
-      titleHtml = ev.results ? `Result: ${ev.results}` : "Inspection";
+      titleHtml = ev.results
+        ? t("generateReport.doc.resultPrefix", { result: ev.results })
+        : t("generateReport.doc.inspection");
       fieldsHtml = `
-        ${field("Inspection Center", ev.place)}
-        ${ev.cost != null ? field("Cost", `$${ev.cost.toFixed(2)}`) : ""}
-        ${ev.nextInspectionDate ? field("Next Inspection", formatDate(ev.nextInspectionDate)) : ""}
+        ${field(t("generateReport.doc.inspectionCenter"), ev.place)}
+        ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
+        ${ev.nextInspectionDate ? field(t("generateReport.doc.nextInspection"), formatDate(ev.nextInspectionDate)) : ""}
       `;
     }
 
@@ -148,11 +170,14 @@ function buildHtml(items: HistoryItem[], filterLabel: string): string {
     </div>`;
   }).join("");
 
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
-  <title>CTL Report</title>
+  const dir = isRTL ? "rtl" : "ltr";
+  const lang = isRTL ? "ar" : "en";
+
+  return `<!DOCTYPE html><html lang="${lang}" dir="${dir}"><head><meta charset="UTF-8"/>
+  <title>${t("generateReport.doc.title")}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; padding: 40px; background: #f9fafb; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; padding: 40px; background: #f9fafb; direction: ${dir}; }
     h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
     .meta { color: #6b7280; font-size: 13px; margin-bottom: 28px; }
     .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
@@ -173,14 +198,20 @@ function buildHtml(items: HistoryItem[], filterLabel: string): string {
     .status-active { color: #DC2626; font-weight: 600; }
     @media print { body { padding: 20px; background: #fff; } }
   </style></head><body>
-  <h1>CTL History Report</h1>
-  <div class="meta">Generated ${now} &nbsp;·&nbsp; ${filterLabel} &nbsp;·&nbsp; ${items.length} record${items.length !== 1 ? "s" : ""}</div>
+  <h1>${t("generateReport.doc.title")}</h1>
+  <div class="meta">${t("generateReport.doc.generated", { date: now })} &nbsp;·&nbsp; ${filterLabel} &nbsp;·&nbsp; ${t("generateReport.doc.records", { count: items.length })}</div>
   ${cards}
   </body></html>`;
 }
 
-async function openReport(items: HistoryItem[], filterLabel: string) {
-  const html = buildHtml(items, filterLabel);
+async function openReport(
+  items: HistoryItem[],
+  filterLabel: string,
+  t: TFunction,
+  isRTL: boolean,
+  currencySymbol: string
+) {
+  const html = buildHtml(items, filterLabel, t, isRTL, currencySymbol);
 
   if (Platform.OS === "web") {
     if (typeof document !== "undefined") {
@@ -198,7 +229,7 @@ async function openReport(items: HistoryItem[], filterLabel: string) {
       const { uri } = await Print.printToFileAsync({ html });
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
-        await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: "CTL History Report" });
+        await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: t("generateReport.doc.title") });
       } else {
         await Print.printAsync({ html });
       }
@@ -211,6 +242,10 @@ async function openReport(items: HistoryItem[], filterLabel: string) {
 export default function ReportScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const rtlText = isRTL ? { textAlign: "right" as const, writingDirection: "rtl" as const } : null;
+  const { currency } = useCurrency();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId: carIdParam } = useLocalSearchParams<{ carId?: string }>();
 
@@ -245,6 +280,7 @@ export default function ReportScreen() {
   const isLoading = carsQuery.isLoading || faultsQuery.isLoading || repairsQuery.isLoading || inspectionsQuery.isLoading;
 
   const cars: CarStub[] = carsQuery.data ?? [];
+  const unknownCar = t("generateReport.unknownCar");
 
   const allItems: HistoryItem[] = React.useMemo(() => {
     const faults = (faultsQuery.data ?? []).map((r): HistoryItem => ({
@@ -253,7 +289,7 @@ export default function ReportScreen() {
       type: "malfunction",
       date: r.date,
       title: r.description,
-      carName: carLabel(r.car),
+      carName: carLabel(r.car, unknownCar),
       completed: r.completed,
       phase: r.phase,
     }));
@@ -264,7 +300,7 @@ export default function ReportScreen() {
       type: "maintenance",
       date: r.date,
       title: r.description,
-      carName: carLabel(r.car),
+      carName: carLabel(r.car, unknownCar),
       completed: false,
       serviceType: r.type,
       correctiveAction: r.description,
@@ -279,8 +315,8 @@ export default function ReportScreen() {
       carId: r.carId,
       type: "inspection",
       date: r.date,
-      title: r.results ?? "Inspection",
-      carName: carLabel(r.car),
+      title: r.results ?? t("generateReport.doc.inspection"),
+      carName: carLabel(r.car, unknownCar),
       completed: false,
       results: r.results,
       place: r.place,
@@ -289,7 +325,7 @@ export default function ReportScreen() {
     }));
 
     return [...faults, ...repairs, ...inspections].sort((a, b) => b.date.localeCompare(a.date));
-  }, [faultsQuery.data, repairsQuery.data, inspectionsQuery.data]);
+  }, [faultsQuery.data, repairsQuery.data, inspectionsQuery.data, unknownCar, t]);
 
   const allSelected = selectedCarIds.length === 0;
 
@@ -319,30 +355,32 @@ export default function ReportScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     let carPart: string;
     if (allSelected) {
-      carPart = "All Cars";
+      carPart = t("generateReport.filter.allCars");
     } else if (selectedCarIds.length === 1) {
       const [id] = selectedCarIds;
-      carPart = carLabel(cars.find((c) => c.id === id) ?? null);
+      carPart = carLabel(cars.find((c) => c.id === id) ?? null, unknownCar);
     } else {
-      carPart = `${selectedCarIds.length} Cars`;
+      carPart = t("generateReport.filter.nCars", { count: selectedCarIds.length });
     }
-    const typePart = includeFaults && includeRepairs ? "Faults & Repairs"
-      : includeFaults ? "Faults only"
-      : "Repairs only";
-    await openReport(filteredItems, `${carPart} · ${typePart}`);
+    const typePart = includeFaults && includeRepairs
+      ? t("generateReport.filter.faultsAndRepairs")
+      : includeFaults
+        ? t("generateReport.filter.faultsOnly")
+        : t("generateReport.filter.repairsOnly");
+    await openReport(filteredItems, `${carPart} · ${typePart}`, t, isRTL, currency.symbol);
   }
 
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable
             onPress={() => router.back()}
             style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}
             hitSlop={8}
           >
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           <LinearGradient
             colors={["#ECFDF5", "#34D399", "#047857"]}
@@ -354,9 +392,9 @@ export default function ReportScreen() {
             <Feather name="file-text" size={22} color="#064E3B" />
           </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Generate Report</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-              {isLoading ? "Loading…" : `${filteredItems.length} record${filteredItems.length !== 1 ? "s" : ""} selected`}
+            <Text style={[styles.headerTitle, { color: C.text }, rtlText]}>{t("generateReport.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }, rtlText]}>
+              {isLoading ? t("generateReport.loading") : t("generateReport.recordsSelected", { count: filteredItems.length })}
             </Text>
           </View>
         </View>
@@ -370,14 +408,14 @@ export default function ReportScreen() {
         <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}>
 
           {/* Car filter */}
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>CARS</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }, rtlText]}>{t("generateReport.carsLabel")}</Text>
           <View style={[styles.section, { backgroundColor: C.card, borderColor: C.border }]}>
             {/* All Cars toggle */}
             <Pressable
               onPress={selectAll}
-              style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: cars.length > 0 ? StyleSheet.hairlineWidth : 0 }]}
+              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: cars.length > 0 ? StyleSheet.hairlineWidth : 0 }]}
             >
-              <Text style={[styles.optionText, { color: C.text }]}>All Cars</Text>
+              <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.allCars")}</Text>
               <View style={[styles.checkbox, { borderColor: allSelected ? "#059669" : C.border, backgroundColor: allSelected ? "#059669" : "transparent" }]}>
                 {allSelected && <Feather name="check" size={12} color="#fff" />}
               </View>
@@ -388,9 +426,9 @@ export default function ReportScreen() {
                 <Pressable
                   key={car.id}
                   onPress={() => toggleCar(car.id)}
-                  style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: i < cars.length - 1 ? StyleSheet.hairlineWidth : 0 }]}
+                  style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: i < cars.length - 1 ? StyleSheet.hairlineWidth : 0 }]}
                 >
-                  <Text style={[styles.optionText, { color: C.text }]}>{carLabel(car)}</Text>
+                  <Text style={[styles.optionText, { color: C.text }, rtlText]}>{carLabel(car, unknownCar)}</Text>
                   <View style={[styles.checkbox, { borderColor: checked ? "#059669" : C.border, backgroundColor: checked ? "#059669" : "transparent" }]}>
                     {checked && <Feather name="check" size={12} color="#fff" />}
                   </View>
@@ -400,17 +438,17 @@ export default function ReportScreen() {
           </View>
 
           {/* Record types */}
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>RECORD TYPES</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary }, rtlText]}>{t("generateReport.recordTypesLabel")}</Text>
           <View style={[styles.section, { backgroundColor: C.card, borderColor: C.border }]}>
             <Pressable
               onPress={() => { Haptics.selectionAsync(); setIncludeFaults((v) => !v); }}
-              style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
+              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
             >
-              <View style={styles.optionLeft}>
+              <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
                 <View style={[styles.typeDot, { backgroundColor: "#FEE2E2" }]}>
                   <Feather name="alert-triangle" size={12} color="#DC2626" />
                 </View>
-                <Text style={[styles.optionText, { color: C.text }]}>Faults</Text>
+                <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.faults")}</Text>
               </View>
               <View style={[styles.checkbox, { borderColor: includeFaults ? "#059669" : C.border, backgroundColor: includeFaults ? "#059669" : "transparent" }]}>
                 {includeFaults && <Feather name="check" size={12} color="#fff" />}
@@ -418,13 +456,13 @@ export default function ReportScreen() {
             </Pressable>
             <Pressable
               onPress={() => { Haptics.selectionAsync(); setIncludeRepairs((v) => !v); }}
-              style={[styles.optionRow, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
+              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
             >
-              <View style={styles.optionLeft}>
+              <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
                 <View style={[styles.typeDot, { backgroundColor: "#FEF3C7" }]}>
                   <Feather name="tool" size={12} color="#D97706" />
                 </View>
-                <Text style={[styles.optionText, { color: C.text }]}>Repairs</Text>
+                <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.repairs")}</Text>
               </View>
               <View style={[styles.checkbox, { borderColor: includeRepairs ? "#059669" : C.border, backgroundColor: includeRepairs ? "#059669" : "transparent" }]}>
                 {includeRepairs && <Feather name="check" size={12} color="#fff" />}
@@ -432,13 +470,13 @@ export default function ReportScreen() {
             </Pressable>
             <Pressable
               onPress={() => { Haptics.selectionAsync(); setIncludeInspections((v) => !v); }}
-              style={styles.optionRow}
+              style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }]}
             >
-              <View style={styles.optionLeft}>
+              <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
                 <View style={[styles.typeDot, { backgroundColor: "#CCFBF1" }]}>
                   <Feather name="clipboard" size={12} color="#0D9488" />
                 </View>
-                <Text style={[styles.optionText, { color: C.text }]}>Inspections</Text>
+                <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.inspections")}</Text>
               </View>
               <View style={[styles.checkbox, { borderColor: includeInspections ? "#059669" : C.border, backgroundColor: includeInspections ? "#059669" : "transparent" }]}>
                 {includeInspections && <Feather name="check" size={12} color="#fff" />}
@@ -447,14 +485,14 @@ export default function ReportScreen() {
           </View>
 
           {/* Summary */}
-          <View style={[styles.summary, { backgroundColor: "#D1FAE5", borderColor: "#6EE7B7" }]}>
+          <View style={[styles.summary, isRTL && { flexDirection: "row-reverse" }, { backgroundColor: "#D1FAE5", borderColor: "#6EE7B7" }]}>
             <Feather name="info" size={15} color="#059669" />
-            <Text style={styles.summaryText}>
+            <Text style={[styles.summaryText, rtlText]}>
               {canGenerate
-                ? `${filteredItems.length} record${filteredItems.length !== 1 ? "s" : ""} will be included in the report.`
+                ? t("generateReport.willInclude", { count: filteredItems.length })
                 : filteredItems.length === 0
-                  ? "No records match the current filters."
-                  : "Select at least one record type."}
+                  ? t("generateReport.noMatch")
+                  : t("generateReport.selectType")}
             </Text>
           </View>
 
@@ -464,11 +502,12 @@ export default function ReportScreen() {
             disabled={!canGenerate}
             style={({ pressed }) => [
               styles.generateBtn,
+              isRTL && { flexDirection: "row-reverse" },
               { opacity: !canGenerate ? 0.45 : pressed ? 0.8 : 1 },
             ]}
           >
             <Feather name="file-text" size={17} color="#fff" />
-            <Text style={styles.generateBtnText}>Generate &amp; Open Report</Text>
+            <Text style={styles.generateBtnText}>{t("generateReport.generate")}</Text>
           </Pressable>
         </ScrollView>
       )}
