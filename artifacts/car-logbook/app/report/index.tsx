@@ -25,8 +25,9 @@ import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useCurrency } from "@/context/CurrencyContext";
 
+const CARD_OUTLINE = "#94A3B8";
+
 const METALLIC = {
-  silver: ["#FFFFFF", "#CBD5E1", "#94A3B8"] as const,
   greenSoft: ["#ECFDF5", "#D1FAE5", "#A7F3D0"] as const,
   fault: ["#FEF2F2", "#FECACA", "#FCA5A5"] as const,
   repair: ["#FFFBEB", "#FEF3C7", "#FDE68A"] as const,
@@ -423,7 +424,7 @@ export default function ReportScreen() {
 
           {/* Car filter */}
           <Text style={[styles.sectionLabel, { color: C.textSecondary }, rtlText]}>{t("generateReport.carsLabel")}</Text>
-          <LinearGradient colors={METALLIC.silver} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardFrame}>
+          <View style={[styles.cardFrame, { backgroundColor: CARD_OUTLINE }]}>
             <View style={[styles.cardInner, { backgroundColor: C.card }]}>
               {/* All Cars toggle */}
               <Pressable
@@ -451,11 +452,11 @@ export default function ReportScreen() {
                 );
               })}
             </View>
-          </LinearGradient>
+          </View>
 
           {/* Record types */}
           <Text style={[styles.sectionLabel, { color: C.textSecondary }, rtlText]}>{t("generateReport.recordTypesLabel")}</Text>
-          <LinearGradient colors={METALLIC.silver} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardFrame}>
+          <View style={[styles.cardFrame, { backgroundColor: CARD_OUTLINE }]}>
             <View style={[styles.cardInner, { backgroundColor: C.card }]}>
               <Pressable
                 onPress={() => { Haptics.selectionAsync(); setIncludeFaults((v) => !v); }}
@@ -500,7 +501,7 @@ export default function ReportScreen() {
                 </View>
               </Pressable>
             </View>
-          </LinearGradient>
+          </View>
 
           {/* Summary */}
           <LinearGradient
