@@ -24,6 +24,7 @@ import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useCurrency } from "@/context/CurrencyContext";
+import { REPORT_LOGO } from "@/lib/reportLogo";
 
 const CARD_OUTLINE = "#94A3B8";
 
@@ -276,10 +277,8 @@ function buildHtml(
     .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .brand-mark {
       width: 46px; height: 46px; border-radius: 13px;
-      background: rgba(255,255,255,0.14);
       border: 1px solid rgba(255,255,255,0.35);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 16px; letter-spacing: 1.5px;
+      object-fit: cover; display: block;
     }
     .brand-name { font-size: 15px; font-weight: 700; }
     .brand-sub { font-size: 12px; color: #93C5FD; }
@@ -356,7 +355,7 @@ function buildHtml(
   <div class="report">
     <header class="report-header">
       <div class="brand">
-        <div class="brand-mark">${t("common.appName")}</div>
+        <img class="brand-mark" src="${REPORT_LOGO}" alt="${t("common.appName")}"/>
         <div class="brand-text">
           <div class="brand-name">${t("common.appName")}</div>
           <div class="brand-sub">${t("common.appTagline")}</div>
