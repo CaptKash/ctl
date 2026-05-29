@@ -509,7 +509,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "faults": "Active Faults",
+    "faults": "Fault Log",
     "history": "History",
     "tools": "Tools",
     "settings": "Settings"
