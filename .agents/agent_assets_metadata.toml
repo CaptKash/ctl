@@ -77,3 +77,9 @@ id = "2HJ78s3B3AqOZcAvgJbwD"
 uri = "file://exports/CTL-Clerk-Migration-Plan.pdf"
 type = "pdf"
 title = "CTL Clerk Migration Plan — Build 28"
+
+[[outputs]]
+id = "1wo1fogT2y_Knql-k0Wrw"
+uri = "file://exports/ctl-partner-brief.pdf"
+type = "pdf"
+title = "CTL — Partnership Brief (PDF)"
