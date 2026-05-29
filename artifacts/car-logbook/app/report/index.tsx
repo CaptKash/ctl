@@ -266,23 +266,29 @@ function buildHtml(
     .report { max-width: 820px; margin: 0 auto; }
 
     .report-header {
-      background: linear-gradient(135deg, #047857 0%, #064E3B 100%);
+      background: linear-gradient(135deg, #0F2D5E 0%, #0A1A3A 100%);
       color: #fff;
       border-radius: 18px;
       padding: 26px 28px 22px;
       margin-bottom: 20px;
-      box-shadow: 0 6px 18px rgba(4,120,87,0.25);
+      box-shadow: 0 6px 18px rgba(15,45,94,0.28);
     }
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .brand-mark {
       width: 46px; height: 46px; border-radius: 13px;
-      background: rgba(255,255,255,0.16);
-      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.35);
       display: flex; align-items: center; justify-content: center;
       font-weight: 800; font-size: 16px; letter-spacing: 1.5px;
     }
     .brand-name { font-size: 15px; font-weight: 700; }
-    .brand-sub { font-size: 12px; opacity: 0.82; }
+    .brand-sub { font-size: 12px; color: #93C5FD; }
+    .accent-bar {
+      display: flex; gap: 6px; margin-bottom: 16px;
+    }
+    .accent-bar span { height: 4px; border-radius: 999px; }
+    .accent-bar .ab-blue { width: 54px; background: #2563EB; }
+    .accent-bar .ab-teal { width: 26px; background: #2DD4BF; }
     .report-header h1 { font-size: 25px; font-weight: 800; margin-bottom: 9px; letter-spacing: -0.3px; }
     .meta-row { font-size: 13px; opacity: 0.92; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     .meta-row .dot { opacity: 0.45; }
@@ -311,10 +317,10 @@ function buildHtml(
       padding: 13px 16px;
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
-      border-inline-start: 4px solid #047857;
+      border-inline-start: 4px solid #1D4ED8;
     }
     .car-name { font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
-    .car-total { font-size: 12px; font-weight: 700; color: #047857; background: #D1FAE5; border-radius: 999px; padding: 3px 11px; white-space: nowrap; margin-inline-start: 10px; }
+    .car-total { font-size: 12px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; border-radius: 999px; padding: 3px 11px; white-space: nowrap; margin-inline-start: 10px; }
 
     .rec-row td {
       padding: 12px 16px;
@@ -356,6 +362,7 @@ function buildHtml(
           <div class="brand-sub">${t("common.appTagline")}</div>
         </div>
       </div>
+      <div class="accent-bar"><span class="ab-blue"></span><span class="ab-teal"></span></div>
       <h1>${t("generateReport.doc.title")}</h1>
       <div class="meta-row">
         <span>${t("generateReport.doc.generated", { date: now })}</span>
