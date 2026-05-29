@@ -445,12 +445,12 @@ export default function ReportScreen() {
               style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
             >
               <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                <View style={[styles.typeDot, { backgroundColor: "#FEE2E2" }]}>
-                  <Feather name="alert-triangle" size={12} color="#DC2626" />
+                <View style={[styles.typeDot, { borderColor: "#DC2626", backgroundColor: includeFaults ? "#DC2626" : "transparent" }]}>
+                  <Feather name="alert-triangle" size={14} color={includeFaults ? "#fff" : "#DC2626"} />
                 </View>
                 <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.faults")}</Text>
               </View>
-              <View style={[styles.checkbox, { borderColor: includeFaults ? "#059669" : C.border, backgroundColor: includeFaults ? "#059669" : "transparent" }]}>
+              <View style={[styles.checkbox, { borderColor: includeFaults ? "#DC2626" : C.border, backgroundColor: includeFaults ? "#DC2626" : "transparent" }]}>
                 {includeFaults && <Feather name="check" size={12} color="#fff" />}
               </View>
             </Pressable>
@@ -459,12 +459,12 @@ export default function ReportScreen() {
               style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
             >
               <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                <View style={[styles.typeDot, { backgroundColor: "#FEF3C7" }]}>
-                  <Feather name="tool" size={12} color="#D97706" />
+                <View style={[styles.typeDot, { borderColor: "#D97706", backgroundColor: includeRepairs ? "#D97706" : "transparent" }]}>
+                  <Feather name="tool" size={14} color={includeRepairs ? "#fff" : "#D97706"} />
                 </View>
                 <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.repairs")}</Text>
               </View>
-              <View style={[styles.checkbox, { borderColor: includeRepairs ? "#059669" : C.border, backgroundColor: includeRepairs ? "#059669" : "transparent" }]}>
+              <View style={[styles.checkbox, { borderColor: includeRepairs ? "#D97706" : C.border, backgroundColor: includeRepairs ? "#D97706" : "transparent" }]}>
                 {includeRepairs && <Feather name="check" size={12} color="#fff" />}
               </View>
             </Pressable>
@@ -473,12 +473,12 @@ export default function ReportScreen() {
               style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }]}
             >
               <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                <View style={[styles.typeDot, { backgroundColor: "#CCFBF1" }]}>
-                  <Feather name="clipboard" size={12} color="#0D9488" />
+                <View style={[styles.typeDot, { borderColor: "#0D9488", backgroundColor: includeInspections ? "#0D9488" : "transparent" }]}>
+                  <Feather name="clipboard" size={14} color={includeInspections ? "#fff" : "#0D9488"} />
                 </View>
                 <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.inspections")}</Text>
               </View>
-              <View style={[styles.checkbox, { borderColor: includeInspections ? "#059669" : C.border, backgroundColor: includeInspections ? "#059669" : "transparent" }]}>
+              <View style={[styles.checkbox, { borderColor: includeInspections ? "#0D9488" : C.border, backgroundColor: includeInspections ? "#0D9488" : "transparent" }]}>
                 {includeInspections && <Feather name="check" size={12} color="#fff" />}
               </View>
             </Pressable>
@@ -551,9 +551,14 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   section: {
-    borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 16,
+    borderWidth: 1,
     overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.05)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 1,
   },
   optionRow: {
     flexDirection: "row",
@@ -565,9 +570,10 @@ const styles = StyleSheet.create({
   optionLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
   optionText: { fontSize: 15, fontFamily: "Inter_500Medium" },
   typeDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
   },
