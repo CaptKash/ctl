@@ -31,13 +31,13 @@ const METALLIC = {
   greenSoft: ["#ECFDF5", "#D1FAE5", "#A7F3D0"] as const,
   fault: ["#FEF2F2", "#FECACA", "#FCA5A5"] as const,
   repair: ["#FFFBEB", "#FEF3C7", "#FDE68A"] as const,
-  renewal: ["#EEF2FF", "#E0E7FF", "#C7D2FE"] as const,
+  renewal: ["#F0FDFA", "#CCFBF1", "#99F6E4"] as const,
 };
 
 const TYPE_COLORS = {
   fault: { icon: "#DC2626", border: "#DC2626" },
   repair: { icon: "#D97706", border: "#D97706" },
-  renewal: { icon: "#4F46E5", border: "#4F46E5" },
+  renewal: { icon: "#0D9488", border: "#0D9488" },
 };
 
 type CarStub = {
