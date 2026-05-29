@@ -126,7 +126,12 @@ const GROUP_META = [
   { type: "renewal", cls: "renewal", labelKey: "generateReport.renewals" },
 ] as const;
 
-function renderCard(
+function detailPair(label: string, value: string | null | undefined): string {
+  if (!value) return "";
+  return `<span class="dp"><span class="dl">${label}:</span> ${value}</span>`;
+}
+
+function renderRow(
   ev: HistoryItem,
   t: TFunction,
   currencySymbol: string
@@ -140,7 +145,7 @@ function renderCard(
   const cls =
     ev.type === "malfunction" ? "fault" : ev.type === "renewal" ? "renewal" : "repair";
   let titleHtml = "";
-  let fieldsHtml = "";
+  const parts: string[] = [];
 
   if (ev.type === "malfunction") {
     titleHtml = ev.title;
@@ -148,42 +153,38 @@ function renderCard(
     const statusText = ev.completed
       ? t("generateReport.doc.resolved")
       : t("generateReport.doc.active");
-    fieldsHtml = `
-      <div class="field"><div class="fl">${t("generateReport.doc.status")}</div><div class="fv"><span class="status status-${statusClass}">${statusText}</span></div></div>
-      ${ev.phase ? field(t("generateReport.doc.phase"), ev.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())) : ""}
-    `;
+    parts.push(`<span class="status status-${statusClass}">${statusText}</span>`);
+    if (ev.phase) {
+      parts.push(detailPair(t("generateReport.doc.phase"), ev.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())));
+    }
   } else if (ev.type === "maintenance") {
     titleHtml = ev.serviceType ?? ev.title;
-    fieldsHtml = `
-      ${ev.correctiveAction && ev.correctiveAction !== ev.serviceType ? field(t("generateReport.doc.description"), ev.correctiveAction) : ""}
-      ${field(t("generateReport.doc.shop"), ev.shop)}
-      ${ev.shopAddress ? field(t("generateReport.doc.address"), ev.shopAddress) : ""}
-      ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
-      ${field(t("generateReport.doc.warranty"), ev.warrantyPeriod)}
-    `;
+    if (ev.correctiveAction && ev.correctiveAction !== ev.serviceType) parts.push(detailPair(t("generateReport.doc.description"), ev.correctiveAction));
+    parts.push(detailPair(t("generateReport.doc.shop"), ev.shop));
+    if (ev.shopAddress) parts.push(detailPair(t("generateReport.doc.address"), ev.shopAddress));
+    if (ev.cost != null) parts.push(detailPair(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`));
+    parts.push(detailPair(t("generateReport.doc.warranty"), ev.warrantyPeriod));
   } else {
     titleHtml = ev.renewalType === "license"
       ? t("generateReport.doc.licenseRenewal")
       : t("generateReport.doc.insuranceRenewal");
-    fieldsHtml = `
-      ${field(t("generateReport.doc.provider"), ev.provider)}
-      ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
-      ${ev.validUntil ? field(t("generateReport.doc.expiryDate"), formatDate(ev.validUntil)) : ""}
-      ${field(t("generateReport.doc.reference"), ev.referenceNumber)}
-    `;
+    parts.push(detailPair(t("generateReport.doc.provider"), ev.provider));
+    if (ev.cost != null) parts.push(detailPair(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`));
+    if (ev.validUntil) parts.push(detailPair(t("generateReport.doc.expiryDate"), formatDate(ev.validUntil)));
+    parts.push(detailPair(t("generateReport.doc.reference"), ev.referenceNumber));
   }
 
+  const detailsHtml = parts.filter(Boolean).join(" ");
+
   return `
-    <article class="card ${cls}">
-      <div class="card-header">
-        <span class="date">${formatDate(ev.date)}</span>
-        <span class="badge ${cls}">${typeLabel}</span>
-      </div>
-      <div class="card-body">
-        <div class="record-title">${titleHtml}</div>
-        <div class="fields">${fieldsHtml}</div>
-      </div>
-    </article>`;
+    <tr class="rec-row ${cls}">
+      <td class="c-date">${formatDate(ev.date)}</td>
+      <td class="c-type"><span class="badge ${cls}">${typeLabel}</span></td>
+      <td class="c-rec">
+        <span class="rec-title">${titleHtml}</span>
+        ${detailsHtml ? `<span class="rec-details">${detailsHtml}</span>` : ""}
+      </td>
+    </tr>`;
 }
 
 function buildHtml(
@@ -226,14 +227,22 @@ function buildHtml(
       .filter((ev) => ev.carId === car.id)
       .sort((a, b) => b.date.localeCompare(a.date));
     if (carItems.length === 0) return "";
-    const cards = carItems.map((ev) => renderCard(ev, t, currencySymbol)).join("");
+    const rows = carItems.map((ev) => renderRow(ev, t, currencySymbol)).join("");
     return `
     <section class="car-group">
-      <div class="car-head">
-        <span class="car-name">${car.name}</span>
-        <span class="car-total">${t("generateReport.doc.records", { count: carItems.length })}</span>
-      </div>
-      ${cards}
+      <table class="rec-table">
+        <thead>
+          <tr class="car-head">
+            <th colspan="3">
+              <span class="car-name">${car.name}</span>
+              <span class="car-total">${t("generateReport.doc.records", { count: carItems.length })}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
     </section>`;
   }).join("");
 
@@ -288,72 +297,55 @@ function buildHtml(
     }
     .stat.fault { border-top-color: #DC2626; }
     .stat.repair { border-top-color: #D97706; }
-    .stat.renewal { border-top-color: #4F46E5; }
+    .stat.renewal { border-top-color: #0D9488; }
     .stat-num { display: block; font-size: 26px; font-weight: 800; line-height: 1.1; }
     .stat-label { font-size: 12px; color: #64748b; font-weight: 600; }
 
-    .car-group { margin-bottom: 30px; }
-    .car-head {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 13px 16px; margin-bottom: 16px;
+    .car-group { margin-bottom: 26px; }
+    .rec-table {
+      width: 100%; border-collapse: collapse;
       background: #fff; border: 1px solid #e2e8f0; border-radius: 13px;
-      border-inline-start: 5px solid #047857;
+      overflow: hidden; table-layout: fixed;
+    }
+    .car-head th {
+      text-align: start;
+      padding: 13px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      border-inline-start: 4px solid #047857;
     }
     .car-name { font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
-    .car-total { font-size: 12px; font-weight: 700; color: #047857; background: #D1FAE5; border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
-    .subgroup { margin-bottom: 18px; }
-    .subgroup:last-child { margin-bottom: 0; }
+    .car-total { font-size: 12px; font-weight: 700; color: #047857; background: #D1FAE5; border-radius: 999px; padding: 3px 11px; white-space: nowrap; margin-inline-start: 10px; }
 
-    .group { margin-bottom: 26px; }
-    .group-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
-    .group-dot { width: 11px; height: 11px; border-radius: 4px; flex-shrink: 0; }
-    .group-head.fault .group-dot { background: #DC2626; }
-    .group-head.repair .group-dot { background: #D97706; }
-    .group-head.renewal .group-dot { background: #4F46E5; }
-    .group-title { font-size: 15px; font-weight: 800; letter-spacing: -0.2px; }
-    .group-count {
-      font-size: 12px; font-weight: 700; color: #fff;
-      border-radius: 999px; padding: 1px 9px; min-width: 22px; text-align: center;
+    .rec-row td {
+      padding: 12px 16px;
+      border-top: 1px solid #eef2f6;
+      vertical-align: top;
     }
-    .group-head.fault .group-count { background: #DC2626; }
-    .group-head.repair .group-count { background: #D97706; }
-    .group-head.renewal .group-count { background: #4F46E5; }
-
-    .card {
-      background: #fff; border: 1px solid #e2e8f0;
-      border-radius: 13px; margin-bottom: 10px; overflow: hidden;
-      border-inline-start-width: 4px; border-inline-start-style: solid;
-    }
-    .card.fault { border-inline-start-color: #DC2626; }
-    .card.repair { border-inline-start-color: #D97706; }
-    .card.renewal { border-inline-start-color: #4F46E5; }
-    .card-header { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: #f8fafc; border-bottom: 1px solid #eef2f6; }
-    .date { font-size: 12px; color: #64748b; font-weight: 600; white-space: nowrap; flex: 1; }
-    .badge { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .c-date { width: 92px; font-size: 12px; color: #64748b; font-weight: 600; white-space: nowrap; }
+    .c-type { width: 92px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
     .badge.fault { background: #FEE2E2; color: #DC2626; }
     .badge.repair { background: #FEF3C7; color: #B45309; }
-    .badge.renewal { background: #E0E7FF; color: #4F46E5; }
-    .card-body { padding: 14px 16px; }
-    .record-title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
-    .fields { display: flex; flex-wrap: wrap; gap: 12px 28px; }
-    .field { min-width: 130px; }
-    .fl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #94a3b8; margin-bottom: 3px; font-weight: 700; }
-    .fv { font-size: 13px; color: #334155; font-weight: 500; }
-    .status { display: inline-block; font-weight: 700; padding: 1px 9px; border-radius: 6px; font-size: 12px; }
+    .badge.renewal { background: #CCFBF1; color: #0D9488; }
+    .c-rec .rec-title { display: block; font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .c-rec .rec-details { display: block; font-size: 12px; color: #64748b; line-height: 1.7; }
+    .dp { margin-inline-end: 14px; white-space: nowrap; }
+    .dl { color: #94a3b8; font-weight: 600; }
+    .status { display: inline-block; font-weight: 700; padding: 1px 9px; border-radius: 6px; font-size: 11px; margin-inline-end: 14px; }
     .status-resolved { color: #047857; background: #D1FAE5; }
     .status-active { color: #DC2626; background: #FEE2E2; }
 
-    [dir="rtl"] .fl { text-transform: none; letter-spacing: 0; }
     [dir="rtl"] .brand-mark { letter-spacing: 0; }
 
     @media print {
       body { padding: 0; background: #fff; }
-      .report-header, .stat, .card, .badge, .group-count, .group-dot, .status {
+      .report-header, .stat, .rec-table, .badge, .status, .car-head th {
         -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       .report-header { box-shadow: none; }
-      .car-group { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .card, .subgroup, .stat, .car-head { break-inside: avoid; }
+      .car-group, .rec-row { break-inside: avoid; }
+      .stat { break-inside: avoid; }
     }
   </style></head><body>
   <div class="report">
