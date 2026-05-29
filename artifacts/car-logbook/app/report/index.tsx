@@ -120,6 +120,72 @@ function field(label: string, value: string | null | undefined) {
   return `<div class="field"><div class="fl">${label}</div><div class="fv">${value}</div></div>`;
 }
 
+const GROUP_META = [
+  { type: "malfunction", cls: "fault", labelKey: "generateReport.faults" },
+  { type: "maintenance", cls: "repair", labelKey: "generateReport.repairs" },
+  { type: "renewal", cls: "renewal", labelKey: "generateReport.renewals" },
+] as const;
+
+function renderCard(
+  ev: HistoryItem,
+  t: TFunction,
+  currencySymbol: string
+): string {
+  const typeLabel =
+    ev.type === "malfunction"
+      ? t("generateReport.doc.badgeFault")
+      : ev.type === "renewal"
+        ? t("generateReport.doc.badgeRenewal")
+        : t("generateReport.doc.badgeRepair");
+  const cls =
+    ev.type === "malfunction" ? "fault" : ev.type === "renewal" ? "renewal" : "repair";
+  let titleHtml = "";
+  let fieldsHtml = "";
+
+  if (ev.type === "malfunction") {
+    titleHtml = ev.title;
+    const statusClass = ev.completed ? "resolved" : "active";
+    const statusText = ev.completed
+      ? t("generateReport.doc.resolved")
+      : t("generateReport.doc.active");
+    fieldsHtml = `
+      <div class="field"><div class="fl">${t("generateReport.doc.status")}</div><div class="fv"><span class="status status-${statusClass}">${statusText}</span></div></div>
+      ${ev.phase ? field(t("generateReport.doc.phase"), ev.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())) : ""}
+    `;
+  } else if (ev.type === "maintenance") {
+    titleHtml = ev.serviceType ?? ev.title;
+    fieldsHtml = `
+      ${ev.correctiveAction && ev.correctiveAction !== ev.serviceType ? field(t("generateReport.doc.description"), ev.correctiveAction) : ""}
+      ${field(t("generateReport.doc.shop"), ev.shop)}
+      ${ev.shopAddress ? field(t("generateReport.doc.address"), ev.shopAddress) : ""}
+      ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
+      ${field(t("generateReport.doc.warranty"), ev.warrantyPeriod)}
+    `;
+  } else {
+    titleHtml = ev.renewalType === "license"
+      ? t("generateReport.doc.licenseRenewal")
+      : t("generateReport.doc.insuranceRenewal");
+    fieldsHtml = `
+      ${field(t("generateReport.doc.provider"), ev.provider)}
+      ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
+      ${ev.validUntil ? field(t("generateReport.doc.expiryDate"), formatDate(ev.validUntil)) : ""}
+      ${field(t("generateReport.doc.reference"), ev.referenceNumber)}
+    `;
+  }
+
+  return `
+    <article class="card ${cls}">
+      <div class="card-header">
+        <span class="date">${formatDate(ev.date)}</span>
+        <span class="badge ${cls}">${typeLabel}</span>
+      </div>
+      <div class="card-body">
+        <div class="record-title">${titleHtml}</div>
+        <div class="fields">${fieldsHtml}</div>
+      </div>
+    </article>`;
+}
+
 function buildHtml(
   items: HistoryItem[],
   filterLabel: string,
@@ -133,92 +199,195 @@ function buildHtml(
     year: "numeric",
   });
 
-  const cards = items.map((ev) => {
-    const typeLabel =
-      ev.type === "malfunction"
-        ? t("generateReport.doc.badgeFault")
-        : ev.type === "renewal"
-          ? t("generateReport.doc.badgeRenewal")
-          : t("generateReport.doc.badgeRepair");
-    let titleHtml = "";
-    let fieldsHtml = "";
+  const counts = {
+    malfunction: items.filter((ev) => ev.type === "malfunction").length,
+    maintenance: items.filter((ev) => ev.type === "maintenance").length,
+    renewal: items.filter((ev) => ev.type === "renewal").length,
+  } as const;
 
-    if (ev.type === "malfunction") {
-      titleHtml = ev.title;
-      const statusClass = ev.completed ? "resolved" : "active";
-      const statusText = ev.completed
-        ? t("generateReport.doc.resolved")
-        : t("generateReport.doc.active");
-      fieldsHtml = `
-        <div class="field"><div class="fl">${t("generateReport.doc.status")}</div><div class="fv status-${statusClass}">${statusText}</div></div>
-        ${ev.phase ? field(t("generateReport.doc.phase"), ev.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())) : ""}
-      `;
-    } else if (ev.type === "maintenance") {
-      titleHtml = ev.serviceType ?? ev.title;
-      fieldsHtml = `
-        ${ev.correctiveAction && ev.correctiveAction !== ev.serviceType ? field(t("generateReport.doc.description"), ev.correctiveAction) : ""}
-        ${field(t("generateReport.doc.shop"), ev.shop)}
-        ${ev.shopAddress ? field(t("generateReport.doc.address"), ev.shopAddress) : ""}
-        ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
-        ${field(t("generateReport.doc.warranty"), ev.warrantyPeriod)}
-      `;
-    } else {
-      titleHtml = ev.renewalType === "license"
-        ? t("generateReport.doc.licenseRenewal")
-        : t("generateReport.doc.insuranceRenewal");
-      fieldsHtml = `
-        ${field(t("generateReport.doc.provider"), ev.provider)}
-        ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
-        ${ev.validUntil ? field(t("generateReport.doc.expiryDate"), formatDate(ev.validUntil)) : ""}
-        ${field(t("generateReport.doc.reference"), ev.referenceNumber)}
-      `;
+  const chips = GROUP_META.map((g) => {
+    const n = counts[g.type];
+    if (n === 0) return "";
+    return `<div class="stat ${g.cls}"><span class="stat-num">${n}</span><span class="stat-label">${t(g.labelKey)}</span></div>`;
+  }).join("");
+
+  const carOrder: { id: number; name: string }[] = [];
+  const seenCars = new Set<number>();
+  for (const ev of items) {
+    if (!seenCars.has(ev.carId)) {
+      seenCars.add(ev.carId);
+      carOrder.push({ id: ev.carId, name: ev.carName });
     }
+  }
+  carOrder.sort((a, b) => a.name.localeCompare(b.name));
 
+  const groups = carOrder.map((car) => {
+    const carItems = items.filter((ev) => ev.carId === car.id);
+    if (carItems.length === 0) return "";
+    const subgroups = GROUP_META.map((g) => {
+      const groupItems = carItems.filter((ev) => ev.type === g.type);
+      if (groupItems.length === 0) return "";
+      const cards = groupItems.map((ev) => renderCard(ev, t, currencySymbol)).join("");
+      return `
+      <div class="subgroup">
+        <div class="group-head ${g.cls}">
+          <span class="group-dot"></span>
+          <span class="group-title">${t(g.labelKey)}</span>
+          <span class="group-count">${groupItems.length}</span>
+        </div>
+        ${cards}
+      </div>`;
+    }).join("");
     return `
-    <div class="card">
-      <div class="card-header">
-        <span class="date">${formatDate(ev.date)}</span>
-        <span class="car">${ev.carName}</span>
-        <span class="badge ${ev.type}">${typeLabel}</span>
+    <section class="car-group">
+      <div class="car-head">
+        <span class="car-name">${car.name}</span>
+        <span class="car-total">${t("generateReport.doc.records", { count: carItems.length })}</span>
       </div>
-      <div class="card-body">
-        <div class="record-title">${titleHtml}</div>
-        <div class="fields">${fieldsHtml}</div>
-      </div>
-    </div>`;
+      ${subgroups}
+    </section>`;
   }).join("");
 
   const dir = isRTL ? "rtl" : "ltr";
   const lang = isRTL ? "ar" : "en";
 
   return `<!DOCTYPE html><html lang="${lang}" dir="${dir}"><head><meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>${t("generateReport.doc.title")}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; padding: 40px; background: #f9fafb; direction: ${dir}; }
-    h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
-    .meta { color: #6b7280; font-size: 13px; margin-bottom: 28px; }
-    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
-    .card-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
-    .date { font-size: 13px; color: #6b7280; min-width: 90px; }
-    .car { font-size: 13px; font-weight: 600; color: #374151; flex: 1; }
-    .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
-    .malfunction { background: #FEE2E2; color: #DC2626; }
-    .maintenance  { background: #FEF3C7; color: #D97706; }
-    .renewal      { background: #E0E7FF; color: #4F46E5; }
-    .card-body { padding: 12px 16px; }
-    .record-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 10px; }
-    .fields { display: flex; flex-wrap: wrap; gap: 12px 24px; }
-    .field { min-width: 140px; }
-    .fl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #9ca3af; margin-bottom: 2px; }
-    .fv { font-size: 13px; color: #374151; }
-    .status-resolved { color: #059669; font-weight: 600; }
-    .status-active { color: #DC2626; font-weight: 600; }
-    @media print { body { padding: 20px; background: #fff; } }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #f1f5f9;
+      direction: ${dir};
+      padding: 32px 20px;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.45;
+    }
+    .report { max-width: 820px; margin: 0 auto; }
+
+    .report-header {
+      background: linear-gradient(135deg, #047857 0%, #064E3B 100%);
+      color: #fff;
+      border-radius: 18px;
+      padding: 26px 28px 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 18px rgba(4,120,87,0.25);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .brand-mark {
+      width: 46px; height: 46px; border-radius: 13px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; letter-spacing: 1.5px;
+    }
+    .brand-name { font-size: 15px; font-weight: 700; }
+    .brand-sub { font-size: 12px; opacity: 0.82; }
+    .report-header h1 { font-size: 25px; font-weight: 800; margin-bottom: 9px; letter-spacing: -0.3px; }
+    .meta-row { font-size: 13px; opacity: 0.92; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .meta-row .dot { opacity: 0.45; }
+
+    .summary-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 26px; }
+    .stat {
+      flex: 1; min-width: 120px;
+      background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 14px; padding: 14px 16px;
+      border-top: 3px solid #e2e8f0;
+    }
+    .stat.fault { border-top-color: #DC2626; }
+    .stat.repair { border-top-color: #D97706; }
+    .stat.renewal { border-top-color: #4F46E5; }
+    .stat-num { display: block; font-size: 26px; font-weight: 800; line-height: 1.1; }
+    .stat-label { font-size: 12px; color: #64748b; font-weight: 600; }
+
+    .car-group { margin-bottom: 30px; }
+    .car-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 13px 16px; margin-bottom: 16px;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 13px;
+      border-inline-start: 5px solid #047857;
+    }
+    .car-name { font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
+    .car-total { font-size: 12px; font-weight: 700; color: #047857; background: #D1FAE5; border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+    .subgroup { margin-bottom: 18px; }
+    .subgroup:last-child { margin-bottom: 0; }
+
+    .group { margin-bottom: 26px; }
+    .group-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+    .group-dot { width: 11px; height: 11px; border-radius: 4px; flex-shrink: 0; }
+    .group-head.fault .group-dot { background: #DC2626; }
+    .group-head.repair .group-dot { background: #D97706; }
+    .group-head.renewal .group-dot { background: #4F46E5; }
+    .group-title { font-size: 15px; font-weight: 800; letter-spacing: -0.2px; }
+    .group-count {
+      font-size: 12px; font-weight: 700; color: #fff;
+      border-radius: 999px; padding: 1px 9px; min-width: 22px; text-align: center;
+    }
+    .group-head.fault .group-count { background: #DC2626; }
+    .group-head.repair .group-count { background: #D97706; }
+    .group-head.renewal .group-count { background: #4F46E5; }
+
+    .card {
+      background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 13px; margin-bottom: 10px; overflow: hidden;
+      border-inline-start-width: 4px; border-inline-start-style: solid;
+    }
+    .card.fault { border-inline-start-color: #DC2626; }
+    .card.repair { border-inline-start-color: #D97706; }
+    .card.renewal { border-inline-start-color: #4F46E5; }
+    .card-header { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: #f8fafc; border-bottom: 1px solid #eef2f6; }
+    .date { font-size: 12px; color: #64748b; font-weight: 600; white-space: nowrap; flex: 1; }
+    .badge { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .badge.fault { background: #FEE2E2; color: #DC2626; }
+    .badge.repair { background: #FEF3C7; color: #B45309; }
+    .badge.renewal { background: #E0E7FF; color: #4F46E5; }
+    .card-body { padding: 14px 16px; }
+    .record-title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+    .fields { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+    .field { min-width: 130px; }
+    .fl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #94a3b8; margin-bottom: 3px; font-weight: 700; }
+    .fv { font-size: 13px; color: #334155; font-weight: 500; }
+    .status { display: inline-block; font-weight: 700; padding: 1px 9px; border-radius: 6px; font-size: 12px; }
+    .status-resolved { color: #047857; background: #D1FAE5; }
+    .status-active { color: #DC2626; background: #FEE2E2; }
+
+    [dir="rtl"] .fl { text-transform: none; letter-spacing: 0; }
+    [dir="rtl"] .brand-mark { letter-spacing: 0; }
+
+    @media print {
+      body { padding: 0; background: #fff; }
+      .report-header, .stat, .card, .badge, .group-count, .group-dot, .status {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .report-header { box-shadow: none; }
+      .car-group { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .card, .subgroup, .stat, .car-head { break-inside: avoid; }
+    }
   </style></head><body>
-  <h1>${t("generateReport.doc.title")}</h1>
-  <div class="meta">${t("generateReport.doc.generated", { date: now })} &nbsp;·&nbsp; ${filterLabel} &nbsp;·&nbsp; ${t("generateReport.doc.records", { count: items.length })}</div>
-  ${cards}
+  <div class="report">
+    <header class="report-header">
+      <div class="brand">
+        <div class="brand-mark">${t("common.appName")}</div>
+        <div class="brand-text">
+          <div class="brand-name">${t("common.appName")}</div>
+          <div class="brand-sub">${t("common.appTagline")}</div>
+        </div>
+      </div>
+      <h1>${t("generateReport.doc.title")}</h1>
+      <div class="meta-row">
+        <span>${t("generateReport.doc.generated", { date: now })}</span>
+        <span class="dot">·</span>
+        <span>${filterLabel}</span>
+        <span class="dot">·</span>
+        <span>${t("generateReport.doc.records", { count: items.length })}</span>
+      </div>
+    </header>
+    ${chips ? `<div class="summary-bar">${chips}</div>` : ""}
+    ${groups}
+  </div>
   </body></html>`;
 }
 
