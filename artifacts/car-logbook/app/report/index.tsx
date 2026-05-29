@@ -27,11 +27,16 @@ import { useCurrency } from "@/context/CurrencyContext";
 
 const METALLIC = {
   silver: ["#FFFFFF", "#CBD5E1", "#94A3B8"] as const,
-  green: ["#ECFDF5", "#34D399", "#047857"] as const,
   greenSoft: ["#ECFDF5", "#D1FAE5", "#A7F3D0"] as const,
-  fault: ["#FEF2F2", "#F87171", "#B91C1C"] as const,
-  repair: ["#FFFBEB", "#FCD34D", "#B45309"] as const,
-  inspection: ["#F0FDFA", "#5EEAD4", "#0F766E"] as const,
+  fault: ["#FEF2F2", "#FECACA", "#FCA5A5"] as const,
+  repair: ["#FFFBEB", "#FEF3C7", "#FDE68A"] as const,
+  inspection: ["#F0FDFA", "#CCFBF1", "#99F6E4"] as const,
+};
+
+const TYPE_COLORS = {
+  fault: { icon: "#DC2626", border: "#DC2626" },
+  repair: { icon: "#D97706", border: "#D97706" },
+  inspection: { icon: "#0D9488", border: "#0D9488" },
 };
 
 type CarStub = {
@@ -457,12 +462,12 @@ export default function ReportScreen() {
                 style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                  <LinearGradient colors={METALLIC.fault} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#7F1D1D", opacity: includeFaults ? 1 : 0.4 }]}>
-                    <Feather name="alert-triangle" size={14} color="#fff" />
+                  <LinearGradient colors={METALLIC.fault} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: TYPE_COLORS.fault.border }]}>
+                    <Feather name="alert-triangle" size={14} color={TYPE_COLORS.fault.icon} />
                   </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.faults")}</Text>
                 </View>
-                <View style={[styles.checkbox, { borderColor: includeFaults ? "#B91C1C" : C.border, backgroundColor: includeFaults ? "#B91C1C" : "transparent" }]}>
+                <View style={[styles.checkbox, { borderColor: includeFaults ? TYPE_COLORS.fault.border : C.border, backgroundColor: includeFaults ? TYPE_COLORS.fault.border : "transparent" }]}>
                   {includeFaults && <Feather name="check" size={12} color="#fff" />}
                 </View>
               </Pressable>
@@ -471,12 +476,12 @@ export default function ReportScreen() {
                 style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                  <LinearGradient colors={METALLIC.repair} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#78350F", opacity: includeRepairs ? 1 : 0.4 }]}>
-                    <Feather name="tool" size={14} color="#fff" />
+                  <LinearGradient colors={METALLIC.repair} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: TYPE_COLORS.repair.border }]}>
+                    <Feather name="tool" size={14} color={TYPE_COLORS.repair.icon} />
                   </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.repairs")}</Text>
                 </View>
-                <View style={[styles.checkbox, { borderColor: includeRepairs ? "#B45309" : C.border, backgroundColor: includeRepairs ? "#B45309" : "transparent" }]}>
+                <View style={[styles.checkbox, { borderColor: includeRepairs ? TYPE_COLORS.repair.border : C.border, backgroundColor: includeRepairs ? TYPE_COLORS.repair.border : "transparent" }]}>
                   {includeRepairs && <Feather name="check" size={12} color="#fff" />}
                 </View>
               </Pressable>
@@ -485,12 +490,12 @@ export default function ReportScreen() {
                 style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }]}
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                  <LinearGradient colors={METALLIC.inspection} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#134E4A", opacity: includeInspections ? 1 : 0.4 }]}>
-                    <Feather name="clipboard" size={14} color="#fff" />
+                  <LinearGradient colors={METALLIC.inspection} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: TYPE_COLORS.inspection.border }]}>
+                    <Feather name="clipboard" size={14} color={TYPE_COLORS.inspection.icon} />
                   </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.inspections")}</Text>
                 </View>
-                <View style={[styles.checkbox, { borderColor: includeInspections ? "#0F766E" : C.border, backgroundColor: includeInspections ? "#0F766E" : "transparent" }]}>
+                <View style={[styles.checkbox, { borderColor: includeInspections ? TYPE_COLORS.inspection.border : C.border, backgroundColor: includeInspections ? TYPE_COLORS.inspection.border : "transparent" }]}>
                   {includeInspections && <Feather name="check" size={12} color="#fff" />}
                 </View>
               </Pressable>
@@ -521,12 +526,13 @@ export default function ReportScreen() {
             style={({ pressed }) => [styles.generateWrap, { opacity: !canGenerate ? 0.45 : pressed ? 0.85 : 1 }]}
           >
             <LinearGradient
-              colors={METALLIC.green}
+              colors={["#DBEAFE", "#BFDBFE", "#93C5FD"]}
+              locations={[0, 0.55, 1]}
               start={{ x: 0.15, y: 0 }}
               end={{ x: 0.85, y: 1 }}
               style={[styles.generateBtn, isRTL && { flexDirection: "row-reverse" }]}
             >
-              <Feather name="file-text" size={17} color="#fff" />
+              <Feather name="file-text" size={17} color="#312E81" />
               <Text style={styles.generateBtnText}>{t("generateReport.generate")}</Text>
             </LinearGradient>
           </Pressable>
@@ -629,7 +635,7 @@ const styles = StyleSheet.create({
   generateWrap: {
     marginTop: 12,
     borderRadius: 14,
-    shadowColor: "#064E3B",
+    shadowColor: "#1E40AF",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -641,11 +647,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#064E3B",
+    borderWidth: 1.5,
+    borderColor: "#1E40AF",
     paddingVertical: 16,
   },
-  generateBtnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
+  generateBtnText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#312E81" },
 
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
 });
