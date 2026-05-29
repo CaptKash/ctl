@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -166,9 +167,15 @@ export default function FaultLogScreen() {
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
-          <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
-            <Feather name="alert-triangle" size={22} color="#DC2626" />
-          </View>
+          <LinearGradient
+            colors={["#F5F7FA", "#C4CBD4", "#8A929E", "#C4CBD4", "#EEF1F5"]}
+            locations={[0, 0.3, 0.55, 0.78, 1]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.iconBox, styles.metalIcon]}
+          >
+            <Feather name="alert-triangle" size={22} color="#B91C1C" />
+          </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("faults.logTitle")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
@@ -242,6 +249,15 @@ const styles = StyleSheet.create({
   },
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  metalIcon: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#9AA2AE",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 3,
+  },
   headerText: { flex: 1 },
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
