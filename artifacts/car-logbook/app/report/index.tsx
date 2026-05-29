@@ -274,20 +274,11 @@ function buildHtml(
       margin-bottom: 20px;
       box-shadow: 0 6px 18px rgba(15,45,94,0.28);
     }
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .brand { display: flex; margin-bottom: 16px; }
     .brand-mark {
-      width: 46px; height: 46px; border-radius: 13px;
-      border: 1px solid rgba(255,255,255,0.35);
-      object-fit: cover; display: block;
+      width: 60px; height: 60px;
+      object-fit: contain; display: block;
     }
-    .brand-name { font-size: 15px; font-weight: 700; }
-    .brand-sub { font-size: 12px; color: #93C5FD; }
-    .accent-bar {
-      display: flex; gap: 6px; margin-bottom: 16px;
-    }
-    .accent-bar span { height: 4px; border-radius: 999px; }
-    .accent-bar .ab-blue { width: 54px; background: #2563EB; }
-    .accent-bar .ab-teal { width: 26px; background: #2DD4BF; }
     .report-header h1 { font-size: 25px; font-weight: 800; margin-bottom: 9px; letter-spacing: -0.3px; }
     .meta-row { font-size: 13px; opacity: 0.92; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     .meta-row .dot { opacity: 0.45; }
@@ -340,8 +331,6 @@ function buildHtml(
     .status-resolved { color: #047857; background: #D1FAE5; }
     .status-active { color: #DC2626; background: #FEE2E2; }
 
-    [dir="rtl"] .brand-mark { letter-spacing: 0; }
-
     @media print {
       body { padding: 0; background: #fff; }
       .report-header, .stat, .rec-table, .badge, .status, .car-head th {
@@ -356,12 +345,7 @@ function buildHtml(
     <header class="report-header">
       <div class="brand">
         <img class="brand-mark" src="${REPORT_LOGO}" alt="${t("common.appName")}"/>
-        <div class="brand-text">
-          <div class="brand-name">${t("common.appName")}</div>
-          <div class="brand-sub">${t("common.appTagline")}</div>
-        </div>
       </div>
-      <div class="accent-bar"><span class="ab-blue"></span><span class="ab-teal"></span></div>
       <h1>${t("generateReport.doc.title")}</h1>
       <div class="meta-row">
         <span>${t("generateReport.doc.generated", { date: now })}</span>
