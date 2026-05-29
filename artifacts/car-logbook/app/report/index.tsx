@@ -222,29 +222,18 @@ function buildHtml(
   carOrder.sort((a, b) => a.name.localeCompare(b.name));
 
   const groups = carOrder.map((car) => {
-    const carItems = items.filter((ev) => ev.carId === car.id);
+    const carItems = items
+      .filter((ev) => ev.carId === car.id)
+      .sort((a, b) => b.date.localeCompare(a.date));
     if (carItems.length === 0) return "";
-    const subgroups = GROUP_META.map((g) => {
-      const groupItems = carItems.filter((ev) => ev.type === g.type);
-      if (groupItems.length === 0) return "";
-      const cards = groupItems.map((ev) => renderCard(ev, t, currencySymbol)).join("");
-      return `
-      <div class="subgroup">
-        <div class="group-head ${g.cls}">
-          <span class="group-dot"></span>
-          <span class="group-title">${t(g.labelKey)}</span>
-          <span class="group-count">${groupItems.length}</span>
-        </div>
-        ${cards}
-      </div>`;
-    }).join("");
+    const cards = carItems.map((ev) => renderCard(ev, t, currencySymbol)).join("");
     return `
     <section class="car-group">
       <div class="car-head">
         <span class="car-name">${car.name}</span>
         <span class="car-total">${t("generateReport.doc.records", { count: carItems.length })}</span>
       </div>
-      ${subgroups}
+      ${cards}
     </section>`;
   }).join("");
 
