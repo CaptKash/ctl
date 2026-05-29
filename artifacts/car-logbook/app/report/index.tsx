@@ -481,7 +481,7 @@ export default function ReportScreen() {
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
                   <LinearGradient colors={METALLIC.repair} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: TYPE_COLORS.repair.border }]}>
-                    <Feather name="tool" size={14} color={TYPE_COLORS.repair.icon} />
+                    <Feather name="clipboard" size={14} color={TYPE_COLORS.repair.icon} />
                   </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.repairs")}</Text>
                 </View>
@@ -495,7 +495,7 @@ export default function ReportScreen() {
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
                   <LinearGradient colors={METALLIC.renewal} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: TYPE_COLORS.renewal.border }]}>
-                    <Feather name="credit-card" size={14} color={TYPE_COLORS.renewal.icon} />
+                    <Feather name="refresh-cw" size={14} color={TYPE_COLORS.renewal.icon} />
                   </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.renewals")}</Text>
                 </View>
