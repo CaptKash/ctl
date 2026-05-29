@@ -235,7 +235,6 @@ function buildHtml(
           <tr class="car-head">
             <th colspan="3">
               <span class="car-name">${car.name}</span>
-              <span class="car-total">${t("generateReport.doc.records", { count: carItems.length })}</span>
             </th>
           </tr>
         </thead>
