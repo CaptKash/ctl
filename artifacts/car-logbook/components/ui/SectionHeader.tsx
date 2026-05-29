@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 
 type Props = {
@@ -10,8 +11,10 @@ type Props = {
 
 export function SectionHeader({ title, actionLabel, onAction }: Props) {
   const C = useColors();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, isRTL && { flexDirection: "row-reverse" }]}>
       <Text style={[styles.title, { color: C.text }]}>{title}</Text>
       {actionLabel && onAction && (
         <Pressable onPress={onAction} hitSlop={8}>

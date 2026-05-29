@@ -6,6 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 
 type Props = {
@@ -34,22 +35,24 @@ export function RecordCard({
   onComplete,
 }: Props) {
   const C = useColors();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
 
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.card, { backgroundColor: C.card, opacity: pressed ? 0.9 : 1 }]}
+      style={({ pressed }) => [styles.card, isRTL && styles.cardRTL, { backgroundColor: C.card, opacity: pressed ? 0.9 : 1 }]}
     >
       <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
         <Feather name={icon} size={18} color={iconColor} />
       </View>
       <View style={styles.content}>
-        <Text style={[styles.title, { color: C.text }]} numberOfLines={1}>{title}</Text>
+        <Text style={[styles.title, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{title}</Text>
         {subtitle ? (
-          <Text style={[styles.subtitle, { color: C.textSecondary }]} numberOfLines={1}>{subtitle}</Text>
+          <Text style={[styles.subtitle, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{subtitle}</Text>
         ) : null}
       </View>
-      <View style={styles.right}>
+      <View style={[styles.right, isRTL && { alignItems: "flex-start" }]}>
         {rightText ? (
           <Text style={[styles.rightText, { color: C.text }]}>{rightText}</Text>
         ) : null}
@@ -92,6 +95,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 6,
     elevation: 2,
+  },
+  cardRTL: {
+    flexDirection: "row-reverse",
   },
   iconBox: {
     width: 40,

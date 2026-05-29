@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -42,24 +43,17 @@ type MalfunctionRecord = {
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
 
 const INPUT_METHODS = ["warning_message", "written"];
-const INPUT_METHOD_LABELS: Record<string, string> = {
-  warning_message: "Warning Message",
-  written: "Written",
-};
-
 const PHASES = ["car_running", "car_started", "parking", "during_drive"];
-const PHASE_LABELS: Record<string, string> = {
-  car_running: "Car Running",
-  car_started: "Car Started",
-  parking: "Parking",
-  during_drive: "During Drive",
-};
 
 export default function FaultsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const methodLabel = (k: string) => t(`faults.methods.${k}`);
+  const phaseLabel = (k: string) => t(`faults.phases.${k}`);
   const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -120,21 +114,21 @@ export default function FaultsScreen() {
   const car = carQuery.data;
   const carTitle = car
     ? car.nickname ?? `${car.year} ${car.make} ${car.model}`
-    : "Car";
+    : t("faults.carFallback");
 
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
             <Feather name="alert-triangle" size={22} color="#DC2626" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Fault Records</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carTitle}</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("faults.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{carTitle}</Text>
           </View>
         </View>
       </View>
@@ -144,8 +138,8 @@ export default function FaultsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <SectionHeader
-          title="Fault Records"
-          actionLabel="Add Fault"
+          title={t("faults.title")}
+          actionLabel={t("faults.add")}
           onAction={() => setShowAdd(true)}
         />
 
@@ -154,9 +148,9 @@ export default function FaultsScreen() {
         ) : !faultsQuery.data || faultsQuery.data.length === 0 ? (
           <EmptyState
             icon="alert-triangle"
-            title="No fault records"
-            description="Log warning messages and malfunctions here."
-            actionLabel="Add Fault"
+            title={t("faults.emptyTitle")}
+            description={t("faults.emptyDesc")}
+            actionLabel={t("faults.add")}
             onAction={() => setShowAdd(true)}
           />
         ) : (
@@ -168,8 +162,8 @@ export default function FaultsScreen() {
               iconBg="#FEE2E2"
               title={r.description}
               subtitle={[
-                INPUT_METHOD_LABELS[r.inputMethod] ?? r.inputMethod,
-                r.phase ? (PHASE_LABELS[r.phase] ?? r.phase) : null,
+                methodLabel(r.inputMethod),
+                r.phase ? phaseLabel(r.phase) : null,
               ].filter(Boolean).join(" · ")}
               rightText={formatDate(r.date)}
               rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} ${unit}` : undefined}
@@ -187,8 +181,8 @@ export default function FaultsScreen() {
         onRequestClose={() => setShowAdd(false)}
       >
         <View style={[styles.sheet, { backgroundColor: C.backgroundSecondary }]}>
-          <View style={[styles.sheetHeader, { borderBottomColor: C.border }]}>
-            <Text style={[styles.sheetTitle, { color: C.text }]}>Add Fault Record</Text>
+          <View style={[styles.sheetHeader, { borderBottomColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.sheetTitle, { color: C.text }]}>{t("faults.addTitle")}</Text>
             <Pressable onPress={() => setShowAdd(false)} hitSlop={12}>
               <Feather name="x" size={22} color={C.textSecondary} />
             </Pressable>
@@ -199,49 +193,45 @@ export default function FaultsScreen() {
           >
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <DatePickerField
-                label="Date"
+                label={t("faults.date")}
                 value={date}
                 onChange={setDate}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Description"
+                label={t("faults.description")}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Describe the fault…"
+                placeholder={t("faults.descriptionPlaceholder")}
                 multiline
                 required
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <SelectField
-                label="Input Method"
-                value={INPUT_METHOD_LABELS[inputMethod] ?? inputMethod}
+                label={t("faults.inputMethod")}
+                value={methodLabel(inputMethod)}
                 onSelect={(v) =>
-                  setInputMethod(
-                    Object.keys(INPUT_METHOD_LABELS).find((k) => INPUT_METHOD_LABELS[k] === v) ?? v
-                  )
+                  setInputMethod(INPUT_METHODS.find((k) => methodLabel(k) === v) ?? v)
                 }
-                options={INPUT_METHODS.map((k) => INPUT_METHOD_LABELS[k])}
-                placeholder="Select method…"
+                options={INPUT_METHODS.map((k) => methodLabel(k))}
+                placeholder={t("faults.selectMethod")}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <SelectField
-                label="Phase"
-                value={PHASE_LABELS[phase] ?? phase}
+                label={t("faults.phase")}
+                value={phaseLabel(phase)}
                 onSelect={(v) =>
-                  setPhase(
-                    Object.keys(PHASE_LABELS).find((k) => PHASE_LABELS[k] === v) ?? v
-                  )
+                  setPhase(PHASES.find((k) => phaseLabel(k) === v) ?? v)
                 }
-                options={PHASES.map((k) => PHASE_LABELS[k])}
-                placeholder="Select phase…"
+                options={PHASES.map((k) => phaseLabel(k))}
+                placeholder={t("faults.selectPhase")}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={`Odometer (${unit})`}
+                label={t("faults.odometer", { unit })}
                 value={odometer}
                 onChangeText={setOdometer}
-                placeholder="e.g. 54200"
+                placeholder={t("faults.odometerPlaceholder")}
                 keyboardType="number-pad"
               />
             </View>
@@ -249,13 +239,13 @@ export default function FaultsScreen() {
             {addMutation.isError && (
               <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
                 <Text style={[styles.errorText, { color: C.danger }]}>
-                  Failed to save. Please check all required fields.
+                  {t("faults.saveError")}
                 </Text>
               </View>
             )}
 
             <PrimaryButton
-              label="Save Fault"
+              label={t("faults.save")}
               onPress={() => addMutation.mutate()}
               loading={addMutation.isPending}
               disabled={!description.trim()}
@@ -266,12 +256,12 @@ export default function FaultsScreen() {
 
       <ConfirmModal
         visible={confirmId !== null}
-        title="Delete Fault Record"
-        message="This fault record will be permanently deleted."
-        confirmLabel="Delete"
+        title={t("faults.deleteTitle")}
+        message={t("faults.deleteMessage")}
+        confirmLabel={t("common.delete")}
         onConfirm={() => confirmId !== null && deleteMutation.mutate(confirmId)}
         onCancel={() => setConfirmId(null)}
-        destructive
+        confirmStyle="destructive"
       />
       <BottomNav />
     </SwipeBackView>

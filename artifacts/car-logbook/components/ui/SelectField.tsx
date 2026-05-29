@@ -35,15 +35,16 @@ export function SelectField({
   onSelect,
   options,
   optionLabels,
-  placeholder = "Select…",
+  placeholder,
   required,
   disabled,
   allowCustom,
 }: Props) {
   const C = useColors();
   const insets = useSafeAreaInsets();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const resolvedPlaceholder = placeholder ?? t("common.select");
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -103,7 +104,7 @@ export function SelectField({
             ]}
             numberOfLines={1}
           >
-            {value ? labelOf(value) : placeholder}
+            {value ? labelOf(value) : resolvedPlaceholder}
           </Text>
           <Feather name="chevron-down" size={17} color={C.textSecondary} />
         </TouchableOpacity>
@@ -133,7 +134,7 @@ export function SelectField({
                 <Feather name="search" size={16} color={C.textSecondary} style={{ marginRight: 8 }} />
                 <TextInput
                   style={[styles.searchInput, { color: C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}
-                  placeholder={allowCustom ? `+ Add ${label.toLowerCase()}` : `Search ${label.toLowerCase()}…`}
+                  placeholder={allowCustom ? t("common.addField", { label: label.toLowerCase() }) : t("common.searchField", { label: label.toLowerCase() })}
                   placeholderTextColor={C.textTertiary}
                   value={search}
                   onChangeText={setSearch}
@@ -168,7 +169,7 @@ export function SelectField({
               )}
               ListEmptyComponent={
                 <View style={styles.empty}>
-                  <Text style={{ color: C.textSecondary }}>No results for "{search}"</Text>
+                  <Text style={{ color: C.textSecondary }}>{t("common.noResults", { query: search })}</Text>
                 </View>
               }
               ListFooterComponent={
@@ -181,7 +182,7 @@ export function SelectField({
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                       <Feather name="plus-circle" size={18} color={C.tint} />
                       <Text style={[styles.optionText, { color: C.tint }]} numberOfLines={1}>
-                        Use "{search.trim()}"
+                        {t("common.useValue", { value: search.trim() })}
                       </Text>
                     </View>
                   </TouchableOpacity>

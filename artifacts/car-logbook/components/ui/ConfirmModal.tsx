@@ -6,6 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 
 type Props = {
@@ -22,12 +23,14 @@ export function ConfirmModal({
   visible,
   title,
   message,
-  confirmLabel = "Confirm",
+  confirmLabel,
   confirmStyle = "default",
   onConfirm,
   onCancel,
 }: Props) {
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const isDestructive = confirmStyle === "destructive";
 
   return (
@@ -41,7 +44,7 @@ export function ConfirmModal({
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <Text style={[styles.title, { color: C.text }]}>{title}</Text>
           <Text style={[styles.message, { color: C.textSecondary }]}>{message}</Text>
-          <View style={styles.buttons}>
+          <View style={[styles.buttons, isRTL && { flexDirection: "row-reverse" }]}>
             <Pressable
               onPress={onCancel}
               style={({ pressed }) => [
@@ -50,7 +53,7 @@ export function ConfirmModal({
                 { backgroundColor: C.backgroundTertiary, opacity: pressed ? 0.7 : 1 },
               ]}
             >
-              <Text style={[styles.buttonText, { color: C.textSecondary }]}>Cancel</Text>
+              <Text style={[styles.buttonText, { color: C.textSecondary }]}>{t("common.cancel")}</Text>
             </Pressable>
             <Pressable
               onPress={onConfirm}
@@ -63,7 +66,7 @@ export function ConfirmModal({
                 },
               ]}
             >
-              <Text style={[styles.buttonText, { color: "#fff" }]}>{confirmLabel}</Text>
+              <Text style={[styles.buttonText, { color: "#fff" }]}>{confirmLabel ?? t("common.confirm")}</Text>
             </Pressable>
           </View>
         </View>

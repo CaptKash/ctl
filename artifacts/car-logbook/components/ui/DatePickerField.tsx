@@ -37,6 +37,17 @@ function CustomCalendar({
   onDone: () => void;
 }) {
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const monthName = (m: number) =>
+    isRTL
+      ? new Date(viewYear, m, 1).toLocaleDateString("ar", { month: "long" })
+      : MONTH_NAMES[m];
+  const dayLabels = isRTL
+    ? Array.from({ length: 7 }, (_, i) =>
+        new Date(2023, 0, 1 + i).toLocaleDateString("ar", { weekday: "narrow" }),
+      )
+    : DAY_LABELS;
   const today = new Date();
   const initial = value ? new Date(value + "T12:00:00") : today;
   const [viewYear, setViewYear] = useState(initial.getFullYear());
@@ -99,7 +110,7 @@ function CustomCalendar({
           hitSlop={4}
         >
           <Text style={[calStyles.monthYear, { color: C.text }]}>
-            {MONTH_NAMES[viewMonth]} {viewYear}
+            {monthName(viewMonth)} {viewYear}
           </Text>
           <Feather name={showYearPicker ? "chevron-up" : "chevron-down"} size={14} color={C.textSecondary} />
         </Pressable>
@@ -131,8 +142,8 @@ function CustomCalendar({
         <>
           {/* Day-of-week labels */}
           <View style={calStyles.dayRow}>
-            {DAY_LABELS.map(d => (
-              <Text key={d} style={[calStyles.dayLabel, { color: C.textTertiary }]}>{d}</Text>
+            {dayLabels.map((d, i) => (
+              <Text key={i} style={[calStyles.dayLabel, { color: C.textTertiary }]}>{d}</Text>
             ))}
           </View>
 
@@ -173,17 +184,18 @@ function CustomCalendar({
         onPress={onDone}
         style={[calStyles.doneBtn, { backgroundColor: C.tint }]}
       >
-        <Text style={calStyles.doneBtnText}>Done</Text>
+        <Text style={calStyles.doneBtnText}>{t("common.done")}</Text>
       </Pressable>
     </View>
   );
 }
 
-export function DatePickerField({ label, value, onChange, placeholder = "Select date" }: Props) {
+export function DatePickerField({ label, value, onChange, placeholder }: Props) {
   const C = useColors();
   const { resolvedTheme } = useTheme();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const resolvedPlaceholder = placeholder ?? t("common.selectDate");
   const [show, setShow] = useState(false);
 
   const dateObj = value ? new Date(value + "T12:00:00") : new Date();
@@ -204,7 +216,7 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
             type="date"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             style={{
               flex: 1,
               border: "none",
@@ -244,7 +256,7 @@ export function DatePickerField({ label, value, onChange, placeholder = "Select 
       >
         <Feather name="calendar" size={16} color={show ? C.tint : C.textTertiary} />
         <Text style={[styles.displayText, { color: value ? C.text : C.textTertiary, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>
-          {display || placeholder}
+          {display || resolvedPlaceholder}
         </Text>
         <Feather name={show ? "chevron-up" : "chevron-down"} size={14} color={C.textTertiary} />
       </Pressable>

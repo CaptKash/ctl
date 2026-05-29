@@ -7,7 +7,16 @@
     "ok": "OK",
     "dash": "—",
     "restartRequiredTitle": "Restart required  •  إعادة تشغيل مطلوبة",
-    "restartRequiredMessage": "Please close and reopen the app to apply the new language.\n\nيرجى إغلاق التطبيق وإعادة فتحه لتطبيق اللغة الجديدة."
+    "restartRequiredMessage": "Please close and reopen the app to apply the new language.\n\nيرجى إغلاق التطبيق وإعادة فتحه لتطبيق اللغة الجديدة.",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "select": "Select…",
+    "searchField": "Search {{label}}…",
+    "addField": "+ Add {{label}}",
+    "noResults": "No results for \"{{query}}\"",
+    "useValue": "Use \"{{value}}\"",
+    "selectDate": "Select date",
+    "done": "Done"
   },
   "login": {
     "title": "Sign in",
@@ -665,6 +674,37 @@
       "reference": "Reference No.",
       "licenseRenewal": "License Renewal",
       "insuranceRenewal": "Insurance Renewal"
+    }
+  },
+  "faults": {
+    "title": "Fault Records",
+    "carFallback": "Car",
+    "add": "Add Fault",
+    "emptyTitle": "No fault records",
+    "emptyDesc": "Log warning messages and malfunctions here.",
+    "addTitle": "Add Fault Record",
+    "date": "Date",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the fault…",
+    "inputMethod": "Input Method",
+    "selectMethod": "Select method…",
+    "phase": "Phase",
+    "selectPhase": "Select phase…",
+    "odometer": "Odometer ({{unit}})",
+    "odometerPlaceholder": "e.g. 54200",
+    "saveError": "Failed to save. Please check all required fields.",
+    "save": "Save Fault",
+    "deleteTitle": "Delete Fault Record",
+    "deleteMessage": "This fault record will be permanently deleted.",
+    "methods": {
+      "warning_message": "Warning Message",
+      "written": "Written"
+    },
+    "phases": {
+      "car_running": "Car Running",
+      "car_started": "Car Started",
+      "parking": "Parking",
+      "during_drive": "During Drive"
     }
   }
 }

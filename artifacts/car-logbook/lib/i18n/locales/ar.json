@@ -7,7 +7,16 @@
     "ok": "حسناً",
     "dash": "—",
     "restartRequiredTitle": "إعادة تشغيل مطلوبة  •  Restart required",
-    "restartRequiredMessage": "يرجى إغلاق التطبيق وإعادة فتحه لتطبيق اللغة الجديدة.\n\nPlease close and reopen the app to apply the new language."
+    "restartRequiredMessage": "يرجى إغلاق التطبيق وإعادة فتحه لتطبيق اللغة الجديدة.\n\nPlease close and reopen the app to apply the new language.",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "select": "اختر…",
+    "searchField": "بحث في {{label}}…",
+    "addField": "+ إضافة {{label}}",
+    "noResults": "لا نتائج لـ \"{{query}}\"",
+    "useValue": "استخدام \"{{value}}\"",
+    "selectDate": "اختر التاريخ",
+    "done": "تم"
   },
   "login": {
     "title": "تسجيل الدخول",
@@ -685,6 +694,37 @@
       "reference": "رقم المرجع",
       "licenseRenewal": "تجديد الرخصة",
       "insuranceRenewal": "تجديد التأمين"
+    }
+  },
+  "faults": {
+    "title": "سجلات الأعطال",
+    "carFallback": "سيارة",
+    "add": "إضافة عطل",
+    "emptyTitle": "لا توجد سجلات أعطال",
+    "emptyDesc": "سجّل رسائل التحذير والأعطال هنا.",
+    "addTitle": "إضافة سجل عطل",
+    "date": "التاريخ",
+    "description": "الوصف",
+    "descriptionPlaceholder": "صف العطل…",
+    "inputMethod": "طريقة الإدخال",
+    "selectMethod": "اختر الطريقة…",
+    "phase": "المرحلة",
+    "selectPhase": "اختر المرحلة…",
+    "odometer": "العداد ({{unit}})",
+    "odometerPlaceholder": "مثال: 54200",
+    "saveError": "فشل الحفظ. يرجى التحقق من جميع الحقول المطلوبة.",
+    "save": "حفظ العطل",
+    "deleteTitle": "حذف سجل العطل",
+    "deleteMessage": "سيتم حذف سجل العطل هذا نهائياً.",
+    "methods": {
+      "warning_message": "رسالة تحذير",
+      "written": "مكتوب"
+    },
+    "phases": {
+      "car_running": "المحرك يعمل",
+      "car_started": "عند التشغيل",
+      "parking": "أثناء الوقوف",
+      "during_drive": "أثناء القيادة"
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 
 type Props = {
@@ -17,6 +18,8 @@ type Props = {
 
 export function EmptyState({ icon, ionIcon, title, description, actionLabel, onAction, btnColor, btnTextColor, btnIcon }: Props) {
   const C = useColors();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const resolvedBtnColor = btnColor ?? C.tint;
   const resolvedBtnTextColor = btnTextColor ?? "#fff";
   return (
@@ -32,7 +35,7 @@ export function EmptyState({ icon, ionIcon, title, description, actionLabel, onA
       {actionLabel && onAction && (
         <Pressable
           onPress={onAction}
-          style={({ pressed }) => [styles.btn, { backgroundColor: resolvedBtnColor, opacity: pressed ? 0.85 : 1 }]}
+          style={({ pressed }) => [styles.btn, isRTL && { flexDirection: "row-reverse" }, { backgroundColor: resolvedBtnColor, opacity: pressed ? 0.85 : 1 }]}
         >
           {btnIcon && <Feather name={btnIcon} size={18} color={resolvedBtnTextColor} />}
           <Text style={[styles.btnText, { color: resolvedBtnTextColor }]}>{actionLabel}</Text>

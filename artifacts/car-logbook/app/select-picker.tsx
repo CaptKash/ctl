@@ -21,7 +21,7 @@ const ITEM_HEIGHT = 52;
 export default function SelectPickerScreen() {
   const C = useColors();
   const insets = useSafeAreaInsets();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
   const { label, options, value, optionLabels } = getPickerState();
   const [search, setSearch] = useState("");
@@ -59,20 +59,20 @@ export default function SelectPickerScreen() {
 
   return (
     <SwipeBackView style={[styles.container, { backgroundColor: C.background }]}>
-      <View style={[styles.header, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
+      <View style={[styles.header, isRTL && { flexDirection: "row-reverse" }, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
         <TouchableOpacity onPress={handleClose} style={styles.closeBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <Feather name="arrow-left" size={22} color={C.text} />
+          <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: C.text }]}>{label}</Text>
         <View style={styles.closeBtn} />
       </View>
 
       <View style={[styles.searchRow, { borderBottomColor: C.border }]}>
-        <View style={[styles.searchBox, { backgroundColor: C.backgroundTertiary }]}>
-          <Feather name="search" size={16} color={C.textSecondary} style={{ marginRight: 8 }} />
+        <View style={[styles.searchBox, isRTL && { flexDirection: "row-reverse" }, { backgroundColor: C.backgroundTertiary }]}>
+          <Feather name="search" size={16} color={C.textSecondary} style={isRTL ? { marginLeft: 8 } : { marginRight: 8 }} />
           <TextInput
-            style={[styles.searchInput, { color: C.text }]}
-            placeholder={`Search ${label.toLowerCase()}…`}
+            style={[styles.searchInput, { color: C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}
+            placeholder={t("common.searchField", { label: label.toLowerCase() })}
             placeholderTextColor={C.textTertiary}
             value={search}
             onChangeText={setSearch}
@@ -124,7 +124,7 @@ export default function SelectPickerScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={{ color: C.textSecondary }}>No results for "{search}"</Text>
+            <Text style={{ color: C.textSecondary }}>{t("common.noResults", { query: search })}</Text>
           </View>
         }
       />
