@@ -639,9 +639,9 @@
     "carsLabel": "السيارات",
     "allCars": "كل السيارات",
     "recordTypesLabel": "أنواع السجلات",
-    "faults": "الأعطال",
-    "repairs": "الإصلاحات",
-    "inspections": "الفحوصات",
+    "faults": "الأعطال / الأعطال المفاجئة / الأضرار",
+    "repairs": "الإصلاح / الصيانة",
+    "renewals": "تجديد الرخصة / التأمين",
     "willInclude_zero": "لن يتم تضمين أي سجل في التقرير.",
     "willInclude_one": "سيتم تضمين سجل واحد في التقرير.",
     "willInclude_two": "سيتم تضمين سجلين في التقرير.",
@@ -670,7 +670,7 @@
       "records_other": "{{count}} سجل",
       "badgeFault": "عطل",
       "badgeRepair": "إصلاح",
-      "badgeInspection": "فحص",
+      "badgeRenewal": "تجديد",
       "status": "الحالة",
       "resolved": "تم الحل",
       "active": "نشط",
@@ -680,10 +680,11 @@
       "address": "العنوان",
       "cost": "التكلفة",
       "warranty": "الضمان",
-      "inspectionCenter": "مركز الفحص",
-      "nextInspection": "الفحص القادم",
-      "inspection": "فحص",
-      "resultPrefix": "النتيجة: {{result}}"
+      "provider": "الجهة",
+      "expiryDate": "تاريخ الانتهاء",
+      "reference": "رقم المرجع",
+      "licenseRenewal": "تجديد الرخصة",
+      "insuranceRenewal": "تجديد التأمين"
     }
   }
 }

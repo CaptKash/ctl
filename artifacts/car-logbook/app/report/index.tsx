@@ -31,13 +31,13 @@ const METALLIC = {
   greenSoft: ["#ECFDF5", "#D1FAE5", "#A7F3D0"] as const,
   fault: ["#FEF2F2", "#FECACA", "#FCA5A5"] as const,
   repair: ["#FFFBEB", "#FEF3C7", "#FDE68A"] as const,
-  inspection: ["#F0FDFA", "#CCFBF1", "#99F6E4"] as const,
+  renewal: ["#EEF2FF", "#E0E7FF", "#C7D2FE"] as const,
 };
 
 const TYPE_COLORS = {
   fault: { icon: "#DC2626", border: "#DC2626" },
   repair: { icon: "#D97706", border: "#D97706" },
-  inspection: { icon: "#0D9488", border: "#0D9488" },
+  renewal: { icon: "#4F46E5", border: "#4F46E5" },
 };
 
 type CarStub = {
@@ -74,21 +74,22 @@ type MaintenanceRecord = {
   car: CarStub | null;
 };
 
-type InspectionRecord = {
+type RenewalRecord = {
   id: number;
   carId: number;
+  type: "license" | "insurance";
   date: string;
-  place?: string | null;
-  results?: string | null;
+  validUntil?: string | null;
+  provider?: string | null;
+  referenceNumber?: string | null;
   cost?: number | null;
-  nextInspectionDate?: string | null;
   car: CarStub | null;
 };
 
 type HistoryItem = {
   key: string;
   carId: number;
-  type: "malfunction" | "maintenance" | "inspection";
+  type: "malfunction" | "maintenance" | "renewal";
   date: string;
   title: string;
   carName: string;
@@ -102,10 +103,11 @@ type HistoryItem = {
   shopAddress?: string | null;
   warrantyPeriod?: string | null;
   cost?: number | null;
-  // inspection
-  results?: string | null;
-  place?: string | null;
-  nextInspectionDate?: string | null;
+  // renewal
+  renewalType?: "license" | "insurance";
+  provider?: string | null;
+  validUntil?: string | null;
+  referenceNumber?: string | null;
 };
 
 function carLabel(car: CarStub | null, unknownLabel: string): string {
@@ -135,8 +137,8 @@ function buildHtml(
     const typeLabel =
       ev.type === "malfunction"
         ? t("generateReport.doc.badgeFault")
-        : ev.type === "inspection"
-          ? t("generateReport.doc.badgeInspection")
+        : ev.type === "renewal"
+          ? t("generateReport.doc.badgeRenewal")
           : t("generateReport.doc.badgeRepair");
     let titleHtml = "";
     let fieldsHtml = "";
@@ -161,13 +163,14 @@ function buildHtml(
         ${field(t("generateReport.doc.warranty"), ev.warrantyPeriod)}
       `;
     } else {
-      titleHtml = ev.results
-        ? t("generateReport.doc.resultPrefix", { result: ev.results })
-        : t("generateReport.doc.inspection");
+      titleHtml = ev.renewalType === "license"
+        ? t("generateReport.doc.licenseRenewal")
+        : t("generateReport.doc.insuranceRenewal");
       fieldsHtml = `
-        ${field(t("generateReport.doc.inspectionCenter"), ev.place)}
+        ${field(t("generateReport.doc.provider"), ev.provider)}
         ${ev.cost != null ? field(t("generateReport.doc.cost"), `${currencySymbol}${ev.cost.toFixed(2)}`) : ""}
-        ${ev.nextInspectionDate ? field(t("generateReport.doc.nextInspection"), formatDate(ev.nextInspectionDate)) : ""}
+        ${ev.validUntil ? field(t("generateReport.doc.expiryDate"), formatDate(ev.validUntil)) : ""}
+        ${field(t("generateReport.doc.reference"), ev.referenceNumber)}
       `;
     }
 
@@ -202,7 +205,7 @@ function buildHtml(
     .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
     .malfunction { background: #FEE2E2; color: #DC2626; }
     .maintenance  { background: #FEF3C7; color: #D97706; }
-    .inspection   { background: #CCFBF1; color: #0D9488; }
+    .renewal      { background: #E0E7FF; color: #4F46E5; }
     .card-body { padding: 12px 16px; }
     .record-title { font-size: 15px; font-weight: 600; color: #111; margin-bottom: 10px; }
     .fields { display: flex; flex-wrap: wrap; gap: 12px 24px; }
@@ -270,7 +273,7 @@ export default function ReportScreen() {
   );
   const [includeFaults, setIncludeFaults] = useState(true);
   const [includeRepairs, setIncludeRepairs] = useState(true);
-  const [includeInspections, setIncludeInspections] = useState(true);
+  const [includeRenewals, setIncludeRenewals] = useState(true);
 
   const carsQuery = useQuery<CarStub[]>({
     queryKey: ["cars"],
@@ -287,12 +290,12 @@ export default function ReportScreen() {
     queryFn: () => apiGet<MaintenanceRecord[]>("/maintenance"),
   });
 
-  const inspectionsQuery = useQuery<InspectionRecord[]>({
-    queryKey: ["inspections-all"],
-    queryFn: () => apiGet<InspectionRecord[]>("/inspections"),
+  const renewalsQuery = useQuery<RenewalRecord[]>({
+    queryKey: ["renewals-all"],
+    queryFn: () => apiGet<RenewalRecord[]>("/renewals"),
   });
 
-  const isLoading = carsQuery.isLoading || faultsQuery.isLoading || repairsQuery.isLoading || inspectionsQuery.isLoading;
+  const isLoading = carsQuery.isLoading || faultsQuery.isLoading || repairsQuery.isLoading || renewalsQuery.isLoading;
 
   const cars: CarStub[] = carsQuery.data ?? [];
   const unknownCar = t("generateReport.unknownCar");
@@ -325,22 +328,25 @@ export default function ReportScreen() {
       warrantyPeriod: r.warrantyPeriod,
     }));
 
-    const inspections = (inspectionsQuery.data ?? []).map((r): HistoryItem => ({
-      key: `inspection-${r.id}`,
+    const renewals = (renewalsQuery.data ?? []).map((r): HistoryItem => ({
+      key: `renewal-${r.id}`,
       carId: r.carId,
-      type: "inspection",
+      type: "renewal",
       date: r.date,
-      title: r.results ?? t("generateReport.doc.inspection"),
+      title: r.type === "license"
+        ? t("generateReport.doc.licenseRenewal")
+        : t("generateReport.doc.insuranceRenewal"),
       carName: carLabel(r.car, unknownCar),
       completed: false,
-      results: r.results,
-      place: r.place,
+      renewalType: r.type,
+      provider: r.provider,
+      validUntil: r.validUntil,
+      referenceNumber: r.referenceNumber,
       cost: r.cost,
-      nextInspectionDate: r.nextInspectionDate,
     }));
 
-    return [...faults, ...repairs, ...inspections].sort((a, b) => b.date.localeCompare(a.date));
-  }, [faultsQuery.data, repairsQuery.data, inspectionsQuery.data, unknownCar, t]);
+    return [...faults, ...repairs, ...renewals].sort((a, b) => b.date.localeCompare(a.date));
+  }, [faultsQuery.data, repairsQuery.data, renewalsQuery.data, unknownCar, t]);
 
   const allSelected = selectedCarIds.length === 0;
 
@@ -360,11 +366,11 @@ export default function ReportScreen() {
     if (!allSelected && !selectedCarIds.includes(ev.carId)) return false;
     if (!includeFaults && ev.type === "malfunction") return false;
     if (!includeRepairs && ev.type === "maintenance") return false;
-    if (!includeInspections && ev.type === "inspection") return false;
+    if (!includeRenewals && ev.type === "renewal") return false;
     return true;
   });
 
-  const canGenerate = (includeFaults || includeRepairs || includeInspections) && filteredItems.length > 0;
+  const canGenerate = (includeFaults || includeRepairs || includeRenewals) && filteredItems.length > 0;
 
   async function handleGenerate() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -377,11 +383,11 @@ export default function ReportScreen() {
     } else {
       carPart = t("generateReport.filter.nCars", { count: selectedCarIds.length });
     }
-    const typePart = includeFaults && includeRepairs
-      ? t("generateReport.filter.faultsAndRepairs")
-      : includeFaults
-        ? t("generateReport.filter.faultsOnly")
-        : t("generateReport.filter.repairsOnly");
+    const typePart = [
+      includeFaults && t("generateReport.faults"),
+      includeRepairs && t("generateReport.repairs"),
+      includeRenewals && t("generateReport.renewals"),
+    ].filter(Boolean).join(" · ");
     await openReport(filteredItems, `${carPart} · ${typePart}`, t, isRTL, currency.symbol);
   }
 
@@ -484,17 +490,17 @@ export default function ReportScreen() {
                 </View>
               </Pressable>
               <Pressable
-                onPress={() => { Haptics.selectionAsync(); setIncludeInspections((v) => !v); }}
+                onPress={() => { Haptics.selectionAsync(); setIncludeRenewals((v) => !v); }}
                 style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }]}
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                  <LinearGradient colors={METALLIC.inspection} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: TYPE_COLORS.inspection.border }]}>
-                    <Feather name="clipboard" size={14} color={TYPE_COLORS.inspection.icon} />
+                  <LinearGradient colors={METALLIC.renewal} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: TYPE_COLORS.renewal.border }]}>
+                    <Feather name="credit-card" size={14} color={TYPE_COLORS.renewal.icon} />
                   </LinearGradient>
-                  <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.inspections")}</Text>
+                  <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.renewals")}</Text>
                 </View>
-                <View style={[styles.checkbox, { borderColor: includeInspections ? TYPE_COLORS.inspection.border : C.border, backgroundColor: includeInspections ? TYPE_COLORS.inspection.border : "transparent" }]}>
-                  {includeInspections && <Feather name="check" size={12} color="#fff" />}
+                <View style={[styles.checkbox, { borderColor: includeRenewals ? TYPE_COLORS.renewal.border : C.border, backgroundColor: includeRenewals ? TYPE_COLORS.renewal.border : "transparent" }]}>
+                  {includeRenewals && <Feather name="check" size={12} color="#fff" />}
                 </View>
               </Pressable>
             </View>

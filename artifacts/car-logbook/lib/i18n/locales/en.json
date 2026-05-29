@@ -627,9 +627,9 @@
     "carsLabel": "CARS",
     "allCars": "All Cars",
     "recordTypesLabel": "RECORD TYPES",
-    "faults": "Faults",
-    "repairs": "Repairs",
-    "inspections": "Inspections",
+    "faults": "Faults / Breakdown / Damage",
+    "repairs": "Repair / Service",
+    "renewals": "License / Insurance Renewal",
     "willInclude_one": "{{count}} record will be included in the report.",
     "willInclude_other": "{{count}} records will be included in the report.",
     "noMatch": "No records match the current filters.",
@@ -650,7 +650,7 @@
       "records_other": "{{count}} records",
       "badgeFault": "Fault",
       "badgeRepair": "Repair",
-      "badgeInspection": "Inspection",
+      "badgeRenewal": "Renewal",
       "status": "Status",
       "resolved": "Resolved",
       "active": "Active",
@@ -660,10 +660,11 @@
       "address": "Address",
       "cost": "Cost",
       "warranty": "Warranty",
-      "inspectionCenter": "Inspection Center",
-      "nextInspection": "Next Inspection",
-      "inspection": "Inspection",
-      "resultPrefix": "Result: {{result}}"
+      "provider": "Provider",
+      "expiryDate": "Expiry Date",
+      "reference": "Reference No.",
+      "licenseRenewal": "License Renewal",
+      "insuranceRenewal": "Insurance Renewal"
     }
   }
 }
