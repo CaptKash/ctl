@@ -705,6 +705,16 @@
       "car_started": "Car Started",
       "parking": "Parking",
       "during_drive": "During Drive"
-    }
+    },
+    "logTitle": "Fault Log",
+    "noFaults": "No faults logged",
+    "summary": "{{open}} open · {{total}} total",
+    "logEmptyDesc": "Fault records across all your cars will appear here.",
+    "faultBadge": "Fault",
+    "dashboardMessageLabel": "Dashboard message: ",
+    "allResolved": "All faults resolved",
+    "logAnother": "Log Another Fault",
+    "unknownCar": "Unknown Car",
+    "deleteFaultTitle": "Delete Fault"
   }
 }

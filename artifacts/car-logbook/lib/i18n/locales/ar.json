@@ -725,6 +725,16 @@
       "car_started": "عند التشغيل",
       "parking": "أثناء الوقوف",
       "during_drive": "أثناء القيادة"
-    }
+    },
+    "logTitle": "سجل الأعطال",
+    "noFaults": "لا توجد أعطال مسجلة",
+    "summary": "{{open}} مفتوحة · {{total}} الإجمالي",
+    "logEmptyDesc": "ستظهر سجلات الأعطال لجميع سياراتك هنا.",
+    "faultBadge": "عطل",
+    "dashboardMessageLabel": "رسالة لوحة القيادة: ",
+    "allResolved": "تم حل جميع الأعطال",
+    "logAnother": "تسجيل عطل آخر",
+    "unknownCar": "سيارة غير معروفة",
+    "deleteFaultTitle": "حذف العطل"
   }
 }

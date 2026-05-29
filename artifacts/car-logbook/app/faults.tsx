@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -44,16 +45,18 @@ type FaultRecord = {
 const FAULT_BG = "#FEE2E2";
 const FAULT_COLOR = "#DC2626";
 
-const carLabel = (car: Car | null) => {
-  if (!car) return "Unknown Car";
-  return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
-};
-
 export default function FaultLogScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const qc = useQueryClient();
+
+  const carLabel = (car: Car | null) => {
+    if (!car) return t("faults.unknownCar");
+    return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
+  };
 
   const { data: faults, isLoading } = useQuery<FaultRecord[]>({
     queryKey: ["malfunctions-all"],
@@ -93,22 +96,22 @@ export default function FaultLogScreen() {
   const renderCard = ({ item }: { item: FaultRecord }) => {
     const car = carLabel(item.car);
     return (
-      <View style={[styles.card, { backgroundColor: C.card, borderColor: FAULT_COLOR }]}>
-        <View style={styles.cardHeader}>
-          <View style={[styles.faultBadge, { backgroundColor: FAULT_BG }]}>
+      <View style={[styles.card, { backgroundColor: C.card, borderColor: FAULT_COLOR }, isRTL && { borderLeftWidth: 1, borderRightWidth: 4 }]}>
+        <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
+          <View style={[styles.faultBadge, { backgroundColor: FAULT_BG }, isRTL && { flexDirection: "row-reverse" }]}>
             <Feather name="alert-triangle" size={11} color={FAULT_COLOR} />
-            <Text style={[styles.badgeText, { color: FAULT_COLOR }]}>Fault</Text>
+            <Text style={[styles.badgeText, { color: FAULT_COLOR }]}>{t("faults.faultBadge")}</Text>
           </View>
-          <Text style={[styles.carName, { color: C.textTertiary }]} numberOfLines={1}>{car}</Text>
+          <Text style={[styles.carName, { color: C.textTertiary, textAlign: isRTL ? "left" : "right" }]} numberOfLines={1}>{car}</Text>
         </View>
 
-        <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>
+        <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]} numberOfLines={2}>
           {item.description}
         </Text>
 
         {!!item.warningMessage && (
-          <Text style={[styles.warningMsgText, { color: C.textSecondary }]} numberOfLines={2}>
-            <Text style={styles.warningMsgLabel}>Dashboard message: </Text>
+          <Text style={[styles.warningMsgText, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]} numberOfLines={2}>
+            <Text style={styles.warningMsgLabel}>{t("faults.dashboardMessageLabel")}</Text>
             {item.warningMessage}
           </Text>
         )}
@@ -126,12 +129,12 @@ export default function FaultLogScreen() {
           );
         })()}
 
-        <View style={styles.cardFooter}>
-          <View style={styles.footerLeft}>
+        <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
+          <View style={[styles.footerLeft, isRTL && { flexDirection: "row-reverse" }]}>
             <Feather name="calendar" size={12} color={C.textTertiary} />
             <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
           </View>
-          <View style={styles.footerActions}>
+          <View style={[styles.footerActions, isRTL && { flexDirection: "row-reverse" }]}>
             <Pressable
               onPress={() =>
                 router.push({
@@ -162,14 +165,14 @@ export default function FaultLogScreen() {
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
             <Feather name="alert-triangle" size={22} color="#DC2626" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Fault Log</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-              {totalCount === 0 ? "No faults logged" : `${openCount} open · ${totalCount} total`}
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("faults.logTitle")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {totalCount === 0 ? t("faults.noFaults") : t("faults.summary", { open: openCount, total: totalCount })}
             </Text>
           </View>
         </View>
@@ -183,8 +186,8 @@ export default function FaultLogScreen() {
         <View style={styles.centered}>
           <EmptyState
             icon="check-circle"
-            title="No faults logged"
-            subtitle="Fault records across all your cars will appear here."
+            title={t("faults.noFaults")}
+            description={t("faults.logEmptyDesc")}
           />
         </View>
       ) : (
@@ -196,9 +199,9 @@ export default function FaultLogScreen() {
           showsVerticalScrollIndicator={false}
         >
           {active.length === 0 ? (
-            <View style={[styles.emptyActive, { backgroundColor: C.card, borderColor: C.border }]}>
+            <View style={[styles.emptyActive, { backgroundColor: C.card, borderColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
               <Feather name="check-circle" size={20} color="#059669" />
-              <Text style={[styles.emptyActiveText, { color: C.textSecondary }]}>All faults resolved</Text>
+              <Text style={[styles.emptyActiveText, { color: C.textSecondary }]}>{t("faults.allResolved")}</Text>
             </View>
           ) : (
             active.map((item) => (
@@ -209,7 +212,7 @@ export default function FaultLogScreen() {
           )}
 
           <PrimaryButton
-            label="Log Another Fault"
+            label={t("faults.logAnother")}
             onPress={() => router.push("/malfunction/add" as any)}
             variant="danger-light"
             icon="plus"
@@ -219,9 +222,9 @@ export default function FaultLogScreen() {
 
       <ConfirmModal
         visible={confirmModal.visible}
-        title="Delete Fault"
-        message="This fault record will be permanently deleted."
-        confirmLabel="Delete"
+        title={t("faults.deleteFaultTitle")}
+        message={t("faults.deleteMessage")}
+        confirmLabel={t("common.delete")}
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal((s) => ({ ...s, visible: false }))}
       />
