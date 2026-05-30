@@ -1,0 +1,1 @@
+- [Car-logbook i18n/RTL pattern](car-logbook-i18n.md) — how Arabic + RTL localization works in the Expo app, plus the dead-screen gotcha for the fault log.

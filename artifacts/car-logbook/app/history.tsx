@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
@@ -64,19 +65,21 @@ type HistoryItem = {
 };
 
 const EVENT_META = {
-  malfunction: { label: "Fault",  icon: "alert-triangle" as const, bg: "#FEE2E2", color: "#DC2626" },
-  maintenance: { label: "Repair", icon: "tool"           as const, bg: "#FEF3C7", color: "#D97706" },
+  malfunction: { icon: "alert-triangle" as const, bg: "#FEE2E2", color: "#DC2626" },
+  maintenance: { icon: "tool"           as const, bg: "#FEF3C7", color: "#D97706" },
 };
-
-function carLabel(car: CarStub | null): string {
-  if (!car) return "Unknown car";
-  return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
-}
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  const carLabel = (car: CarStub | null): string => {
+    if (!car) return t("history.unknownCar");
+    return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
+  };
 
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
 
@@ -99,7 +102,11 @@ export default function HistoryScreen() {
       type: "malfunction",
       date: r.date,
       title: r.description,
-      subtitle: (r.phase ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      subtitle: r.phase
+        ? (i18n.exists(`faults.phases.${r.phase}`)
+            ? t(`faults.phases.${r.phase}`)
+            : r.phase.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
+        : "",
       carName: carLabel(r.car),
       completed: r.completed,
       dashboardMessage: r.dashboardMessage,
@@ -118,7 +125,7 @@ export default function HistoryScreen() {
     }));
 
     return [...faults, ...repairs].sort((a, b) => b.date.localeCompare(a.date));
-  }, [faultsQuery.data, repairsQuery.data]);
+  }, [faultsQuery.data, repairsQuery.data, i18n.language]);
 
   // Unique cars that have records
   const cars: CarStub[] = React.useMemo(() => {
@@ -134,30 +141,30 @@ export default function HistoryScreen() {
     : allItems.filter((ev) => ev.carId === selectedCarId);
 
   const headerSub = isLoading
-    ? "Loading…"
+    ? t("history.loading")
     : selectedCarId == null
-      ? `${allItems.length} record${allItems.length !== 1 ? "s" : ""}${cars.length > 1 ? ` · ${cars.length} cars` : ""}`
+      ? `${t("history.records", { count: allItems.length })}${cars.length > 1 ? t("history.carsSuffix", { count: cars.length }) : ""}`
       : carLabel(cars.find((c) => c.id === selectedCarId) ?? null);
 
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
             <Feather name="clock" size={22} color="#2563EB" />
           </View>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>History</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>{headerSub}</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("history.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{headerSub}</Text>
           </View>
           {!isLoading && allItems.length > 0 && (
             <Pressable
               onPress={() => { Haptics.selectionAsync(); router.push("/report"); }}
-              style={({ pressed }) => [styles.reportBtn, { opacity: pressed ? 0.75 : 1 }]}
+              style={({ pressed }) => [styles.reportBtn, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed ? 0.75 : 1 }]}
             >
               <Feather name="file-text" size={14} color="#059669" />
-              <Text style={styles.reportBtnText}>Generate Report</Text>
+              <Text style={styles.reportBtnText}>{t("history.generateReport")}</Text>
             </Pressable>
           )}
         </View>
@@ -169,7 +176,7 @@ export default function HistoryScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.chipsBar}
-          contentContainerStyle={styles.chips}
+          contentContainerStyle={[styles.chips, isRTL && { flexDirection: "row-reverse" }]}
         >
           <Pressable
             onPress={() => { Haptics.selectionAsync(); setSelectedCarId(null); }}
@@ -178,7 +185,7 @@ export default function HistoryScreen() {
               { backgroundColor: selectedCarId == null ? C.tint : C.card, borderColor: selectedCarId == null ? C.tint : C.border },
             ]}
           >
-            <Text style={[styles.chipText, { color: selectedCarId == null ? "#fff" : C.text }]}>All</Text>
+            <Text style={[styles.chipText, { color: selectedCarId == null ? "#fff" : C.text }]}>{t("history.all")}</Text>
           </Pressable>
           {cars.map((car) => {
             const active = car.id === selectedCarId;
@@ -208,9 +215,9 @@ export default function HistoryScreen() {
       ) : items.length === 0 ? (
         <View style={styles.centered}>
           <Feather name="clock" size={40} color={C.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: C.text }]}>No History Yet</Text>
+          <Text style={[styles.emptyTitle, { color: C.text }]}>{t("history.emptyTitle")}</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            Logged faults and repairs will appear here automatically.
+            {t("history.emptyDesc")}
           </Text>
         </View>
       ) : (
@@ -222,21 +229,21 @@ export default function HistoryScreen() {
           {items.map((ev) => {
             const meta = EVENT_META[ev.type];
             return (
-              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
-                <View style={styles.cardHeader}>
-                  <View style={styles.badgeGroup}>
-                    <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }, isRTL && { borderLeftWidth: 1, borderRightWidth: 4 }]}>
+                <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
+                  <View style={[styles.badgeGroup, isRTL && { flexDirection: "row-reverse" }]}>
+                    <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
                       <Feather name={meta.icon} size={11} color={meta.color} />
-                      <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
+                      <Text style={[styles.badgeText, { color: meta.color }]}>{t(`history.badge.${ev.type}`)}</Text>
                     </View>
                     {ev.type === "malfunction" && (
                       ev.completed ? (
                         <View style={styles.resolvedStamp}>
-                          <Text style={styles.resolvedStampText}>RESOLVED</Text>
+                          <Text style={[styles.resolvedStampText, isRTL && { letterSpacing: 0 }]}>{t("history.resolved")}</Text>
                         </View>
                       ) : (
                         <View style={styles.activeStamp}>
-                          <Text style={styles.activeStampText}>ACTIVE</Text>
+                          <Text style={[styles.activeStampText, isRTL && { letterSpacing: 0 }]}>{t("history.active")}</Text>
                         </View>
                       )
                     )}
@@ -244,11 +251,11 @@ export default function HistoryScreen() {
                   <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
                 </View>
 
-                <Text style={[styles.cardTitle, { color: C.text }]} numberOfLines={2}>{ev.title}</Text>
+                <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>{ev.title}</Text>
 
                 {ev.type === "malfunction" && !!ev.warningMessage && (
-                  <Text style={[styles.warningMsgText, { color: C.textSecondary }]} numberOfLines={2}>
-                    <Text style={styles.warningMsgLabel}>Dashboard message: </Text>
+                  <Text style={[styles.warningMsgText, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>
+                    <Text style={styles.warningMsgLabel}>{t("history.dashboardMessageLabel")}</Text>
                     {ev.warningMessage}
                   </Text>
                 )}
@@ -268,12 +275,12 @@ export default function HistoryScreen() {
 
                 {ev.subtitle ? (
                   <View style={styles.cardMeta}>
-                    <Text style={[styles.metaText, { color: C.textSecondary }]} numberOfLines={1}>{ev.subtitle}</Text>
+                    <Text style={[styles.metaText, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{ev.subtitle}</Text>
                   </View>
                 ) : null}
 
                 <View style={styles.cardMeta}>
-                  <Text style={[styles.metaText, { color: C.textTertiary }]} numberOfLines={1}>{ev.carName}</Text>
+                  <Text style={[styles.metaText, { color: C.textTertiary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{ev.carName}</Text>
                 </View>
               </View>
             );

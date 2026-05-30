@@ -736,5 +736,23 @@
     "logAnother": "تسجيل عطل آخر",
     "unknownCar": "سيارة غير معروفة",
     "deleteFaultTitle": "حذف العطل"
+  },
+  "history": {
+    "title": "السجل",
+    "loading": "جارٍ التحميل…",
+    "records_other": "{{count}} سجل",
+    "carsSuffix_other": " · {{count}} سيارات",
+    "generateReport": "إنشاء تقرير",
+    "all": "الكل",
+    "badge": {
+      "malfunction": "عطل",
+      "maintenance": "إصلاح"
+    },
+    "resolved": "تم الحل",
+    "active": "نشط",
+    "dashboardMessageLabel": "رسالة لوحة القيادة: ",
+    "emptyTitle": "لا يوجد سجل بعد",
+    "emptyDesc": "ستظهر الأعطال والإصلاحات المسجلة هنا تلقائياً.",
+    "unknownCar": "سيارة غير معروفة"
   }
 }

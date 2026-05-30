@@ -716,5 +716,24 @@
     "logAnother": "Log Another Fault",
     "unknownCar": "Unknown Car",
     "deleteFaultTitle": "Delete Fault"
+  },
+  "history": {
+    "title": "History",
+    "loading": "Loading…",
+    "records_one": "{{count}} record",
+    "records_other": "{{count}} records",
+    "carsSuffix_other": " · {{count}} cars",
+    "generateReport": "Generate Report",
+    "all": "All",
+    "badge": {
+      "malfunction": "Fault",
+      "maintenance": "Repair"
+    },
+    "resolved": "RESOLVED",
+    "active": "ACTIVE",
+    "dashboardMessageLabel": "Dashboard message: ",
+    "emptyTitle": "No History Yet",
+    "emptyDesc": "Logged faults and repairs will appear here automatically.",
+    "unknownCar": "Unknown car"
   }
 }
