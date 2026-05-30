@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  urgencyBar: { width: 4 },
+  urgencyBar: { width: 4, borderTopLeftRadius: 14, borderBottomLeftRadius: 14 },
   cardBody: { flex: 1, padding: 14, gap: 5 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 8 },
   cardType: { flex: 1, fontSize: 15, fontFamily: "Inter_600SemiBold" },
