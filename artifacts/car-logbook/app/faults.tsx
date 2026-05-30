@@ -14,8 +14,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useColors } from "@/context/ThemeContext";
+import { useColors, useTheme } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { formatDate } from "@/lib/dateUtils";
@@ -45,7 +46,6 @@ type FaultRecord = {
 
 const FAULT_BG = "#FEE2E2";
 const FAULT_COLOR = "#DC2626";
-const REPAIR_BG = "#FEF3C7";
 const REPAIR_COLOR = "#D97706";
 
 export default function FaultLogScreen() {
@@ -53,6 +53,8 @@ export default function FaultLogScreen() {
   const C = useColors();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const qc = useQueryClient();
 
@@ -99,7 +101,13 @@ export default function FaultLogScreen() {
   const renderCard = ({ item }: { item: FaultRecord }) => {
     const car = carLabel(item.car);
     return (
-      <View style={[styles.card, { backgroundColor: C.card, borderColor: FAULT_COLOR }, isRTL && { borderLeftWidth: 1, borderRightWidth: 4 }]}>
+      <LinearGradient
+        colors={isDark ? ["#283449", "#1E293B", "#16202F"] : ["#FFFFFF", "#F4F5F7", "#E6E8EB"]}
+        locations={[0, 0.5, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.card, { borderColor: FAULT_COLOR }, isRTL && { borderLeftWidth: 1, borderRightWidth: 4 }]}
+      >
         <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
           <View style={[styles.faultBadge, { backgroundColor: FAULT_BG }, isRTL && { flexDirection: "row-reverse" }]}>
             <Feather name="alert-triangle" size={11} color={FAULT_COLOR} />
@@ -149,19 +157,17 @@ export default function FaultLogScreen() {
                   },
                 } as any)
               }
-              style={[styles.fixBtn, { backgroundColor: REPAIR_BG, borderColor: REPAIR_COLOR }]}
             >
-              <Feather name="tool" size={14} color={REPAIR_COLOR} />
+              <MetalIcon icon="tool" color={REPAIR_COLOR} size={14} containerSize={30} radius={8} />
             </Pressable>
             <Pressable
               onPress={() => confirmDelete(item)}
-              style={[styles.fixBtn, { backgroundColor: FAULT_BG, borderColor: FAULT_COLOR }]}
             >
-              <Feather name="trash-2" size={14} color={FAULT_COLOR} />
+              <MetalIcon icon="trash-2" color={FAULT_COLOR} size={14} containerSize={30} radius={8} />
             </Pressable>
           </View>
         </View>
-      </View>
+      </LinearGradient>
     );
   };
 
@@ -301,14 +307,6 @@ const styles = StyleSheet.create({
   footerLeft: { flexDirection: "row", alignItems: "center", gap: 5, flex: 1, flexWrap: "wrap" },
   footerText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   footerActions: { flexDirection: "row", gap: 8 },
-  fixBtn: {
-    width: 30,
-    height: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
-    borderWidth: 1,
-  },
   emptyActive: {
     flexDirection: "row",
     alignItems: "center",
