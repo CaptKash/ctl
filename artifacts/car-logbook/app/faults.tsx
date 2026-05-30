@@ -45,6 +45,8 @@ type FaultRecord = {
 
 const FAULT_BG = "#FEE2E2";
 const FAULT_COLOR = "#DC2626";
+const REPAIR_BG = "#FEF3C7";
+const REPAIR_COLOR = "#D97706";
 
 export default function FaultLogScreen() {
   const insets = useSafeAreaInsets();
@@ -147,9 +149,9 @@ export default function FaultLogScreen() {
                   },
                 } as any)
               }
-              style={[styles.fixBtn, { backgroundColor: FAULT_BG, borderColor: FAULT_COLOR }]}
+              style={[styles.fixBtn, { backgroundColor: REPAIR_BG, borderColor: REPAIR_COLOR }]}
             >
-              <Feather name="tool" size={14} color={FAULT_COLOR} />
+              <Feather name="tool" size={14} color={REPAIR_COLOR} />
             </Pressable>
             <Pressable
               onPress={() => confirmDelete(item)}
