@@ -158,7 +158,7 @@ export default function FaultLogScreen() {
                 } as any)
               }
             >
-              <MetalIcon icon="tool" color={REPAIR_COLOR} size={14} containerSize={30} radius={8} style={{ width: 46 }} />
+              <MetalIcon icon="tool" color={REPAIR_COLOR} size={14} containerSize={30} radius={8} style={{ width: 60 }} />
             </Pressable>
             <Pressable
               onPress={() => confirmDelete(item)}
