@@ -596,7 +596,12 @@ export default function MenuDashboardScreen() {
                   locations={[0, 0.55, 1]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 0, y: 1 }}
-                  style={styles.urgencyBar}
+                  style={[
+                    styles.urgencyBar,
+                    isRTL
+                      ? { borderTopRightRadius: 12.5, borderBottomRightRadius: 12.5 }
+                      : { borderTopLeftRadius: 12.5, borderBottomLeftRadius: 12.5 },
+                  ]}
                 />
                 <View style={styles.eventCardBody}>
                   <View style={[styles.eventCardTop, isRTL && { flexDirection: "row-reverse" }]}>
