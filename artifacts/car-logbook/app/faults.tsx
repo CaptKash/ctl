@@ -132,7 +132,7 @@ export default function FaultLogScreen() {
           const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
           if (!lights.length) return null;
           return (
-            <View style={styles.iconsRow}>
+            <View style={[styles.iconsRow, isRTL && { alignSelf: "flex-end" }]}>
               {lights.map((l) => (
                 <DashboardIcon key={l.id} id={l.id} color={l.warningColor} size={20} />
               ))}
@@ -142,8 +142,8 @@ export default function FaultLogScreen() {
 
         <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
           <View style={[styles.footerLeft, isRTL && { flexDirection: "row-reverse" }]}>
-            <Feather name="calendar" size={12} color={C.textTertiary} />
-            <Text style={[styles.footerText, { color: C.textTertiary }]}>{formatDate(item.date)}</Text>
+            <Feather name="calendar" size={13} color={C.textSecondary} />
+            <Text style={[styles.footerText, { color: C.textSecondary }]}>{formatDate(item.date)}</Text>
           </View>
           <View style={[styles.footerActions, isRTL && { flexDirection: "row-reverse" }]}>
             <Pressable
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
 
   cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   footerLeft: { flexDirection: "row", alignItems: "center", gap: 5, flex: 1, flexWrap: "wrap" },
-  footerText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  footerText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   footerActions: { flexDirection: "row", gap: 8 },
   emptyActive: {
     flexDirection: "row",
