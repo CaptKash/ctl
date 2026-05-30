@@ -103,7 +103,7 @@ export default function FaultLogScreen() {
             <Feather name="alert-triangle" size={11} color={FAULT_COLOR} />
             <Text style={[styles.badgeText, { color: FAULT_COLOR }]}>{t("faults.faultBadge")}</Text>
           </View>
-          <Text style={[styles.carName, { color: C.textTertiary, textAlign: isRTL ? "left" : "right" }]} numberOfLines={1}>{car}</Text>
+          <Text style={[styles.carName, { color: C.textSecondary, textAlign: isRTL ? "left" : "right" }]} numberOfLines={1}>{car}</Text>
         </View>
 
         <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]} numberOfLines={2}>
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
   cardHeaderLeft: { flexDirection: "row", alignItems: "center", gap: 6 },
-  carName: { fontSize: 11, fontFamily: "Inter_500Medium", flexShrink: 1, textAlign: "right" },
+  carName: { fontSize: 13, fontFamily: "Inter_600SemiBold", flexShrink: 1, textAlign: "right" },
   faultBadge: {
     flexDirection: "row",
     alignItems: "center",
