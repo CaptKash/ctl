@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -60,9 +61,7 @@ export default function ToolsScreen() {
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
         <View style={styles.titleRow}>
-          <View style={[styles.titleIconBox, { backgroundColor: C.tint + "22" }]}>
-            <Feather name="sliders" size={20} color={C.tint} />
-          </View>
+          <MetalIcon icon="sliders" color={C.tint} size={20} style={styles.titleIconBox} />
           <Text style={[styles.headerTitle, { color: C.text }]}>Tools</Text>
         </View>
       </View>
@@ -80,9 +79,7 @@ export default function ToolsScreen() {
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: "#ECFDF5" }]}>
-            <Feather name="map-pin" size={24} color="#059669" />
-          </View>
+          <MetalIcon icon="map-pin" color="#059669" bg="#ECFDF5" size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
               Service Centers Nearby
@@ -101,9 +98,7 @@ export default function ToolsScreen() {
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: isFleet ? "#DBEAFE" : "#F3F4F6" }]}>
-            <Feather name="droplet" size={24} color={isFleet ? "#2563EB" : "#9CA3AF"} />
-          </View>
+          <MetalIcon icon="droplet" color={isFleet ? "#2563EB" : "#9CA3AF"} bg={isFleet ? "#DBEAFE" : "#F3F4F6"} size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
               Fuel Consumption
@@ -125,9 +120,7 @@ export default function ToolsScreen() {
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: isFleet ? "#F3E8FF" : "#F3F4F6" }]}>
-            <Feather name="dollar-sign" size={24} color={isFleet ? "#7C3AED" : "#9CA3AF"} />
-          </View>
+          <MetalIcon icon="dollar-sign" color={isFleet ? "#7C3AED" : "#9CA3AF"} bg={isFleet ? "#F3E8FF" : "#F3F4F6"} size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>
               Cost Tracker
@@ -149,9 +142,7 @@ export default function ToolsScreen() {
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <View style={[styles.toolIcon, { backgroundColor: isFleet ? "#FEF3C7" : "#F3F4F6" }]}>
-            <Feather name="download" size={24} color={isFleet ? "#D97706" : "#9CA3AF"} />
-          </View>
+          <MetalIcon icon="download" color={isFleet ? "#D97706" : "#9CA3AF"} bg={isFleet ? "#FEF3C7" : "#F3F4F6"} size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text }]}>Data Backup & Export</Text>
             <Text style={[styles.toolSub, { color: C.textSecondary }]}>
@@ -168,9 +159,7 @@ export default function ToolsScreen() {
           onPress={openModal}
           style={({ pressed }) => [styles.suggestCard, { opacity: pressed ? 0.85 : 1 }]}
         >
-          <View style={styles.suggestIconBox}>
-            <Feather name="send" size={20} color="#92400E" />
-          </View>
+          <MetalIcon icon="send" color="#92400E" bg="#FDE047" size={20} style={styles.suggestIconBox} />
           <View style={styles.toolBody}>
             <Text style={styles.suggestTitle}>Suggest a Tool</Text>
             <Text style={styles.suggestSub}>Got an idea? Let us know what to build next</Text>
@@ -201,9 +190,7 @@ export default function ToolsScreen() {
 
             {sent ? (
               <View style={styles.sentContainer}>
-                <View style={styles.sentIconBox}>
-                  <Feather name="check" size={32} color="#92400E" />
-                </View>
+                <MetalIcon icon="check" color="#92400E" bg="#FDE047" size={32} style={styles.sentIconBox} />
                 <Text style={[styles.sentTitle, { color: C.text }]}>Thanks for the idea!</Text>
                 <Text style={[styles.sentSub, { color: C.textSecondary }]}>
                   We review every suggestion and use them to shape what we build next.

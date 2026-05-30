@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useColors } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -238,9 +239,7 @@ export default function FuelScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="droplet" size={22} color="#2563EB" />
-          </View>
+          <MetalIcon icon="droplet" color="#2563EB" bg="#DBEAFE" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Fuel Consumption</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>

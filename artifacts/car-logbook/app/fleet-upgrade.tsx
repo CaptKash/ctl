@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
@@ -98,9 +99,7 @@ export default function FleetUpgradeScreen() {
   if (isFleet) {
     return (
       <View style={[styles.screen, { backgroundColor: C.background, alignItems: "center", justifyContent: "center" }]}>
-        <View style={styles.heroIconWrap}>
-          <Feather name="check-circle" size={32} color="#D97706" />
-        </View>
+        <MetalIcon icon="check-circle" color="#D97706" bg="#FEF3C7" size={32} style={styles.heroIconWrap} />
         <Text style={[styles.heroTitle, { color: C.text, marginTop: 16 }]}>{t("fleetUpgrade.alreadyTitle")}</Text>
         <Text style={[styles.heroSub, { color: C.textSecondary, marginTop: 8 }]}>
           {t("fleetUpgrade.alreadySub")}
@@ -130,9 +129,7 @@ export default function FleetUpgradeScreen() {
         </Pressable>
 
         <View style={styles.hero}>
-          <View style={styles.heroIconWrap}>
-            <Feather name="star" size={28} color="#92400E" />
-          </View>
+          <MetalIcon icon="star" color="#92400E" bg="#FEF3C7" size={28} style={styles.heroIconWrap} />
           <Text style={[styles.heroTitle, { color: C.text }]}>{t("fleetUpgrade.ctlFleetTitle")}</Text>
           <Text style={[styles.heroSub, { color: C.textSecondary }]}>
             {t("fleetUpgrade.tagline")}

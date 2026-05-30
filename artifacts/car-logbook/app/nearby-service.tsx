@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import * as Location from "expo-location";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -223,9 +224,7 @@ export default function NearbyServiceScreen() {
     if (phase === "denied") {
       return (
         <View style={styles.center}>
-          <View style={[styles.stateIcon, { backgroundColor: "#FEF3C7" }]}>
-            <Feather name="map-pin" size={28} color="#D97706" />
-          </View>
+          <MetalIcon icon="map-pin" color="#D97706" bg="#FEF3C7" size={28} style={styles.stateIcon} />
           <Text style={[styles.stateTitle, { color: C.text }]}>
             Location Access Needed
           </Text>
@@ -246,9 +245,7 @@ export default function NearbyServiceScreen() {
     if (phase === "error") {
       return (
         <View style={styles.center}>
-          <View style={[styles.stateIcon, { backgroundColor: "#FEE2E2" }]}>
-            <Feather name="alert-circle" size={28} color="#DC2626" />
-          </View>
+          <MetalIcon icon="alert-circle" color="#DC2626" bg="#FEE2E2" size={28} style={styles.stateIcon} />
           <Text style={[styles.stateTitle, { color: C.text }]}>
             Couldn't Load Results
           </Text>
@@ -268,9 +265,7 @@ export default function NearbyServiceScreen() {
     if (phase === "done" && centers.length === 0) {
       return (
         <View style={styles.center}>
-          <View style={[styles.stateIcon, { backgroundColor: "#F3F4F6" }]}>
-            <Feather name="search" size={28} color="#9CA3AF" />
-          </View>
+          <MetalIcon icon="search" color="#9CA3AF" bg="#F3F4F6" size={28} style={styles.stateIcon} />
           <Text style={[styles.stateTitle, { color: C.text }]}>
             None Found Nearby
           </Text>
@@ -295,9 +290,7 @@ export default function NearbyServiceScreen() {
         { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
       ]}
     >
-      <View style={[styles.cardIconBox, { backgroundColor: "#EFF6FF" }]}>
-        <Feather name="tool" size={20} color="#1D4ED8" />
-      </View>
+      <MetalIcon icon="tool" color="#1D4ED8" bg="#EFF6FF" size={20} style={styles.cardIconBox} />
       <View style={styles.cardBody}>
         <Text style={[styles.cardName, { color: C.text }]} numberOfLines={1}>
           {center.name}
@@ -346,9 +339,7 @@ export default function NearbyServiceScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#ECFDF5" }]}>
-            <Feather name="map-pin" size={22} color="#059669" />
-          </View>
+          <MetalIcon icon="map-pin" color="#059669" bg="#ECFDF5" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Service Centers</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>Near your location</Text>

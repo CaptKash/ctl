@@ -3,6 +3,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
+import { MetalIcon } from "./MetalIcon";
 
 type Props = {
   icon?: keyof typeof Feather.glyphMap;
@@ -24,12 +25,7 @@ export function EmptyState({ icon, ionIcon, title, description, actionLabel, onA
   const resolvedBtnTextColor = btnTextColor ?? "#fff";
   return (
     <View style={styles.container}>
-      <View style={[styles.iconBox, { backgroundColor: C.backgroundTertiary }]}>
-        {ionIcon
-          ? <Ionicons name={ionIcon} size={32} color={C.textTertiary} />
-          : <Feather name={icon!} size={32} color={C.textTertiary} />
-        }
-      </View>
+      <MetalIcon icon={icon} ionIcon={ionIcon} color={C.textTertiary} bg={C.backgroundTertiary} size={32} style={styles.iconBox} />
       <Text style={[styles.title, { color: C.text }]}>{title}</Text>
       <Text style={[styles.desc, { color: C.textSecondary }]}>{description}</Text>
       {actionLabel && onAction && (

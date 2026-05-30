@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -377,9 +378,7 @@ export default function ForgotPasswordScreen() {
           {step === "linkSent" && (
             <View style={[styles.formCard, { backgroundColor: C.card }]}>
               <View style={styles.successBlock}>
-                <View style={[styles.successIcon, { backgroundColor: "#D1FAE5" }]}>
-                  <Feather name="mail" size={28} color="#059669" />
-                </View>
+                <MetalIcon icon="mail" color="#059669" bg="#D1FAE5" size={28} style={styles.successIcon} />
                 <Text style={[styles.successTitle, { color: C.text }]}>Check your email</Text>
                 <Text style={[styles.successSub, { color: C.textSecondary }]}>
                   If an account exists for <Text style={{ fontFamily: "Inter_600SemiBold", color: C.text }}>{email.trim()}</Text>, a password reset link has been sent. Check your inbox (and spam folder).

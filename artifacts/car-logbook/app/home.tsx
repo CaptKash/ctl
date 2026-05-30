@@ -1,4 +1,5 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
@@ -616,13 +617,13 @@ export default function MenuDashboardScreen() {
                       onPress={() => handleAddToCalendar(item)}
                       hitSlop={8}
                     >
-                      <View style={[styles.calBtn, { backgroundColor: "#E5E7EB", borderWidth: 1, borderColor: "#9CA3AF" }]}>
-                        {calendarLoading === `${item.itemKind}-${item.id}` ? (
+                      {calendarLoading === `${item.itemKind}-${item.id}` ? (
+                        <View style={[styles.calBtn, { backgroundColor: "#E5E7EB", borderWidth: 1, borderColor: "#9CA3AF" }]}>
                           <ActivityIndicator size={16} color="#374151" />
-                        ) : (
-                          <Ionicons name="calendar-outline" size={22} color="#374151" />
-                        )}
-                      </View>
+                        </View>
+                      ) : (
+                        <MetalIcon ionIcon="calendar-outline" color="#9CA3AF" size={22} style={styles.calBtn} />
+                      )}
                     </Pressable>
                   </View>
                   <Text

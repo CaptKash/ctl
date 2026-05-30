@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
@@ -123,9 +124,7 @@ export default function FaultsScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#FEE2E2" }]}>
-            <Feather name="alert-triangle" size={22} color="#DC2626" />
-          </View>
+          <MetalIcon icon="alert-triangle" color="#DC2626" bg="#FEE2E2" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("faults.title")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{carTitle}</Text>

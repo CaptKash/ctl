@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React from "react";
@@ -74,9 +75,7 @@ export default function UpcomingEventsScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="calendar" size={22} color="#2563EB" />
-          </View>
+          <MetalIcon icon="calendar" color="#2563EB" bg="#DBEAFE" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Upcoming Events</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>Service schedule</Text>
@@ -90,9 +89,7 @@ export default function UpcomingEventsScreen() {
         </View>
       ) : sortedRecords.length === 0 ? (
         <View style={styles.center}>
-          <View style={[styles.emptyIcon, { backgroundColor: C.successLight }]}>
-            <Feather name="check-circle" size={36} color={C.success} />
-          </View>
+          <MetalIcon icon="check-circle" color={C.success} bg={C.successLight} size={36} style={styles.emptyIcon} />
           <Text style={[styles.emptyTitle, { color: C.text }]}>All caught up!</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
             No upcoming events scheduled.{"\n"}Log service records to track due dates.
@@ -148,9 +145,7 @@ export default function UpcomingEventsScreen() {
                         </>
                       )}
                     </View>
-                    <View style={[styles.calBtn, { backgroundColor: "#DBEAFE" }]}>
-                      <Feather name="calendar" size={15} color="#2563EB" />
-                    </View>
+                    <MetalIcon icon="calendar" color="#2563EB" bg="#DBEAFE" size={15} style={styles.calBtn} />
                   </View>
                 </View>
               </View>

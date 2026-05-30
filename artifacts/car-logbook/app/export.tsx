@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import * as Haptics from "expo-haptics";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Print from "expo-print";
@@ -343,9 +344,7 @@ export default function ExportScreen() {
           <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#FEF3C7" }]}>
-            <Feather name="download" size={22} color="#D97706" />
-          </View>
+          <MetalIcon icon="download" color="#D97706" bg="#FEF3C7" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Data Backup & Export</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>PDF report & Excel spreadsheet</Text>

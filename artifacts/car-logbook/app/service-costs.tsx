@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
@@ -129,9 +130,7 @@ export default function ServiceCostsScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#F3E8FF" }]}>
-            <Feather name="dollar-sign" size={22} color="#7C3AED" />
-          </View>
+          <MetalIcon icon="dollar-sign" color="#7C3AED" bg="#F3E8FF" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Cost Tracker</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>
@@ -220,9 +219,7 @@ export default function ServiceCostsScreen() {
                     <View key={cat.key}>
                       {idx > 0 && <View style={[styles.divider, { backgroundColor: C.borderLight }]} />}
                       <View style={styles.categoryRow}>
-                        <View style={[styles.catIconBox, { backgroundColor: meta.bg }]}>
-                          <Feather name={meta.icon as any} size={16} color={meta.color} />
-                        </View>
+                        <MetalIcon icon={meta.icon as any} color={meta.color} bg={meta.bg} size={16} style={styles.catIconBox} />
                         <View style={styles.catBody}>
                           <View style={styles.catLabelRow}>
                             <Text style={[styles.catLabel, { color: C.text }]}>{meta.label}</Text>
@@ -253,9 +250,7 @@ export default function ServiceCostsScreen() {
                       <View key={idx}>
                         {idx > 0 && <View style={[styles.divider, { backgroundColor: C.borderLight }]} />}
                         <View style={styles.entryRow}>
-                          <View style={[styles.entryIconBox, { backgroundColor: meta.bg }]}>
-                            <Feather name={meta.icon as any} size={15} color={meta.color} />
-                          </View>
+                          <MetalIcon icon={meta.icon as any} color={meta.color} bg={meta.bg} size={15} style={styles.entryIconBox} />
                           <View style={styles.entryBody}>
                             <Text style={[styles.entryTitle, { color: C.text }]} numberOfLines={1}>
                               {item.description}

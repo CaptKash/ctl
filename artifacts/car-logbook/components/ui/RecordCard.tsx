@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
+import { MetalIcon } from "./MetalIcon";
 
 type Props = {
   icon: keyof typeof Feather.glyphMap;
@@ -43,9 +44,7 @@ export function RecordCard({
       onPress={onPress}
       style={({ pressed }) => [styles.card, isRTL && styles.cardRTL, { backgroundColor: C.card, opacity: pressed ? 0.9 : 1 }]}
     >
-      <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
-        <Feather name={icon} size={18} color={iconColor} />
-      </View>
+      <MetalIcon icon={icon} color={iconColor} bg={iconBg} size={18} style={styles.iconBox} />
       <View style={styles.content}>
         <Text style={[styles.title, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{title}</Text>
         {subtitle ? (

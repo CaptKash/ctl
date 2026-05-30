@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -93,9 +94,7 @@ export default function ReportsScreen() {
                 { backgroundColor: C.card, opacity: pressed ? 0.9 : 1 },
               ]}
             >
-              <View style={[styles.iconBox, { backgroundColor: C.infoLight }]}>
-                <Feather name="file-text" size={22} color={C.info} />
-              </View>
+              <MetalIcon icon="file-text" color={C.info} bg={C.infoLight} size={22} style={styles.iconBox} />
               <View style={styles.cardText}>
                 <Text style={[styles.carName, { color: C.text }, rtlText]}>
                   {item.year} {item.make} {item.model}

@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useAuth as useClerkAuth } from "@clerk/clerk-expo";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/context/ThemeContext";
@@ -65,9 +66,7 @@ export function PasswordUpgradeModal() {
     >
       <View style={[styles.backdrop, { backgroundColor: C.overlay }]}>
         <View style={[styles.card, { backgroundColor: C.card, shadowColor: C.shadow }]}>
-          <View style={[styles.iconWrap, { backgroundColor: C.infoLight }]}>
-            <Feather name="shield" size={28} color={C.tint} />
-          </View>
+          <MetalIcon icon="shield" color={C.tint} bg={C.infoLight} size={28} style={styles.iconWrap} />
 
           {!sent ? (
             <>

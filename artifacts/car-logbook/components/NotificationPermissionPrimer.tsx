@@ -3,6 +3,7 @@ import { Modal, View, Text, Pressable, StyleSheet, Platform, Alert, Linking } fr
 import * as Notifications from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useEventReminders } from "@/context/EventRemindersContext";
@@ -77,9 +78,7 @@ export function NotificationPermissionPrimer() {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={dismiss}>
       <View style={styles.backdrop}>
         <View style={[styles.card, { backgroundColor: C.card }]}>
-          <View style={[styles.iconWrap, { backgroundColor: "#FEF3C7" }]}>
-            <Feather name="bell" size={28} color="#D97706" />
-          </View>
+          <MetalIcon icon="bell" color="#D97706" bg="#FEF3C7" size={28} style={styles.iconWrap} />
           <Text
             style={[
               styles.title,

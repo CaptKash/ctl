@@ -2,6 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useColors } from "@/context/ThemeContext";
+import { MetalIcon } from "./MetalIcon";
 
 type Props = {
   icon: keyof typeof Feather.glyphMap;
@@ -15,9 +16,7 @@ export function StatCard({ icon, iconColor, iconBg, label, value }: Props) {
   const C = useColors();
   return (
     <View style={[styles.card, { backgroundColor: C.card }]}>
-      <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
-        <Feather name={icon} size={20} color={iconColor} />
-      </View>
+      <MetalIcon icon={icon} color={iconColor} bg={iconBg} size={20} style={styles.iconBox} />
       <Text style={[styles.value, { color: C.text }]}>{value}</Text>
       <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>
     </View>

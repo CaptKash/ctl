@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React from "react";
@@ -63,9 +64,7 @@ export default function RepairHistoryScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#FEF3C7" }]}>
-            <Feather name="tool" size={22} color="#D97706" />
-          </View>
+          <MetalIcon icon="tool" color="#D97706" bg="#FEF3C7" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>Repair History</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>All maintenance logs</Text>

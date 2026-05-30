@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -65,9 +66,7 @@ export default function FeedbackScreen() {
 
       {done ? (
         <View style={styles.successWrap}>
-          <View style={[styles.successIcon, { backgroundColor: "#D1FAE5" }]}>
-            <Feather name="check-circle" size={36} color="#059669" />
-          </View>
+          <MetalIcon icon="check-circle" color="#059669" bg="#D1FAE5" size={36} style={styles.successIcon} />
           <Text style={[styles.successTitle, { color: C.text }]}>Thanks for the feedback!</Text>
           <Text style={[styles.successSub, { color: C.textSecondary }]}>
             Your message has been sent. We read every piece of feedback and use it to improve CTL.

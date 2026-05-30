@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -148,9 +149,7 @@ export default function FleetScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Ionicons name="car-outline" size={26} color={C.tint} />
-          </View>
+          <MetalIcon ionIcon="car-outline" color={C.tint} bg="#DBEAFE" size={26} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>My Fleet</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>All vehicles</Text>

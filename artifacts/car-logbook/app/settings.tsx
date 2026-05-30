@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { MetalIcon } from "@/components/ui/MetalIcon";
 import * as Haptics from "expo-haptics";
 import * as ExpoLinking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
@@ -72,9 +73,7 @@ function NavRow({
       }}
       style={({ pressed }) => [styles.row, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed && onPress ? 0.75 : 1 }]}
     >
-      <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
-        <Feather name={icon} size={16} color={iconColor} />
-      </View>
+      <MetalIcon icon={icon} color={iconColor} bg={iconBg} size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: danger ? C.danger : C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{label}</Text>
         {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{subtitle}</Text> : null}
@@ -194,9 +193,7 @@ function ConnectedAccountsCard() {
         }}
         style={({ pressed }) => [styles.row, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed && !isPending ? 0.75 : 1 }]}
       >
-        <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
-          <Ionicons name={icon} size={18} color={iconColor} />
-        </View>
+        <MetalIcon ionIcon={icon} color={iconColor} bg={iconBg} size={18} style={styles.rowIcon} />
         <View style={styles.rowBody}>
           <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{label}</Text>
           <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]} numberOfLines={1}>
@@ -268,9 +265,7 @@ function ToggleRow({
   const isRTL = i18n.language === "ar";
   return (
     <View style={[styles.row, isRTL && { flexDirection: "row-reverse" }]}>
-      <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
-        <Feather name={icon} size={16} color={iconColor} />
-      </View>
+      <MetalIcon icon={icon} color={iconColor} bg={iconBg} size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{label}</Text>
         {subtitle ? <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{subtitle}</Text> : null}
@@ -326,9 +321,7 @@ function CountryRow() {
 
   return (
     <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
-      <View style={[styles.rowIcon, { backgroundColor: "#EDE9FE" }]}>
-        <Feather name="globe" size={16} color="#7C3AED" />
-      </View>
+      <MetalIcon icon="globe" color="#7C3AED" bg="#EDE9FE" size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.account.country")}</Text>
         <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
@@ -372,9 +365,7 @@ function LanguageRow() {
 
   return (
     <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
-      <View style={[styles.rowIcon, { backgroundColor: "#FCE7F3" }]}>
-        <Feather name="message-circle" size={16} color="#DB2777" />
-      </View>
+      <MetalIcon icon="message-circle" color="#DB2777" bg="#FCE7F3" size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.account.language")}</Text>
         <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{optionFor(current)}</Text>
@@ -405,9 +396,7 @@ function CurrencyRow() {
 
   return (
     <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
-      <View style={[styles.rowIcon, { backgroundColor: "#D1FAE5" }]}>
-        <Feather name="dollar-sign" size={16} color="#059669" />
-      </View>
+      <MetalIcon icon="dollar-sign" color="#059669" bg="#D1FAE5" size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.preferences.currency")}</Text>
         <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>
@@ -427,9 +416,7 @@ function DistanceRow() {
 
   return (
     <View style={[styles.row, isRTL && { flexDirection: "row-reverse" }]}>
-      <View style={[styles.rowIcon, { backgroundColor: "#CFFAFE" }]}>
-        <Feather name="navigation" size={16} color="#0891B2" />
-      </View>
+      <MetalIcon icon="navigation" color="#0891B2" bg="#CFFAFE" size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.preferences.distanceUnit")}</Text>
       </View>
@@ -466,9 +453,7 @@ function ThemeRow() {
   return (
     <View style={[styles.row, { alignItems: "flex-start", flexDirection: "column", gap: 10 }]}>
       <View style={{ flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 12, alignSelf: "stretch" }}>
-        <View style={[styles.rowIcon, { backgroundColor: "#FEF3C7" }]}>
-          <Feather name="sun" size={16} color="#D97706" />
-        </View>
+        <MetalIcon icon="sun" color="#D97706" bg="#FEF3C7" size={16} style={styles.rowIcon} />
         <Text style={[styles.rowTitle, { color: C.text, flex: 1 }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.preferences.theme")}</Text>
       </View>
       <View style={[styles.segmented, { backgroundColor: C.backgroundTertiary, borderColor: C.border, alignSelf: "stretch" }]}>
@@ -554,9 +539,7 @@ export default function SettingsScreen() {
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
-          <View style={[styles.iconBox, { backgroundColor: C.backgroundTertiary }]}>
-            <Feather name="settings" size={22} color={C.textSecondary} />
-          </View>
+          <MetalIcon icon="settings" color={C.textSecondary} bg={C.backgroundTertiary} size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.title")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.subtitle")}</Text>
@@ -609,9 +592,7 @@ export default function SettingsScreen() {
           onPress={() => router.push("/fleet-upgrade" as any)}
         >
           <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
-            <View style={styles.fleetIconWrap}>
-              <Feather name="star" size={16} color="#92400E" />
-            </View>
+            <MetalIcon icon="star" color="#92400E" bg="#FEF3C7" size={16} style={styles.fleetIconWrap} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.fleetTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.title")}</Text>
               <Text style={[styles.fleetTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.tagline")}</Text>
@@ -649,9 +630,7 @@ export default function SettingsScreen() {
           }
         >
           <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
-            <View style={styles.enterpriseIconWrap}>
-              <Feather name="briefcase" size={16} color="#312E81" />
-            </View>
+            <MetalIcon icon="briefcase" color="#312E81" bg="#E0E7FF" size={16} style={styles.enterpriseIconWrap} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.enterpriseTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.title")}</Text>
               <Text style={[styles.enterpriseTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.tagline")}</Text>
@@ -707,9 +686,7 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.about")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           <View style={[styles.row, isRTL && { flexDirection: "row-reverse" }]}>
-            <View style={[styles.rowIcon, { backgroundColor: C.backgroundTertiary }]}>
-              <Feather name="info" size={16} color={C.textSecondary} />
-            </View>
+            <MetalIcon icon="info" color={C.textSecondary} bg={C.backgroundTertiary} size={16} style={styles.rowIcon} />
             <View style={styles.rowBody}>
               <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.about.appVersion")}</Text>
               <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("common.version")}</Text>
