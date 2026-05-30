@@ -518,7 +518,7 @@
   "nav": {
     "dashboard": "الرئيسية",
     "faults": "سجل الأعطال",
-    "history": "السجل",
+    "history": "السجل العام",
     "tools": "الأدوات",
     "settings": "الإعدادات"
   },
@@ -738,7 +738,7 @@
     "deleteFaultTitle": "حذف العطل"
   },
   "history": {
-    "title": "السجل",
+    "title": "السجل العام",
     "loading": "جارٍ التحميل…",
     "records_other": "{{count}} سجل",
     "carsSuffix_other": " · {{count}} سيارات",
