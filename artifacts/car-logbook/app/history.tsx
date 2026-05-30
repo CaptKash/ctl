@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { useColors } from "@/context/ThemeContext";
+import { useColors, useTheme } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
@@ -75,6 +75,8 @@ export default function HistoryScreen() {
   const C = useColors();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const carLabel = (car: CarStub | null): string => {
@@ -236,7 +238,14 @@ export default function HistoryScreen() {
           {items.map((ev) => {
             const meta = EVENT_META[ev.type];
             return (
-              <View key={ev.key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }, isRTL && { borderLeftWidth: 1, borderRightWidth: 4 }]}>
+              <LinearGradient
+                key={ev.key}
+                colors={isDark ? ["#283449", "#1E293B", "#16202F"] : ["#FFFFFF", "#F4F5F7", "#E6E8EB"]}
+                locations={[0, 0.5, 1]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.card, { borderColor: meta.color }, isRTL && { borderLeftWidth: 1, borderRightWidth: 4 }]}
+              >
                 <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
                   <View style={[styles.badgeGroup, isRTL && { flexDirection: "row-reverse" }]}>
                     <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
@@ -255,7 +264,7 @@ export default function HistoryScreen() {
                       )
                     )}
                   </View>
-                  <Text style={[styles.dateText, { color: C.textTertiary }]}>{formatDate(ev.date)}</Text>
+                  <Text style={[styles.dateText, { color: C.textSecondary }]}>{formatDate(ev.date)}</Text>
                 </View>
 
                 <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>{ev.title}</Text>
@@ -272,7 +281,7 @@ export default function HistoryScreen() {
                   const lights = DASHBOARD_LIGHTS.filter((l) => ids.includes(l.id));
                   if (!lights.length) return null;
                   return (
-                    <View style={styles.iconsRowBg}>
+                    <View style={[styles.iconsRowBg, isRTL && { alignSelf: "flex-end" }]}>
                       {lights.map((l) => (
                         <DashboardIcon key={l.id} id={l.id} color={l.warningColor} size={20} />
                       ))}
@@ -287,9 +296,9 @@ export default function HistoryScreen() {
                 ) : null}
 
                 <View style={styles.cardMeta}>
-                  <Text style={[styles.metaText, { color: C.textTertiary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{ev.carName}</Text>
+                  <Text style={[styles.metaText, { color: C.textSecondary, fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{ev.carName}</Text>
                 </View>
-              </View>
+              </LinearGradient>
             );
           })}
         </ScrollView>
@@ -395,7 +404,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   badgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  dateText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  dateText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
   cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
