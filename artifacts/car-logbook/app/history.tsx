@@ -264,7 +264,7 @@ export default function HistoryScreen() {
                       )
                     )}
                   </View>
-                  <Text style={[styles.dateText, { color: C.textSecondary }]}>{formatDate(ev.date)}</Text>
+                  <Text style={[styles.carNameHeader, { color: C.textSecondary, textAlign: isRTL ? "left" : "right" }]} numberOfLines={1}>{ev.carName}</Text>
                 </View>
 
                 <Text style={[styles.cardTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={2}>{ev.title}</Text>
@@ -295,8 +295,9 @@ export default function HistoryScreen() {
                   </View>
                 ) : null}
 
-                <View style={styles.cardMeta}>
-                  <Text style={[styles.metaText, { color: C.textSecondary, fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{ev.carName}</Text>
+                <View style={[styles.dateRow, isRTL && { flexDirection: "row-reverse" }]}>
+                  <Feather name="calendar" size={13} color={C.textSecondary} />
+                  <Text style={[styles.dateText, { color: C.textSecondary }]}>{formatDate(ev.date)}</Text>
                 </View>
               </LinearGradient>
             );
@@ -405,6 +406,8 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
   dateText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  carNameHeader: { fontSize: 13, fontFamily: "Inter_600SemiBold", flexShrink: 1 },
+  dateRow: { flexDirection: "row", alignItems: "center", gap: 5 },
   cardTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", lineHeight: 21 },
   cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
