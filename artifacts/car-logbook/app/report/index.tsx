@@ -682,7 +682,7 @@ export default function ReportScreen() {
         </ScrollView>
       )}
 
-      <BottomNav active="history" />
+      <BottomNav />
     </SwipeBackView>
   );
 }
