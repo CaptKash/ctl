@@ -714,6 +714,7 @@
     "dashboardMessageLabel": "Dashboard message: ",
     "allResolved": "All faults resolved",
     "logAnother": "Log Another Fault",
+    "logFault": "Log Fault",
     "unknownCar": "Unknown Car",
     "deleteFaultTitle": "Delete Fault"
   },

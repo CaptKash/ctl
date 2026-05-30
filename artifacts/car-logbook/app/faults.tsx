@@ -196,6 +196,14 @@ export default function FaultLogScreen() {
             title={t("faults.noFaults")}
             description={t("faults.logEmptyDesc")}
           />
+          <View style={styles.emptyBtnWrap}>
+            <PrimaryButton
+              label={t("faults.logFault")}
+              onPress={() => router.push("/malfunction/add" as any)}
+              variant="metallic-blue"
+              icon="plus"
+            />
+          </View>
         </View>
       ) : (
         <ScrollView
@@ -219,9 +227,9 @@ export default function FaultLogScreen() {
           )}
 
           <PrimaryButton
-            label={t("faults.logAnother")}
+            label={t("faults.logFault")}
             onPress={() => router.push("/malfunction/add" as any)}
-            variant="danger-light"
+            variant="metallic-blue"
             icon="plus"
           />
         </ScrollView>
@@ -253,6 +261,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 2 },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
+  emptyBtnWrap: { alignSelf: "stretch", paddingHorizontal: 24, marginTop: 24 },
   listContent: { padding: 16 },
 
   card: {

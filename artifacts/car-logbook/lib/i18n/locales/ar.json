@@ -734,6 +734,7 @@
     "dashboardMessageLabel": "رسالة لوحة القيادة: ",
     "allResolved": "تم حل جميع الأعطال",
     "logAnother": "تسجيل عطل آخر",
+    "logFault": "تسجيل خلل",
     "unknownCar": "سيارة غير معروفة",
     "deleteFaultTitle": "حذف العطل"
   },
