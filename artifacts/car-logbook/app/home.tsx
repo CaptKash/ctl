@@ -669,13 +669,13 @@ export default function MenuDashboardScreen() {
                         </View>
                       ) : (
                         <LinearGradient
-                          colors={["#EDEEF1", "#C0C5CD", "#9CA3AF"]}
+                          colors={["#FFFFFF", "#F3F4F6", "#E5E7EB"]}
                           locations={[0, 0.55, 1]}
                           start={{ x: 0.15, y: 0 }}
                           end={{ x: 0.85, y: 1 }}
-                          style={[styles.calBtn, { borderWidth: 1, borderColor: "#70757E" }]}
+                          style={[styles.calBtn, { borderWidth: 1, borderColor: "#DC2626" }]}
                         >
-                          <Ionicons name="calendar-outline" size={16} color="#565A60" />
+                          <Ionicons name="calendar-outline" size={16} color="#DC2626" />
                           <Text style={styles.calAddText}>{t("home.addToCal")}</Text>
                         </LinearGradient>
                       )}
@@ -991,7 +991,7 @@ const styles = StyleSheet.create({
     lineHeight: 8,
     marginTop: 1,
     fontFamily: "Inter_700Bold",
-    color: "#565A60",
+    color: "#DC2626",
   },
   calBtnText: {
     fontSize: 11,
