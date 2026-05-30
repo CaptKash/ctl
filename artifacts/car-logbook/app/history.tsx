@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -151,9 +152,15 @@ export default function HistoryScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
         <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
-          <View style={[styles.iconBox, { backgroundColor: "#DBEAFE" }]}>
-            <Feather name="clock" size={22} color="#2563EB" />
-          </View>
+          <LinearGradient
+            colors={["#DBEAFE", "#93C5FD", "#2563EB"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#1E40AF" }]}
+          >
+            <Feather name="clock" size={22} color="#1E3A8A" />
+          </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("history.title")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{headerSub}</Text>
