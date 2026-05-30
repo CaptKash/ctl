@@ -668,12 +668,16 @@ export default function MenuDashboardScreen() {
                           <ActivityIndicator size={16} color="#374151" />
                         </View>
                       ) : (
-                        <View>
-                          <MetalIcon ionIcon="calendar-outline" color="#9CA3AF" size={22} style={styles.calBtn} />
-                          <View style={styles.calPlus} pointerEvents="none">
-                            <Ionicons name="add" size={13} color="#4B5563" />
-                          </View>
-                        </View>
+                        <LinearGradient
+                          colors={["#EDEEF1", "#C0C5CD", "#9CA3AF"]}
+                          locations={[0, 0.55, 1]}
+                          start={{ x: 0.15, y: 0 }}
+                          end={{ x: 0.85, y: 1 }}
+                          style={[styles.calBtn, { borderWidth: 1, borderColor: "#70757E" }]}
+                        >
+                          <Ionicons name="calendar-outline" size={16} color="#565A60" />
+                          <Text style={styles.calAddText}>{t("home.addToCal")}</Text>
+                        </LinearGradient>
                       )}
                     </Pressable>
                   </View>
@@ -982,15 +986,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  calPlus: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 6,
+  calAddText: {
+    fontSize: 7,
+    lineHeight: 8,
+    marginTop: 1,
+    fontFamily: "Inter_700Bold",
+    color: "#565A60",
   },
   calBtnText: {
     fontSize: 11,
