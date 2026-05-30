@@ -1,5 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { MetalIcon } from "@/components/ui/MetalIcon";
+import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -149,7 +149,15 @@ export default function FleetScreen() {
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]} hitSlop={8}>
             <Feather name="arrow-left" size={22} color={C.text} />
           </Pressable>
-          <MetalIcon ionIcon="car-outline" color={C.tint} bg="#DBEAFE" size={26} style={styles.iconBox} />
+          <LinearGradient
+            colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#64748B", shadowColor: "#0F172A", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.18, shadowRadius: 2 }]}
+          >
+            <Ionicons name="car" size={26} color="#334155" />
+          </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text }]}>My Fleet</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>All vehicles</Text>
