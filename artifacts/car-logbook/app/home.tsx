@@ -668,7 +668,12 @@ export default function MenuDashboardScreen() {
                           <ActivityIndicator size={16} color="#374151" />
                         </View>
                       ) : (
-                        <MetalIcon ionIcon="calendar-outline" color="#9CA3AF" size={22} style={styles.calBtn} />
+                        <View>
+                          <MetalIcon ionIcon="calendar-outline" color="#9CA3AF" size={22} style={styles.calBtn} />
+                          <View style={styles.calPlus} pointerEvents="none">
+                            <Ionicons name="add" size={13} color="#4B5563" />
+                          </View>
+                        </View>
                       )}
                     </Pressable>
                   </View>
@@ -976,6 +981,16 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
+  },
+  calPlus: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 6,
   },
   calBtnText: {
     fontSize: 11,
