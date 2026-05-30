@@ -618,18 +618,6 @@ export default function MenuDashboardScreen() {
                     <View style={[styles.urgencyBadge, { backgroundColor: color + "22" }]}>
                       <Text style={[styles.urgencyText, { color }]}>{label}</Text>
                     </View>
-                    <Pressable
-                      onPress={() => handleAddToCalendar(item)}
-                      hitSlop={8}
-                    >
-                      {calendarLoading === `${item.itemKind}-${item.id}` ? (
-                        <View style={[styles.calBtn, { backgroundColor: "#E5E7EB", borderWidth: 1, borderColor: "#9CA3AF" }]}>
-                          <ActivityIndicator size={16} color="#374151" />
-                        </View>
-                      ) : (
-                        <MetalIcon ionIcon="calendar-outline" color="#9CA3AF" size={22} style={styles.calBtn} />
-                      )}
-                    </Pressable>
                   </View>
                   <Text
                     style={[
@@ -670,6 +658,19 @@ export default function MenuDashboardScreen() {
                         </>
                       )}
                     </View>
+                    <Pressable
+                      onPress={() => handleAddToCalendar(item)}
+                      hitSlop={8}
+                      style={isRTL ? { alignSelf: "flex-end", marginRight: 8 } : { alignSelf: "flex-end", marginLeft: 8 }}
+                    >
+                      {calendarLoading === `${item.itemKind}-${item.id}` ? (
+                        <View style={[styles.calBtn, { backgroundColor: "#E5E7EB", borderWidth: 1, borderColor: "#9CA3AF" }]}>
+                          <ActivityIndicator size={16} color="#374151" />
+                        </View>
+                      ) : (
+                        <MetalIcon ionIcon="calendar-outline" color="#9CA3AF" size={22} style={styles.calBtn} />
+                      )}
+                    </Pressable>
                   </View>
                 </View>
               </Pressable>
@@ -954,7 +955,6 @@ const styles = StyleSheet.create({
   eventCard: {
     flexDirection: "row",
     borderRadius: 14,
-    overflow: "hidden",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 6,

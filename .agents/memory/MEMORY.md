@@ -1,2 +1,3 @@
 - [Car-logbook i18n/RTL pattern](car-logbook-i18n.md) — how Arabic + RTL localization works in the Expo app, plus the dead-screen gotcha for the fault log.
 - [Car-logbook metallic icon tiles](car-logbook-metallic-icons.md) — colored icon tiles use shared MetalIcon (gradient+border+darkened glyph); which icon types are excluded + neutral/spinner gotchas.
+- [Car-logbook rounded-card corner gap](car-logbook-card-corner-gap.md) — bordered rounded card + overflow:hidden over-clips an edge accent bar → white corner crescent; fix by dropping overflow:hidden and rounding the bar to the inner radius.
