@@ -673,9 +673,9 @@ export default function MenuDashboardScreen() {
                           locations={[0, 0.55, 1]}
                           start={{ x: 0.15, y: 0 }}
                           end={{ x: 0.85, y: 1 }}
-                          style={[styles.calBtn, { borderWidth: 1, borderColor: "#DC2626" }]}
+                          style={[styles.calBtn, { borderWidth: 1, borderColor: "#9CA3AF" }]}
                         >
-                          <Ionicons name="calendar-outline" size={16} color="#DC2626" />
+                          <Ionicons name="calendar-outline" size={16} color="#565A60" />
                           <Text style={styles.calAddText}>{t("home.addToCal")}</Text>
                         </LinearGradient>
                       )}
@@ -991,7 +991,7 @@ const styles = StyleSheet.create({
     lineHeight: 8,
     marginTop: 1,
     fontFamily: "Inter_700Bold",
-    color: "#DC2626",
+    color: "#565A60",
   },
   calBtnText: {
     fontSize: 11,
