@@ -605,9 +605,9 @@ export default function ReportScreen() {
                 style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                  <View style={[styles.typeDot, { backgroundColor: "#FEE2E2", borderColor: TYPE_COLORS.fault.border }]}>
-                    <Feather name="alert-triangle" size={14} color={TYPE_COLORS.fault.icon} />
-                  </View>
+                  <LinearGradient colors={["#FEE2E2", "#FCA5A5", "#DC2626"]} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#991B1B" }]}>
+                    <Feather name="alert-triangle" size={14} color="#7F1D1D" />
+                  </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.faults")}</Text>
                 </View>
                 <View style={[styles.checkbox, { borderColor: includeFaults ? TYPE_COLORS.fault.border : C.border, backgroundColor: includeFaults ? TYPE_COLORS.fault.border : "transparent" }]}>
@@ -619,9 +619,9 @@ export default function ReportScreen() {
                 style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }, { borderBottomColor: C.border, borderBottomWidth: StyleSheet.hairlineWidth }]}
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                  <View style={[styles.typeDot, { backgroundColor: "#FEF3C7", borderColor: TYPE_COLORS.repair.border }]}>
-                    <Feather name="tool" size={14} color={TYPE_COLORS.repair.icon} />
-                  </View>
+                  <LinearGradient colors={["#FEF3C7", "#FCD34D", "#D97706"]} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#92400E" }]}>
+                    <Feather name="clipboard" size={14} color="#78350F" />
+                  </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.repairs")}</Text>
                 </View>
                 <View style={[styles.checkbox, { borderColor: includeRepairs ? TYPE_COLORS.repair.border : C.border, backgroundColor: includeRepairs ? TYPE_COLORS.repair.border : "transparent" }]}>
@@ -633,9 +633,9 @@ export default function ReportScreen() {
                 style={[styles.optionRow, isRTL && { flexDirection: "row-reverse" }]}
               >
                 <View style={[styles.optionLeft, isRTL && { flexDirection: "row-reverse" }]}>
-                  <View style={[styles.typeDot, { backgroundColor: "#CCFBF1", borderColor: TYPE_COLORS.renewal.border }]}>
-                    <Feather name="refresh-cw" size={14} color={TYPE_COLORS.renewal.icon} />
-                  </View>
+                  <LinearGradient colors={["#CCFBF1", "#5EEAD4", "#0D9488"]} locations={[0, 0.55, 1]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={[styles.typeDot, { borderColor: "#115E59" }]}>
+                    <Feather name="refresh-cw" size={14} color="#134E4A" />
+                  </LinearGradient>
                   <Text style={[styles.optionText, { color: C.text }, rtlText]}>{t("generateReport.renewals")}</Text>
                 </View>
                 <View style={[styles.checkbox, { borderColor: includeRenewals ? TYPE_COLORS.renewal.border : C.border, backgroundColor: includeRenewals ? TYPE_COLORS.renewal.border : "transparent" }]}>
