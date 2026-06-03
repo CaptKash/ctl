@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import BottomNav from "@/components/ui/BottomNav";
@@ -45,6 +46,8 @@ type MaintenanceLog = {
 export default function RepairHistoryScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const { currency } = useCurrency();
@@ -99,23 +102,23 @@ export default function RepairHistoryScreen() {
               locations={[0, 0.5, 1]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.card}
+              style={[styles.card, isRTL && { borderLeftWidth: 1, borderRightWidth: 4 }]}
             >
-              <View style={styles.cardTop}>
-                <View style={[styles.typeBadge, { backgroundColor: "#FEF3C7" }]}>
+              <View style={[styles.cardTop, isRTL && { flexDirection: "row-reverse" }]}>
+                <View style={[styles.typeBadge, { backgroundColor: "#FEF3C7" }, isRTL && { flexDirection: "row-reverse" }]}>
                   <Feather name="tool" size={12} color="#D97706" />
                   <Text style={[styles.typeBadgeText, { color: "#D97706" }]}>{log.type}</Text>
                 </View>
-                <Text style={[styles.carName, { color: C.textSecondary }]} numberOfLines={1}>
+                <Text style={[styles.carName, { color: C.textSecondary, textAlign: isRTL ? "left" : "right" }]} numberOfLines={1}>
                   {carLabel(log.car)}
                 </Text>
               </View>
 
-              <Text style={[styles.description, { color: C.text }]} numberOfLines={2}>
+              <Text style={[styles.description, { color: C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]} numberOfLines={2}>
                 {log.description}
               </Text>
 
-              <View style={styles.cardMeta}>
+              <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="calendar" size={12} color={C.textSecondary} />
                 <Text style={[styles.metaText, { color: C.textSecondary }]}>{formatDate(log.date)}</Text>
 
@@ -131,7 +134,7 @@ export default function RepairHistoryScreen() {
               </View>
 
               {(log.cost != null || log.warrantyPeriod) ? (
-                <View style={styles.cardFooter}>
+                <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
                   {log.cost != null && (
                     <View style={[styles.costChip, { backgroundColor: "#D1FAE5" }]}>
                       <Text style={[styles.costChipText, { color: "#065F46" }]}>
@@ -140,7 +143,7 @@ export default function RepairHistoryScreen() {
                     </View>
                   )}
                   {log.warrantyPeriod ? (
-                    <View style={[styles.warrantyChip, { backgroundColor: "#EDE9FE" }]}>
+                    <View style={[styles.warrantyChip, { backgroundColor: "#EDE9FE" }, isRTL && { flexDirection: "row-reverse" }]}>
                       <Feather name="shield" size={11} color="#7C3AED" />
                       <Text style={[styles.warrantyChipText, { color: "#7C3AED" }]}>
                         {log.warrantyPeriod}
