@@ -3,14 +3,18 @@ import { LinearGradient } from "expo-linear-gradient";
 import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +25,8 @@ import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 
 type Car = {
   id: number;
@@ -40,18 +46,62 @@ type MaintenanceLog = {
   shop?: string | null;
   shopAddress?: string | null;
   warrantyPeriod?: string | null;
+  billPhoto?: string | null;
+  warrantyPhoto?: string | null;
   car: Car | null;
 };
 
 export default function RepairHistoryScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const { currency } = useCurrency();
+  const { width } = useWindowDimensions();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  const [viewerPhotos, setViewerPhotos] = useState<string[] | null>(null);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [downloadingPhoto, setDownloadingPhoto] = useState(false);
+
+  const openViewer = (photos: string[]) => {
+    setViewerIndex(0);
+    setViewerPhotos(photos);
+  };
+
+  const handleDownloadPhoto = (url: string) => {
+    if (!url || downloadingPhoto) return;
+    setViewerPhotos(null);
+    setTimeout(() => doShare(url), 600);
+  };
+
+  const doShare = async (url: string) => {
+    setDownloadingPhoto(true);
+    try {
+      const filename = `ctl_photo_${Date.now()}.jpg`;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      if (url.startsWith("data:")) {
+        const base64 = url.split(",")[1];
+        await FileSystem.writeAsStringAsync(fileUri, base64, { encoding: "base64" });
+      } else {
+        await FileSystem.downloadAsync(url, fileUri);
+      }
+      const available = await Sharing.isAvailableAsync();
+      if (!available) throw new Error("Sharing not available on this device");
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "image/jpeg",
+        UTI: "public.jpeg",
+        dialogTitle: t("carDetail.photo.saveDialogTitle"),
+      });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert(t("carDetail.photo.saveFailed"), msg);
+    } finally {
+      setDownloadingPhoto(false);
+    }
+  };
 
   const { data: logs, isLoading } = useQuery<MaintenanceLog[]>({
     queryKey: ["all-maintenance"],
@@ -95,9 +145,11 @@ export default function RepairHistoryScreen() {
           contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 100 }]}
           showsVerticalScrollIndicator={false}
         >
-          {logs.map((log) => (
+          {logs.map((log) => {
+            const photos = [log.billPhoto, log.warrantyPhoto].filter(Boolean) as string[];
+            const hasPhotos = photos.length > 0;
+            const card = (
             <LinearGradient
-              key={log.id}
               colors={isDark ? ["#283449", "#1E293B", "#16202F"] : ["#FFFFFF", "#F4F5F7", "#E6E8EB"]}
               locations={[0, 0.5, 1]}
               start={{ x: 0, y: 0 }}
@@ -126,14 +178,14 @@ export default function RepairHistoryScreen() {
                   <>
                     <View style={styles.metaDot} />
                     <Feather name="map-pin" size={12} color={C.textSecondary} />
-                    <Text style={[styles.metaText, { color: C.textSecondary }]} numberOfLines={1}>
+                    <Text style={[styles.metaText, { color: C.textSecondary, flexShrink: 1 }]} numberOfLines={1}>
                       {log.shop}
                     </Text>
                   </>
                 ) : null}
               </View>
 
-              {(log.cost != null || log.warrantyPeriod) ? (
+              {(log.cost != null || log.warrantyPeriod || hasPhotos) ? (
                 <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
                   {log.cost != null && (
                     <View style={[styles.costChip, { backgroundColor: "#D1FAE5" }]}>
@@ -150,12 +202,82 @@ export default function RepairHistoryScreen() {
                       </Text>
                     </View>
                   ) : null}
+                  {hasPhotos ? (
+                    <View style={[styles.photoChip, { backgroundColor: "#DBEAFE" }, isRTL && { flexDirection: "row-reverse" }]}>
+                      <Feather name="paperclip" size={11} color="#1D4ED8" />
+                      <Text style={[styles.photoChipText, { color: "#1D4ED8" }]}>{photos.length}</Text>
+                    </View>
+                  ) : null}
                 </View>
               ) : null}
             </LinearGradient>
-          ))}
+            );
+            return hasPhotos ? (
+              <Pressable
+                key={log.id}
+                onPress={() => openViewer(photos)}
+                style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+              >
+                {card}
+              </Pressable>
+            ) : (
+              <View key={log.id}>{card}</View>
+            );
+          })}
         </ScrollView>
       )}
+
+      <Modal
+        visible={!!viewerPhotos}
+        animationType="fade"
+        onRequestClose={() => setViewerPhotos(null)}
+        statusBarTranslucent
+      >
+        <View style={styles.photoModal}>
+          <Pressable onPress={() => setViewerPhotos(null)} style={styles.photoModalClose} hitSlop={12}>
+            <Feather name="x" size={24} color="#fff" />
+          </Pressable>
+          {viewerPhotos && viewerPhotos.length === 1 ? (
+            <Image source={{ uri: viewerPhotos[0] }} style={styles.photoFull} resizeMode="contain" />
+          ) : viewerPhotos ? (
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              style={{ flex: 1, width }}
+              onMomentumScrollEnd={(e) => setViewerIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
+            >
+              {viewerPhotos.map((p, i) => (
+                <View key={i} style={{ width, height: "100%", alignItems: "center", justifyContent: "center" }}>
+                  <Image source={{ uri: p }} style={styles.photoFull} resizeMode="contain" />
+                </View>
+              ))}
+            </ScrollView>
+          ) : null}
+          {viewerPhotos && viewerPhotos.length > 1 ? (
+            <View style={styles.dotsRow}>
+              {viewerPhotos.map((_, i) => (
+                <View key={i} style={[styles.dot, { opacity: i === viewerIndex ? 1 : 0.4 }]} />
+              ))}
+            </View>
+          ) : null}
+          <Pressable
+            onPress={() => viewerPhotos && handleDownloadPhoto(viewerPhotos[viewerIndex])}
+            disabled={downloadingPhoto}
+            style={styles.photoModalDownload}
+            hitSlop={12}
+          >
+            {downloadingPhoto ? (
+              <ActivityIndicator size={18} color="#fff" />
+            ) : (
+              <>
+                <Feather name="download" size={20} color="#fff" />
+                <Text style={styles.photoModalDownloadText}>{t("carDetail.photo.save")}</Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+      </Modal>
 
       <BottomNav active="dashboard" />
     </SwipeBackView>
@@ -204,7 +326,7 @@ const styles = StyleSheet.create({
   typeBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
   carName: { fontSize: 11, fontFamily: "Inter_500Medium", flexShrink: 1 },
   description: { fontSize: 14, fontFamily: "Inter_500Medium", lineHeight: 20 },
-  cardMeta: { flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
+  cardMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
   metaDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#CBD5E1", marginHorizontal: 2 },
   cardFooter: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
@@ -223,4 +345,43 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   warrantyChipText: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  photoChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  photoChipText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  photoModal: { flex: 1, backgroundColor: "#000", alignItems: "center", justifyContent: "center" },
+  photoModalClose: {
+    position: "absolute",
+    top: 56,
+    right: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  photoFull: { width: "100%", height: "80%" },
+  dotsRow: { position: "absolute", bottom: 120, flexDirection: "row", gap: 6, alignSelf: "center" },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#fff" },
+  photoModalDownload: {
+    position: "absolute",
+    bottom: 56,
+    right: 24,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    zIndex: 10,
+  },
+  photoModalDownloadText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });
