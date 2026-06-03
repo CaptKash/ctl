@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -13,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/context/ThemeContext";
+import { useColors, useTheme } from "@/context/ThemeContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -44,6 +45,8 @@ type MaintenanceLog = {
 export default function RepairHistoryScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const { currency } = useCurrency();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -90,59 +93,63 @@ export default function RepairHistoryScreen() {
           showsVerticalScrollIndicator={false}
         >
           {logs.map((log) => (
-            <View key={log.id} style={[styles.card, { backgroundColor: C.card, shadowColor: C.shadow }]}>
-              <View style={[styles.cardAccent, { backgroundColor: "#D97706" }]} />
-              <View style={styles.cardBody}>
-                <View style={styles.cardTop}>
-                  <View style={[styles.typeBadge, { backgroundColor: "#FEF3C7" }]}>
-                    <Feather name="tool" size={12} color="#D97706" />
-                    <Text style={[styles.typeBadgeText, { color: "#D97706" }]}>{log.type}</Text>
-                  </View>
-                  <Text style={[styles.carName, { color: C.textTertiary }]} numberOfLines={1}>
-                    {carLabel(log.car)}
-                  </Text>
+            <LinearGradient
+              key={log.id}
+              colors={isDark ? ["#283449", "#1E293B", "#16202F"] : ["#FFFFFF", "#F4F5F7", "#E6E8EB"]}
+              locations={[0, 0.5, 1]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.card}
+            >
+              <View style={styles.cardTop}>
+                <View style={[styles.typeBadge, { backgroundColor: "#FEF3C7" }]}>
+                  <Feather name="tool" size={12} color="#D97706" />
+                  <Text style={[styles.typeBadgeText, { color: "#D97706" }]}>{log.type}</Text>
                 </View>
-
-                <Text style={[styles.description, { color: C.text }]} numberOfLines={2}>
-                  {log.description}
+                <Text style={[styles.carName, { color: C.textSecondary }]} numberOfLines={1}>
+                  {carLabel(log.car)}
                 </Text>
+              </View>
 
-                <View style={styles.cardMeta}>
-                  <Feather name="calendar" size={12} color={C.textTertiary} />
-                  <Text style={[styles.metaText, { color: C.textSecondary }]}>{formatDate(log.date)}</Text>
+              <Text style={[styles.description, { color: C.text }]} numberOfLines={2}>
+                {log.description}
+              </Text>
 
-                  {log.shop ? (
-                    <>
-                      <View style={styles.metaDot} />
-                      <Feather name="map-pin" size={12} color={C.textTertiary} />
-                      <Text style={[styles.metaText, { color: C.textSecondary }]} numberOfLines={1}>
-                        {log.shop}
-                      </Text>
-                    </>
-                  ) : null}
-                </View>
+              <View style={styles.cardMeta}>
+                <Feather name="calendar" size={12} color={C.textSecondary} />
+                <Text style={[styles.metaText, { color: C.textSecondary }]}>{formatDate(log.date)}</Text>
 
-                {(log.cost != null || log.warrantyPeriod) ? (
-                  <View style={styles.cardFooter}>
-                    {log.cost != null && (
-                      <View style={[styles.costChip, { backgroundColor: "#D1FAE5" }]}>
-                        <Text style={[styles.costChipText, { color: "#065F46" }]}>
-                          {currency.symbol}{log.cost.toFixed(2)}
-                        </Text>
-                      </View>
-                    )}
-                    {log.warrantyPeriod ? (
-                      <View style={[styles.warrantyChip, { backgroundColor: "#EDE9FE" }]}>
-                        <Feather name="shield" size={11} color="#7C3AED" />
-                        <Text style={[styles.warrantyChipText, { color: "#7C3AED" }]}>
-                          {log.warrantyPeriod}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
+                {log.shop ? (
+                  <>
+                    <View style={styles.metaDot} />
+                    <Feather name="map-pin" size={12} color={C.textSecondary} />
+                    <Text style={[styles.metaText, { color: C.textSecondary }]} numberOfLines={1}>
+                      {log.shop}
+                    </Text>
+                  </>
                 ) : null}
               </View>
-            </View>
+
+              {(log.cost != null || log.warrantyPeriod) ? (
+                <View style={styles.cardFooter}>
+                  {log.cost != null && (
+                    <View style={[styles.costChip, { backgroundColor: "#D1FAE5" }]}>
+                      <Text style={[styles.costChipText, { color: "#065F46" }]}>
+                        {currency.symbol}{log.cost.toFixed(2)}
+                      </Text>
+                    </View>
+                  )}
+                  {log.warrantyPeriod ? (
+                    <View style={[styles.warrantyChip, { backgroundColor: "#EDE9FE" }]}>
+                      <Feather name="shield" size={11} color="#7C3AED" />
+                      <Text style={[styles.warrantyChipText, { color: "#7C3AED" }]}>
+                        {log.warrantyPeriod}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              ) : null}
+            </LinearGradient>
           ))}
         </ScrollView>
       )}
@@ -171,15 +178,12 @@ const styles = StyleSheet.create({
   list: { padding: 16, gap: 12 },
   card: {
     borderRadius: 14,
-    flexDirection: "row",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    elevation: 2,
-    overflow: "hidden",
+    borderLeftWidth: 4,
+    borderWidth: 1,
+    borderColor: "#D97706",
+    padding: 14,
+    gap: 8,
   },
-  cardAccent: { width: 4 },
-  cardBody: { flex: 1, padding: 14, gap: 8 },
   cardTop: {
     flexDirection: "row",
     alignItems: "center",
