@@ -226,23 +226,15 @@ export default function RepairServiceFormScreen() {
         cost: totalCost > 0 ? totalCost : undefined,
         billPhoto: billPhotos.length > 0 ? billPhotos[0] : undefined,
         warrantyPhoto: warrantyPhotos.length > 0 ? warrantyPhotos[0] : undefined,
+        nextDueDate: repairNextInspectionDate.trim() || undefined,
       }),
-    onSuccess: async () => {
-      if (repairNextInspectionDate.trim()) {
-        try {
-          await apiPost(`/cars/${carId}/inspections`, {
-            carId,
-            date: new Date().toISOString().split("T")[0],
-            nextInspectionDate: repairNextInspectionDate.trim(),
-          });
-        } catch (_) {}
-      }
+    onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["maintenance", carId] });
       qc.invalidateQueries({ queryKey: ["malfunctions", carId] });
       qc.invalidateQueries({ queryKey: ["events", carId] });
       qc.invalidateQueries({ queryKey: ["malfunctions-all"] });
-      qc.invalidateQueries({ queryKey: ["upcoming"] });
+      qc.invalidateQueries({ queryKey: ["maintenance", "upcoming"] });
       router.replace({ pathname: "/car/[id]", params: { id: String(carId) } });
     },
   });

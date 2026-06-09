@@ -31,3 +31,21 @@ grouping (grouping keys on raw `r.type` before the map).
 **Known limitation (pre-existing, out of scope):** upcoming maintenance grouping
 key is `carId::type`, so multiple empty-type fault repairs for one car collapse
 into a single card (latest wins).
+
+## Two repair entry points (easy to miss one)
+
+Repairs can be logged from TWO screens, both POST to `/cars/:id/maintenance`:
+1. `app/maintenance/form.tsx` (Maintenance quick action + fault "repair" button).
+2. `app/inspection/type.tsx` in **repair mode** (Home → Log Event → Inspection;
+   this screen has both repair and inspection modes).
+
+**Trap:** `inspection/type.tsx` repair mode used to write the repair's next date
+by making a SECOND POST to `/cars/:id/inspections` in `onSuccess`, creating a
+spurious `inspection_records` row that showed up as a "Next Inspection" upcoming
+card. The correct behavior (matching `maintenance/form.tsx`) is to send
+`nextDueDate` on the maintenance POST and NOT touch `/inspections`.
+
+**How to apply:** when changing repair/next-date behavior, update BOTH entry
+points. Spurious inspection rows from the old bug are identifiable as
+`inspection_records` with empty place/results/cost and only `next_inspection_date`
+set.
