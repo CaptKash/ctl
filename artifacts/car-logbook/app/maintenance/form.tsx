@@ -192,7 +192,7 @@ export default function MaintenanceFormScreen() {
     mutationFn: () =>
       apiPost(`/cars/${carId}/maintenance`, {
         type,
-        description: correctiveAction.trim() || type,
+        description: correctiveAction.trim() || faultDescription?.trim() || type,
         date,
         costOfParts: costOfParts ? parseFloat(costOfParts) : undefined,
         laborCost: laborCost ? parseFloat(laborCost) : undefined,
@@ -222,7 +222,7 @@ export default function MaintenanceFormScreen() {
   const car = carQuery.data;
   const carTitle = car ? `${car.year} ${car.make} ${car.model}` : "";
   const canSubmit = fromFault
-    ? correctiveAction.trim().length > 0
+    ? correctiveAction.trim().length > 0 || Boolean(faultDescription?.trim())
     : type.trim().length > 0 && (type !== "Other" || correctiveAction.trim().length > 0);
 
   return (
@@ -272,7 +272,6 @@ export default function MaintenanceFormScreen() {
                 onChangeText={setCorrectiveAction}
                 placeholder={t("carDetail.maintenanceForm.placeholders.workDone")}
                 multiline
-                required
               />
             ) : (
               <>
