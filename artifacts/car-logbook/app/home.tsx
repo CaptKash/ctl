@@ -632,8 +632,8 @@ export default function MenuDashboardScreen() {
                   </Text>
                   <View style={[styles.eventCardBottom, isRTL && { flexDirection: "row-reverse" }]}>
                     <View style={[styles.eventCardMeta, isRTL && { flexDirection: "row-reverse" }]}>
-                      <Ionicons name="car-outline" size={13} color={C.textTertiary} />
-                      <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
+                      <Ionicons name="car-outline" size={15} color={C.textSecondary} />
+                      <Text style={[styles.eventCardCar, { color: C.text }]}>
                         {localizeDigits(item.year, i18n.language)} {localizeBrand(item.make, i18n.language)} {item.model}
                       </Text>
                       <Feather
@@ -980,6 +980,7 @@ const styles = StyleSheet.create({
   eventCardBottom: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginTop: 4 },
   eventCardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   eventCardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  eventCardCar: { fontSize: 13.5, fontFamily: "Inter_600SemiBold" },
   calBtn: {
     width: 36,
     height: 36,

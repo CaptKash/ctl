@@ -135,8 +135,8 @@ export default function UpcomingEventsScreen() {
                   </Text>
                   <View style={styles.cardBottom}>
                     <View style={styles.cardMeta}>
-                      <Ionicons name="car-outline" size={13} color={C.textTertiary} />
-                      <Text style={[styles.cardMetaText, { color: C.textSecondary }]}>
+                      <Ionicons name="car-outline" size={15} color={C.textSecondary} />
+                      <Text style={[styles.cardCar, { color: C.text }]}>
                         {item.year} {item.make} {item.model}
                       </Text>
                       <Feather name="calendar" size={12} color={C.textTertiary} style={{ marginLeft: 8 }} />
@@ -211,5 +211,6 @@ const styles = StyleSheet.create({
   cardBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 4 },
   cardMeta: { flex: 1, flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" },
   cardMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  cardCar: { fontSize: 13.5, fontFamily: "Inter_600SemiBold" },
   calBtn: { width: 30, height: 30, borderRadius: 8, alignItems: "center", justifyContent: "center", marginLeft: 8 },
 });
