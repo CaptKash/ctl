@@ -1,29 +1,30 @@
 ---
 name: CTL upcoming reminder labels
-description: Why all maintenance-derived "upcoming" cards share one "Next Service" label, and the repair-vs-service storage constraint behind it.
+description: The (counter-intuitive) mapping from record source to upcoming-card title that Kash explicitly chose.
 ---
 
 # Upcoming reminder card labels (car-logbook)
 
-All "upcoming" cards derived from the maintenance table — whether logged from the
-repair form (`app/maintenance/form.tsx`) or the service form
-(`app/car/maintenance.tsx`) — share ONE fixed title: **"Next Service"**.
-Inspection-derived cards (from the inspections table) keep "Next Inspection".
+Kash's FINAL chosen titles (note: deliberately counter-intuitive — implement as
+stated, do not "correct" the wording):
+- `itemKind === "maintenance"` (repair/service logged into `maintenance_records`,
+  i.e. has a `next_due_date`) → titled **"Next Inspection"**.
+- `itemKind === "inspection"` (logged into `inspection_records`, has a
+  `next_inspection_date`) → titled **"Next Service"**.
+- license/insurance cards keep their own titles (rendered via `item.type`).
 
-**Why:** Kash asked to label repair-generated and service-generated cards
-differently, but repair logs and service logs are stored identically in the same
-`maintenance_records` table with **no source marker**. `faultId` is used only to
-resolve the fault and is NOT persisted on the maintenance row. The only data
-signal is that fault-origin repairs have an empty `type` (service logs always
-have a type), which cannot distinguish non-fault repairs from services. DB
-migrations are off-limits, so a source column can't be added. Given that, Kash
-chose a single shared label ("Next Service") over per-source labels.
+**Why:** Kash's reasoning — a maintenance card already shows the specific repair
+that was done, so its follow-up date reads as a "Next Inspection"; an
+inspection-sourced card is generic, so it reads as "Next Service". This reverses
+an earlier interim decision (where maintenance→"Next Service"); the swap above is
+the current intent.
 
-**How to apply:** Title is fixed client-side by `itemKind === "maintenance"`
-(in `home.tsx` `localizedEventType` and in `maintenance/upcoming.tsx`), keyed on
-`home.eventType.nextService` (en + ar). Do NOT try to title by the record's
-`type`/`description`. Keep the server `item.type` as the real type — it feeds the
-maintenance form `preType` on tap from home. Don't reintroduce a
+**How to apply:** the two label sites are `home.tsx` `localizedEventType` and
+`maintenance/upcoming.tsx` card-title ternary. Both key on `itemKind` and reuse
+the i18n keys `home.eventType.nextInspection` / `home.eventType.nextService`
+(en + ar) — the key NAMES are now swapped relative to the displayed itemKind, so
+go by itemKind, not the key name. Keep the server `item.type` as the real type
+(feeds maintenance form `preType` on tap). Don't reintroduce a
 `type: r.type || r.description` fallback in `/maintenance/upcoming`: it would push
 a work-description into the form's service-type field, and it does NOT affect
 grouping (grouping keys on raw `r.type` before the map).

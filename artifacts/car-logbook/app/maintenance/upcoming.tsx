@@ -120,7 +120,11 @@ export default function UpcomingEventsScreen() {
                 <View style={styles.cardBody}>
                   <View style={styles.cardTop}>
                     <Text style={[styles.cardType, { color: C.text }]} numberOfLines={1}>
-                      {item.itemKind === "maintenance" ? t("home.eventType.nextService") : item.type}
+                      {item.itemKind === "maintenance"
+                        ? t("home.eventType.nextInspection")
+                        : item.itemKind === "inspection"
+                          ? t("home.eventType.nextService")
+                          : item.type}
                     </Text>
                     <View style={[styles.urgencyBadge, { backgroundColor: color + "22" }]}>
                       <Text style={[styles.urgencyText, { color }]}>{label}</Text>

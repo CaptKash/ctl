@@ -87,8 +87,8 @@ function urgencyColor(days: number, C: ColorScheme): string {
 function localizedEventType(item: UpcomingItem, t: (k: string, o?: any) => string): string {
   if (item.itemKind === "license") return t("home.eventType.licenseExpiry");
   if (item.itemKind === "insurance") return t("home.eventType.insuranceExpiry");
-  if (item.itemKind === "inspection") return t("home.eventType.nextInspection");
-  if (item.itemKind === "maintenance") return t("home.eventType.nextService");
+  if (item.itemKind === "inspection") return t("home.eventType.nextService");
+  if (item.itemKind === "maintenance") return t("home.eventType.nextInspection");
   return item.type;
 }
 
