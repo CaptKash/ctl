@@ -31,7 +31,7 @@ type Car = {
   licensePlate?: string | null;
 };
 
-type ResultOption = "Pass" | "Marginal" | "Fail";
+type ResultOption = "No findings" | "Repair required";
 
 export default function InspectionFormScreen() {
   const { carId: carIdParam } = useLocalSearchParams<{ carId: string }>();
@@ -78,9 +78,8 @@ export default function InspectionFormScreen() {
   const textAlign = isRTL ? "right" : "left";
 
   const resultOptions: { value: ResultOption; labelKey: string; color: string; bg: string }[] = [
-    { value: "Pass", labelKey: "inspection.results.pass", color: "#059669", bg: "#D1FAE5" },
-    { value: "Marginal", labelKey: "inspection.results.marginal", color: "#D97706", bg: "#FEF3C7" },
-    { value: "Fail", labelKey: "inspection.results.fail", color: "#DC2626", bg: "#FEE2E2" },
+    { value: "No findings", labelKey: "inspection.results.noFindings", color: "#059669", bg: "#D1FAE5" },
+    { value: "Repair required", labelKey: "inspection.results.repairRequired", color: "#DC2626", bg: "#FEE2E2" },
   ];
 
   return (
@@ -142,8 +141,10 @@ export default function InspectionFormScreen() {
                       styles.resultBtn,
                       { backgroundColor: active ? option.bg : C.backgroundSecondary },
                       i === 0 && styles.resultBtnFirst,
-                      i === 2 && styles.resultBtnLast,
-                      i < 2 && { borderRightWidth: 1, borderRightColor: C.border },
+                      i === resultOptions.length - 1 && styles.resultBtnLast,
+                      i < resultOptions.length - 1 && (isRTL
+                        ? { borderLeftWidth: 1, borderLeftColor: C.border }
+                        : { borderRightWidth: 1, borderRightColor: C.border }),
                     ]}
                   >
                     <Text style={[styles.resultBtnText, { color: active ? option.color : C.textSecondary, fontFamily: active ? "Inter_600SemiBold" : "Inter_400Regular" }]}>
@@ -154,7 +155,7 @@ export default function InspectionFormScreen() {
               })}
             </View>
           </View>
-          {(results === "Marginal" || results === "Fail") && (
+          {results === "Repair required" && (
             <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

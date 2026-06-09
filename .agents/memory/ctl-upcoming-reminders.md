@@ -50,3 +50,16 @@ card. The correct behavior (matching `maintenance/form.tsx`) is to send
 points. Spurious inspection rows from the old bug are identifiable as
 `inspection_records` with empty place/results/cost and only `next_inspection_date`
 set.
+
+## Inspection "Results" selector = 2 options (Kash's choice)
+
+The inspection ("service") Results selector is **two** options, not Pass/Marginal/Fail:
+- **"No findings"** (green) — no follow-up.
+- **"Repair required"** (red) — shows the "Log a fault" button → `/malfunction/log`.
+
+**Why:** Kash reframed inspection results around whether a repair is needed.
+**How to apply:** lives in BOTH `inspection/type.tsx` and `inspection/form.tsx`
+(shared i18n `inspection.results.noFindings` / `repairRequired`, en+ar). Values
+are stored raw in `inspection_records.results` and shown raw in `car/[id].tsx`
+(no migration), so legacy rows still read Pass/Marginal/Fail — leave them. The
+fault-prompt condition keys on `results === "Repair required"`.
