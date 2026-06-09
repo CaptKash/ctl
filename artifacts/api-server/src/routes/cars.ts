@@ -162,7 +162,6 @@ router.get("/maintenance/upcoming", async (req, res) => {
     .filter((r) => r.nextDueDate)
     .map((r) => ({
       ...r,
-      type: r.type || r.description,
       itemKind: "maintenance" as const,
       nickname: r.nickname ?? null,
     }));

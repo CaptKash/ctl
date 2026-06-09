@@ -204,7 +204,8 @@
     "eventType": {
       "licenseExpiry": "License Expiry",
       "insuranceExpiry": "Insurance Expiry",
-      "nextInspection": "Next Inspection"
+      "nextInspection": "Next Inspection",
+      "nextService": "Next Service"
     }
   },
   "addCar": {

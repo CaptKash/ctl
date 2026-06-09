@@ -212,7 +212,8 @@
     "eventType": {
       "licenseExpiry": "انتهاء الترخيص",
       "insuranceExpiry": "انتهاء عقد التأمين",
-      "nextInspection": "الفحص القادم"
+      "nextInspection": "الفحص القادم",
+      "nextService": "الصيانة القادمة"
     }
   },
   "addCar": {

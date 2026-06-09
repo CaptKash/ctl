@@ -20,10 +20,12 @@ import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { apiGet } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { useTranslation } from "react-i18next";
 
 type UpcomingRecord = {
   id: number;
   carId: number;
+  itemKind: string;
   type: string;
   description: string;
   nextDueDate: string;
@@ -58,6 +60,7 @@ function urgencyLabel(days: number): string {
 export default function UpcomingEventsScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t } = useTranslation();
   const { unit } = useDistanceUnit();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -117,7 +120,7 @@ export default function UpcomingEventsScreen() {
                 <View style={styles.cardBody}>
                   <View style={styles.cardTop}>
                     <Text style={[styles.cardType, { color: C.text }]} numberOfLines={1}>
-                      {item.type}
+                      {item.itemKind === "maintenance" ? t("home.eventType.nextService") : item.type}
                     </Text>
                     <View style={[styles.urgencyBadge, { backgroundColor: color + "22" }]}>
                       <Text style={[styles.urgencyText, { color }]}>{label}</Text>

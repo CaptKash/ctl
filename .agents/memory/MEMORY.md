@@ -1,1 +1,2 @@
 - [Driving car-logbook Expo web past Clerk for testing](car-logbook-web-test-auth.md) — inject legacy JWT into localStorage (`ctl_auth_token`) + reload to reach authed flows when Clerk CAPTCHA blocks sign-in.
+- [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
