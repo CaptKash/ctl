@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
 import BottomNav from "@/components/ui/BottomNav";
@@ -25,6 +26,8 @@ import { apiPost } from "@/hooks/useApi";
 export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { isFleet } = useSubscription();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -41,7 +44,7 @@ export default function ToolsScreen() {
 
   async function handleSubmit() {
     if (suggestion.trim().length < 5) {
-      Alert.alert("Too short", "Please describe the tool you'd like in a bit more detail.");
+      Alert.alert(t("tools.suggest.tooShortTitle"), t("tools.suggest.tooShortMessage"));
       return;
     }
     setLoading(true);
@@ -51,7 +54,7 @@ export default function ToolsScreen() {
       });
       setSent(true);
     } catch {
-      Alert.alert("Error", "Couldn't send your suggestion. Please try again.");
+      Alert.alert(t("tools.suggest.errorTitle"), t("tools.suggest.errorMessage"));
     } finally {
       setLoading(false);
     }
@@ -60,9 +63,9 @@ export default function ToolsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
-        <View style={styles.titleRow}>
-          <MetalIcon icon="sliders" color={C.tint} size={20} style={styles.titleIconBox} />
-          <Text style={[styles.headerTitle, { color: C.text }]}>Tools</Text>
+        <View style={[styles.titleRow, isRTL && { flexDirection: "row-reverse" }]}>
+          <MetalIcon icon="sliders" color={C.tint} size={20} style={[styles.titleIconBox, isRTL && { marginRight: 0, marginLeft: 12 }]} />
+          <Text style={[styles.headerTitle, { color: C.text }]}>{t("tools.title")}</Text>
         </View>
       </View>
 
@@ -76,40 +79,42 @@ export default function ToolsScreen() {
           onPress={() => router.push("/nearby-service" as any)}
           style={({ pressed }) => [
             styles.tool,
+            isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
           <MetalIcon icon="map-pin" color="#059669" bg="#ECFDF5" size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
-            <Text style={[styles.toolTitle, { color: C.text }]}>
-              Service Centers Nearby
+            <Text style={[styles.toolTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
+              {t("tools.nearby.title")}
             </Text>
-            <Text style={[styles.toolSub, { color: C.textSecondary }]}>
-              Find repair shops close to you
+            <Text style={[styles.toolSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("tools.nearby.sub")}
             </Text>
           </View>
-          <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
         </Pressable>
 
         <Pressable
           onPress={() => isFleet ? router.push("/fuel" as any) : router.push("/fleet-upgrade" as any)}
           style={({ pressed }) => [
             styles.tool,
+            isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
           <MetalIcon icon="droplet" color={isFleet ? "#2563EB" : "#9CA3AF"} bg={isFleet ? "#DBEAFE" : "#F3F4F6"} size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
-            <Text style={[styles.toolTitle, { color: C.text }]}>
-              Fuel Consumption
+            <Text style={[styles.toolTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
+              {t("tools.fuel.title")}
             </Text>
-            <Text style={[styles.toolSub, { color: C.textSecondary }]}>
-              Track &amp; monitor fuel usage
+            <Text style={[styles.toolSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("tools.fuel.sub")}
             </Text>
           </View>
           {isFleet
-            ? <Feather name="chevron-right" size={18} color={C.textTertiary} />
-            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>Fleet</Text></View>
+            ? <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
+            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
           }
         </Pressable>
 
@@ -117,21 +122,22 @@ export default function ToolsScreen() {
           onPress={() => isFleet ? router.push("/service-costs" as any) : router.push("/fleet-upgrade" as any)}
           style={({ pressed }) => [
             styles.tool,
+            isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
           <MetalIcon icon="dollar-sign" color={isFleet ? "#7C3AED" : "#9CA3AF"} bg={isFleet ? "#F3E8FF" : "#F3F4F6"} size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
-            <Text style={[styles.toolTitle, { color: C.text }]}>
-              Cost Tracker
+            <Text style={[styles.toolTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
+              {t("tools.cost.title")}
             </Text>
-            <Text style={[styles.toolSub, { color: C.textSecondary }]}>
-              Analyse spending over time
+            <Text style={[styles.toolSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("tools.cost.sub")}
             </Text>
           </View>
           {isFleet
-            ? <Feather name="chevron-right" size={18} color={C.textTertiary} />
-            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>Fleet</Text></View>
+            ? <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
+            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
           }
         </Pressable>
 
@@ -139,32 +145,33 @@ export default function ToolsScreen() {
           onPress={() => isFleet ? router.push("/export" as any) : router.push("/fleet-upgrade" as any)}
           style={({ pressed }) => [
             styles.tool,
+            isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
           <MetalIcon icon="download" color={isFleet ? "#D97706" : "#9CA3AF"} bg={isFleet ? "#FEF3C7" : "#F3F4F6"} size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
-            <Text style={[styles.toolTitle, { color: C.text }]}>Data Backup & Export</Text>
-            <Text style={[styles.toolSub, { color: C.textSecondary }]}>
-              Export all records as PDF or CSV
+            <Text style={[styles.toolTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("tools.export.title")}</Text>
+            <Text style={[styles.toolSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("tools.export.sub")}
             </Text>
           </View>
           {isFleet
-            ? <Feather name="chevron-right" size={18} color={C.textTertiary} />
-            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>Fleet</Text></View>
+            ? <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
+            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
           }
         </Pressable>
 
         <Pressable
           onPress={openModal}
-          style={({ pressed }) => [styles.suggestCard, { opacity: pressed ? 0.85 : 1 }]}
+          style={({ pressed }) => [styles.suggestCard, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed ? 0.85 : 1 }]}
         >
           <MetalIcon icon="send" color="#92400E" bg="#FDE047" size={20} style={styles.suggestIconBox} />
           <View style={styles.toolBody}>
-            <Text style={styles.suggestTitle}>Suggest a Tool</Text>
-            <Text style={styles.suggestSub}>Got an idea? Let us know what to build next</Text>
+            <Text style={[styles.suggestTitle, isRTL && { textAlign: "right" }]}>{t("tools.suggest.title")}</Text>
+            <Text style={[styles.suggestSub, isRTL && { textAlign: "right" }]}>{t("tools.suggest.sub")}</Text>
           </View>
-          <Feather name="chevron-right" size={18} color="#A16207" />
+          <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color="#A16207" />
         </Pressable>
       </ScrollView>
 
@@ -181,8 +188,8 @@ export default function ToolsScreen() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <View style={[styles.modalContainer, { backgroundColor: C.background }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: C.border }]}>
-              <Text style={[styles.modalTitle, { color: C.text }]}>Suggest a Tool</Text>
+            <View style={[styles.modalHeader, { borderBottomColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
+              <Text style={[styles.modalTitle, { color: C.text }]}>{t("tools.suggest.title")}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)} hitSlop={12}>
                 <Feather name="x" size={22} color={C.textSecondary} />
               </TouchableOpacity>
@@ -191,12 +198,12 @@ export default function ToolsScreen() {
             {sent ? (
               <View style={styles.sentContainer}>
                 <MetalIcon icon="check" color="#92400E" bg="#FDE047" size={32} style={styles.sentIconBox} />
-                <Text style={[styles.sentTitle, { color: C.text }]}>Thanks for the idea!</Text>
+                <Text style={[styles.sentTitle, { color: C.text }]}>{t("tools.suggest.sentTitle")}</Text>
                 <Text style={[styles.sentSub, { color: C.textSecondary }]}>
-                  We review every suggestion and use them to shape what we build next.
+                  {t("tools.suggest.sentSub")}
                 </Text>
                 <TouchableOpacity style={styles.doneBtn} onPress={() => setModalVisible(false)}>
-                  <Text style={styles.doneBtnText}>Done</Text>
+                  <Text style={styles.doneBtnText}>{t("tools.suggest.done")}</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -204,12 +211,12 @@ export default function ToolsScreen() {
                 contentContainerStyle={styles.modalContent}
                 keyboardShouldPersistTaps="handled"
               >
-                <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>
-                  What tool would you like us to build? *
+                <Text style={[styles.fieldLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+                  {t("tools.suggest.fieldLabel")}
                 </Text>
                 <TextInput
-                  style={[styles.textArea, { backgroundColor: C.card, color: C.text, borderColor: C.border }]}
-                  placeholder="Describe the tool and what problem it solves for you…"
+                  style={[styles.textArea, { backgroundColor: C.card, color: C.text, borderColor: C.border, textAlign: isRTL ? "right" : "left" }]}
+                  placeholder={t("tools.suggest.placeholder")}
                   placeholderTextColor={C.textTertiary}
                   multiline
                   numberOfLines={5}
@@ -227,7 +234,7 @@ export default function ToolsScreen() {
                   {loading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={styles.submitBtnText}>Send Suggestion</Text>
+                    <Text style={styles.submitBtnText}>{t("tools.suggest.send")}</Text>
                   )}
                 </TouchableOpacity>
               </ScrollView>

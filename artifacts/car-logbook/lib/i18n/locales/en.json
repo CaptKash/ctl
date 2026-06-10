@@ -741,5 +741,39 @@
     "emptyTitle": "No History Yet",
     "emptyDesc": "Logged faults and repairs will appear here automatically.",
     "unknownCar": "Unknown car"
+  },
+  "tools": {
+    "title": "Tools",
+    "nearby": {
+      "title": "Service Centers Nearby",
+      "sub": "Find repair shops close to you"
+    },
+    "fuel": {
+      "title": "Fuel Consumption",
+      "sub": "Track & monitor fuel usage"
+    },
+    "cost": {
+      "title": "Cost Tracker",
+      "sub": "Analyse spending over time"
+    },
+    "export": {
+      "title": "Data Backup & Export",
+      "sub": "Export all records as PDF or CSV"
+    },
+    "fleetBadge": "Fleet",
+    "suggest": {
+      "title": "Suggest a Tool",
+      "sub": "Got an idea? Let us know what to build next",
+      "fieldLabel": "What tool would you like us to build? *",
+      "placeholder": "Describe the tool and what problem it solves for you…",
+      "send": "Send Suggestion",
+      "sentTitle": "Thanks for the idea!",
+      "sentSub": "We review every suggestion and use them to shape what we build next.",
+      "done": "Done",
+      "tooShortTitle": "Too short",
+      "tooShortMessage": "Please describe the tool you'd like in a bit more detail.",
+      "errorTitle": "Error",
+      "errorMessage": "Couldn't send your suggestion. Please try again."
+    }
   }
 }
