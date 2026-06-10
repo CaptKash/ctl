@@ -28,8 +28,7 @@ export default function ToolsScreen() {
   const C = useColors();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
-  const { isFleet: _isFleet } = useSubscription();
-  const isFleet = false; // TEMP PREVIEW: force locked state to show Fleet badges
+  const { isFleet } = useSubscription();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [modalVisible, setModalVisible] = useState(false);
