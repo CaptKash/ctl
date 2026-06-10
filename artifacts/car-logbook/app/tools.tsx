@@ -114,7 +114,7 @@ export default function ToolsScreen() {
           </View>
           {isFleet
             ? <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
-            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
+            : <View style={[styles.fleetBadge, isRTL && { flexDirection: "row-reverse" }]}><Feather name="lock" size={10} color="#92400E" /><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
           }
         </Pressable>
 
@@ -137,7 +137,7 @@ export default function ToolsScreen() {
           </View>
           {isFleet
             ? <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
-            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
+            : <View style={[styles.fleetBadge, isRTL && { flexDirection: "row-reverse" }]}><Feather name="lock" size={10} color="#92400E" /><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
           }
         </Pressable>
 
@@ -158,7 +158,7 @@ export default function ToolsScreen() {
           </View>
           {isFleet
             ? <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
-            : <View style={styles.fleetBadge}><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
+            : <View style={[styles.fleetBadge, isRTL && { flexDirection: "row-reverse" }]}><Feather name="lock" size={10} color="#92400E" /><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
           }
         </Pressable>
 
@@ -307,6 +307,9 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   fleetBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     paddingHorizontal: 9,
     paddingVertical: 3,
     borderRadius: 20,
