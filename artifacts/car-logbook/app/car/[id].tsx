@@ -20,7 +20,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { useColors } from "@/context/ThemeContext";
+import { useColors, useTheme } from "@/context/ThemeContext";
 import { localizeBrand } from "@/lib/carBrandLogo";
 import { localizeDigits } from "@/lib/i18n";
 import BottomNav from "@/components/ui/BottomNav";
@@ -106,6 +106,11 @@ export default function CarDetailScreen() {
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const cardGradient = isDark
+    ? (["#283449", "#1E293B", "#16202F"] as const)
+    : (["#FFFFFF", "#F4F5F7", "#E6E8EB"] as const);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
   const { unit } = useDistanceUnit();
@@ -213,7 +218,14 @@ export default function CarDetailScreen() {
     if (ev.kind === "fault") {
       const r = ev.data;
       return (
-        <View key={key} style={[styles.card, { backgroundColor: C.card, borderColor: meta.color }]}>
+        <LinearGradient
+          key={key}
+          colors={cardGradient}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.card, styles.cardPressable, { borderColor: meta.color }]}
+        >
           <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
               <Feather name={meta.icon} size={11} color={meta.color} />
@@ -260,7 +272,7 @@ export default function CarDetailScreen() {
               </Pressable>
             </View>
           </View>
-        </View>
+        </LinearGradient>
       );
     }
 
@@ -270,8 +282,15 @@ export default function CarDetailScreen() {
         <Pressable
           key={key}
           onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
-          style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+          style={({ pressed }) => [styles.cardPressable, { opacity: pressed ? 0.9 : 1 }]}
         >
+          <LinearGradient
+            colors={cardGradient}
+            locations={[0, 0.5, 1]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.card, { borderColor: meta.color }]}
+          >
           <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
               <Feather name={meta.icon} size={11} color={meta.color} />
@@ -321,6 +340,7 @@ export default function CarDetailScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          </LinearGradient>
         </Pressable>
       );
     }
@@ -331,8 +351,15 @@ export default function CarDetailScreen() {
         <Pressable
           key={key}
           onPress={() => { Haptics.selectionAsync(); setDetailEvent(ev); }}
-          style={({ pressed }) => [styles.card, { backgroundColor: C.card, borderColor: meta.color, opacity: pressed ? 0.9 : 1 }]}
+          style={({ pressed }) => [styles.cardPressable, { opacity: pressed ? 0.9 : 1 }]}
         >
+          <LinearGradient
+            colors={cardGradient}
+            locations={[0, 0.5, 1]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.card, { borderColor: meta.color }]}
+          >
           <View style={[styles.cardHeader, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.badge, { backgroundColor: meta.bg }, isRTL && { flexDirection: "row-reverse" }]}>
               <Feather name={meta.icon} size={11} color={meta.color} />
@@ -374,6 +401,7 @@ export default function CarDetailScreen() {
               <Feather name="trash-2" size={14} color={meta.color} />
             </TouchableOpacity>
           </View>
+          </LinearGradient>
         </Pressable>
       );
     }
@@ -793,6 +821,9 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   contentPadding: { padding: 16, gap: 0 },
 
+  cardPressable: {
+    marginBottom: 10,
+  },
   card: {
     borderRadius: 14,
     borderLeftWidth: 4,
@@ -800,7 +831,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 8,
-    marginBottom: 10,
   },
   cardHeader: {
     flexDirection: "row",
