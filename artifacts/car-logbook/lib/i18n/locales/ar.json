@@ -794,5 +794,38 @@
       "errorTitle": "خطأ",
       "errorMessage": "تعذّر إرسال اقتراحك. يرجى المحاولة مرة أخرى."
     }
+  },
+  "nearbyService": {
+    "title": "مراكز الخدمة",
+    "sub": "بالقرب من موقعك",
+    "locating": "جارٍ تحديد موقعك…",
+    "fetching": "جارٍ البحث عن الورش القريبة…",
+    "deniedTitle": "نحتاج إذن الوصول للموقع",
+    "deniedMessage": "يرجى تفعيل الوصول إلى الموقع في إعدادات جهازك حتى يتمكن CTL من إيجاد مراكز الخدمة القريبة.",
+    "openSettings": "فتح الإعدادات",
+    "errorTitle": "تعذّر تحميل النتائج",
+    "tryAgain": "حاول مرة أخرى",
+    "emptyTitle": "لا توجد مراكز قريبة",
+    "emptyMessage": "لم يتم العثور على مراكز خدمة ضمن {{km}} كم من موقعك.",
+    "count_zero": "لا نتائج ضمن {{km}} كم",
+    "count_one": "نتيجة واحدة ضمن {{km}} كم",
+    "count_two": "نتيجتان ضمن {{km}} كم",
+    "count_few": "{{count}} نتائج ضمن {{km}} كم",
+    "count_many": "{{count}} نتيجة ضمن {{km}} كم",
+    "count_other": "{{count}} نتيجة ضمن {{km}} كم",
+    "filterAll": "الكل",
+    "unnamedShop": "ورشة بدون اسم",
+    "attribution": "البيانات © مساهمو OpenStreetMap",
+    "distMeters": "{{value}} م",
+    "distKm": "{{value}} كم",
+    "types": {
+      "autoRepair": "تصليح سيارات",
+      "carWash": "غسيل سيارات",
+      "serviceCenter": "مركز خدمة",
+      "tireShop": "محل إطارات",
+      "partsStore": "محل قطع غيار",
+      "dealership": "وكالة سيارات",
+      "autoService": "خدمة سيارات"
+    }
   }
 }

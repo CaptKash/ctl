@@ -775,5 +775,34 @@
       "errorTitle": "Error",
       "errorMessage": "Couldn't send your suggestion. Please try again."
     }
+  },
+  "nearbyService": {
+    "title": "Service Centers",
+    "sub": "Near your location",
+    "locating": "Getting your location…",
+    "fetching": "Finding nearby shops…",
+    "deniedTitle": "Location Access Needed",
+    "deniedMessage": "Please enable location access in your device settings so CTL can find nearby service centers.",
+    "openSettings": "Open Settings",
+    "errorTitle": "Couldn't Load Results",
+    "tryAgain": "Try Again",
+    "emptyTitle": "None Found Nearby",
+    "emptyMessage": "No service centers found within {{km}} km of your location.",
+    "count_one": "{{count}} result within {{km}} km",
+    "count_other": "{{count}} results within {{km}} km",
+    "filterAll": "All",
+    "unnamedShop": "Unnamed Shop",
+    "attribution": "Data © OpenStreetMap contributors",
+    "distMeters": "{{value}} m",
+    "distKm": "{{value}} km",
+    "types": {
+      "autoRepair": "Auto Repair",
+      "carWash": "Car Wash",
+      "serviceCenter": "Service Center",
+      "tireShop": "Tire Shop",
+      "partsStore": "Parts Store",
+      "dealership": "Dealership",
+      "autoService": "Auto Service"
+    }
   }
 }

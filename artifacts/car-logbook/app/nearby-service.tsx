@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 
@@ -55,13 +56,13 @@ function haversineKm(
 function friendlyType(tags: Record<string, string>): string {
   const amenity = tags.amenity ?? "";
   const shop = tags.shop ?? "";
-  if (amenity === "car_repair") return "Auto Repair";
-  if (amenity === "car_wash") return "Car Wash";
-  if (amenity === "car_service") return "Service Center";
-  if (shop === "tyres") return "Tire Shop";
-  if (shop === "car_parts") return "Parts Store";
-  if (shop === "car") return "Dealership";
-  return "Auto Service";
+  if (amenity === "car_repair") return "autoRepair";
+  if (amenity === "car_wash") return "carWash";
+  if (amenity === "car_service") return "serviceCenter";
+  if (shop === "tyres") return "tireShop";
+  if (shop === "car_parts") return "partsStore";
+  if (shop === "car") return "dealership";
+  return "autoService";
 }
 
 function formatAddress(tags: Record<string, string>): string | undefined {
@@ -115,7 +116,7 @@ async function fetchNearby(
           const elLon: number = el.lon ?? el.center.lon;
           return {
             id: el.id,
-            name: tags.name ?? "Unnamed Shop",
+            name: tags.name ?? "",
             lat: elLat,
             lon: elLon,
             type: friendlyType(tags),
@@ -146,9 +147,9 @@ function openMaps(center: ServiceCenter) {
   }
 }
 
-function formatDist(km: number): string {
-  if (km < 1) return `${Math.round(km * 1000)} m`;
-  return `${km.toFixed(1)} km`;
+function formatDist(km: number, t: (k: string, o?: any) => string): string {
+  if (km < 1) return t("nearbyService.distMeters", { value: Math.round(km * 1000) });
+  return t("nearbyService.distKm", { value: km.toFixed(1) });
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -156,6 +157,8 @@ function formatDist(km: number): string {
 export default function NearbyServiceScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [phase, setPhase] = useState<
@@ -164,11 +167,11 @@ export default function NearbyServiceScreen() {
   const [centers, setCenters] = useState<ServiceCenter[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<string>("All");
+  const [filter, setFilter] = useState<string>("all");
 
-  const allTypes = ["All", ...Array.from(new Set(centers.map((c) => c.type)))];
+  const allTypes = ["all", ...Array.from(new Set(centers.map((c) => c.type)))];
   const visible =
-    filter === "All" ? centers : centers.filter((c) => c.type === filter);
+    filter === "all" ? centers : centers.filter((c) => c.type === filter);
 
   const load = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setPhase("locating");
@@ -215,7 +218,7 @@ export default function NearbyServiceScreen() {
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#1D4ED8" />
           <Text style={[styles.stateText, { color: C.textSecondary }]}>
-            {phase === "locating" ? "Getting your location…" : "Finding nearby shops…"}
+            {phase === "locating" ? t("nearbyService.locating") : t("nearbyService.fetching")}
           </Text>
         </View>
       );
@@ -226,17 +229,16 @@ export default function NearbyServiceScreen() {
         <View style={styles.center}>
           <MetalIcon icon="map-pin" color="#D97706" bg="#FEF3C7" size={28} style={styles.stateIcon} />
           <Text style={[styles.stateTitle, { color: C.text }]}>
-            Location Access Needed
+            {t("nearbyService.deniedTitle")}
           </Text>
           <Text style={[styles.stateText, { color: C.textSecondary }]}>
-            Please enable location access in your device settings so CTL can
-            find nearby service centers.
+            {t("nearbyService.deniedMessage")}
           </Text>
           <Pressable
             onPress={() => Linking.openSettings()}
             style={[styles.stateBtn, { backgroundColor: "#1D4ED8" }]}
           >
-            <Text style={styles.stateBtnText}>Open Settings</Text>
+            <Text style={styles.stateBtnText}>{t("nearbyService.openSettings")}</Text>
           </Pressable>
         </View>
       );
@@ -247,7 +249,7 @@ export default function NearbyServiceScreen() {
         <View style={styles.center}>
           <MetalIcon icon="alert-circle" color="#DC2626" bg="#FEE2E2" size={28} style={styles.stateIcon} />
           <Text style={[styles.stateTitle, { color: C.text }]}>
-            Couldn't Load Results
+            {t("nearbyService.errorTitle")}
           </Text>
           <Text style={[styles.stateText, { color: C.textSecondary }]}>
             {errorMsg}
@@ -256,7 +258,7 @@ export default function NearbyServiceScreen() {
             onPress={() => load()}
             style={[styles.stateBtn, { backgroundColor: "#1D4ED8" }]}
           >
-            <Text style={styles.stateBtnText}>Try Again</Text>
+            <Text style={styles.stateBtnText}>{t("nearbyService.tryAgain")}</Text>
           </Pressable>
         </View>
       );
@@ -267,10 +269,10 @@ export default function NearbyServiceScreen() {
         <View style={styles.center}>
           <MetalIcon icon="search" color="#9CA3AF" bg="#F3F4F6" size={28} style={styles.stateIcon} />
           <Text style={[styles.stateTitle, { color: C.text }]}>
-            None Found Nearby
+            {t("nearbyService.emptyTitle")}
           </Text>
           <Text style={[styles.stateText, { color: C.textSecondary }]}>
-            No service centers found within 25 km of your location.
+            {t("nearbyService.emptyMessage", { km: 25 })}
           </Text>
         </View>
       );
@@ -287,20 +289,21 @@ export default function NearbyServiceScreen() {
       onPress={() => openMaps(center)}
       style={({ pressed }) => [
         styles.card,
+        isRTL && { flexDirection: "row-reverse" },
         { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
       ]}
     >
       <MetalIcon icon="tool" color="#1D4ED8" bg="#EFF6FF" size={20} style={styles.cardIconBox} />
       <View style={styles.cardBody}>
-        <Text style={[styles.cardName, { color: C.text }]} numberOfLines={1}>
-          {center.name}
+        <Text style={[styles.cardName, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>
+          {center.name || t("nearbyService.unnamedShop")}
         </Text>
-        <Text style={[styles.cardType, { color: C.textSecondary }]}>
-          {center.type}
+        <Text style={[styles.cardType, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+          {t(`nearbyService.types.${center.type}`)}
         </Text>
         {center.address ? (
           <Text
-            style={[styles.cardAddress, { color: C.textTertiary }]}
+            style={[styles.cardAddress, { color: C.textTertiary, textAlign: isRTL ? "right" : "left" }]}
             numberOfLines={1}
           >
             {center.address}
@@ -308,18 +311,18 @@ export default function NearbyServiceScreen() {
         ) : null}
         {center.openingHours ? (
           <Text
-            style={[styles.cardHours, { color: C.textTertiary }]}
+            style={[styles.cardHours, { color: C.textTertiary, textAlign: isRTL ? "right" : "left" }]}
             numberOfLines={1}
           >
             {center.openingHours}
           </Text>
         ) : null}
       </View>
-      <View style={styles.cardRight}>
+      <View style={[styles.cardRight, isRTL && { alignItems: "flex-start" }]}>
         <Text style={[styles.distText, { color: "#1D4ED8" }]}>
-          {formatDist(center.distanceKm)}
+          {formatDist(center.distanceKm, t)}
         </Text>
-        <Feather name="chevron-right" size={16} color={C.textTertiary} />
+        <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
       </View>
     </Pressable>
   );
@@ -335,14 +338,14 @@ export default function NearbyServiceScreen() {
           { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card },
         ]}
       >
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           <MetalIcon icon="map-pin" color="#059669" bg="#ECFDF5" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Service Centers</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Near your location</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("nearbyService.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("nearbyService.sub")}</Text>
           </View>
           <Pressable onPress={() => load()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
             <Feather name="refresh-cw" size={20} color={C.textSecondary} />
@@ -356,14 +359,14 @@ export default function NearbyServiceScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.pillScrollView}
-          contentContainerStyle={styles.pillRow}
+          contentContainerStyle={[styles.pillRow, isRTL && { flexDirection: "row-reverse" }]}
         >
-          {allTypes.map((t) => {
-            const active = t === filter;
+          {allTypes.map((type) => {
+            const active = type === filter;
             return (
               <Pressable
-                key={t}
-                onPress={() => setFilter(t)}
+                key={type}
+                onPress={() => setFilter(type)}
                 style={[
                   styles.pill,
                   {
@@ -377,7 +380,7 @@ export default function NearbyServiceScreen() {
                     { color: active ? "#fff" : C.textSecondary },
                   ]}
                 >
-                  {t}
+                  {type === "all" ? t("nearbyService.filterAll") : t(`nearbyService.types.${type}`)}
                 </Text>
               </Pressable>
             );
@@ -387,8 +390,8 @@ export default function NearbyServiceScreen() {
 
       {/* Count label */}
       {phase === "done" && centers.length > 0 && (
-        <Text style={[styles.countLabel, { color: C.textSecondary }]}>
-          {visible.length} {visible.length === 1 ? "result" : "results"} within 25 km
+        <Text style={[styles.countLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+          {t("nearbyService.count", { count: visible.length, km: 25 })}
         </Text>
       )}
 
@@ -407,7 +410,7 @@ export default function NearbyServiceScreen() {
         >
           {visible.map(renderCard)}
           <Text style={[styles.attribution, { color: C.textTertiary }]}>
-            Data © OpenStreetMap contributors
+            {t("nearbyService.attribution")}
           </Text>
         </ScrollView>
       )}
