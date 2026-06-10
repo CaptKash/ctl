@@ -253,6 +253,28 @@ export default function RepairServiceFormScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["inspections", carId] });
       qc.invalidateQueries({ queryKey: ["maintenance", "upcoming"] });
+      if (results === "Repair required") {
+        Alert.alert(
+          t("inspection.faultPrompt.title"),
+          t("inspection.faultPrompt.message"),
+          [
+            {
+              text: t("inspection.faultPrompt.later"),
+              style: "cancel",
+              onPress: () => router.replace({ pathname: "/car/[id]", params: { id: String(carId) } }),
+            },
+            {
+              text: t("inspection.faultPrompt.confirm"),
+              onPress: () =>
+                router.replace({
+                  pathname: "/malfunction/log",
+                  params: { carId: String(carId), carName: carTitle },
+                }),
+            },
+          ]
+        );
+        return;
+      }
       router.replace({ pathname: "/car/[id]", params: { id: String(carId) } });
     },
   });
@@ -583,26 +605,6 @@ export default function RepairServiceFormScreen() {
                 })}
               </View>
             </View>
-            {results === "Repair required" && (
-              <Pressable
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push({
-                    pathname: "/malfunction/log",
-                    params: { carId: String(carId), carName: car ? `${car.year} ${car.make} ${car.model}` : "" },
-                  });
-                }}
-                style={({ pressed }) => [
-                  styles.logFaultBtn,
-                  isRTL && { flexDirection: "row-reverse" },
-                  { opacity: pressed ? 0.8 : 1 },
-                ]}
-              >
-                <Feather name="alert-triangle" size={15} color="#DC2626" />
-                <Text style={[styles.logFaultText, { textAlign }]}>{t("inspection.logFault")}</Text>
-                <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={15} color="#DC2626" />
-              </Pressable>
-            )}
             <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
             <FormField
               label={t("inspection.fields.cost")}
@@ -702,21 +704,6 @@ const styles = StyleSheet.create({
   resultBtnFirst: { borderTopLeftRadius: 10, borderBottomLeftRadius: 10 },
   resultBtnLast: { borderTopRightRadius: 10, borderBottomRightRadius: 10 },
   resultBtnText: { fontSize: 14 },
-  logFaultBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FEE2E2",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  logFaultText: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    color: "#DC2626",
-  },
   // Repair (maintenance form styles)
   costCard: { borderRadius: 16, overflow: "hidden" },
   costHeader: {

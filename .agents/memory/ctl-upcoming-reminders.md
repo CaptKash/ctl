@@ -63,3 +63,12 @@ The inspection ("service") Results selector is **two** options, not Pass/Margina
 are stored raw in `inspection_records.results` and shown raw in `car/[id].tsx`
 (no migration), so legacy rows still read Pass/Marginal/Fail — leave them. The
 fault-prompt condition keys on `results === "Repair required"`.
+
+**Fault prompt = AFTER save, not inline.** Selecting "Repair required" must NOT
+navigate away before the service is logged. There is no inline "Log a fault"
+button anymore; instead the inspection mutation `onSuccess` (in both files) shows
+`Alert.alert(t("inspection.faultPrompt.*"))` only when `results === "Repair
+required"` — "Log a fault" → `router.replace("/malfunction/log", {carId,
+carName})`, "Not now" → `router.replace("/car/[id]")` — with an early return so
+the default car-screen nav doesn't also fire. Non-repair path keeps the plain
+replace to car detail. (Old approach lost the service log; do not reintroduce it.)

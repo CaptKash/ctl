@@ -384,7 +384,12 @@
       "noFindings": "No findings",
       "repairRequired": "Repair required"
     },
-    "logFault": "Log a fault from this inspection",
+    "faultPrompt": {
+      "title": "Repair required",
+      "message": "Your service log was saved. Do you want to log a fault for this repair now?",
+      "confirm": "Log a fault",
+      "later": "Not now"
+    },
     "save": "Save Inspection",
     "serviceSave": "Save Service Log",
     "error": "Failed to save. Please check required fields and try again."
