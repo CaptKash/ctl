@@ -9,7 +9,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from "react-native";
@@ -43,6 +42,8 @@ type FuelRecord = {
   liters: number;
   pricePerLiter?: number | null;
   totalCost: number;
+  fuelBefore?: number | null;
+  tankAfter?: number | null;
   fuelType?: string | null;
   station?: string | null;
   fullTank?: boolean | null;
@@ -59,6 +60,15 @@ function calcConsumption(liters: number, distKm: number, unit: "km" | "mi"): str
   if (unit === "km") return (liters / distKm * 100).toFixed(1) + " L/100km";
   const miles = distKm * 0.621371;
   return (miles / (liters / L_PER_GAL)).toFixed(1) + " mpg";
+}
+
+function consumedBetween(prev: FuelRecord, curr: FuelRecord): number | null {
+  if (prev.tankAfter != null && curr.fuelBefore != null) {
+    const consumed = prev.tankAfter - curr.fuelBefore;
+    return consumed > 0 ? consumed : null;
+  }
+  if (curr.fullTank !== false) return curr.liters;
+  return null;
 }
 
 function carLabel(car: Car) {
@@ -88,12 +98,14 @@ export default function FuelScreen() {
   const [fCarId, setFCarId] = useState<number | null>(null);
   const [fDate, setFDate] = useState(new Date().toISOString().split("T")[0]);
   const [fMileage, setFMileage] = useState("");
+  const [fFuelBefore, setFFuelBefore] = useState("");
   const [fLiters, setFLiters] = useState("");
   const [fPricePerUnit, setFPricePerUnit] = useState("");
   const [fTotalCost, setFTotalCost] = useState("");
+  const [fTankAfter, setFTankAfter] = useState("");
+  const [fTankAfterEdited, setFTankAfterEdited] = useState(false);
   const [fFuelType, setFFuelType] = useState("");
   const [fStation, setFStation] = useState("");
-  const [fFullTank, setFFullTank] = useState(true);
   const [fNotes, setFNotes] = useState("");
 
   const carsQuery = useQuery<Car[]>({
@@ -141,8 +153,9 @@ export default function FuelScreen() {
       const sorted = [...carRecords].sort((a, b) => a.mileage - b.mileage);
       for (let i = 1; i < sorted.length; i++) {
         const dist = sorted[i].mileage - sorted[i - 1].mileage;
-        if (dist > 0 && sorted[i].fullTank !== false) {
-          totalConsumptionPairs += sorted[i].liters / dist * 100;
+        const consumed = consumedBetween(sorted[i - 1], sorted[i]);
+        if (dist > 0 && consumed !== null) {
+          totalConsumptionPairs += consumed / dist * 100;
           consumptionPairCount++;
         }
       }
@@ -163,7 +176,8 @@ export default function FuelScreen() {
       const sorted = [...carRecords].sort((a, b) => a.mileage - b.mileage);
       for (let i = 1; i < sorted.length; i++) {
         const dist = sorted[i].mileage - sorted[i - 1].mileage;
-        if (dist > 0) map.set(sorted[i].id, calcConsumption(sorted[i].liters, dist, unit));
+        const consumed = consumedBetween(sorted[i - 1], sorted[i]);
+        if (dist > 0 && consumed !== null) map.set(sorted[i].id, calcConsumption(consumed, dist, unit));
       }
     });
     return map;
@@ -175,10 +189,27 @@ export default function FuelScreen() {
     return (L_PER_GAL / (avgL100km / 100) * 0.621371).toFixed(1) + " mpg";
   };
 
+  const autoFillTankAfter = (beforeStr: string, litersStr: string) => {
+    if (fTankAfterEdited) return;
+    const b = parseFloat(beforeStr), l = parseFloat(litersStr);
+    if (!isNaN(b) && !isNaN(l)) setFTankAfter((b + l).toFixed(1));
+  };
+
+  const handleFuelBeforeChange = (val: string) => {
+    setFFuelBefore(val);
+    autoFillTankAfter(val, fLiters);
+  };
+
   const handleLitersChange = (val: string) => {
     setFLiters(val);
     const l = parseFloat(val), p = parseFloat(fPricePerUnit);
     if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) setFTotalCost((l * p).toFixed(2));
+    autoFillTankAfter(fFuelBefore, val);
+  };
+
+  const handleTankAfterChange = (val: string) => {
+    setFTankAfterEdited(true);
+    setFTankAfter(val);
   };
 
   const handlePriceChange = (val: string) => {
@@ -189,8 +220,9 @@ export default function FuelScreen() {
 
   const resetForm = () => {
     setFDate(new Date().toISOString().split("T")[0]);
-    setFMileage(""); setFLiters(""); setFPricePerUnit(""); setFTotalCost("");
-    setFFuelType(""); setFStation(""); setFFullTank(true); setFNotes("");
+    setFMileage(""); setFFuelBefore(""); setFLiters(""); setFPricePerUnit(""); setFTotalCost("");
+    setFTankAfter(""); setFTankAfterEdited(false);
+    setFFuelType(""); setFStation(""); setFNotes("");
   };
 
   const carOptions = fuelCars.map(carLabel);
@@ -208,9 +240,10 @@ export default function FuelScreen() {
         liters: parseFloat(fLiters),
         pricePerLiter: fPricePerUnit ? parseFloat(fPricePerUnit) : undefined,
         totalCost: parseFloat(fTotalCost),
+        fuelBefore: fFuelBefore ? parseFloat(fFuelBefore) : undefined,
+        tankAfter: fTankAfter ? parseFloat(fTankAfter) : undefined,
         fuelType: fFuelType || undefined,
         station: fStation || undefined,
-        fullTank: fFullTank,
         notes: fNotes || undefined,
       }),
     onSuccess: () => {
@@ -419,7 +452,25 @@ export default function FuelScreen() {
                 keyboardType="number-pad"
                 required
               />
-              <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+            </View>
+
+            <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("fuelScreen.sectionBefore")}
+            </Text>
+            <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
+              <FormField
+                label={t("fuelScreen.fuelBefore")}
+                value={fFuelBefore}
+                onChangeText={handleFuelBeforeChange}
+                placeholder={t("fuelScreen.fuelBeforePlaceholder")}
+                keyboardType="decimal-pad"
+              />
+            </View>
+
+            <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("fuelScreen.sectionFill")}
+            </Text>
+            <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <FormField
                 label={t("fuelScreen.amount")}
                 value={fLiters}
@@ -447,6 +498,19 @@ export default function FuelScreen() {
               />
             </View>
 
+            <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("fuelScreen.sectionAfter")}
+            </Text>
+            <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
+              <FormField
+                label={t("fuelScreen.newQuantity")}
+                value={fTankAfter}
+                onChangeText={handleTankAfterChange}
+                placeholder={t("fuelScreen.newQuantityPlaceholder")}
+                keyboardType="decimal-pad"
+              />
+            </View>
+
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <SelectField
                 label={t("fuelScreen.fuelType")}
@@ -463,16 +527,6 @@ export default function FuelScreen() {
                 onChangeText={setFStation}
                 placeholder={t("fuelScreen.stationPlaceholder")}
               />
-              <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-              <View style={[styles.switchRow, isRTL && { flexDirection: "row-reverse" }]}>
-                <Text style={[styles.switchLabel, { color: C.text }]}>{t("fuelScreen.fullTank")}</Text>
-                <Switch
-                  value={fFullTank}
-                  onValueChange={setFFullTank}
-                  trackColor={{ true: C.tint }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
                 label={t("fuelScreen.notes")}
@@ -569,8 +623,7 @@ const styles = StyleSheet.create({
   sheetBody: { padding: 20, gap: 16 },
   fieldGroup: { borderRadius: 14, padding: 16, gap: 12 },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: -4 },
-  switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 4 },
-  switchLabel: { fontSize: 15, fontFamily: "Inter_500Medium" },
+  sectionLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 16, marginBottom: 6, marginHorizontal: 4 },
   errorBox: { borderRadius: 10, padding: 14 },
   errorText: { fontSize: 14, fontFamily: "Inter_500Medium", textAlign: "center" },
 });

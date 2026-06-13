@@ -164,6 +164,8 @@ export const fuelTable = pgTable("fuel_records", {
   liters: real("liters").notNull(),
   pricePerLiter: real("price_per_liter"),
   totalCost: real("total_cost").notNull(),
+  fuelBefore: real("fuel_before"),
+  tankAfter: real("tank_after"),
   fuelType: text("fuel_type"),
   station: text("station"),
   fullTank: boolean("full_tank"),
