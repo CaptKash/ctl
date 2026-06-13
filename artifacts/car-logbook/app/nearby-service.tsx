@@ -293,7 +293,6 @@ export default function NearbyServiceScreen() {
         { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
       ]}
     >
-      <MetalIcon icon="tool" color="#1D4ED8" bg="#EFF6FF" size={20} style={styles.cardIconBox} />
       <View style={styles.cardBody}>
         <Text style={[styles.cardName, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>
           {center.name || t("nearbyService.unnamedShop")}
@@ -460,13 +459,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
-  },
-  cardIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
   },
   cardBody: { flex: 1 },
   cardName: { fontSize: 15, fontWeight: "600", marginBottom: 2 },
