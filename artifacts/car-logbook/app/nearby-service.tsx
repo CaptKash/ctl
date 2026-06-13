@@ -355,12 +355,7 @@ export default function NearbyServiceScreen() {
 
       {/* Filter pills — shown only once we have results */}
       {phase === "done" && centers.length > 0 && allTypes.length > 1 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.pillScrollView}
-          contentContainerStyle={[styles.pillRow, isRTL && { flexDirection: "row-reverse" }]}
-        >
+        <View style={[styles.pillRow, isRTL && { flexDirection: "row-reverse" }]}>
           {allTypes.map((type) => {
             const active = type === filter;
             return (
@@ -385,7 +380,7 @@ export default function NearbyServiceScreen() {
               </Pressable>
             );
           })}
-        </ScrollView>
+        </View>
       )}
 
       {/* Count label */}
@@ -436,8 +431,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_500Medium", marginTop: 1 },
 
-  pillScrollView: { flexGrow: 0, alignSelf: "flex-start", width: "100%" },
-  pillRow: { paddingHorizontal: 16, paddingTop: 2, paddingBottom: 10, gap: 8, flexDirection: "row", alignItems: "flex-start" },
+  pillRow: { paddingHorizontal: 16, paddingTop: 2, paddingBottom: 10, gap: 8, flexDirection: "row", flexWrap: "wrap", alignItems: "center" },
   pill: {
     paddingHorizontal: 16,
     paddingVertical: 8,
