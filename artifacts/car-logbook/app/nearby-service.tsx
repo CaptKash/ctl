@@ -443,8 +443,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     alignSelf: "flex-start",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  pillText: { fontSize: 14, fontWeight: "500" },
+  pillText: { fontSize: 14, lineHeight: 18, fontWeight: "500" },
 
   countLabel: {
     fontSize: 12,
