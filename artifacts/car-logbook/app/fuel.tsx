@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Feather } from "@expo/vector-icons";
 import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useColors } from "@/context/ThemeContext";
@@ -67,10 +68,17 @@ function carLabel(car: Car) {
 export default function FuelScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const { unit } = useDistanceUnit();
   const { currency } = useCurrency();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  const fuelTypeLabels = useMemo(
+    () => Object.fromEntries(FUEL_TYPES.map((ft) => [ft, t(`fuelScreen.fuelTypes.${ft}`)])),
+    [t]
+  );
 
   const [showAdd, setShowAdd] = useState(false);
   const [confirmRecord, setConfirmRecord] = useState<{ id: number; carId: number } | null>(null);
@@ -235,15 +243,15 @@ export default function FuelScreen() {
     <SwipeBackView style={{ backgroundColor: C.background }}>
       {/* Header — matches maintenance/faults pattern */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           <MetalIcon icon="droplet" color="#2563EB" bg="#DBEAFE" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Fuel Consumption</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
-              {filterCarId === null ? "All vehicles" : (fuelCars.find((c) => c.id === filterCarId) ? carLabel(fuelCars.find((c) => c.id === filterCarId)!) : "All vehicles")}
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("fuelScreen.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {filterCarId === null ? t("fuelScreen.allVehicles") : (fuelCars.find((c) => c.id === filterCarId) ? carLabel(fuelCars.find((c) => c.id === filterCarId)!) : t("fuelScreen.allVehicles"))}
             </Text>
           </View>
           <Pressable
@@ -263,13 +271,13 @@ export default function FuelScreen() {
       {/* Car filter pills — only visible when there are multiple non-EV cars */}
       {fuelCars.length > 1 && (
         <View style={[styles.pillsContainer, { backgroundColor: C.card, borderBottomColor: C.border }]}>
-          <View style={styles.pillsRow}>
+          <View style={[styles.pillsRow, isRTL && { flexDirection: "row-reverse" }]}>
             <Pressable
               onPress={() => setFilterCarId(null)}
               style={[styles.pill, filterCarId === null && { backgroundColor: C.tint }]}
             >
               <Text style={[styles.pillText, { color: filterCarId === null ? "#fff" : C.textSecondary }]}>
-                All
+                {t("fuelScreen.filterAll")}
               </Text>
             </Pressable>
             {fuelCars.map((car) => {
@@ -296,23 +304,23 @@ export default function FuelScreen() {
       >
         {/* Stats row */}
         {stats && (
-          <View style={styles.statsRow}>
+          <View style={[styles.statsRow, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.statCard, { backgroundColor: C.card }]}>
               <Feather name="trending-up" size={15} color="#2563EB" style={{ marginBottom: 4 }} />
               <Text style={[styles.statValue, { color: C.text }]}>{formatAvg(stats.avgL100km)}</Text>
-              <Text style={[styles.statLabel, { color: C.textSecondary }]}>Avg. Efficiency</Text>
+              <Text style={[styles.statLabel, { color: C.textSecondary }]}>{t("fuelScreen.avgEfficiency")}</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: C.card }]}>
               <Feather name="droplet" size={15} color={C.success} style={{ marginBottom: 4 }} />
               <Text style={[styles.statValue, { color: C.text }]}>{stats.count}</Text>
-              <Text style={[styles.statLabel, { color: C.textSecondary }]}>Fill-ups</Text>
+              <Text style={[styles.statLabel, { color: C.textSecondary }]}>{t("fuelScreen.fillUps")}</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: C.card }]}>
               <Feather name="dollar-sign" size={15} color={C.warning} style={{ marginBottom: 4 }} />
               <Text style={[styles.statValue, { color: C.text }]}>
                 {currency.symbol}{stats.totalCost.toFixed(0)}
               </Text>
-              <Text style={[styles.statLabel, { color: C.textSecondary }]}>Total Spent</Text>
+              <Text style={[styles.statLabel, { color: C.textSecondary }]}>{t("fuelScreen.totalSpent")}</Text>
             </View>
           </View>
         )}
@@ -322,15 +330,15 @@ export default function FuelScreen() {
         ) : fuelCars.length === 0 ? (
           <EmptyState
             icon="zap"
-            title="No fuel-powered vehicles"
-            description="Electric vehicles don't use fuel. Add a non-EV car to track fill-ups."
+            title={t("fuelScreen.noFuelCarsTitle")}
+            description={t("fuelScreen.noFuelCarsDesc")}
           />
         ) : allRecords.length === 0 ? (
           <EmptyState
             icon="droplet"
-            title="No fill-ups logged"
-            description="Tap + to log your first fill-up and start tracking fuel efficiency."
-            actionLabel="Log Fill-up"
+            title={t("fuelScreen.noRecordsTitle")}
+            description={t("fuelScreen.noRecordsDesc")}
+            actionLabel={t("fuelScreen.logFillUp")}
             onAction={() => {
               if (!fCarId && fuelCars.length > 0) setFCarId(fuelCars[0].id);
               setShowAdd(true);
@@ -339,8 +347,8 @@ export default function FuelScreen() {
         ) : filteredRecords.length === 0 ? (
           <EmptyState
             icon="droplet"
-            title="No fill-ups for this vehicle"
-            description="Log a fill-up for this car to see its stats here."
+            title={t("fuelScreen.noRecordsForCarTitle")}
+            description={t("fuelScreen.noRecordsForCarDesc")}
           />
         ) : (
           filteredRecords.map((r) => {
@@ -357,7 +365,7 @@ export default function FuelScreen() {
                 icon="droplet"
                 iconColor="#2563EB"
                 iconBg="#DBEAFE"
-                title={`${r.liters.toFixed(1)} L${r.fuelType ? ` · ${r.fuelType}` : ""}${r.fullTank === false ? " · Partial" : ""}`}
+                title={`${r.liters.toFixed(1)} L${r.fuelType ? ` · ${fuelTypeLabels[r.fuelType] ?? r.fuelType}` : ""}${r.fullTank === false ? ` · ${t("fuelScreen.partial")}` : ""}`}
                 subtitle={subtitleParts.join(" · ")}
                 rightText={`${currency.symbol}${r.totalCost.toFixed(2)}`}
                 rightSubtext={effText}
@@ -379,8 +387,8 @@ export default function FuelScreen() {
           style={[styles.sheet, { backgroundColor: C.backgroundSecondary }]}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <View style={[styles.sheetHeader, { borderBottomColor: C.border }]}>
-            <Text style={[styles.sheetTitle, { color: C.text }]}>Log Fill-up</Text>
+          <View style={[styles.sheetHeader, { borderBottomColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
+            <Text style={[styles.sheetTitle, { color: C.text }]}>{t("fuelScreen.logFillUp")}</Text>
             <Pressable onPress={() => setShowAdd(false)} hitSlop={12}>
               <Feather name="x" size={22} color={C.textSecondary} />
             </Pressable>
@@ -391,49 +399,49 @@ export default function FuelScreen() {
           >
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <SelectField
-                label="Vehicle"
+                label={t("fuelScreen.vehicle")}
                 value={selectedCarLabel}
                 onSelect={handleCarSelect}
                 options={carOptions}
-                placeholder="Select vehicle…"
+                placeholder={t("fuelScreen.selectVehicle")}
                 required
               />
             </View>
 
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
-              <DatePickerField label="Date" value={fDate} onChange={setFDate} />
+              <DatePickerField label={t("fuelScreen.date")} value={fDate} onChange={setFDate} />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={`Odometer (${unit})`}
+                label={t("fuelScreen.odometer", { unit })}
                 value={fMileage}
                 onChangeText={setFMileage}
-                placeholder="e.g. 54200"
+                placeholder={t("fuelScreen.odoPlaceholder")}
                 keyboardType="number-pad"
                 required
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Amount (L)"
+                label={t("fuelScreen.amount")}
                 value={fLiters}
                 onChangeText={handleLitersChange}
-                placeholder="e.g. 45.0"
+                placeholder={t("fuelScreen.amountPlaceholder")}
                 keyboardType="decimal-pad"
                 required
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={`Price per litre (${currency.symbol})`}
+                label={t("fuelScreen.pricePerLitre", { symbol: currency.symbol })}
                 value={fPricePerUnit}
                 onChangeText={handlePriceChange}
-                placeholder="e.g. 1.85"
+                placeholder={t("fuelScreen.pricePlaceholder")}
                 keyboardType="decimal-pad"
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={`Total cost (${currency.symbol})`}
+                label={t("fuelScreen.totalCost", { symbol: currency.symbol })}
                 value={fTotalCost}
                 onChangeText={setFTotalCost}
-                placeholder="e.g. 83.25"
+                placeholder={t("fuelScreen.totalPlaceholder")}
                 keyboardType="decimal-pad"
                 required
               />
@@ -441,22 +449,23 @@ export default function FuelScreen() {
 
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <SelectField
-                label="Fuel Type"
+                label={t("fuelScreen.fuelType")}
                 value={fFuelType}
                 onSelect={setFFuelType}
                 options={FUEL_TYPES}
-                placeholder="Select type…"
+                optionLabels={fuelTypeLabels}
+                placeholder={t("fuelScreen.selectType")}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Station"
+                label={t("fuelScreen.station")}
                 value={fStation}
                 onChangeText={setFStation}
-                placeholder="e.g. BP, Shell, Total"
+                placeholder={t("fuelScreen.stationPlaceholder")}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
-              <View style={styles.switchRow}>
-                <Text style={[styles.switchLabel, { color: C.text }]}>Full tank</Text>
+              <View style={[styles.switchRow, isRTL && { flexDirection: "row-reverse" }]}>
+                <Text style={[styles.switchLabel, { color: C.text }]}>{t("fuelScreen.fullTank")}</Text>
                 <Switch
                   value={fFullTank}
                   onValueChange={setFFullTank}
@@ -466,10 +475,10 @@ export default function FuelScreen() {
               </View>
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Notes"
+                label={t("fuelScreen.notes")}
                 value={fNotes}
                 onChangeText={setFNotes}
-                placeholder="Any notes…"
+                placeholder={t("fuelScreen.notesPlaceholder")}
                 multiline
               />
             </View>
@@ -477,13 +486,13 @@ export default function FuelScreen() {
             {addMutation.isError && (
               <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
                 <Text style={[styles.errorText, { color: C.danger }]}>
-                  Failed to save. Please check all required fields.
+                  {t("fuelScreen.saveError")}
                 </Text>
               </View>
             )}
 
             <PrimaryButton
-              label="Save Fill-up"
+              label={t("fuelScreen.saveFillUp")}
               onPress={() => addMutation.mutate()}
               loading={addMutation.isPending}
               disabled={!canSubmit}
@@ -494,9 +503,9 @@ export default function FuelScreen() {
 
       <ConfirmModal
         visible={confirmRecord !== null}
-        title="Delete Fill-up"
-        message="This fill-up record will be permanently deleted."
-        confirmLabel="Delete"
+        title={t("fuelScreen.deleteTitle")}
+        message={t("fuelScreen.deleteMessage")}
+        confirmLabel={t("common.delete")}
         onConfirm={() => confirmRecord && deleteMutation.mutate(confirmRecord)}
         onCancel={() => setConfirmRecord(null)}
         destructive
