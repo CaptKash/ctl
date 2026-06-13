@@ -262,12 +262,14 @@ export default function HistoryScreen() {
                     </View>
                     {ev.type === "malfunction" && (
                       ev.completed ? (
-                        <View style={styles.resolvedStamp}>
-                          <Text style={[styles.resolvedStampText, isRTL && { letterSpacing: 0 }]}>{t("history.resolved")}</Text>
+                        <View style={[styles.resolvedStamp, isRTL && { flexDirection: "row-reverse" }]}>
+                          <Feather name="check" size={11} color="#fff" />
+                          <Text style={styles.resolvedStampText}>{t("history.resolved")}</Text>
                         </View>
                       ) : (
-                        <View style={styles.activeStamp}>
-                          <Text style={[styles.activeStampText, isRTL && { letterSpacing: 0 }]}>{t("history.active")}</Text>
+                        <View style={[styles.activeStamp, isRTL && { flexDirection: "row-reverse" }]}>
+                          <Feather name="alert-circle" size={11} color="#fff" />
+                          <Text style={styles.activeStampText}>{t("history.active")}</Text>
                         </View>
                       )
                     )}
@@ -376,32 +378,32 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   badgeGroup: { flexDirection: "row", alignItems: "center", gap: 8 },
   resolvedStamp: {
-    borderWidth: 2,
-    borderColor: "#059669",
-    borderRadius: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#059669",
+    borderRadius: 6,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    opacity: 0.85,
+    paddingVertical: 3,
   },
   resolvedStampText: {
     fontSize: 11,
     fontFamily: "Inter_700Bold",
-    color: "#059669",
-    letterSpacing: 1.5,
+    color: "#fff",
   },
   activeStamp: {
-    borderWidth: 2,
-    borderColor: "#DC2626",
-    borderRadius: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#DC2626",
+    borderRadius: 6,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    opacity: 0.85,
+    paddingVertical: 3,
   },
   activeStampText: {
     fontSize: 11,
     fontFamily: "Inter_700Bold",
-    color: "#DC2626",
-    letterSpacing: 1.5,
+    color: "#fff",
   },
   badge: {
     flexDirection: "row",
