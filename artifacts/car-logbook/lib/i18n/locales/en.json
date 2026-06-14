@@ -808,19 +808,27 @@
     "selectGauge": "Select level…",
     "noTankSizeHint": "Set this car's tank size (in the car details) to log fuel by gauge level.",
     "gaugeInfoTitle": "Logging fuel by gauge",
-    "gaugeInfoBody": "Just pick where your fuel needle was before you filled up — Empty, ¼, ½, ¾, or Full. Your car's tank size is estimated automatically from its make, model, and year, and is used to convert the gauge reading into litres so your fuel economy stays accurate. You can adjust the tank size anytime in the car's details.",
+    "gaugeInfoBody": "Just pick where your fuel needle was before you filled up — anywhere from Empty to Full. Your car's tank size is estimated automatically from its make, model, and year, and is used to convert the gauge reading into litres so your fuel economy stays accurate. You can adjust the tank size anytime in the car's details.",
     "gaugeLevels": {
       "0": "Empty",
+      "0.125": "⅛ tank",
       "0.25": "¼ tank",
+      "0.375": "⅜ tank",
       "0.5": "½ tank",
+      "0.625": "⅝ tank",
       "0.75": "¾ tank",
+      "0.875": "⅞ tank",
       "1": "Full"
     },
     "gaugeShort": {
       "0": "E",
+      "0.125": "⅛",
       "0.25": "¼",
+      "0.375": "⅜",
       "0.5": "½",
+      "0.625": "⅝",
       "0.75": "¾",
+      "0.875": "⅞",
       "1": "F"
     },
     "amount": "Amount (L)",

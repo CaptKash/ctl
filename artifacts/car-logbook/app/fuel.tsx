@@ -54,7 +54,7 @@ type EnrichedRecord = FuelRecord & { carLabel: string };
 
 const FUEL_TYPES = ["Petrol", "Diesel", "Premium", "E85", "LPG", "Other"];
 const L_PER_GAL = 3.78541;
-const GAUGE_LEVELS = ["0", "0.25", "0.5", "0.75", "1"];
+const GAUGE_LEVELS = ["0", "0.125", "0.25", "0.375", "0.5", "0.625", "0.75", "0.875", "1"];
 
 function calcConsumption(liters: number, distKm: number, unit: "km" | "mi"): string {
   if (distKm <= 0 || liters <= 0) return "—";
