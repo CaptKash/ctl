@@ -96,6 +96,7 @@ export default function FuelScreen() {
   );
 
   const [showAdd, setShowAdd] = useState(false);
+  const [showGaugeInfo, setShowGaugeInfo] = useState(false);
   const [confirmRecord, setConfirmRecord] = useState<{ id: number; carId: number } | null>(null);
   const [filterCarId, setFilterCarId] = useState<number | null>(null);
 
@@ -450,9 +451,14 @@ export default function FuelScreen() {
               />
             </View>
 
-            <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
-              {t("fuelScreen.sectionBefore")}
-            </Text>
+            <View style={[styles.sectionLabelRow, isRTL && { flexDirection: "row-reverse" }]}>
+              <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", marginBottom: 0 }]}>
+                {t("fuelScreen.sectionBefore")}
+              </Text>
+              <Pressable onPress={() => setShowGaugeInfo(true)} hitSlop={10}>
+                <Feather name="help-circle" size={16} color={C.textSecondary} />
+              </Pressable>
+            </View>
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               {selectedFuelCar && selectedFuelCar.tankCapacity ? (
                 <SelectField
@@ -545,6 +551,28 @@ export default function FuelScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
+      <Modal
+        visible={showGaugeInfo}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowGaugeInfo(false)}
+      >
+        <Pressable style={styles.infoOverlay} onPress={() => setShowGaugeInfo(false)}>
+          <Pressable style={[styles.infoCard, { backgroundColor: C.card }]} onPress={(e) => e.stopPropagation()}>
+            <View style={[styles.infoHeader, isRTL && { flexDirection: "row-reverse" }]}>
+              <Feather name="info" size={20} color={C.text} />
+              <Text style={[styles.infoTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
+                {t("fuelScreen.gaugeInfoTitle")}
+              </Text>
+            </View>
+            <Text style={[styles.infoBody, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+              {t("fuelScreen.gaugeInfoBody")}
+            </Text>
+            <PrimaryButton label={t("common.gotIt")} onPress={() => setShowGaugeInfo(false)} />
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <ConfirmModal
         visible={confirmRecord !== null}
         title={t("fuelScreen.deleteTitle")}
@@ -614,7 +642,13 @@ const styles = StyleSheet.create({
   fieldGroup: { borderRadius: 14, padding: 16, gap: 12 },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: -4 },
   sectionLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 16, marginBottom: 6, marginHorizontal: 4 },
+  sectionLabelRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 16, marginBottom: 6, marginHorizontal: 4 },
   gaugeHint: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
+  infoOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: 28 },
+  infoCard: { borderRadius: 16, padding: 22, gap: 16 },
+  infoHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
+  infoTitle: { fontSize: 17, fontFamily: "Inter_700Bold", flex: 1 },
+  infoBody: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 22 },
   errorBox: { borderRadius: 10, padding: 14 },
   errorText: { fontSize: 14, fontFamily: "Inter_500Medium", textAlign: "center" },
 });

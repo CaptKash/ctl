@@ -16,7 +16,8 @@
     "noResults": "No results for \"{{query}}\"",
     "useValue": "Use \"{{value}}\"",
     "selectDate": "Select date",
-    "done": "Done"
+    "done": "Done",
+    "gotIt": "Got it"
   },
   "login": {
     "title": "Sign in",
@@ -806,6 +807,8 @@
     "gaugeLevel": "Gauge level before fill-up",
     "selectGauge": "Select level…",
     "noTankSizeHint": "Set this car's tank size (in the car details) to log fuel by gauge level.",
+    "gaugeInfoTitle": "Logging fuel by gauge",
+    "gaugeInfoBody": "No need to figure out the exact litres. Just pick where your fuel needle was before you filled up — Empty, ¼, ½, ¾, or Full. We combine that with your car's tank size to work out how much was left and how much you used, so your fuel economy stays accurate. Make sure your car's tank size is set in its details.",
     "gaugeLevels": {
       "0": "Empty",
       "0.25": "¼ tank",
