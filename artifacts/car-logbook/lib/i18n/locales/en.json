@@ -816,6 +816,13 @@
       "0.75": "¾ tank",
       "1": "Full"
     },
+    "gaugeShort": {
+      "0": "E",
+      "0.25": "¼",
+      "0.5": "½",
+      "0.75": "¾",
+      "1": "F"
+    },
     "amount": "Amount (L)",
     "pricePerLitre": "Price per litre ({{symbol}})",
     "totalCost": "Total cost ({{symbol}})",

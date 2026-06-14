@@ -455,19 +455,48 @@ export default function FuelScreen() {
               <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", marginTop: 0, marginBottom: 0, marginHorizontal: 0 }]}>
                 {t("fuelScreen.sectionBefore")}
               </Text>
-              <Pressable onPress={() => setShowGaugeInfo(true)} hitSlop={10}>
-                <Feather name="help-circle" size={15} color={C.textSecondary} />
+              <Pressable onPress={() => setShowGaugeInfo(true)} hitSlop={12} style={styles.helpBtn}>
+                <Feather name="help-circle" size={16} color={C.textSecondary} />
               </Pressable>
             </View>
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
-              <SelectField
-                label={t("fuelScreen.gaugeLevel")}
-                value={fGauge}
-                onSelect={setFGauge}
-                options={GAUGE_LEVELS}
-                optionLabels={gaugeLabels}
-                placeholder={t("fuelScreen.selectGauge")}
-              />
+              <Text style={[styles.tankBarLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+                {t("fuelScreen.gaugeLevel")}
+              </Text>
+              <View style={[styles.tankBar, { backgroundColor: C.backgroundTertiary, borderColor: C.border }]}>
+                <View
+                  style={[
+                    styles.tankFill,
+                    { backgroundColor: C.tint, width: `${(fGauge !== "" ? parseFloat(fGauge) : 0) * 100}%` },
+                    isRTL ? { right: 0 } : { left: 0 },
+                  ]}
+                />
+                <View style={[styles.tankZones, isRTL && { flexDirection: "row-reverse" }]}>
+                  {GAUGE_LEVELS.map((g) => {
+                    const filled = fGauge !== "" && parseFloat(g) <= parseFloat(fGauge);
+                    return (
+                      <Pressable
+                        key={g}
+                        style={styles.tankZone}
+                        onPress={() => {
+                          setFGauge(g);
+                          Haptics.selectionAsync();
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.tankZoneLabel,
+                            { color: filled ? "#FFFFFF" : C.textSecondary },
+                            fGauge === g && styles.tankZoneLabelActive,
+                          ]}
+                        >
+                          {t(`fuelScreen.gaugeShort.${g}`)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
             </View>
 
             <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
@@ -542,29 +571,24 @@ export default function FuelScreen() {
               disabled={!canSubmit}
             />
           </ScrollView>
-        </KeyboardAvoidingView>
-      </Modal>
 
-      <Modal
-        visible={showGaugeInfo}
-        animationType="fade"
-        transparent
-        onRequestClose={() => setShowGaugeInfo(false)}
-      >
-        <Pressable style={styles.infoOverlay} onPress={() => setShowGaugeInfo(false)}>
-          <Pressable style={[styles.infoCard, { backgroundColor: C.card }]} onPress={(e) => e.stopPropagation()}>
-            <View style={[styles.infoHeader, isRTL && { flexDirection: "row-reverse" }]}>
-              <Feather name="info" size={20} color={C.text} />
-              <Text style={[styles.infoTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
-                {t("fuelScreen.gaugeInfoTitle")}
-              </Text>
-            </View>
-            <Text style={[styles.infoBody, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
-              {t("fuelScreen.gaugeInfoBody")}
-            </Text>
-            <PrimaryButton label={t("common.gotIt")} onPress={() => setShowGaugeInfo(false)} />
-          </Pressable>
-        </Pressable>
+          {showGaugeInfo && (
+            <Pressable style={styles.infoOverlay} onPress={() => setShowGaugeInfo(false)}>
+              <Pressable style={[styles.infoCard, { backgroundColor: C.card }]} onPress={() => {}}>
+                <View style={[styles.infoHeader, isRTL && { flexDirection: "row-reverse" }]}>
+                  <Feather name="info" size={20} color={C.text} />
+                  <Text style={[styles.infoTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
+                    {t("fuelScreen.gaugeInfoTitle")}
+                  </Text>
+                </View>
+                <Text style={[styles.infoBody, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+                  {t("fuelScreen.gaugeInfoBody")}
+                </Text>
+                <PrimaryButton label={t("common.gotIt")} onPress={() => setShowGaugeInfo(false)} />
+              </Pressable>
+            </Pressable>
+          )}
+        </KeyboardAvoidingView>
       </Modal>
 
       <ConfirmModal
@@ -637,8 +661,16 @@ const styles = StyleSheet.create({
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: -4 },
   sectionLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 16, marginBottom: 6, marginHorizontal: 4 },
   sectionLabelRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 16, marginBottom: 6, marginHorizontal: 4 },
+  helpBtn: { alignItems: "center", justifyContent: "center" },
   gaugeHint: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
-  infoOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: 28 },
+  tankBarLabel: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  tankBar: { height: 52, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden", justifyContent: "center" },
+  tankFill: { position: "absolute", top: 0, bottom: 0 },
+  tankZones: { flexDirection: "row", flex: 1 },
+  tankZone: { flex: 1, alignItems: "center", justifyContent: "center" },
+  tankZoneLabel: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  tankZoneLabelActive: { fontFamily: "Inter_700Bold" },
+  infoOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: 28 },
   infoCard: { borderRadius: 16, padding: 22, gap: 16 },
   infoHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
   infoTitle: { fontSize: 17, fontFamily: "Inter_700Bold", flex: 1 },
