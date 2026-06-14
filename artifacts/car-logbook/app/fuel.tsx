@@ -452,28 +452,22 @@ export default function FuelScreen() {
             </View>
 
             <View style={[styles.sectionLabelRow, isRTL && { flexDirection: "row-reverse" }]}>
-              <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", marginBottom: 0 }]}>
+              <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left", marginTop: 0, marginBottom: 0, marginHorizontal: 0 }]}>
                 {t("fuelScreen.sectionBefore")}
               </Text>
               <Pressable onPress={() => setShowGaugeInfo(true)} hitSlop={10}>
-                <Feather name="help-circle" size={16} color={C.textSecondary} />
+                <Feather name="help-circle" size={15} color={C.textSecondary} />
               </Pressable>
             </View>
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
-              {selectedFuelCar && selectedFuelCar.tankCapacity ? (
-                <SelectField
-                  label={t("fuelScreen.gaugeLevel")}
-                  value={fGauge}
-                  onSelect={setFGauge}
-                  options={GAUGE_LEVELS}
-                  optionLabels={gaugeLabels}
-                  placeholder={t("fuelScreen.selectGauge")}
-                />
-              ) : (
-                <Text style={[styles.gaugeHint, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
-                  {t("fuelScreen.noTankSizeHint")}
-                </Text>
-              )}
+              <SelectField
+                label={t("fuelScreen.gaugeLevel")}
+                value={fGauge}
+                onSelect={setFGauge}
+                options={GAUGE_LEVELS}
+                optionLabels={gaugeLabels}
+                placeholder={t("fuelScreen.selectGauge")}
+              />
             </View>
 
             <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
