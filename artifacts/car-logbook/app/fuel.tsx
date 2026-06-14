@@ -32,7 +32,7 @@ import { RecordCard } from "@/components/ui/RecordCard";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 
-type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; isElectric?: boolean | null };
+type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; isElectric?: boolean | null; tankCapacity?: number | null };
 
 type FuelRecord = {
   id: number;
@@ -54,6 +54,7 @@ type EnrichedRecord = FuelRecord & { carLabel: string };
 
 const FUEL_TYPES = ["Petrol", "Diesel", "Premium", "E85", "LPG", "Other"];
 const L_PER_GAL = 3.78541;
+const GAUGE_LEVELS = ["0", "0.25", "0.5", "0.75", "1"];
 
 function calcConsumption(liters: number, distKm: number, unit: "km" | "mi"): string {
   if (distKm <= 0 || liters <= 0) return "—";
@@ -89,6 +90,10 @@ export default function FuelScreen() {
     () => Object.fromEntries(FUEL_TYPES.map((ft) => [ft, t(`fuelScreen.fuelTypes.${ft}`)])),
     [t]
   );
+  const gaugeLabels = useMemo(
+    () => Object.fromEntries(GAUGE_LEVELS.map((g) => [g, t(`fuelScreen.gaugeLevels.${g}`)])),
+    [t]
+  );
 
   const [showAdd, setShowAdd] = useState(false);
   const [confirmRecord, setConfirmRecord] = useState<{ id: number; carId: number } | null>(null);
@@ -98,12 +103,10 @@ export default function FuelScreen() {
   const [fCarId, setFCarId] = useState<number | null>(null);
   const [fDate, setFDate] = useState(new Date().toISOString().split("T")[0]);
   const [fMileage, setFMileage] = useState("");
-  const [fFuelBefore, setFFuelBefore] = useState("");
+  const [fGauge, setFGauge] = useState("");
   const [fLiters, setFLiters] = useState("");
   const [fPricePerUnit, setFPricePerUnit] = useState("");
   const [fTotalCost, setFTotalCost] = useState("");
-  const [fTankAfter, setFTankAfter] = useState("");
-  const [fTankAfterEdited, setFTankAfterEdited] = useState(false);
   const [fFuelType, setFFuelType] = useState("");
   const [fStation, setFStation] = useState("");
   const [fNotes, setFNotes] = useState("");
@@ -189,27 +192,10 @@ export default function FuelScreen() {
     return (L_PER_GAL / (avgL100km / 100) * 0.621371).toFixed(1) + " mpg";
   };
 
-  const autoFillTankAfter = (beforeStr: string, litersStr: string) => {
-    if (fTankAfterEdited) return;
-    const b = parseFloat(beforeStr), l = parseFloat(litersStr);
-    if (!isNaN(b) && !isNaN(l)) setFTankAfter((b + l).toFixed(1));
-  };
-
-  const handleFuelBeforeChange = (val: string) => {
-    setFFuelBefore(val);
-    autoFillTankAfter(val, fLiters);
-  };
-
   const handleLitersChange = (val: string) => {
     setFLiters(val);
     const l = parseFloat(val), p = parseFloat(fPricePerUnit);
     if (!isNaN(l) && !isNaN(p) && l > 0 && p > 0) setFTotalCost((l * p).toFixed(2));
-    autoFillTankAfter(fFuelBefore, val);
-  };
-
-  const handleTankAfterChange = (val: string) => {
-    setFTankAfterEdited(true);
-    setFTankAfter(val);
   };
 
   const handlePriceChange = (val: string) => {
@@ -220,32 +206,42 @@ export default function FuelScreen() {
 
   const resetForm = () => {
     setFDate(new Date().toISOString().split("T")[0]);
-    setFMileage(""); setFFuelBefore(""); setFLiters(""); setFPricePerUnit(""); setFTotalCost("");
-    setFTankAfter(""); setFTankAfterEdited(false);
+    setFMileage(""); setFGauge(""); setFLiters(""); setFPricePerUnit(""); setFTotalCost("");
     setFFuelType(""); setFStation(""); setFNotes("");
   };
 
   const carOptions = fuelCars.map(carLabel);
-  const selectedCarLabel = fCarId ? (fuelCars.find((c) => c.id === fCarId) ? carLabel(fuelCars.find((c) => c.id === fCarId)!) : "") : "";
+  const selectedFuelCar = fCarId ? fuelCars.find((c) => c.id === fCarId) ?? null : null;
+  const selectedCarLabel = selectedFuelCar ? carLabel(selectedFuelCar) : "";
   const handleCarSelect = (label: string) => {
     const car = fuelCars.find((c) => carLabel(c) === label);
-    if (car) setFCarId(car.id);
+    if (car) {
+      setFCarId(car.id);
+      setFGauge("");
+    }
   };
 
   const addMutation = useMutation({
-    mutationFn: () =>
-      apiPost(`/cars/${fCarId}/fuel`, {
+    mutationFn: () => {
+      const capacity = selectedFuelCar?.tankCapacity ?? null;
+      const amount = parseFloat(fLiters);
+      const fuelBeforeL =
+        capacity != null && fGauge !== "" ? capacity * parseFloat(fGauge) : null;
+      const tankAfterL =
+        fuelBeforeL != null && !isNaN(amount) ? fuelBeforeL + amount : null;
+      return apiPost(`/cars/${fCarId}/fuel`, {
         date: fDate,
         mileage: parseInt(fMileage),
-        liters: parseFloat(fLiters),
+        liters: amount,
         pricePerLiter: fPricePerUnit ? parseFloat(fPricePerUnit) : undefined,
         totalCost: parseFloat(fTotalCost),
-        fuelBefore: fFuelBefore ? parseFloat(fFuelBefore) : undefined,
-        tankAfter: fTankAfter ? parseFloat(fTankAfter) : undefined,
+        fuelBefore: fuelBeforeL != null ? Math.round(fuelBeforeL * 10) / 10 : undefined,
+        tankAfter: tankAfterL != null ? Math.round(tankAfterL * 10) / 10 : undefined,
         fuelType: fFuelType || undefined,
         station: fStation || undefined,
         notes: fNotes || undefined,
-      }),
+      });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["fuel", fCarId] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -458,13 +454,20 @@ export default function FuelScreen() {
               {t("fuelScreen.sectionBefore")}
             </Text>
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
-              <FormField
-                label={t("fuelScreen.fuelBefore")}
-                value={fFuelBefore}
-                onChangeText={handleFuelBeforeChange}
-                placeholder={t("fuelScreen.fuelBeforePlaceholder")}
-                keyboardType="decimal-pad"
-              />
+              {selectedFuelCar && selectedFuelCar.tankCapacity ? (
+                <SelectField
+                  label={t("fuelScreen.gaugeLevel")}
+                  value={fGauge}
+                  onSelect={setFGauge}
+                  options={GAUGE_LEVELS}
+                  optionLabels={gaugeLabels}
+                  placeholder={t("fuelScreen.selectGauge")}
+                />
+              ) : (
+                <Text style={[styles.gaugeHint, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+                  {t("fuelScreen.noTankSizeHint")}
+                </Text>
+              )}
             </View>
 
             <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
@@ -495,19 +498,6 @@ export default function FuelScreen() {
                 placeholder={t("fuelScreen.totalPlaceholder")}
                 keyboardType="decimal-pad"
                 required
-              />
-            </View>
-
-            <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
-              {t("fuelScreen.sectionAfter")}
-            </Text>
-            <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
-              <FormField
-                label={t("fuelScreen.newQuantity")}
-                value={fTankAfter}
-                onChangeText={handleTankAfterChange}
-                placeholder={t("fuelScreen.newQuantityPlaceholder")}
-                keyboardType="decimal-pad"
               />
             </View>
 
@@ -624,6 +614,7 @@ const styles = StyleSheet.create({
   fieldGroup: { borderRadius: 14, padding: 16, gap: 12 },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: -4 },
   sectionLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.5, marginTop: 16, marginBottom: 6, marginHorizontal: 4 },
+  gaugeHint: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
   errorBox: { borderRadius: 10, padding: 14 },
   errorText: { fontSize: 14, fontFamily: "Inter_500Medium", textAlign: "center" },
 });

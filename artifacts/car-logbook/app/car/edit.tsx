@@ -22,7 +22,7 @@ import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SelectField } from "@/components/ui/SelectField";
 import { PhotoPicker } from "@/components/ui/PhotoPicker";
-import { apiGet, apiPut } from "@/hooks/useApi";
+import { apiGet, apiPost, apiPut } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { Feather } from "@expo/vector-icons";
 import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
@@ -41,6 +41,7 @@ type Car = {
   nickname?: string | null;
   color?: string | null;
   mileage?: number | null;
+  tankCapacity?: number | null;
   isElectric?: boolean | null;
   licensePlate?: string | null;
   licenseValidUntil?: string | null;
@@ -71,6 +72,9 @@ export default function EditCarScreen() {
   const [year, setYear] = useState(String(CURRENT_YEAR));
   const [color, setColor] = useState("");
   const [mileage, setMileage] = useState("");
+  const [tankCapacity, setTankCapacity] = useState("");
+  const [tankEdited, setTankEdited] = useState(false);
+  const [estimatingTank, setEstimatingTank] = useState(false);
 
   // License
   const [licensePlate, setLicensePlate] = useState("");
@@ -100,6 +104,7 @@ export default function EditCarScreen() {
       setYear(String(car.year));
       setColor(car.color ?? "");
       setMileage(car.mileage != null ? String(car.mileage) : "");
+      setTankCapacity(car.tankCapacity != null ? String(car.tankCapacity) : "");
       setLicensePlate(car.licensePlate ?? "");
       setLicenseValidUntil(car.licenseValidUntil ?? "");
       setVin(car.vin ?? "");
@@ -120,8 +125,44 @@ export default function EditCarScreen() {
 
   const handleMakeSelect = (value: string) => {
     setMake(value);
-    if (value !== carQuery.data?.make) setModel("");
+    if (value !== carQuery.data?.make) {
+      setModel("");
+      if (!tankEdited) setTankCapacity("");
+    }
   };
+
+  const handleModelSelect = (value: string) => {
+    setModel(value);
+    if (!tankEdited) setTankCapacity("");
+  };
+
+  const handleYearSelect = (value: string) => {
+    setYear(value);
+    if (!tankEdited) setTankCapacity("");
+  };
+
+  useEffect(() => {
+    if (!ready || isElectric || tankEdited) return;
+    if (tankCapacity) return;
+    if (!make.trim() || !model.trim() || !year.trim()) return;
+    let cancelled = false;
+    setEstimatingTank(true);
+    apiPost<{ liters: number }>("/cars/estimate-tank-capacity", {
+      make: make.trim(),
+      model: model.trim(),
+      year: parseInt(year),
+    })
+      .then((r) => {
+        if (!cancelled && r?.liters) setTankCapacity(String(r.liters));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setEstimatingTank(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, make, model, year, isElectric, tankEdited, tankCapacity]);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -132,6 +173,7 @@ export default function EditCarScreen() {
         nickname: nickname.trim() || undefined,
         color: color.trim() || undefined,
         mileage: mileage ? parseInt(mileage) : undefined,
+        tankCapacity: !isElectric && tankCapacity ? parseFloat(tankCapacity) : undefined,
         licensePlate: licensePlate.trim() || undefined,
         licenseValidUntil: licenseValidUntil.trim() || undefined,
         vin: vin.trim() || undefined,
@@ -215,7 +257,7 @@ export default function EditCarScreen() {
           <SelectField
             label={t("addCar.fields.model")}
             value={model}
-            onSelect={setModel}
+            onSelect={handleModelSelect}
             options={models}
             placeholder={make ? t("addCar.fields.modelPlaceholder") : t("addCar.fields.modelDisabledPlaceholder")}
             disabled={!make}
@@ -256,7 +298,7 @@ export default function EditCarScreen() {
           <SelectField
             label={t("addCar.fields.year")}
             value={year}
-            onSelect={setYear}
+            onSelect={handleYearSelect}
             options={YEARS}
             placeholder={t("addCar.fields.yearPlaceholder")}
             required
@@ -280,6 +322,19 @@ export default function EditCarScreen() {
             placeholder={t("addCar.fields.mileagePlaceholder")}
             keyboardType="number-pad"
           />
+
+          {!isElectric && (
+            <>
+              <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+              <FormField
+                label={t("addCar.fields.tankCapacity")}
+                value={tankCapacity}
+                onChangeText={(v) => { setTankEdited(true); setTankCapacity(v); }}
+                placeholder={estimatingTank ? t("addCar.fields.tankCapacityEstimating") : t("addCar.fields.tankCapacityPlaceholder")}
+                keyboardType="decimal-pad"
+              />
+            </>
+          )}
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 

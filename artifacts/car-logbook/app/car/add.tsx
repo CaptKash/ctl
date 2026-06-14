@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -47,6 +47,9 @@ export default function AddCarScreen() {
   const [year, setYear] = useState(String(CURRENT_YEAR));
   const [color, setColor] = useState("");
   const [mileage, setMileage] = useState("");
+  const [tankCapacity, setTankCapacity] = useState("");
+  const [tankEdited, setTankEdited] = useState(false);
+  const [estimatingTank, setEstimatingTank] = useState(false);
 
   // License
   const [licensePlate, setLicensePlate] = useState("");
@@ -67,7 +70,30 @@ export default function AddCarScreen() {
   const handleMakeSelect = (value: string) => {
     setMake(value);
     setModel("");
+    if (!tankEdited) setTankCapacity("");
   };
+
+  useEffect(() => {
+    if (isElectric || tankEdited) return;
+    if (!make.trim() || !model.trim() || !year.trim()) return;
+    let cancelled = false;
+    setEstimatingTank(true);
+    apiPost<{ liters: number }>("/cars/estimate-tank-capacity", {
+      make: make.trim(),
+      model: model.trim(),
+      year: parseInt(year),
+    })
+      .then((r) => {
+        if (!cancelled && r?.liters) setTankCapacity(String(r.liters));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setEstimatingTank(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [make, model, year, isElectric, tankEdited]);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -78,6 +104,7 @@ export default function AddCarScreen() {
         nickname: nickname.trim() || undefined,
         color: color.trim() || undefined,
         mileage: mileage ? parseInt(mileage) : undefined,
+        tankCapacity: !isElectric && tankCapacity ? parseFloat(tankCapacity) : undefined,
         licensePlate: licensePlate.trim() || undefined,
         licenseValidUntil: licenseValidUntil.trim() || undefined,
         vin: vin.trim() || undefined,
@@ -224,6 +251,19 @@ export default function AddCarScreen() {
             placeholder={t("addCar.fields.mileagePlaceholder")}
             keyboardType="number-pad"
           />
+
+          {!isElectric && (
+            <>
+              <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
+              <FormField
+                label={t("addCar.fields.tankCapacity")}
+                value={tankCapacity}
+                onChangeText={(v) => { setTankEdited(true); setTankCapacity(v); }}
+                placeholder={estimatingTank ? t("addCar.fields.tankCapacityEstimating") : t("addCar.fields.tankCapacityPlaceholder")}
+                keyboardType="decimal-pad"
+              />
+            </>
+          )}
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 

@@ -22,11 +22,46 @@ import {
   insertRenewalSchema,
 } from "@workspace/db";
 import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
+import { openai } from "@workspace/integrations-openai-ai-server";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
 router.use(requireAuth);
+
+router.post("/cars/estimate-tank-capacity", async (req, res) => {
+  const { make, model, year } = req.body ?? {};
+  if (!make || !model) {
+    return res.status(400).json({ error: "make and model are required" });
+  }
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5-mini",
+      max_completion_tokens: 8192,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content:
+            'You are an automotive expert. Given a car\'s make, model, and year, return the typical fuel tank capacity in liters. Respond with ONLY a JSON object of the form {"liters": number}. Use the most common variant if trims differ. If the exact model is unknown, estimate from the vehicle class. Never return 0 or null.',
+        },
+        {
+          role: "user",
+          content: `${year ?? ""} ${make} ${model}`.trim(),
+        },
+      ],
+    });
+    const text = completion.choices[0]?.message?.content ?? "";
+    const parsed = JSON.parse(text);
+    const liters = Number(parsed.liters);
+    if (!Number.isFinite(liters) || liters <= 0) {
+      return res.status(422).json({ error: "Could not estimate tank capacity" });
+    }
+    res.json({ liters: Math.round(liters) });
+  } catch {
+    res.status(502).json({ error: "Tank capacity estimation failed" });
+  }
+});
 
 // Cars
 router.get("/cars", async (req, res) => {
