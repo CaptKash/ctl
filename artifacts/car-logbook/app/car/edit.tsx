@@ -334,9 +334,12 @@ export default function EditCarScreen() {
                 keyboardType="decimal-pad"
               />
               {!estimatingTank && !tankEdited && tankCapacity !== "" && (
-                <Text style={{ color: C.textSecondary, fontSize: 12, marginTop: 6, marginHorizontal: 16, textAlign: isRTL ? "right" : "left" }}>
-                  {t("addCar.fields.tankCapacityEstimated")}
-                </Text>
+                <View style={{ flexDirection: isRTL ? "row-reverse" : "row", alignItems: "center", gap: 6, marginTop: 8, marginHorizontal: 16, paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: C.tint, borderRadius: 8, backgroundColor: C.tint + "14" }}>
+                  <Feather name="zap" size={13} color={C.tint} />
+                  <Text style={{ color: C.tint, fontSize: 12, flex: 1, textAlign: isRTL ? "right" : "left" }}>
+                    {t("addCar.fields.tankCapacityEstimated")}
+                  </Text>
+                </View>
               )}
             </>
           )}
