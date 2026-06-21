@@ -52,7 +52,22 @@ type FuelRecord = {
 
 type EnrichedRecord = FuelRecord & { carLabel: string };
 
-const FUEL_TYPES = ["Petrol", "Diesel", "Premium", "E85", "LPG", "Other"];
+const FUEL_TYPES = [
+  "Octane 90",
+  "Octane 91",
+  "Octane 92",
+  "Octane 95",
+  "Octane 98",
+  "Octane 100",
+  "Diesel",
+  "Petrol",
+  "Premium",
+  "Regular",
+  "E85",
+  "LPG",
+  "CNG",
+  "Other",
+];
 const L_PER_GAL = 3.78541;
 const GAUGE_LEVELS = ["0", "0.125", "0.25", "0.375", "0.5", "0.625", "0.75", "0.875", "1"];
 
@@ -536,6 +551,7 @@ export default function FuelScreen() {
                 options={FUEL_TYPES}
                 optionLabels={fuelTypeLabels}
                 placeholder={t("fuelScreen.selectType")}
+                allowCustom
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField

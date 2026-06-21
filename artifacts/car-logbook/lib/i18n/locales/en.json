@@ -853,11 +853,19 @@
     "deleteTitle": "Delete Fill-up",
     "deleteMessage": "This fill-up record will be permanently deleted.",
     "fuelTypes": {
-      "Petrol": "Petrol",
+      "Octane 90": "Octane 90",
+      "Octane 91": "Octane 91",
+      "Octane 92": "Octane 92",
+      "Octane 95": "Octane 95",
+      "Octane 98": "Octane 98",
+      "Octane 100": "Octane 100",
       "Diesel": "Diesel",
+      "Petrol": "Petrol",
       "Premium": "Premium",
+      "Regular": "Regular",
       "E85": "E85",
       "LPG": "LPG",
+      "CNG": "CNG",
       "Other": "Other"
     }
   },
