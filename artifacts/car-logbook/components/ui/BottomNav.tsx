@@ -55,10 +55,11 @@ export default function BottomNav({ active }: Props) {
     >
       {orderedTabs.map((tab) => {
         const isActive = tab.id === active;
+        const showActive = isActive || tab.id === "tools";
         const isFaultAlert = tab.id === "faults" && hasActiveFaults;
         const iconColor = isFaultAlert
           ? "#DC2626"
-          : isActive
+          : showActive
           ? (tab.activeColor ?? C.tint)
           : C.textTertiary;
         return (
@@ -72,7 +73,7 @@ export default function BottomNav({ active }: Props) {
             style={styles.tab}
             hitSlop={4}
           >
-            <View style={[styles.iconWrap, isActive && { backgroundColor: iconColor + "15" }]}>
+            <View style={[styles.iconWrap, showActive && { backgroundColor: iconColor + "15" }]}>
               <Feather
                 name={tab.icon}
                 size={24}
@@ -83,7 +84,7 @@ export default function BottomNav({ active }: Props) {
               style={[
                 styles.label,
                 { color: iconColor },
-                isActive && styles.labelActive,
+                showActive && styles.labelActive,
               ]}
             >
               {t(tab.labelKey)}
