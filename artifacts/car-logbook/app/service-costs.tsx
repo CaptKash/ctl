@@ -67,6 +67,16 @@ export default function ServiceCostsScreen() {
   const catLabel = (key: string) =>
     t(`costTracker.categories.${key}`, { defaultValue: CATEGORY_META[key]?.label ?? key });
 
+  const entryDescription = (item: { type: string; description: string }) => {
+    if (item.type === "license" || item.type === "insurance") {
+      const sep = item.description.indexOf(" - ");
+      const provider = sep >= 0 ? item.description.slice(sep + 3) : null;
+      const base = item.type === "license" ? t("costTracker.licenseRenewal") : t("costTracker.insuranceRenewal");
+      return provider ? `${base} - ${provider}` : base;
+    }
+    return item.description;
+  };
+
   const [filterCarId, setFilterCarId] = useState<number | null>(null);
 
   const carsQuery = useQuery<Car[]>({
@@ -259,7 +269,7 @@ export default function ServiceCostsScreen() {
                           <MetalIcon icon={meta.icon as any} color={meta.color} bg={meta.bg} size={15} style={styles.entryIconBox} />
                           <View style={styles.entryBody}>
                             <Text style={[styles.entryTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>
-                              {item.description}
+                              {entryDescription(item)}
                             </Text>
                             <Text style={[styles.entrySub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
                               {filterCarId === null ? `${(item as any).carLabel} · ` : ""}{formatDate(item.date)} · {catLabel(item.type)}

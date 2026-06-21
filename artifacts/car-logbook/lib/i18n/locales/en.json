@@ -880,6 +880,8 @@
     "topCategory": "Top Category",
     "breakdown": "Breakdown",
     "recentEntries": "Recent Entries",
+    "licenseRenewal": "License renewal",
+    "insuranceRenewal": "Insurance renewal",
     "records_one": "{{count}} record",
     "records_other": "{{count}} records",
     "percentOfTotal": "{{pct}}% of total",
