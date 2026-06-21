@@ -888,6 +888,32 @@
       "Other": "أخرى"
     }
   },
+  "costTracker": {
+    "title": "متتبع التكاليف",
+    "allVehicles": "كل المركبات",
+    "filterAll": "الكل",
+    "noCostsTitle": "لا توجد تكاليف بعد",
+    "noCostsDesc": "ستظهر التكاليف هنا بمجرد تسجيل الصيانة أو القطع أو التجديدات أو أي سجلات أخرى لها تكلفة.",
+    "totalSpent": "إجمالي الإنفاق",
+    "serviceRecords": "سجلات الخدمة",
+    "topCategory": "أعلى فئة",
+    "breakdown": "التفصيل",
+    "recentEntries": "أحدث السجلات",
+    "records_zero": "{{count}} سجل",
+    "records_one": "سجل واحد",
+    "records_two": "سجلان",
+    "records_few": "{{count}} سجلات",
+    "records_many": "{{count}} سجلاً",
+    "records_other": "{{count}} سجل",
+    "percentOfTotal": "{{pct}}٪ من الإجمالي",
+    "categories": {
+      "maintenance": "الصيانة",
+      "parts": "القطع",
+      "dealership": "الوكالة",
+      "insurance": "التأمين",
+      "license": "الترخيص"
+    }
+  },
   "nearbyService": {
     "title": "مراكز الخدمة",
     "sub": "بالقرب من موقعك",

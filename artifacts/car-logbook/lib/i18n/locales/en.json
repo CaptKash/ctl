@@ -869,6 +869,28 @@
       "Other": "Other"
     }
   },
+  "costTracker": {
+    "title": "Cost Tracker",
+    "allVehicles": "All vehicles",
+    "filterAll": "All",
+    "noCostsTitle": "No costs yet",
+    "noCostsDesc": "Costs will appear here once you log maintenance, parts, renewals, or other records with a cost.",
+    "totalSpent": "Total Spent",
+    "serviceRecords": "Service Records",
+    "topCategory": "Top Category",
+    "breakdown": "Breakdown",
+    "recentEntries": "Recent Entries",
+    "records_one": "{{count}} record",
+    "records_other": "{{count}} records",
+    "percentOfTotal": "{{pct}}% of total",
+    "categories": {
+      "maintenance": "Maintenance",
+      "parts": "Parts",
+      "dealership": "Dealership",
+      "insurance": "Insurance",
+      "license": "License"
+    }
+  },
   "nearbyService": {
     "title": "Service Centers",
     "sub": "Near your location",

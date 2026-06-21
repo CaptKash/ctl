@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -59,7 +60,12 @@ export default function ServiceCostsScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const { currency } = useCurrency();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  const catLabel = (key: string) =>
+    t(`costTracker.categories.${key}`, { defaultValue: CATEGORY_META[key]?.label ?? key });
 
   const [filterCarId, setFilterCarId] = useState<number | null>(null);
 
@@ -126,16 +132,16 @@ export default function ServiceCostsScreen() {
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })} hitSlop={8}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
           <MetalIcon icon="dollar-sign" color="#7C3AED" bg="#F3E8FF" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Cost Tracker</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("costTracker.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
               {filterCarId === null
-                ? "All vehicles"
+                ? t("costTracker.allVehicles")
                 : carLabel(cars.find((c) => c.id === filterCarId) ?? cars[0])}
             </Text>
           </View>
@@ -144,12 +150,12 @@ export default function ServiceCostsScreen() {
 
       {cars.length > 1 && (
         <View style={[styles.pillsContainer, { backgroundColor: C.card, borderBottomColor: C.border }]}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.pillsRow, isRTL && { flexDirection: "row-reverse" }]}>
             <Pressable
               onPress={() => setFilterCarId(null)}
               style={[styles.pill, filterCarId === null && { backgroundColor: C.tint }]}
             >
-              <Text style={[styles.pillText, { color: filterCarId === null ? "#fff" : C.textSecondary }]}>All</Text>
+              <Text style={[styles.pillText, { color: filterCarId === null ? "#fff" : C.textSecondary }]}>{t("costTracker.filterAll")}</Text>
             </Pressable>
             {cars.map((car) => {
               const active = filterCarId === car.id;
@@ -178,58 +184,58 @@ export default function ServiceCostsScreen() {
         ) : !hasData ? (
           <EmptyState
             icon="dollar-sign"
-            title="No costs yet"
-            description="Costs will appear here once you log maintenance, parts, renewals, or other records with a cost."
+            title={t("costTracker.noCostsTitle")}
+            description={t("costTracker.noCostsDesc")}
           />
         ) : (
           <>
             {/* Summary stat cards */}
-            <View style={styles.statsRow}>
+            <View style={[styles.statsRow, isRTL && { flexDirection: "row-reverse" }]}>
               <View style={[styles.statCard, { backgroundColor: C.card }]}>
                 <Feather name="dollar-sign" size={15} color="#7C3AED" style={{ marginBottom: 4 }} />
                 <Text style={[styles.statValue, { color: C.text }]} numberOfLines={1}>{fmt(aggregated.total)}</Text>
-                <Text style={[styles.statLabel, { color: C.textSecondary }]}>Total Spent</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>{t("costTracker.totalSpent")}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: C.card }]}>
                 <Feather name="tool" size={15} color="#2563EB" style={{ marginBottom: 4 }} />
                 <Text style={[styles.statValue, { color: C.text }]}>
                   {aggregated.categories.reduce((s, c) => s + c.count, 0)}
                 </Text>
-                <Text style={[styles.statLabel, { color: C.textSecondary }]}>Service Records</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>{t("costTracker.serviceRecords")}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: C.card }]}>
                 <Feather name="trending-up" size={15} color={C.warning} style={{ marginBottom: 4 }} />
                 <Text style={[styles.statValue, { color: C.text }]} numberOfLines={1}>
                   {aggregated.topCategory
-                    ? CATEGORY_META[aggregated.topCategory.key]?.label ?? "—"
+                    ? catLabel(aggregated.topCategory.key)
                     : "—"}
                 </Text>
-                <Text style={[styles.statLabel, { color: C.textSecondary }]}>Top Category</Text>
+                <Text style={[styles.statLabel, { color: C.textSecondary }]}>{t("costTracker.topCategory")}</Text>
               </View>
             </View>
 
             {/* Category breakdown */}
             {aggregated.categories.length > 0 && (
               <View style={[styles.section, { backgroundColor: C.card }]}>
-                <Text style={[styles.sectionTitle, { color: C.text }]}>Breakdown</Text>
+                <Text style={[styles.sectionTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("costTracker.breakdown")}</Text>
                 {aggregated.categories.map((cat, idx) => {
                   const meta = CATEGORY_META[cat.key] ?? { label: cat.key, icon: "circle", color: "#6B7280", bg: "#F3F4F6" };
                   const pct = aggregated.total > 0 ? cat.cost / aggregated.total : 0;
                   return (
                     <View key={cat.key}>
                       {idx > 0 && <View style={[styles.divider, { backgroundColor: C.borderLight }]} />}
-                      <View style={styles.categoryRow}>
+                      <View style={[styles.categoryRow, isRTL && { flexDirection: "row-reverse" }]}>
                         <MetalIcon icon={meta.icon as any} color={meta.color} bg={meta.bg} size={16} style={styles.catIconBox} />
                         <View style={styles.catBody}>
-                          <View style={styles.catLabelRow}>
-                            <Text style={[styles.catLabel, { color: C.text }]}>{meta.label}</Text>
+                          <View style={[styles.catLabelRow, isRTL && { flexDirection: "row-reverse" }]}>
+                            <Text style={[styles.catLabel, { color: C.text }]}>{catLabel(cat.key)}</Text>
                             <Text style={[styles.catAmount, { color: C.text }]}>{fmt(cat.cost)}</Text>
                           </View>
                           <View style={[styles.barTrack, { backgroundColor: C.border }]}>
                             <View style={[styles.barFill, { width: `${Math.round(pct * 100)}%` as any, backgroundColor: meta.color }]} />
                           </View>
-                          <Text style={[styles.catCount, { color: C.textSecondary }]}>
-                            {cat.count} record{cat.count !== 1 ? "s" : ""} · {Math.round(pct * 100)}% of total
+                          <Text style={[styles.catCount, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+                            {t("costTracker.records", { count: cat.count })} · {t("costTracker.percentOfTotal", { pct: Math.round(pct * 100) })}
                           </Text>
                         </View>
                       </View>
@@ -242,21 +248,21 @@ export default function ServiceCostsScreen() {
             {/* Recent entries */}
             {aggregated.allActivity.length > 0 && (
               <>
-                <Text style={[styles.listHeading, { color: C.textSecondary }]}>Recent Entries</Text>
+                <Text style={[styles.listHeading, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("costTracker.recentEntries")}</Text>
                 <View style={[styles.section, { backgroundColor: C.card, gap: 0 }]}>
                   {aggregated.allActivity.map((item, idx) => {
                     const meta = CATEGORY_META[item.type] ?? { label: item.type, icon: "circle", color: "#6B7280", bg: "#F3F4F6" };
                     return (
                       <View key={idx}>
                         {idx > 0 && <View style={[styles.divider, { backgroundColor: C.borderLight }]} />}
-                        <View style={styles.entryRow}>
+                        <View style={[styles.entryRow, isRTL && { flexDirection: "row-reverse" }]}>
                           <MetalIcon icon={meta.icon as any} color={meta.color} bg={meta.bg} size={15} style={styles.entryIconBox} />
                           <View style={styles.entryBody}>
-                            <Text style={[styles.entryTitle, { color: C.text }]} numberOfLines={1}>
+                            <Text style={[styles.entryTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>
                               {item.description}
                             </Text>
-                            <Text style={[styles.entrySub, { color: C.textSecondary }]}>
-                              {filterCarId === null ? `${(item as any).carLabel} · ` : ""}{formatDate(item.date)} · {meta.label}
+                            <Text style={[styles.entrySub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
+                              {filterCarId === null ? `${(item as any).carLabel} · ` : ""}{formatDate(item.date)} · {catLabel(item.type)}
                             </Text>
                           </View>
                           {item.cost != null && (
