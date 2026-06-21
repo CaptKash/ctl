@@ -287,7 +287,7 @@ export default function FuelScreen() {
           <Pressable
             onPress={() => {
               if (fuelCars.length > 0) {
-                if (!fCarId) setFCarId(fuelCars[0].id);
+                setFCarId(filterCarId ?? fCarId ?? fuelCars[0].id);
                 setShowAdd(true);
               }
             }}
@@ -370,7 +370,7 @@ export default function FuelScreen() {
             description={t("fuelScreen.noRecordsDesc")}
             actionLabel={t("fuelScreen.logFillUp")}
             onAction={() => {
-              if (!fCarId && fuelCars.length > 0) setFCarId(fuelCars[0].id);
+              if (fuelCars.length > 0) setFCarId(filterCarId ?? fCarId ?? fuelCars[0].id);
               setShowAdd(true);
             }}
           />
