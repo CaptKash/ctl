@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -118,6 +118,12 @@ export default function FuelScreen() {
   });
   const cars = carsQuery.data ?? [];
   const fuelCars = useMemo(() => cars.filter((c) => !c.isElectric), [cars]);
+
+  useEffect(() => {
+    if (fuelCars.length > 0 && (filterCarId === null || !fuelCars.some((c) => c.id === filterCarId))) {
+      setFilterCarId(fuelCars[0].id);
+    }
+  }, [fuelCars, filterCarId]);
 
   const fuelQueries = useQueries({
     queries: fuelCars.map((car) => ({
@@ -302,14 +308,6 @@ export default function FuelScreen() {
       {fuelCars.length > 1 && (
         <View style={[styles.pillsContainer, { backgroundColor: C.card, borderBottomColor: C.border }]}>
           <View style={[styles.pillsRow, isRTL && { flexDirection: "row-reverse" }]}>
-            <Pressable
-              onPress={() => setFilterCarId(null)}
-              style={[styles.pill, filterCarId === null && { backgroundColor: C.tint }]}
-            >
-              <Text style={[styles.pillText, { color: filterCarId === null ? "#fff" : C.textSecondary }]}>
-                {t("fuelScreen.filterAll")}
-              </Text>
-            </Pressable>
             {fuelCars.map((car) => {
               const active = filterCarId === car.id;
               return (
