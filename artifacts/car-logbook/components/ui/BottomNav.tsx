@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -30,6 +30,7 @@ type Props = { active?: BottomNavTab };
 export default function BottomNav({ active }: Props) {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const pathname = usePathname();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
   const bottomPad = Platform.OS === "web" ? 8 : insets.bottom > 0 ? insets.bottom : 8;
@@ -55,25 +56,24 @@ export default function BottomNav({ active }: Props) {
     >
       {orderedTabs.map((tab) => {
         const isActive = tab.id === active;
-        const showActive = isActive || tab.id === "tools";
         const isFaultAlert = tab.id === "faults" && hasActiveFaults;
         const iconColor = isFaultAlert
           ? "#DC2626"
-          : showActive
+          : isActive
           ? (tab.activeColor ?? C.tint)
           : C.textTertiary;
         return (
           <Pressable
             key={tab.id}
             onPress={() => {
-              if (isActive) return;
+              if (pathname === tab.route) return;
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.replace(tab.route as any);
             }}
             style={styles.tab}
             hitSlop={4}
           >
-            <View style={[styles.iconWrap, showActive && { backgroundColor: iconColor + "15" }]}>
+            <View style={[styles.iconWrap, isActive && { backgroundColor: iconColor + "15" }]}>
               <Feather
                 name={tab.icon}
                 size={24}
@@ -84,7 +84,7 @@ export default function BottomNav({ active }: Props) {
               style={[
                 styles.label,
                 { color: iconColor },
-                showActive && styles.labelActive,
+                isActive && styles.labelActive,
               ]}
             >
               {t(tab.labelKey)}
