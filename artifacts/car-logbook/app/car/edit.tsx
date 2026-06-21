@@ -333,6 +333,11 @@ export default function EditCarScreen() {
                 placeholder={estimatingTank ? t("addCar.fields.tankCapacityEstimating") : t("addCar.fields.tankCapacityPlaceholder")}
                 keyboardType="decimal-pad"
               />
+              {!estimatingTank && !tankEdited && tankCapacity !== "" && (
+                <Text style={{ color: C.textSecondary, fontSize: 12, marginTop: 6, marginHorizontal: 16, textAlign: isRTL ? "right" : "left" }}>
+                  {t("addCar.fields.tankCapacityEstimated")}
+                </Text>
+              )}
             </>
           )}
 

@@ -244,6 +244,7 @@
       "tankCapacity": "سعة خزان الوقود (لتر)",
       "tankCapacityPlaceholder": "مثال: ٦٠",
       "tankCapacityEstimating": "جارٍ التقدير…",
+      "tankCapacityEstimated": "تقدير بالذكاء الاصطناعي — يمكنك إدخال قيمتك الخاصة.",
       "plate": "رقم اللوحة",
       "platePlaceholder": "مثال: أ ب ج ١٢٣٤",
       "validUntil": "صالح حتى",

@@ -236,6 +236,7 @@
       "tankCapacity": "Fuel Tank Capacity (L)",
       "tankCapacityPlaceholder": "e.g. 60",
       "tankCapacityEstimating": "Estimating…",
+      "tankCapacityEstimated": "Estimated with AI — you can enter your own value.",
       "plate": "Plate Number",
       "platePlaceholder": "e.g. ABC 1234",
       "validUntil": "Valid Until",
