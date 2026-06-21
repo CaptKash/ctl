@@ -17,9 +17,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import * as XLSX from "xlsx-js-style";
 import { useColors } from "@/context/ThemeContext";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { apiGet } from "@/hooks/useApi";
+import { REPORT_LOGO } from "@/lib/reportLogo";
 
 type Car = {
   id: number;
@@ -32,26 +36,37 @@ type Car = {
 };
 
 const SECTIONS = [
-  { id: "maintenance", label: "Maintenance Logs", icon: "tool" as const },
-  { id: "fuel", label: "Fuel Records", icon: "droplet" as const },
-  { id: "parts", label: "Parts Replaced", icon: "package" as const },
-  { id: "insurance", label: "Insurance", icon: "shield" as const },
-  { id: "faults", label: "Faults / Malfunctions", icon: "alert-triangle" as const },
-  { id: "inspections", label: "Inspections", icon: "clipboard" as const },
+  { id: "maintenance", icon: "tool" as const },
+  { id: "fuel", icon: "droplet" as const },
+  { id: "parts", icon: "package" as const },
+  { id: "insurance", icon: "shield" as const },
+  { id: "faults", icon: "alert-triangle" as const },
+  { id: "inspections", icon: "clipboard" as const },
 ] as const;
 
 type SectionId = (typeof SECTIONS)[number]["id"];
 
-const HIDDEN_FIELDS = new Set(["id", "carId", "userId", "createdAt", "updatedAt", "completed"]);
+const SECTION_ORDER: SectionId[] = ["maintenance", "fuel", "parts", "insurance", "faults", "inspections"];
 
-const SHEET_NAMES: Record<SectionId, string> = {
-  maintenance: "Maintenance",
-  fuel: "Fuel Records",
-  parts: "Parts Replaced",
-  insurance: "Insurance",
-  faults: "Faults",
-  inspections: "Inspections",
+const SECTION_COLORS: Record<SectionId, string> = {
+  maintenance: "#D97706",
+  fuel: "#1D4ED8",
+  parts: "#7C3AED",
+  insurance: "#0D9488",
+  faults: "#DC2626",
+  inspections: "#059669",
 };
+
+const HIDDEN_FIELDS = new Set([
+  "id",
+  "carId",
+  "userId",
+  "createdAt",
+  "updatedAt",
+  "completed",
+  "billPhoto",
+  "warrantyPhoto",
+]);
 
 function toLabel(key: string): string {
   return key
@@ -60,27 +75,55 @@ function toLabel(key: string): string {
     .trim();
 }
 
-function formatVal(v: unknown): string {
+function fieldLabel(key: string, t: TFunction): string {
+  return t(`export.fields.${key}`, { defaultValue: toLabel(key) });
+}
+
+function sectionName(id: SectionId, t: TFunction): string {
+  return t(`export.sections.${id}`);
+}
+
+function safeSheetName(raw: string): string {
+  let s = raw.replace(/[:\\/?*[\]]/g, " ").replace(/\s+/g, " ").trim();
+  if (s.length > 31) s = s.slice(0, 31).trim();
+  return s || "Sheet";
+}
+
+function sheetName(id: SectionId | "summary", t: TFunction): string {
+  return safeSheetName(t(`export.sheets.${id}`));
+}
+
+function formatVal(v: unknown, t: TFunction): string {
   if (v == null) return "";
-  if (typeof v === "boolean") return v ? "Yes" : "No";
+  if (typeof v === "boolean") return v ? t("export.doc.yes") : t("export.doc.no");
   const s = String(v);
   if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
   return s;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function carLabel(car: Car) {
   return `${car.year} ${car.make} ${car.model}${car.nickname ? ` (${car.nickname})` : ""}`;
 }
 
-const HEADER_STYLE = {
-  fill: { patternType: "solid", fgColor: { rgb: "D97706" } },
-  font: { bold: true, color: { rgb: "FFFFFF" }, sz: 11 },
-  alignment: { horizontal: "left", vertical: "center" },
+const TITLE_STYLE = {
+  font: { bold: true, color: { rgb: "0F2D5E" }, sz: 14 },
 };
 
-const TITLE_STYLE = {
-  font: { bold: true, color: { rgb: "111827" }, sz: 14 },
-};
+function headerStyle() {
+  return {
+    fill: { patternType: "solid", fgColor: { rgb: "0F2D5E" } },
+    font: { bold: true, color: { rgb: "FFFFFF" }, sz: 11 },
+    alignment: { horizontal: "left", vertical: "center" },
+  };
+}
 
 function styleRow(ws: XLSX.WorkSheet, rowIdx: number, numCols: number, style: object) {
   for (let c = 0; c < numCols; c++) {
@@ -89,127 +132,265 @@ function styleRow(ws: XLSX.WorkSheet, rowIdx: number, numCols: number, style: ob
   }
 }
 
-function buildWorkbook(car: Car, sections: Record<SectionId, unknown[]>) {
+function localeDate(isRTL: boolean): string {
+  return new Date().toLocaleDateString(isRTL ? "ar" : "en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function buildWorkbook(
+  car: Car,
+  sections: Record<SectionId, unknown[]>,
+  t: TFunction,
+  isRTL: boolean,
+  unit: string
+) {
   const wb = XLSX.utils.book_new();
+  const usedNames = new Set<string>();
+  const uniqueName = (raw: string) => {
+    let name = raw;
+    let i = 2;
+    while (usedNames.has(name.toLowerCase())) {
+      const suffix = ` ${i++}`;
+      name = raw.slice(0, 31 - suffix.length).trim() + suffix;
+    }
+    usedNames.add(name.toLowerCase());
+    return name;
+  };
   (wb as any).Props = {
-    Title: `CTL Fleet – ${carLabel(car)}`,
-    Author: "Car Technical Log",
+    Title: `${t("export.doc.title")} – ${carLabel(car)}`,
+    Author: t("common.appName", { defaultValue: "Car Technical Log" }),
     CreatedDate: new Date(),
   };
 
-  const sectionOrder: SectionId[] = ["maintenance", "fuel", "parts", "insurance", "faults", "inspections"];
-
   const summaryRows = [
-    ["CTL Fleet Export"],
+    [t("export.doc.title")],
     [carLabel(car)],
-    [car.licensePlate ? `Plate: ${car.licensePlate}` : ""],
-    [car.mileage ? `Mileage: ${car.mileage.toLocaleString()} km` : ""],
-    [`Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`],
+    [car.licensePlate ? `${t("export.doc.plate")}: ${car.licensePlate}` : ""],
+    [car.mileage ? `${t("export.fields.mileage")}: ${car.mileage.toLocaleString()} ${unit}` : ""],
+    [t("export.doc.generated", { date: localeDate(isRTL) })],
     [],
-    ["Section", "Records"],
-    ...sectionOrder
-      .filter((id) => sections[id] !== undefined)
-      .map((id) => [SHEET_NAMES[id], sections[id].length]),
+    [t("export.doc.section"), t("export.doc.records")],
+    ...SECTION_ORDER.filter((id) => sections[id] !== undefined).map((id) => [
+      sectionName(id, t),
+      sections[id].length,
+    ]),
   ];
   const summaryWs = XLSX.utils.aoa_to_sheet(summaryRows);
-  summaryWs["!cols"] = [{ wch: 28 }, { wch: 12 }];
+  summaryWs["!cols"] = [{ wch: 30 }, { wch: 12 }];
   summaryWs["!rows"] = [{ hpt: 22 }, { hpt: 18 }];
   styleRow(summaryWs, 0, 1, TITLE_STYLE);
-  styleRow(summaryWs, 6, 2, HEADER_STYLE);
-  XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+  styleRow(summaryWs, 6, 2, headerStyle());
+  XLSX.utils.book_append_sheet(wb, summaryWs, sheetName("summary", t));
 
-  sectionOrder
-    .filter((id) => sections[id] !== undefined)
-    .forEach((id) => {
-      const rows = sections[id] as Record<string, unknown>[];
+  SECTION_ORDER.filter((id) => sections[id] !== undefined).forEach((id) => {
+    const rows = sections[id] as Record<string, unknown>[];
 
-      if (!rows.length) {
-        const ws = XLSX.utils.aoa_to_sheet([["No records found for this section."]]);
-        ws["!cols"] = [{ wch: 36 }];
-        XLSX.utils.book_append_sheet(wb, ws, SHEET_NAMES[id]);
-        return;
-      }
+    if (!rows.length) {
+      const ws = XLSX.utils.aoa_to_sheet([[t("export.doc.noRecordsSection")]]);
+      ws["!cols"] = [{ wch: 40 }];
+      XLSX.utils.book_append_sheet(wb, ws, uniqueName(sheetName(id, t)));
+      return;
+    }
 
-      const keys = Object.keys(rows[0]).filter((k) => !HIDDEN_FIELDS.has(k));
-      const header = keys.map(toLabel);
-      const dataRows = rows.map((r) => keys.map((k) => formatVal(r[k])));
-      const ws = XLSX.utils.aoa_to_sheet([header, ...dataRows]);
+    const keys = Object.keys(rows[0]).filter((k) => !HIDDEN_FIELDS.has(k));
+    const header = keys.map((k) => fieldLabel(k, t));
+    const dataRows = rows.map((r) => keys.map((k) => formatVal(r[k], t)));
+    const ws = XLSX.utils.aoa_to_sheet([header, ...dataRows]);
 
-      const colWidths = keys.map((k, i) => {
-        const maxData = Math.max(...dataRows.map((r) => (r[i] ?? "").length));
-        return { wch: Math.max(header[i].length, maxData, 10) + 2 };
-      });
-      ws["!cols"] = colWidths;
-      ws["!rows"] = [{ hpt: 20 }];
-      styleRow(ws, 0, header.length, HEADER_STYLE);
-
-      XLSX.utils.book_append_sheet(wb, ws, SHEET_NAMES[id]);
+    const colWidths = keys.map((k, i) => {
+      const maxData = Math.max(...dataRows.map((r) => (r[i] ?? "").length));
+      return { wch: Math.max(header[i].length, maxData, 10) + 2 };
     });
+    ws["!cols"] = colWidths;
+    ws["!rows"] = [{ hpt: 20 }];
+    styleRow(ws, 0, header.length, headerStyle());
+
+    XLSX.utils.book_append_sheet(wb, ws, uniqueName(sheetName(id, t)));
+  });
 
   return wb;
 }
 
-function buildPdfHtml(car: Car, sections: Record<SectionId, unknown[]>): string {
-  const label = carLabel(car);
-  const plate = car.licensePlate ? `License: ${car.licensePlate}` : "";
-  const odo = car.mileage ? `Mileage: ${car.mileage.toLocaleString()} km` : "";
-  const generated = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+function buildPdfHtml(
+  car: Car,
+  sections: Record<SectionId, unknown[]>,
+  t: TFunction,
+  isRTL: boolean,
+  unit: string
+): string {
+  const dir = isRTL ? "rtl" : "ltr";
+  const lang = isRTL ? "ar" : "en";
+  const generated = localeDate(isRTL);
 
-  const tableHtml = (rows: Record<string, unknown>[]): string => {
-    if (!rows.length) return "<p class='empty'>No records found.</p>";
-    const headers = Object.keys(rows[0]).filter((k) => !HIDDEN_FIELDS.has(k));
-    return `<table>
-      <thead><tr>${headers.map((h) => `<th>${toLabel(h)}</th>`).join("")}</tr></thead>
-      <tbody>${rows
-        .map((r) => `<tr>${headers.map((h) => `<td>${formatVal(r[h])}</td>`).join("")}</tr>`)
-        .join("")}</tbody>
-    </table>`;
-  };
+  const meta = [
+    car.licensePlate ? `${t("export.doc.plate")}: ${escapeHtml(car.licensePlate)}` : "",
+    car.mileage ? `${t("export.fields.mileage")}: ${car.mileage.toLocaleString()} ${escapeHtml(unit)}` : "",
+    t("export.doc.generated", { date: generated }),
+  ].filter(Boolean);
 
-  const sectionOrder: SectionId[] = ["maintenance", "fuel", "parts", "insurance", "faults", "inspections"];
-  const sectionLabels: Record<SectionId, string> = {
-    maintenance: "Maintenance Logs",
-    fuel: "Fuel Records",
-    parts: "Parts Replaced",
-    insurance: "Insurance",
-    faults: "Faults / Malfunctions",
-    inspections: "Inspections",
-  };
+  const included = SECTION_ORDER.filter((id) => sections[id] !== undefined);
 
-  const sectionsHtml = sectionOrder
-    .filter((id) => sections[id] !== undefined)
-    .map(
-      (id) => `
-      <div class="section">
-        <h2>${sectionLabels[id]}</h2>
-        ${tableHtml(sections[id] as Record<string, unknown>[])}
-      </div>`
-    )
+  const chips = included
+    .map((id) => {
+      const n = (sections[id] as unknown[]).length;
+      return `<div class="stat" style="border-top-color:${SECTION_COLORS[id]}">
+        <span class="stat-num">${n}</span>
+        <span class="stat-label">${escapeHtml(sectionName(id, t))}</span>
+      </div>`;
+    })
     .join("");
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  const sectionsHtml = included
+    .map((id) => {
+      const rows = sections[id] as Record<string, unknown>[];
+      const color = SECTION_COLORS[id];
+      const name = escapeHtml(sectionName(id, t));
+      const count = rows.length;
+
+      if (!rows.length) {
+        return `<section class="card">
+          <table class="data-table">
+            <thead>
+              <tr class="sec-head"><th style="border-inline-start-color:${color}">
+                <span class="sec-name">${name}</span>
+                <span class="sec-count">${count}</span>
+              </th></tr>
+            </thead>
+            <tbody><tr><td class="empty-cell">${t("export.doc.noRecords")}</td></tr></tbody>
+          </table>
+        </section>`;
+      }
+
+      const keys = Object.keys(rows[0]).filter((k) => !HIDDEN_FIELDS.has(k));
+      const colHeads = keys.map((k) => `<th>${escapeHtml(fieldLabel(k, t))}</th>`).join("");
+      const bodyRows = rows
+        .map(
+          (r) =>
+            `<tr class="data-row">${keys
+              .map((k) => `<td>${escapeHtml(formatVal(r[k], t))}</td>`)
+              .join("")}</tr>`
+        )
+        .join("");
+
+      return `<section class="card">
+        <table class="data-table">
+          <thead>
+            <tr class="sec-head"><th colspan="${keys.length}" style="border-inline-start-color:${color}">
+              <span class="sec-name">${name}</span>
+              <span class="sec-count">${count}</span>
+            </th></tr>
+            <tr class="col-head">${colHeads}</tr>
+          </thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </section>`;
+    })
+    .join("");
+
+  return `<!DOCTYPE html><html lang="${lang}" dir="${dir}"><head><meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>${escapeHtml(t("export.doc.title"))}</title>
   <style>
-    body { font-family: -apple-system, Arial, sans-serif; font-size: 12px; color: #111; padding: 40px; }
-    .header { border-bottom: 3px solid #D97706; padding-bottom: 16px; margin-bottom: 24px; }
-    .header h1 { font-size: 22px; margin: 0 0 6px; color: #111; }
-    .header .badge { display: inline-block; background: #FEF3C7; color: #92400E; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
-    .meta { color: #555; font-size: 12px; margin-top: 6px; }
-    .section { margin-bottom: 32px; page-break-inside: avoid; }
-    .section h2 { font-size: 15px; color: #D97706; border-bottom: 1px solid #FDE68A; padding-bottom: 4px; margin-bottom: 12px; }
-    table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    th { background: #F9FAFB; text-align: left; padding: 6px 8px; border-bottom: 2px solid #E5E7EB; color: #374151; font-weight: 700; }
-    td { padding: 5px 8px; border-bottom: 1px solid #F3F4F6; color: #374151; }
-    tr:nth-child(even) td { background: #FAFAFA; }
-    .empty { color: #9CA3AF; font-style: italic; font-size: 11px; }
-    .footer { margin-top: 40px; text-align: center; color: #9CA3AF; font-size: 10px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #f1f5f9;
+      direction: ${dir};
+      padding: 32px 20px;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.45;
+    }
+    .report { max-width: 900px; margin: 0 auto; }
+
+    .report-header {
+      background: linear-gradient(135deg, #0F2D5E 0%, #0A1A3A 100%);
+      color: #fff;
+      border-radius: 18px;
+      padding: 26px 28px 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 18px rgba(15,45,94,0.28);
+    }
+    .brand { display: flex; margin-bottom: 16px; }
+    .brand-mark { width: 60px; height: 60px; object-fit: contain; display: block; }
+    .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.8; margin-bottom: 6px; }
+    .report-header h1 { font-size: 25px; font-weight: 800; margin-bottom: 9px; letter-spacing: -0.3px; }
+    .meta-row { font-size: 13px; opacity: 0.92; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .meta-row .dot { opacity: 0.45; }
+
+    .summary-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 26px; }
+    .stat {
+      flex: 1; min-width: 110px;
+      background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 14px; padding: 14px 16px;
+      border-top: 3px solid #e2e8f0;
+    }
+    .stat-num { display: block; font-size: 26px; font-weight: 800; line-height: 1.1; }
+    .stat-label { font-size: 12px; color: #64748b; font-weight: 600; }
+
+    .card { margin-bottom: 24px; }
+    .data-table {
+      width: 100%; border-collapse: collapse;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 13px;
+      overflow: hidden;
+    }
+    .sec-head th {
+      text-align: start;
+      padding: 13px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      border-inline-start: 4px solid #1D4ED8;
+    }
+    .sec-name { font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
+    .sec-count { font-size: 12px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; border-radius: 999px; padding: 3px 11px; white-space: nowrap; margin-inline-start: 10px; }
+    .col-head th {
+      text-align: start;
+      background: #f1f5f9;
+      padding: 8px 10px;
+      font-size: 11px; font-weight: 700; color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .data-row td {
+      padding: 8px 10px;
+      font-size: 11px; color: #334155;
+      border-top: 1px solid #eef2f6;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    .data-row:nth-child(even) td { background: #f8fafc; }
+    .empty-cell { padding: 14px 16px; color: #94a3b8; font-style: italic; font-size: 12px; }
+
+    .footer { margin-top: 28px; text-align: center; color: #94a3b8; font-size: 11px; }
+
+    @media print {
+      body { padding: 0; background: #fff; }
+      .report-header, .stat, .data-table, .sec-head th, .col-head th {
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .report-header { box-shadow: none; }
+      .card, .data-row { break-inside: avoid; }
+      .stat { break-inside: avoid; }
+    }
   </style></head><body>
-  <div class="header">
-    <div class="badge">CTL Fleet Report</div>
-    <h1>${label}</h1>
-    <p class="meta">${[plate, odo, `Generated: ${generated}`].filter(Boolean).join("  ·  ")}</p>
+  <div class="report">
+    <header class="report-header">
+      <div class="brand">
+        <img class="brand-mark" src="${REPORT_LOGO}" alt="${escapeHtml(t("export.doc.title"))}"/>
+      </div>
+      <div class="eyebrow">${escapeHtml(t("export.doc.title"))}</div>
+      <h1>${escapeHtml(carLabel(car))}</h1>
+      <div class="meta-row">
+        ${meta.map((m, i) => `${i > 0 ? '<span class="dot">·</span>' : ""}<span>${m}</span>`).join("")}
+      </div>
+    </header>
+    ${chips ? `<div class="summary-bar">${chips}</div>` : ""}
+    ${sectionsHtml}
+    <div class="footer">${escapeHtml(t("export.doc.footer"))}</div>
   </div>
-  ${sectionsHtml}
-  <div class="footer">Generated by Car Technical Log · CTL Fleet</div>
   </body></html>`;
 }
 
@@ -230,6 +411,9 @@ async function sharePdf(html: string) {
 export default function ExportScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const { unit } = useDistanceUnit();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 20 : insets.top;
 
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
@@ -291,10 +475,10 @@ export default function ExportScreen() {
       const safeName = `${selectedCar.make}_${selectedCar.model}_${selectedCar.year}`.replace(/\s+/g, "_");
 
       if (format === "pdf") {
-        const html = buildPdfHtml(selectedCar, sections);
+        const html = buildPdfHtml(selectedCar, sections, t, isRTL, unit);
         await sharePdf(html);
       } else {
-        const wb = buildWorkbook(selectedCar, sections);
+        const wb = buildWorkbook(selectedCar, sections, t, isRTL, unit);
         const filename = `CTL_${safeName}_${Date.now()}.xlsx`;
 
         if (Platform.OS === "web") {
@@ -324,42 +508,44 @@ export default function ExportScreen() {
               });
             }
           } else {
-            const html = buildPdfHtml(selectedCar, sections);
+            const html = buildPdfHtml(selectedCar, sections, t, isRTL, unit);
             await sharePdf(html);
-            setError("Excel export requires the full app. Shared as PDF instead.");
+            setError(t("export.excelFallback"));
           }
         }
       }
     } catch (e: any) {
-      setError(e?.message ?? "Export failed. Please try again.");
+      setError(e?.message ?? t("export.exportFailed"));
     } finally {
       setGenerating(false);
     }
   }
 
+  const textAlign = isRTL ? ("right" as const) : ("left" as const);
+
   return (
     <View style={[styles.screen, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: C.card, borderBottomColor: C.border }]}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, isRTL && { flexDirection: "row-reverse" }]}>
           <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn}>
-            <Feather name="arrow-left" size={22} color={C.text} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.text} />
           </Pressable>
-          <MetalIcon icon="download" color="#D97706" bg="#FEF3C7" size={22} style={styles.iconBox} />
+          <MetalIcon icon="download" color="#0F2D5E" bg="#DBEAFE" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Data Backup & Export</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>PDF report & Excel spreadsheet</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign }]}>{t("export.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary, textAlign }]}>{t("export.subtitle")}</Text>
           </View>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={[styles.content]} showsVerticalScrollIndicator={false}>
 
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>VEHICLE</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>{t("export.vehicleLabel")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           {carsLoading ? (
             <ActivityIndicator color={C.tint} style={{ padding: 16 }} />
           ) : !cars?.length ? (
-            <Text style={[styles.emptyText, { color: C.textSecondary }]}>No vehicles found.</Text>
+            <Text style={[styles.emptyText, { color: C.textSecondary }]}>{t("export.noVehicles")}</Text>
           ) : (
             cars.map((car, idx) => {
               const active = (selectedCar?.id ?? cars[0]?.id) === car.id;
@@ -369,32 +555,33 @@ export default function ExportScreen() {
                   onPress={() => { setSelectedCarId(car.id); Haptics.selectionAsync(); }}
                   style={[
                     styles.optionRow,
+                    isRTL && { flexDirection: "row-reverse" },
                     idx < cars.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border },
                   ]}
                 >
                   <View style={[styles.radio, { borderColor: active ? C.tint : C.textTertiary }]}>
                     {active && <View style={[styles.radioInner, { backgroundColor: C.tint }]} />}
                   </View>
-                  <Text style={[styles.optionText, { color: C.text }]}>{carLabel(car)}</Text>
+                  <Text style={[styles.optionText, { color: C.text, flex: 1, textAlign }]}>{carLabel(car)}</Text>
                 </Pressable>
               );
             })
           )}
         </View>
 
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>FORMAT</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>{t("export.formatLabel")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           {([
             {
               id: "pdf" as const,
-              label: "PDF Report",
-              sub: "Styled report — great for printing or sharing",
+              label: t("export.pdfTitle"),
+              sub: t("export.pdfSub"),
               icon: "file-text" as const,
             },
             {
               id: "xlsx" as const,
-              label: "Excel Spreadsheet (.xlsx)",
-              sub: "One tab per section — opens in Excel, Numbers, Sheets",
+              label: t("export.xlsxTitle"),
+              sub: t("export.xlsxSub"),
               icon: "grid" as const,
             },
           ]).map((f, idx) => {
@@ -405,6 +592,7 @@ export default function ExportScreen() {
                 onPress={() => { setFormat(f.id); Haptics.selectionAsync(); }}
                 style={[
                   styles.optionRow,
+                  isRTL && { flexDirection: "row-reverse" },
                   idx === 0 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border },
                   { paddingVertical: 14 },
                 ]}
@@ -414,15 +602,15 @@ export default function ExportScreen() {
                 </View>
                 <Feather name={f.icon} size={16} color={active ? C.tint : C.textTertiary} />
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.optionText, { color: C.text }]}>{f.label}</Text>
-                  <Text style={[styles.optionSub, { color: C.textSecondary }]}>{f.sub}</Text>
+                  <Text style={[styles.optionText, { color: C.text, textAlign }]}>{f.label}</Text>
+                  <Text style={[styles.optionSub, { color: C.textSecondary, textAlign }]}>{f.sub}</Text>
                 </View>
               </Pressable>
             );
           })}
         </View>
 
-        <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>INCLUDE</Text>
+        <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign }]}>{t("export.includeLabel")}</Text>
         <View style={[styles.card, { backgroundColor: C.card }]}>
           {SECTIONS.map((s, idx) => {
             const on = enabled.has(s.id);
@@ -432,11 +620,12 @@ export default function ExportScreen() {
                 onPress={() => toggleSection(s.id)}
                 style={[
                   styles.optionRow,
+                  isRTL && { flexDirection: "row-reverse" },
                   idx < SECTIONS.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border },
                 ]}
               >
-                <Feather name={s.icon} size={16} color={on ? C.tint : C.textTertiary} style={{ marginRight: 4 }} />
-                <Text style={[styles.optionText, { color: on ? C.text : C.textSecondary, flex: 1 }]}>{s.label}</Text>
+                <Feather name={s.icon} size={16} color={on ? C.tint : C.textTertiary} style={{ marginHorizontal: 4 }} />
+                <Text style={[styles.optionText, { color: on ? C.text : C.textSecondary, flex: 1, textAlign }]}>{sectionName(s.id, t)}</Text>
                 <View style={[styles.toggle, { backgroundColor: on ? C.tint : C.border }]}>
                   <View style={[styles.toggleThumb, { transform: [{ translateX: on ? 18 : 2 }] }]} />
                 </View>
@@ -452,6 +641,7 @@ export default function ExportScreen() {
           disabled={generating || !selectedCar || enabled.size === 0}
           style={({ pressed }) => [
             styles.generateBtn,
+            isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.tint, opacity: pressed || generating || !selectedCar || enabled.size === 0 ? 0.65 : 1 },
           ]}
         >
@@ -461,14 +651,14 @@ export default function ExportScreen() {
             <>
               <Feather name="share" size={18} color="#fff" />
               <Text style={styles.generateBtnText}>
-                Export {format === "pdf" ? "PDF" : "Excel"} & Share
+                {format === "pdf" ? t("export.exportPdf") : t("export.exportXlsx")}
               </Text>
             </>
           )}
         </Pressable>
 
         <Text style={[styles.note, { color: C.textTertiary }]}>
-          File is generated on-device and shared via the system share sheet.
+          {t("export.note")}
         </Text>
       </ScrollView>
     </View>
