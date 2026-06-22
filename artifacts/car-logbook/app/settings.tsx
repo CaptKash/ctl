@@ -601,7 +601,6 @@ export default function SettingsScreen() {
           <View style={styles.fleetFeatures}>
             {[
               t("settings.fleet.feature1"),
-              t("settings.fleet.feature2"),
               t("settings.fleet.feature3"),
               t("settings.fleet.feature4"),
               t("settings.fleet.feature5"),
