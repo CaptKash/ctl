@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 
 const { height: SCREEN_H } = Dimensions.get("window");
@@ -24,6 +25,7 @@ type Props = {
 
 export function BottomSheet({ visible, onClose, title, children }: Props) {
   const C = useColors();
+  const { t } = useTranslation();
   const slideAnim = useRef(new Animated.Value(SCREEN_H)).current;
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export function BottomSheet({ visible, onClose, title, children }: Props) {
           <View style={styles.header}>
             <Text style={[styles.title, { color: C.text }]}>{title}</Text>
             <Pressable onPress={onClose} hitSlop={12}>
-              <Text style={[styles.close, { color: C.tint }]}>Done</Text>
+              <Text style={[styles.close, { color: C.tint }]}>{t("common.done")}</Text>
             </Pressable>
           </View>
           <ScrollView

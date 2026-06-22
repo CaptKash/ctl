@@ -66,11 +66,13 @@ function getFirstPhoto(photos?: string | null): string | null {
 
 export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accentBorder }: Props) {
   const C = useColors();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const brand = localizeBrand(car.make, i18n.language);
   const firstPhoto = getFirstPhoto(car.photos);
   const thumbBg = accentBg ?? C.infoLight;
   const thumbIcon = accentIcon ?? C.info;
+  const textAlign = isRTL ? "right" : "left";
 
   return (
     <Pressable
@@ -79,6 +81,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accent
         styles.card,
         { backgroundColor: C.card, opacity: pressed ? 0.92 : 1, shadowColor: C.shadow },
         accentBorder ? { borderWidth: 1.5, borderColor: accentBorder } : null,
+        isRTL && { flexDirection: "row-reverse" },
       ]}
     >
       {/* Thumbnail */}
@@ -97,14 +100,14 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accent
 
       {/* Info */}
       <View style={styles.info}>
-        <Text style={[styles.makeModel, { color: C.text }]} numberOfLines={1}>
+        <Text style={[styles.makeModel, { color: C.text, textAlign }]} numberOfLines={1}>
           {brand} {car.model}
         </Text>
-        <Text style={[styles.sub, { color: C.textSecondary }]} numberOfLines={1}>
+        <Text style={[styles.sub, { color: C.textSecondary, textAlign }]} numberOfLines={1}>
           {[car.nickname, car.year != null ? localizeDigits(car.year, i18n.language) : null].filter(Boolean).join("  |  ")}
         </Text>
         {(car.licensePlate || car.mileage != null) && (
-          <Text style={[styles.detail, { color: C.textTertiary }]} numberOfLines={1}>
+          <Text style={[styles.detail, { color: C.textTertiary, textAlign }]} numberOfLines={1}>
             {[
               car.licensePlate,
               car.mileage != null ? `${localizeDigits(car.mileage.toLocaleString(), i18n.language)} km` : null,
@@ -126,14 +129,15 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accent
             style={({ pressed }) => [
               styles.logBtn,
               { opacity: pressed ? 0.75 : 1 },
+              isRTL && { flexDirection: "row-reverse" },
             ]}
             hitSlop={4}
           >
             <Feather name="plus" size={12} color="#2563EB" />
-            <Text style={styles.logBtnText}>Technical Log</Text>
+            <Text style={styles.logBtnText}>{t("technicalLog.title")}</Text>
           </Pressable>
         ) : (
-          <Feather name="chevron-right" size={18} color={C.textTertiary} />
+          <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
         )}
       </View>
     </Pressable>

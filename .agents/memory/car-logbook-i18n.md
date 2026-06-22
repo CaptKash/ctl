@@ -13,6 +13,8 @@ description: How Arabic + RTL localization is done in the car-logbook Expo app, 
 - Arabic plural keys: provide `<key>_one` + `<key>_other` for English; Arabic only needs `<key>_other` (i18next falls back to `_other` for all Arabic plural categories). This intentional asymmetry is NOT a parity bug.
 - For RESOLVED/ACTIVE style stamps, reset `letterSpacing: 0` in Arabic (letter-spacing breaks Arabic ligatures).
 - Dates are NOT localized — shared `lib/dateUtils.formatDate` renders English digits app-wide. Deferred on purpose; changing it affects every screen.
+- Do NOT translate stored DB enum/option values that are persisted and rendered raw elsewhere (e.g. `MAINTENANCE_TYPES` in `app/car/maintenance.tsx`). Translate only the surrounding UI chrome; translating the option values would desync them from stored rows shown via RecordCard.
+- List-screen headers (fleet, maintenance/add, car/maintenance, repair-history) are intentionally NOT row-reversed in RTL — only card/content rows flip. Form screens (feedback, edit-profile) DO flip their headers. Match the sibling screen's existing convention rather than flipping everything.
 
 # Fault-log dead-screen gotcha
 

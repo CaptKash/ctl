@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/context/ThemeContext";
 import { FormField } from "@/components/ui/FormField";
@@ -24,6 +25,8 @@ type ProfileResponse = { user: { id: number; name: string; email: string } };
 export default function EditProfileScreen() {
   const C = useColors();
   const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { user, updateUser } = useAuth();
 
@@ -58,7 +61,7 @@ export default function EditProfileScreen() {
       setTimeout(() => router.back(), 800);
     } catch (err: unknown) {
       const msg =
-        err instanceof Error ? err.message : "Something went wrong. Please try again.";
+        err instanceof Error ? err.message : t("editProfile.errGeneric");
       setError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -76,7 +79,7 @@ export default function EditProfileScreen() {
       setResetSent(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Could not send reset email. Try again.";
+      const msg = err instanceof Error ? err.message : t("editProfile.errReset");
       setResetError(msg);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -107,6 +110,7 @@ export default function EditProfileScreen() {
               borderBottomColor: C.border,
               backgroundColor: C.card,
             },
+            isRTL && { flexDirection: "row-reverse" },
           ]}
         >
           <Pressable
@@ -114,9 +118,9 @@ export default function EditProfileScreen() {
             style={({ pressed }) => [styles.backBtn, { opacity: pressed ? 0.6 : 1 }]}
             hitSlop={12}
           >
-            <Feather name="arrow-left" size={22} color={C.tint} />
+            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={22} color={C.tint} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: C.text }]}>Edit Profile</Text>
+          <Text style={[styles.headerTitle, { color: C.text }]}>{t("editProfile.title")}</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -131,29 +135,29 @@ export default function EditProfileScreen() {
               <Text style={styles.avatarText}>{initials}</Text>
             </View>
             <Text style={[styles.avatarHint, { color: C.textSecondary }]}>
-              Your initials are generated from your name
+              {t("editProfile.avatarHint")}
             </Text>
           </View>
 
           {/* Form card */}
           <View style={[styles.card, { backgroundColor: C.card }]}>
             <FormField
-              label="Full Name"
+              label={t("editProfile.nameLabel")}
               required
               value={name}
-              onChangeText={(t) => { setName(t); setError(""); setSaved(false); }}
-              placeholder="Your name"
+              onChangeText={(v) => { setName(v); setError(""); setSaved(false); }}
+              placeholder={t("editProfile.namePlaceholder")}
               autoCapitalize="words"
               autoCorrect={false}
               returnKeyType="next"
             />
             <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
             <FormField
-              label="Email Address"
+              label={t("editProfile.emailLabel")}
               required
               value={email}
-              onChangeText={(t) => { setEmail(t); setError(""); setSaved(false); }}
-              placeholder="you@example.com"
+              onChangeText={(v) => { setEmail(v); setError(""); setSaved(false); }}
+              placeholder={t("editProfile.emailPlaceholder")}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -164,31 +168,31 @@ export default function EditProfileScreen() {
 
           {/* Error */}
           {error !== "" && (
-            <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+            <View style={[styles.errorBox, { backgroundColor: C.dangerLight }, isRTL && { flexDirection: "row-reverse" }]}>
               <Feather name="alert-circle" size={15} color={C.danger} />
-              <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+              <Text style={[styles.errorText, { color: C.danger, textAlign: isRTL ? "right" : "left" }]}>{error}</Text>
             </View>
           )}
 
           {/* Success */}
           {saved && (
-            <View style={[styles.successBox, { backgroundColor: "#D1FAE5" }]}>
+            <View style={[styles.successBox, { backgroundColor: "#D1FAE5" }, isRTL && { flexDirection: "row-reverse" }]}>
               <Feather name="check-circle" size={15} color="#059669" />
               <Text style={[styles.successText, { color: "#059669" }]}>
-                Profile updated!
+                {t("editProfile.profileUpdated")}
               </Text>
             </View>
           )}
 
           <PrimaryButton
-            label={loading ? "Saving…" : "Save Changes"}
+            label={loading ? t("editProfile.saving") : t("editProfile.save")}
             onPress={handleSave}
             loading={loading}
             disabled={!canSave || loading}
           />
 
           <Text style={[styles.hint, { color: C.textTertiary }]}>
-            Changing your email will require you to use the new address at next sign-in.
+            {t("editProfile.emailHint")}
           </Text>
 
           {/* Reset Password */}
@@ -202,6 +206,7 @@ export default function EditProfileScreen() {
                 backgroundColor: resetSent ? "#D1FAE5" : C.infoLight,
                 opacity: pressed || resetLoading ? 0.7 : 1,
               },
+              isRTL && { flexDirection: "row-reverse" },
             ]}
           >
             <Feather
@@ -211,11 +216,11 @@ export default function EditProfileScreen() {
             />
             <View style={{ alignItems: "center" }}>
               <Text style={[styles.resetBtnLabel, { color: resetSent ? "#059669" : C.tint }]}>
-                {resetLoading ? "Sending…" : resetSent ? "Reset Link Sent" : "Reset Password"}
+                {resetLoading ? t("editProfile.sending") : resetSent ? t("editProfile.resetLinkSent") : t("editProfile.resetPassword")}
               </Text>
               {resetSent && (
                 <Text style={[styles.resetHint, { color: "#059669" }]}>
-                  Sent to {user?.email}
+                  {t("editProfile.sentTo", { email: user?.email })}
                 </Text>
               )}
               {resetError !== "" && (

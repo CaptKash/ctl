@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -35,6 +36,7 @@ type Car = {
 export default function AddRepairSelectCarScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t } = useTranslation();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const { data: cars, isLoading } = useQuery<Car[]>({
@@ -56,8 +58,8 @@ export default function AddRepairSelectCarScreen() {
           </Pressable>
           <MetalIcon icon="tool" color="#D97706" bg="#FEF3C7" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Add Repair</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>Select a vehicle</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>{t("maintenanceAdd.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>{t("maintenanceAdd.subtitle")}</Text>
           </View>
         </View>
       </View>
@@ -70,16 +72,16 @@ export default function AddRepairSelectCarScreen() {
       ) : !cars || cars.length === 0 ? (
         <View style={styles.center}>
           <Feather name="truck" size={40} color={C.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: C.text }]}>No vehicles yet</Text>
+          <Text style={[styles.emptyTitle, { color: C.text }]}>{t("maintenanceAdd.emptyTitle")}</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            Add a car first before logging a repair.
+            {t("maintenanceAdd.emptySub")}
           </Text>
           <Pressable
             onPress={() => router.replace("/car/add")}
             style={[styles.addCarBtn, { backgroundColor: C.warning }]}
           >
             <Feather name="plus" size={16} color="#fff" />
-            <Text style={styles.addCarBtnText}>Add Car</Text>
+            <Text style={styles.addCarBtnText}>{t("maintenanceAdd.addCar")}</Text>
           </Pressable>
         </View>
       ) : (

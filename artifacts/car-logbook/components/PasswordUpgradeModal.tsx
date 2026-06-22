@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useAuth as useClerkAuth } from "@clerk/clerk-expo";
 import { useAuth } from "@/context/AuthContext";
@@ -19,6 +20,8 @@ export function PasswordUpgradeModal() {
   const { user, isAuthenticated, logout } = useAuth();
   const { isSignedIn: isClerkSignedIn } = useClerkAuth();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const [dismissed, setDismissed] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -36,7 +39,7 @@ export function PasswordUpgradeModal() {
     !!user?.passwordUpgradeRequired &&
     !dismissed;
 
-  const firstName = user?.name?.trim().split(/\s+/)[0] ?? "there";
+  const firstName = user?.name?.trim().split(/\s+/)[0] ?? t("passwordUpgrade.fallbackName");
 
   const handleSendLink = async () => {
     if (!user?.email) return;
@@ -46,7 +49,7 @@ export function PasswordUpgradeModal() {
       await apiPost("/auth/forgot-password", { email: user.email });
       setSent(true);
     } catch {
-      setError("Couldn't send the email right now. Please try again in a moment.");
+      setError(t("passwordUpgrade.errSend"));
     } finally {
       setSending(false);
     }
@@ -55,6 +58,9 @@ export function PasswordUpgradeModal() {
   const handleClose = () => {
     setDismissed(true);
   };
+
+  const textAlign = isRTL ? "right" : "left";
+  const writingDirection = isRTL ? "rtl" : "ltr";
 
   return (
     <Modal
@@ -70,23 +76,21 @@ export function PasswordUpgradeModal() {
 
           {!sent ? (
             <>
-              <Text style={[styles.title, { color: C.text }]}>
-                Hi {firstName}, please update your password
+              <Text style={[styles.title, { color: C.text, textAlign, writingDirection }]}>
+                {t("passwordUpgrade.title", { name: firstName })}
               </Text>
-              <Text style={[styles.body, { color: C.textSecondary }]}>
-                We've raised CTL's security standards. Your current password no longer meets the
-                new requirements (8+ characters, with an uppercase letter, a lowercase letter, and
-                a number).
+              <Text style={[styles.body, { color: C.textSecondary, textAlign, writingDirection }]}>
+                {t("passwordUpgrade.body")}
               </Text>
-              <Text style={[styles.body, { color: C.textSecondary, marginTop: 12 }]}>
-                We'll email a secure link to{" "}
-                <Text style={{ color: C.text, fontFamily: "Inter_600SemiBold" }}>{user?.email}</Text>{" "}
-                so you can set a stronger one. The link expires in 1 hour.
+              <Text style={[styles.body, { color: C.textSecondary, marginTop: 12, textAlign, writingDirection }]}>
+                {t("passwordUpgrade.body2Pre")}
+                <Text style={{ color: C.text, fontFamily: "Inter_600SemiBold" }}>{user?.email}</Text>
+                {t("passwordUpgrade.body2Post")}
               </Text>
 
               {error && (
                 <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
-                  <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+                  <Text style={[styles.errorText, { color: C.danger, textAlign, writingDirection }]}>{error}</Text>
                 </View>
               )}
 
@@ -99,27 +103,26 @@ export function PasswordUpgradeModal() {
                 {sending ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryBtnText}>Email me a secure link</Text>
+                  <Text style={styles.primaryBtnText}>{t("passwordUpgrade.sendLink")}</Text>
                 )}
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleClose} style={styles.secondaryBtn}>
                 <Text style={[styles.secondaryBtnText, { color: C.textSecondary }]}>
-                  Remind me next time
+                  {t("passwordUpgrade.remindLater")}
                 </Text>
               </TouchableOpacity>
             </>
           ) : (
             <>
-              <Text style={[styles.title, { color: C.text }]}>Check your inbox</Text>
-              <Text style={[styles.body, { color: C.textSecondary }]}>
-                We sent a secure link to{" "}
+              <Text style={[styles.title, { color: C.text, textAlign, writingDirection }]}>{t("passwordUpgrade.sentTitle")}</Text>
+              <Text style={[styles.body, { color: C.textSecondary, textAlign, writingDirection }]}>
+                {t("passwordUpgrade.sentBodyPre")}
                 <Text style={{ color: C.text, fontFamily: "Inter_600SemiBold" }}>{user?.email}</Text>
-                . Open it on this device to set your new password. The link expires in 1 hour.
+                {t("passwordUpgrade.sentBodyPost")}
               </Text>
-              <Text style={[styles.bodySmall, { color: C.textTertiary, marginTop: 12 }]}>
-                Don't see it? Check your spam folder, or sign out and tap "Forgot password" on the
-                login screen to send another.
+              <Text style={[styles.bodySmall, { color: C.textTertiary, marginTop: 12, textAlign, writingDirection }]}>
+                {t("passwordUpgrade.sentNote")}
               </Text>
 
               <TouchableOpacity
@@ -127,7 +130,7 @@ export function PasswordUpgradeModal() {
                 onPress={handleClose}
                 activeOpacity={0.85}
               >
-                <Text style={styles.primaryBtnText}>Got it</Text>
+                <Text style={styles.primaryBtnText}>{t("passwordUpgrade.gotIt")}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -138,7 +141,7 @@ export function PasswordUpgradeModal() {
                 style={styles.secondaryBtn}
               >
                 <Text style={[styles.secondaryBtnText, { color: C.textSecondary }]}>
-                  Sign out and reset now
+                  {t("passwordUpgrade.signOutReset")}
                 </Text>
               </TouchableOpacity>
             </>

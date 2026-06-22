@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -64,6 +65,7 @@ export default function MaintenanceScreen() {
   const carId = parseInt(id ?? "0");
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t } = useTranslation();
   const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -129,7 +131,7 @@ export default function MaintenanceScreen() {
   const car = carQuery.data;
   const carTitle = car
     ? car.nickname ?? `${car.year} ${car.make} ${car.model}`
-    : "Car";
+    : t("carMaintenance.carFallback");
 
   return (
     <SwipeBackView style={{ backgroundColor: C.background }}>
@@ -148,7 +150,7 @@ export default function MaintenanceScreen() {
             <Feather name="tool" size={22} color="#78350F" />
           </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Maintenance</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>{t("carMaintenance.title")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]} numberOfLines={1}>{carTitle}</Text>
           </View>
         </View>
@@ -159,8 +161,8 @@ export default function MaintenanceScreen() {
         showsVerticalScrollIndicator={false}
       >
         <SectionHeader
-          title="Maintenance Logs"
-          actionLabel="Add Entry"
+          title={t("carMaintenance.logsTitle")}
+          actionLabel={t("carMaintenance.addEntry")}
           onAction={() => setShowAdd(true)}
         />
 
@@ -169,9 +171,9 @@ export default function MaintenanceScreen() {
         ) : !maintenanceQuery.data || maintenanceQuery.data.length === 0 ? (
           <EmptyState
             icon="tool"
-            title="No maintenance records"
-            description="Log oil changes, tyre rotations, brake service, and more."
-            actionLabel="Add Entry"
+            title={t("carMaintenance.emptyTitle")}
+            description={t("carMaintenance.emptyDesc")}
+            actionLabel={t("carMaintenance.addEntry")}
             onAction={() => setShowAdd(true)}
           />
         ) : (
@@ -200,7 +202,7 @@ export default function MaintenanceScreen() {
       >
         <View style={[styles.sheet, { backgroundColor: C.backgroundSecondary }]}>
           <View style={[styles.sheetHeader, { borderBottomColor: C.border }]}>
-            <Text style={[styles.sheetTitle, { color: C.text }]}>Add Maintenance</Text>
+            <Text style={[styles.sheetTitle, { color: C.text }]}>{t("carMaintenance.sheetTitle")}</Text>
             <Pressable onPress={() => setShowAdd(false)} hitSlop={12}>
               <Feather name="x" size={22} color={C.textSecondary} />
             </Pressable>
@@ -211,54 +213,54 @@ export default function MaintenanceScreen() {
           >
             <View style={[styles.fieldGroup, { backgroundColor: C.card }]}>
               <SelectField
-                label="Type"
+                label={t("carMaintenance.typeLabel")}
                 value={mType}
                 onSelect={setMType}
                 options={MAINTENANCE_TYPES}
-                placeholder="Select type…"
+                placeholder={t("carMaintenance.typePlaceholder")}
                 required
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Description"
+                label={t("carMaintenance.descLabel")}
                 value={mDesc}
                 onChangeText={setMDesc}
-                placeholder="What was done?"
+                placeholder={t("carMaintenance.descPlaceholder")}
                 multiline
                 required
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <DatePickerField
-                label="Date"
+                label={t("carMaintenance.dateLabel")}
                 value={mDate}
                 onChange={setMDate}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={`Mileage (${unit})`}
+                label={t("carMaintenance.mileageLabel", { unit })}
                 value={mMileage}
                 onChangeText={setMMileage}
-                placeholder="e.g. 54200"
+                placeholder={t("carMaintenance.mileagePlaceholder")}
                 keyboardType="number-pad"
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Cost"
+                label={t("carMaintenance.costLabel")}
                 value={mCost}
                 onChangeText={setMCost}
-                placeholder="e.g. 120.00"
+                placeholder={t("carMaintenance.costPlaceholder")}
                 keyboardType="decimal-pad"
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label="Shop / Technician"
+                label={t("carMaintenance.shopLabel")}
                 value={mShop}
                 onChangeText={setMShop}
-                placeholder="e.g. City Garage"
+                placeholder={t("carMaintenance.shopPlaceholder")}
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <DatePickerField
-                label="Next Due Date"
+                label={t("carMaintenance.nextDueLabel")}
                 value={mNextDate}
                 onChange={setMNextDate}
               />
@@ -267,13 +269,13 @@ export default function MaintenanceScreen() {
             {addMutation.isError && (
               <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
                 <Text style={[styles.errorText, { color: C.danger }]}>
-                  Failed to save. Please check all required fields.
+                  {t("carMaintenance.saveError")}
                 </Text>
               </View>
             )}
 
             <PrimaryButton
-              label="Save Entry"
+              label={t("carMaintenance.saveEntry")}
               onPress={() => addMutation.mutate()}
               loading={addMutation.isPending}
               disabled={!mType.trim() || !mDesc.trim()}
@@ -284,9 +286,9 @@ export default function MaintenanceScreen() {
 
       <ConfirmModal
         visible={confirmId !== null}
-        title="Delete Maintenance Log"
-        message="This maintenance record will be permanently deleted."
-        confirmLabel="Delete"
+        title={t("carMaintenance.deleteTitle")}
+        message={t("carMaintenance.deleteMessage")}
+        confirmLabel={t("common.delete")}
         onConfirm={() => confirmId !== null && deleteMutation.mutate(confirmId)}
         onCancel={() => setConfirmId(null)}
         destructive

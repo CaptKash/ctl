@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
 import { useSignIn, isClerkAPIResponseError } from "@clerk/clerk-expo";
+import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
@@ -32,6 +33,9 @@ export default function ForgotPasswordScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { width: screenW } = useWindowDimensions();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+  const rtlText = isRTL ? { textAlign: "right" as const, writingDirection: "rtl" as const } : null;
 
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -42,9 +46,9 @@ export default function ForgotPasswordScreen() {
   const [error, setError] = useState("");
 
   const passwordRules = [
-    { key: "len", label: "At least 8 characters", met: newPassword.length >= 8 },
-    { key: "upper", label: "One uppercase letter (A–Z)", met: /[A-Z]/.test(newPassword) },
-    { key: "num", label: "One number (0–9)", met: /[0-9]/.test(newPassword) },
+    { key: "len", label: t("forgotPassword.ruleLen"), met: newPassword.length >= 8 },
+    { key: "upper", label: t("forgotPassword.ruleUpper"), met: /[A-Z]/.test(newPassword) },
+    { key: "num", label: t("forgotPassword.ruleNum"), met: /[0-9]/.test(newPassword) },
   ];
   const passwordValid = passwordRules.every((r) => r.met);
 
@@ -99,7 +103,7 @@ export default function ForgotPasswordScreen() {
       }
     } catch {
       // Generic error to avoid revealing anything about the account.
-      setError("Couldn't start password reset right now. Please try again.");
+      setError(t("forgotPassword.errStart"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -130,29 +134,29 @@ export default function ForgotPasswordScreen() {
       // password IS reset at this point — they just can't be auto-signed-in
       // here. Send them back to the login screen to complete the challenge.
       if (result.status === "needs_second_factor") {
-        setError("Your password was reset. Please sign in to finish.");
+        setError(t("forgotPassword.errReset2fa"));
         setTimeout(() => router.replace("/"), 1500);
         return;
       }
-      setError("Your password was reset. Please sign in with your new password.");
+      setError(t("forgotPassword.errResetSignIn"));
       setTimeout(() => router.replace("/"), 1500);
     } catch (err: unknown) {
       if (isClerkAPIResponseError(err) && err.errors.length > 0) {
         const code = err.errors[0].code;
         if (code === "form_code_incorrect" || code === "verification_expired") {
-          setError("Invalid or expired code. Please try again.");
+          setError(t("forgotPassword.errInvalidCode"));
         } else if (
           code === "form_password_pwned" ||
           code === "form_password_length_too_short" ||
           code === "form_password_validation_failed" ||
           code === "form_password_not_strong_enough"
         ) {
-          setError("Please choose a stronger password.");
+          setError(t("forgotPassword.errWeak"));
         } else {
-          setError("Couldn't complete the reset. Please try again.");
+          setError(t("forgotPassword.errComplete"));
         }
       } else {
-        setError("Couldn't complete the reset. Please try again.");
+        setError(t("forgotPassword.errComplete"));
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -170,7 +174,7 @@ export default function ForgotPasswordScreen() {
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      setError("Couldn't resend the code right now.");
+      setError(t("forgotPassword.errResend"));
     }
   };
 
@@ -215,8 +219,8 @@ export default function ForgotPasswordScreen() {
             <View style={styles.heroLineLong} />
             <View style={styles.heroLineShort} />
           </View>
-          <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }]}>
-            Car Technical Log
+          <Text style={[styles.heroTagline, { color: isDark ? "#93C5FD" : "#2563EB" }, rtlText]}>
+            {t("forgotPassword.tagline")}
           </Text>
         </View>
 
@@ -228,31 +232,31 @@ export default function ForgotPasswordScreen() {
           {step === "email" && (
             <View style={[styles.formCard, { backgroundColor: C.card }]}>
               <View style={styles.welcomeBlock}>
-                <Text style={[styles.welcomeTitle, { color: C.text }]}>Reset password</Text>
-                <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
-                  Enter your account email and we'll send you a code to set a new password.
+                <Text style={[styles.welcomeTitle, { color: C.text }, rtlText]}>{t("forgotPassword.resetTitle")}</Text>
+                <Text style={[styles.welcomeSub, { color: C.textSecondary }, rtlText]}>
+                  {t("forgotPassword.resetSub")}
                 </Text>
               </View>
 
               {error !== "" && (
-                <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+                <View style={[styles.errorBox, { backgroundColor: C.dangerLight }, isRTL && { flexDirection: "row-reverse" }]}>
                   <Feather name="alert-circle" size={15} color={C.danger} />
-                  <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+                  <Text style={[styles.errorText, { color: C.danger }, rtlText]}>{error}</Text>
                 </View>
               )}
 
               <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
 
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Email</Text>
-                <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+                <Text style={[styles.fieldLabel, { color: C.textSecondary }, rtlText]}>{t("forgotPassword.emailLabel")}</Text>
+                <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }, isRTL && { flexDirection: "row-reverse" }]}>
                   <Feather name="mail" size={16} color={C.textSecondary} />
                   <TextInput
-                    style={[styles.input, { color: C.text }]}
-                    placeholder="you@example.com"
+                    style={[styles.input, { color: C.text }, rtlText]}
+                    placeholder={t("forgotPassword.emailPlaceholder")}
                     placeholderTextColor={C.textTertiary}
                     value={email}
-                    onChangeText={(t) => { setEmail(t); setError(""); }}
+                    onChangeText={(v) => { setEmail(v); setError(""); }}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -264,15 +268,15 @@ export default function ForgotPasswordScreen() {
               </View>
 
               <PrimaryButton
-                label="Send Reset Code"
+                label={t("forgotPassword.sendCode")}
                 onPress={handleSubmitEmail}
                 loading={loading}
                 disabled={!canSubmitEmail || loading}
               />
 
-              <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backLink}>
-                <Feather name="arrow-left" size={14} color={C.tint} />
-                <Text style={[styles.backLinkText, { color: C.tint }]}>Back to Sign In</Text>
+              <Pressable onPress={() => router.back()} hitSlop={8} style={[styles.backLink, isRTL && { flexDirection: "row-reverse" }]}>
+                <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={14} color={C.tint} />
+                <Text style={[styles.backLinkText, { color: C.tint }]}>{t("forgotPassword.backToSignIn")}</Text>
               </Pressable>
             </View>
           )}
@@ -280,29 +284,29 @@ export default function ForgotPasswordScreen() {
           {step === "verify" && (
             <View style={[styles.formCard, { backgroundColor: C.card }]}>
               <View style={styles.welcomeBlock}>
-                <Text style={[styles.welcomeTitle, { color: C.text }]}>Set a new password</Text>
-                <Text style={[styles.welcomeSub, { color: C.textSecondary }]}>
-                  We sent a 6-digit code to {email.trim()}. Enter it below along with your new password.
+                <Text style={[styles.welcomeTitle, { color: C.text }, rtlText]}>{t("forgotPassword.setNewTitle")}</Text>
+                <Text style={[styles.welcomeSub, { color: C.textSecondary }, rtlText]}>
+                  {t("forgotPassword.setNewSub", { email: email.trim() })}
                 </Text>
               </View>
 
               {error !== "" && (
-                <View style={[styles.errorBox, { backgroundColor: C.dangerLight }]}>
+                <View style={[styles.errorBox, { backgroundColor: C.dangerLight }, isRTL && { flexDirection: "row-reverse" }]}>
                   <Feather name="alert-circle" size={15} color={C.danger} />
-                  <Text style={[styles.errorText, { color: C.danger }]}>{error}</Text>
+                  <Text style={[styles.errorText, { color: C.danger }, rtlText]}>{error}</Text>
                 </View>
               )}
 
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>Verification code</Text>
-                <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+                <Text style={[styles.fieldLabel, { color: C.textSecondary }, rtlText]}>{t("forgotPassword.codeLabel")}</Text>
+                <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }, isRTL && { flexDirection: "row-reverse" }]}>
                   <Feather name="hash" size={16} color={C.textSecondary} />
                   <TextInput
-                    style={[styles.input, { color: C.text, letterSpacing: 4 }]}
-                    placeholder="123456"
+                    style={[styles.input, { color: C.text, letterSpacing: 4 }, rtlText]}
+                    placeholder={t("forgotPassword.codePlaceholder")}
                     placeholderTextColor={C.textTertiary}
                     value={code}
-                    onChangeText={(t) => { setCode(t.replace(/[^0-9]/g, "")); setError(""); }}
+                    onChangeText={(v) => { setCode(v.replace(/[^0-9]/g, "")); setError(""); }}
                     keyboardType="number-pad"
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -315,15 +319,15 @@ export default function ForgotPasswordScreen() {
               <View style={[styles.sep, { backgroundColor: C.borderLight }]} />
 
               <View style={styles.fieldGroup}>
-                <Text style={[styles.fieldLabel, { color: C.textSecondary }]}>New password</Text>
-                <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }]}>
+                <Text style={[styles.fieldLabel, { color: C.textSecondary }, rtlText]}>{t("forgotPassword.newPasswordLabel")}</Text>
+                <View style={[styles.inputRow, { borderColor: C.border, backgroundColor: C.backgroundTertiary }, isRTL && { flexDirection: "row-reverse" }]}>
                   <Feather name="lock" size={16} color={C.textSecondary} />
                   <TextInput
-                    style={[styles.input, { color: C.text }]}
+                    style={[styles.input, { color: C.text }, rtlText]}
                     placeholder="••••••••"
                     placeholderTextColor={C.textTertiary}
                     value={newPassword}
-                    onChangeText={(t) => { setNewPassword(t); setError(""); }}
+                    onChangeText={(v) => { setNewPassword(v); setError(""); }}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     returnKeyType="done"
@@ -337,7 +341,7 @@ export default function ForgotPasswordScreen() {
                 {newPassword.length > 0 && (
                   <View style={styles.pwRules}>
                     {passwordRules.map((r) => (
-                      <View key={r.key} style={styles.pwRuleRow}>
+                      <View key={r.key} style={[styles.pwRuleRow, isRTL && { flexDirection: "row-reverse" }]}>
                         <Feather
                           name={r.met ? "check-circle" : "circle"}
                           size={13}
@@ -353,24 +357,24 @@ export default function ForgotPasswordScreen() {
               </View>
 
               <PrimaryButton
-                label="Reset Password"
+                label={t("forgotPassword.resetPassword")}
                 onPress={handleSubmitVerify}
                 loading={loading}
                 disabled={!canSubmitVerify || loading}
               />
 
-              <Pressable onPress={handleResendCode} hitSlop={8} style={styles.backLink}>
+              <Pressable onPress={handleResendCode} hitSlop={8} style={[styles.backLink, isRTL && { flexDirection: "row-reverse" }]}>
                 <Feather name="refresh-cw" size={14} color={C.tint} />
-                <Text style={[styles.backLinkText, { color: C.tint }]}>Resend code</Text>
+                <Text style={[styles.backLinkText, { color: C.tint }]}>{t("forgotPassword.resendCode")}</Text>
               </Pressable>
 
               <Pressable
                 onPress={() => { setStep("email"); setError(""); setCode(""); setNewPassword(""); }}
                 hitSlop={8}
-                style={styles.backLink}
+                style={[styles.backLink, isRTL && { flexDirection: "row-reverse" }]}
               >
-                <Feather name="arrow-left" size={14} color={C.tint} />
-                <Text style={[styles.backLinkText, { color: C.tint }]}>Use a different email</Text>
+                <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={14} color={C.tint} />
+                <Text style={[styles.backLinkText, { color: C.tint }]}>{t("forgotPassword.useDifferentEmail")}</Text>
               </Pressable>
             </View>
           )}
@@ -379,16 +383,18 @@ export default function ForgotPasswordScreen() {
             <View style={[styles.formCard, { backgroundColor: C.card }]}>
               <View style={styles.successBlock}>
                 <MetalIcon icon="mail" color="#059669" bg="#D1FAE5" size={28} style={styles.successIcon} />
-                <Text style={[styles.successTitle, { color: C.text }]}>Check your email</Text>
-                <Text style={[styles.successSub, { color: C.textSecondary }]}>
-                  If an account exists for <Text style={{ fontFamily: "Inter_600SemiBold", color: C.text }}>{email.trim()}</Text>, a password reset link has been sent. Check your inbox (and spam folder).
+                <Text style={[styles.successTitle, { color: C.text }]}>{t("forgotPassword.checkEmailTitle")}</Text>
+                <Text style={[styles.successSub, { color: C.textSecondary }, rtlText]}>
+                  {t("forgotPassword.checkEmailPre")}
+                  <Text style={{ fontFamily: "Inter_600SemiBold", color: C.text }}>{email.trim()}</Text>
+                  {t("forgotPassword.checkEmailPost")}
                 </Text>
                 <Text style={[styles.successNote, { color: C.textSecondary }]}>
-                  The link expires in 1 hour.
+                  {t("forgotPassword.linkExpires")}
                 </Text>
               </View>
 
-              <PrimaryButton label="Back to Sign In" onPress={() => router.back()} />
+              <PrimaryButton label={t("forgotPassword.backToSignIn")} onPress={() => router.back()} />
             </View>
           )}
         </ScrollView>

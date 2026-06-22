@@ -16,19 +16,22 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/context/ThemeContext";
+import { useTranslation } from "react-i18next";
 import { apiPost } from "@/hooks/useApi";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 
 const CATEGORIES = [
-  { id: "Bug Report",        icon: "alert-circle" as const,  color: "#DC2626", bg: "#FEE2E2" },
-  { id: "Feature Request",   icon: "star" as const,          color: "#D97706", bg: "#FEF3C7" },
-  { id: "General Feedback",  icon: "message-circle" as const,color: "#2563EB", bg: "#DBEAFE" },
-  { id: "Other",             icon: "more-horizontal" as const,color: "#6B7280", bg: "#F3F4F6" },
+  { id: "Bug Report",        labelKey: "feedback.categories.bug",     icon: "alert-circle" as const,  color: "#DC2626", bg: "#FEE2E2" },
+  { id: "Feature Request",   labelKey: "feedback.categories.feature", icon: "star" as const,          color: "#D97706", bg: "#FEF3C7" },
+  { id: "General Feedback",  labelKey: "feedback.categories.general", icon: "message-circle" as const,color: "#2563EB", bg: "#DBEAFE" },
+  { id: "Other",             labelKey: "feedback.categories.other",   icon: "more-horizontal" as const,color: "#6B7280", bg: "#F3F4F6" },
 ];
 
 export default function FeedbackScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [category, setCategory] = useState("General Feedback");
@@ -47,7 +50,7 @@ export default function FeedbackScreen() {
       setDone(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      Alert.alert("Something went wrong", "Please try again in a moment.");
+      Alert.alert(t("feedback.errorTitle"), t("feedback.errorBody"));
     } finally {
       setLoading(false);
     }
@@ -56,26 +59,26 @@ export default function FeedbackScreen() {
   return (
     <SwipeBackView style={[styles.container, { backgroundColor: C.background }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
-          <Feather name="chevron-left" size={26} color={C.tint} />
+      <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: C.border, backgroundColor: C.card }, isRTL && { flexDirection: "row-reverse" }]}>
+        <Pressable onPress={() => router.back()} hitSlop={12} style={[styles.backBtn, isRTL && { alignItems: "flex-end" }]}>
+          <Feather name={isRTL ? "chevron-right" : "chevron-left"} size={26} color={C.tint} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: C.text }]}>Send Feedback</Text>
+        <Text style={[styles.headerTitle, { color: C.text }]}>{t("feedback.title")}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       {done ? (
         <View style={styles.successWrap}>
           <MetalIcon icon="check-circle" color="#059669" bg="#D1FAE5" size={36} style={styles.successIcon} />
-          <Text style={[styles.successTitle, { color: C.text }]}>Thanks for the feedback!</Text>
+          <Text style={[styles.successTitle, { color: C.text }]}>{t("feedback.thanksTitle")}</Text>
           <Text style={[styles.successSub, { color: C.textSecondary }]}>
-            Your message has been sent. We read every piece of feedback and use it to improve CTL.
+            {t("feedback.thanksSub")}
           </Text>
           <Pressable
             onPress={() => router.back()}
             style={[styles.doneBtn, { backgroundColor: C.tint }]}
           >
-            <Text style={styles.doneBtnText}>Done</Text>
+            <Text style={styles.doneBtnText}>{t("common.done")}</Text>
           </Pressable>
         </View>
       ) : (
@@ -84,8 +87,8 @@ export default function FeedbackScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={[styles.sectionLabel, { color: C.textSecondary }]}>CATEGORY</Text>
-          <View style={styles.categoryGrid}>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("feedback.categoryLabel")}</Text>
+          <View style={[styles.categoryGrid, isRTL && { flexDirection: "row-reverse" }]}>
             {CATEGORIES.map((cat) => {
               const active = category === cat.id;
               return (
@@ -98,30 +101,31 @@ export default function FeedbackScreen() {
                   style={[
                     styles.categoryChip,
                     { backgroundColor: active ? cat.bg : C.card, borderColor: active ? cat.color : C.border },
+                    isRTL && { flexDirection: "row-reverse" },
                   ]}
                 >
                   <Feather name={cat.icon} size={16} color={active ? cat.color : C.textSecondary} />
                   <Text style={[styles.categoryLabel, { color: active ? cat.color : C.textSecondary }]}>
-                    {cat.id}
+                    {t(cat.labelKey)}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
 
-          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20 }]}>YOUR MESSAGE</Text>
+          <Text style={[styles.sectionLabel, { color: C.textSecondary, marginTop: 20, textAlign: isRTL ? "right" : "left" }]}>{t("feedback.messageLabel")}</Text>
           <View style={[styles.textAreaWrap, { backgroundColor: C.card, borderColor: C.border }]}>
             <TextInput
               value={message}
               onChangeText={setMessage}
-              placeholder="Tell us what's on your mind — bugs, ideas, or anything else…"
+              placeholder={t("feedback.placeholder")}
               placeholderTextColor={C.textTertiary}
               multiline
               textAlignVertical="top"
-              style={[styles.textArea, { color: C.text }]}
+              style={[styles.textArea, { color: C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}
               maxLength={2000}
             />
-            <Text style={[styles.charCount, { color: C.textTertiary }]}>
+            <Text style={[styles.charCount, { color: C.textTertiary, textAlign: isRTL ? "left" : "right" }]}>
               {message.length}/2000
             </Text>
           </View>
@@ -132,6 +136,7 @@ export default function FeedbackScreen() {
             style={[
               styles.submitBtn,
               { backgroundColor: canSubmit ? C.tint : C.border },
+              isRTL && { flexDirection: "row-reverse" },
             ]}
           >
             {loading ? (
@@ -139,13 +144,13 @@ export default function FeedbackScreen() {
             ) : (
               <>
                 <Feather name="send" size={16} color="#fff" />
-                <Text style={styles.submitText}>Send Feedback</Text>
+                <Text style={styles.submitText}>{t("feedback.send")}</Text>
               </>
             )}
           </Pressable>
 
           <Text style={[styles.hint, { color: C.textTertiary }]}>
-            Feedback is sent directly to the CTL team. We may follow up at your account email address.
+            {t("feedback.hint")}
           </Text>
         </ScrollView>
       )}

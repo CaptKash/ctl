@@ -89,7 +89,7 @@ export default function RepairHistoryScreen() {
         await FileSystem.downloadAsync(url, fileUri);
       }
       const available = await Sharing.isAvailableAsync();
-      if (!available) throw new Error("Sharing not available on this device");
+      if (!available) throw new Error(t("carDetail.photo.sharingUnavailable"));
       await Sharing.shareAsync(fileUri, {
         mimeType: "image/jpeg",
         UTI: "public.jpeg",
@@ -109,7 +109,7 @@ export default function RepairHistoryScreen() {
   });
 
   function carLabel(car: Car | null) {
-    if (!car) return "Unknown Car";
+    if (!car) return t("repairHistory.unknownCar");
     return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
   }
 
@@ -122,8 +122,8 @@ export default function RepairHistoryScreen() {
           </Pressable>
           <MetalIcon icon="tool" color="#D97706" bg="#FEF3C7" size={22} style={styles.iconBox} />
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>Repair History</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>All maintenance logs</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>{t("repairHistory.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>{t("repairHistory.subtitle")}</Text>
           </View>
         </View>
       </View>
@@ -135,9 +135,9 @@ export default function RepairHistoryScreen() {
       ) : !logs || logs.length === 0 ? (
         <View style={styles.centered}>
           <Feather name="tool" size={40} color={C.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: C.text }]}>No Repair Logs Yet</Text>
+          <Text style={[styles.emptyTitle, { color: C.text }]}>{t("repairHistory.emptyTitle")}</Text>
           <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            Saved maintenance logs will appear here.
+            {t("repairHistory.emptySub")}
           </Text>
         </View>
       ) : (

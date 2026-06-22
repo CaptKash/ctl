@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
 import BottomNav from "@/components/ui/BottomNav";
@@ -41,6 +42,7 @@ type Car = {
 export default function FleetScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -106,9 +108,9 @@ export default function FleetScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setConfirmModal({
       visible: true,
-      title: "Delete Car",
-      message: `This will permanently delete ${car.year} ${car.make} ${car.model} and ALL associated records — maintenance, fuel, parts, insurance, dealerships, and malfunctions.\n\nThis cannot be undone.`,
-      confirmLabel: "Delete Everything",
+      title: t("fleet.deleteTitle"),
+      message: t("fleet.deleteMessage", { car: `${car.year} ${car.make} ${car.model}` }),
+      confirmLabel: t("fleet.deleteConfirm"),
       onConfirm: () => {
         setConfirmModal((s) => ({ ...s, visible: false }));
         closeRow(car.id);
@@ -119,7 +121,7 @@ export default function FleetScreen() {
         closeRow(car.id);
       },
     });
-  }, [closeRow, deleteMutation]);
+  }, [closeRow, deleteMutation, t]);
 
   const renderRightActions = useCallback(
     (car: Car) =>
@@ -134,12 +136,12 @@ export default function FleetScreen() {
           <Pressable style={styles.deleteActionContainer} onPress={() => handleDelete(car)}>
             <Animated.View style={[styles.deleteAction, { transform: [{ scale }] }]}>
               <Feather name="trash-2" size={22} color="#fff" />
-              <Text style={styles.deleteActionText}>Delete</Text>
+              <Text style={styles.deleteActionText}>{t("common.delete")}</Text>
             </Animated.View>
           </Pressable>
         );
       },
-    [handleDelete]
+    [handleDelete, t]
   );
 
   return (
@@ -159,8 +161,8 @@ export default function FleetScreen() {
             <Ionicons name="car" size={26} color="#334155" />
           </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text }]}>My Fleet</Text>
-            <Text style={[styles.headerSub, { color: C.textSecondary }]}>All vehicles</Text>
+            <Text style={[styles.headerTitle, { color: C.text }]}>{t("fleet.title")}</Text>
+            <Text style={[styles.headerSub, { color: C.textSecondary }]}>{t("fleet.subtitle")}</Text>
           </View>
           <Pressable
             onPress={() => {
@@ -198,9 +200,9 @@ export default function FleetScreen() {
           ListEmptyComponent={
             <EmptyState
               ionIcon="car-outline"
-              title="No cars yet"
-              description="Add your first car to start logging maintenance, fuel, insurance, and more."
-              actionLabel="Add Car"
+              title={t("fleet.emptyTitle")}
+              description={t("fleet.emptyDesc")}
+              actionLabel={t("fleet.addCar")}
               onAction={handleAddCar}
             />
           }
