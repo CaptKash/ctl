@@ -305,7 +305,8 @@ function buildPdfHtml(
       -webkit-font-smoothing: antialiased;
       line-height: 1.45;
     }
-    .report { max-width: 900px; margin: 0 auto; }
+    @page { size: A4 landscape; margin: 10mm; }
+    .report { max-width: 1180px; margin: 0 auto; }
 
     .report-header {
       background: linear-gradient(135deg, #0F2D5E 0%, #0A1A3A 100%);
@@ -350,16 +351,19 @@ function buildPdfHtml(
     .col-head th {
       text-align: start;
       background: #f1f5f9;
-      padding: 8px 10px;
-      font-size: 11px; font-weight: 700; color: #475569;
+      padding: 6px 7px;
+      font-size: 9.5px; font-weight: 700; color: #475569;
       border-bottom: 1px solid #e2e8f0;
+      overflow-wrap: break-word;
     }
     .data-row td {
-      padding: 8px 10px;
-      font-size: 11px; color: #334155;
+      padding: 6px 7px;
+      font-size: 9.5px; color: #334155;
+      line-height: 1.35;
       border-top: 1px solid #eef2f6;
       vertical-align: top;
-      word-break: break-word;
+      overflow-wrap: break-word;
+      word-break: normal;
     }
     .data-row:nth-child(even) td { background: #f8fafc; }
     .empty-cell { padding: 14px 16px; color: #94a3b8; font-style: italic; font-size: 12px; }
@@ -368,7 +372,8 @@ function buildPdfHtml(
 
     @media print {
       body { padding: 0; background: #fff; }
-      .report-header, .stat, .data-table, .sec-head th, .col-head th {
+      .report { max-width: none; }
+      .report-header, .stat, .data-table, .sec-head th, .col-head th, .data-row:nth-child(even) td {
         -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       .report-header { box-shadow: none; }
