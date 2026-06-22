@@ -747,6 +747,7 @@
       "records": "السجلات",
       "noRecords": "لا توجد سجلات.",
       "noRecordsSection": "لا توجد سجلات لهذا القسم.",
+      "record": "السجل {{num}}",
       "footer": "تم الإنشاء بواسطة Car Technical Log",
       "yes": "نعم",
       "no": "لا"

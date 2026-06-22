@@ -250,43 +250,41 @@ function buildPdfHtml(
       const name = escapeHtml(sectionName(id, t));
       const count = rows.length;
 
+      const head = `<div class="sec-head" style="border-inline-start-color:${color}">
+        <span class="sec-name">${name}</span>
+        <span class="sec-count">${count}</span>
+      </div>`;
+
       if (!rows.length) {
-        return `<section class="card">
-          <table class="data-table">
-            <thead>
-              <tr class="sec-head"><th style="border-inline-start-color:${color}">
-                <span class="sec-name">${name}</span>
-                <span class="sec-count">${count}</span>
-              </th></tr>
-            </thead>
-            <tbody><tr><td class="empty-cell">${t("export.doc.noRecords")}</td></tr></tbody>
-          </table>
+        return `<section class="card">${head}
+          <div class="empty">${escapeHtml(t("export.doc.noRecords"))}</div>
         </section>`;
       }
 
-      const keys = Object.keys(rows[0]).filter((k) => !HIDDEN_FIELDS.has(k));
-      const colHeads = keys.map((k) => `<th>${escapeHtml(fieldLabel(k, t))}</th>`).join("");
-      const bodyRows = rows
-        .map(
-          (r) =>
-            `<tr class="data-row">${keys
-              .map((k) => `<td>${escapeHtml(formatVal(r[k], t))}</td>`)
-              .join("")}</tr>`
-        )
+      const records = rows
+        .map((r, idx) => {
+          const kvs = Object.keys(r)
+            .filter((k) => !HIDDEN_FIELDS.has(k))
+            .map((k) => {
+              const val = formatVal(r[k], t);
+              if (val === "") return "";
+              return `<div class="kv">
+                <span class="k">${escapeHtml(fieldLabel(k, t))}</span>
+                <span class="v">${escapeHtml(val)}</span>
+              </div>`;
+            })
+            .join("");
+
+          return `<div class="record">
+            <div class="record-no" style="color:${color}">${escapeHtml(
+              t("export.doc.record", { num: idx + 1 })
+            )}</div>
+            ${kvs || `<div class="kv"><span class="v">${escapeHtml(t("export.doc.noRecords"))}</span></div>`}
+          </div>`;
+        })
         .join("");
 
-      return `<section class="card">
-        <table class="data-table">
-          <thead>
-            <tr class="sec-head"><th colspan="${keys.length}" style="border-inline-start-color:${color}">
-              <span class="sec-name">${name}</span>
-              <span class="sec-count">${count}</span>
-            </th></tr>
-            <tr class="col-head">${colHeads}</tr>
-          </thead>
-          <tbody>${bodyRows}</tbody>
-        </table>
-      </section>`;
+      return `<section class="card">${head}<div class="records">${records}</div></section>`;
     })
     .join("");
 
@@ -305,8 +303,8 @@ function buildPdfHtml(
       -webkit-font-smoothing: antialiased;
       line-height: 1.45;
     }
-    @page { size: A4 landscape; margin: 10mm; }
-    .report { max-width: 1180px; margin: 0 auto; }
+    @page { size: A4; margin: 14mm; }
+    .report { max-width: 820px; margin: 0 auto; }
 
     .report-header {
       background: linear-gradient(135deg, #0F2D5E 0%, #0A1A3A 100%);
@@ -333,52 +331,60 @@ function buildPdfHtml(
     .stat-num { display: block; font-size: 26px; font-weight: 800; line-height: 1.1; }
     .stat-label { font-size: 12px; color: #64748b; font-weight: 600; }
 
-    .card { margin-bottom: 24px; }
-    .data-table {
-      width: 100%; border-collapse: collapse;
+    .card {
+      margin-bottom: 22px;
       background: #fff; border: 1px solid #e2e8f0; border-radius: 13px;
       overflow: hidden;
     }
-    .sec-head th {
-      text-align: start;
+    .sec-head {
+      display: flex; align-items: center; gap: 10px;
       padding: 13px 16px;
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
       border-inline-start: 4px solid #1D4ED8;
     }
     .sec-name { font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; }
-    .sec-count { font-size: 12px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; border-radius: 999px; padding: 3px 11px; white-space: nowrap; margin-inline-start: 10px; }
-    .col-head th {
+    .sec-count { font-size: 12px; font-weight: 700; color: #1D4ED8; background: #DBEAFE; border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+
+    .record {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .record:last-child { border-bottom: none; }
+    .record-no {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.4px;
+      text-transform: uppercase; color: #1D4ED8; margin-bottom: 7px;
+    }
+    .kv {
+      display: flex; gap: 14px; align-items: baseline;
+      padding: 4px 0;
+      border-top: 1px dashed #f1f5f9;
+    }
+    .kv:first-of-type { border-top: none; }
+    .kv .k {
+      flex: 0 0 38%; max-width: 38%;
+      font-size: 11.5px; font-weight: 600; color: #64748b;
       text-align: start;
-      background: #f1f5f9;
-      padding: 6px 7px;
-      font-size: 9.5px; font-weight: 700; color: #475569;
-      border-bottom: 1px solid #e2e8f0;
-      overflow-wrap: break-word;
     }
-    .data-row td {
-      padding: 6px 7px;
-      font-size: 9.5px; color: #334155;
-      line-height: 1.35;
-      border-top: 1px solid #eef2f6;
-      vertical-align: top;
-      overflow-wrap: break-word;
-      word-break: normal;
+    .kv .v {
+      flex: 1;
+      font-size: 11.5px; color: #0f172a; font-weight: 500;
+      text-align: start;
+      overflow-wrap: break-word; word-break: normal;
+      white-space: pre-wrap;
     }
-    .data-row:nth-child(even) td { background: #f8fafc; }
-    .empty-cell { padding: 14px 16px; color: #94a3b8; font-style: italic; font-size: 12px; }
+    .empty { padding: 14px 16px; color: #94a3b8; font-style: italic; font-size: 12px; text-align: start; }
 
     .footer { margin-top: 28px; text-align: center; color: #94a3b8; font-size: 11px; }
 
     @media print {
       body { padding: 0; background: #fff; }
       .report { max-width: none; }
-      .report-header, .stat, .data-table, .sec-head th, .col-head th, .data-row:nth-child(even) td {
+      .report-header, .stat, .card, .sec-head {
         -webkit-print-color-adjust: exact; print-color-adjust: exact;
       }
       .report-header { box-shadow: none; }
-      .card, .data-row { break-inside: avoid; }
-      .stat { break-inside: avoid; }
+      .record, .stat { break-inside: avoid; }
     }
   </style></head><body>
   <div class="report">
