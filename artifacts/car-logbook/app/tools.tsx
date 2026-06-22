@@ -96,14 +96,14 @@ export default function ToolsScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => isFleet ? router.push("/fuel" as any) : router.push("/fleet-upgrade" as any)}
+          onPress={() => router.push("/fuel" as any)}
           style={({ pressed }) => [
             styles.tool,
             isRTL && { flexDirection: "row-reverse" },
             { backgroundColor: C.card, shadowColor: C.shadow, opacity: pressed ? 0.85 : 1 },
           ]}
         >
-          <MetalIcon icon="droplet" color={isFleet ? "#2563EB" : "#9CA3AF"} bg={isFleet ? "#DBEAFE" : "#F3F4F6"} size={24} style={styles.toolIcon} />
+          <MetalIcon icon="droplet" color="#2563EB" bg="#DBEAFE" size={24} style={styles.toolIcon} />
           <View style={styles.toolBody}>
             <Text style={[styles.toolTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>
               {t("tools.fuel.title")}
@@ -112,10 +112,7 @@ export default function ToolsScreen() {
               {t("tools.fuel.sub")}
             </Text>
           </View>
-          {isFleet
-            ? <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
-            : <View style={[styles.fleetBadge, isRTL && { flexDirection: "row-reverse" }]}><Feather name="lock" size={10} color="#92400E" /><Text style={styles.fleetBadgeText}>{t("tools.fleetBadge")}</Text></View>
-          }
+          <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={18} color={C.textTertiary} />
         </Pressable>
 
         <Pressable

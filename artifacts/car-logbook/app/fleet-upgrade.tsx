@@ -35,11 +35,11 @@ export default function FleetUpgradeScreen() {
     t("fleetUpgrade.freeFeature2"),
     t("fleetUpgrade.freeFeature3"),
     t("fleetUpgrade.freeFeature4"),
+    t("fleetUpgrade.freeFeature5"),
   ];
 
   const FLEET_FEATURES = [
     { icon: "layers" as const, label: t("fleetUpgrade.fleetFeature1") },
-    { icon: "bar-chart-2" as const, label: t("fleetUpgrade.fleetFeature2") },
     { icon: "dollar-sign" as const, label: t("fleetUpgrade.fleetFeature3") },
     { icon: "download" as const, label: t("fleetUpgrade.fleetFeature4") },
     { icon: "star" as const, label: t("fleetUpgrade.fleetFeature5") },
