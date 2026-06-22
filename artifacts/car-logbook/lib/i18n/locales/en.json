@@ -1146,6 +1146,11 @@
     "heading": "This screen doesn't exist.",
     "link": "Go to home screen!"
   },
+  "errorFallback": {
+    "title": "Something went wrong",
+    "message": "Please reload the app to continue.",
+    "tryAgain": "Try Again"
+  },
   "passwordUpgrade": {
     "title": "Hi {{name}}, please update your password",
     "body": "We've raised CTL's security standards. Your current password no longer meets the new requirements (8+ characters, with an uppercase letter, a lowercase letter, and a number).",
