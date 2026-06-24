@@ -21,6 +21,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
+import { useOrg } from "@/context/OrgContext";
 import { localizeBrand } from "@/lib/carBrandLogo";
 import { localizeDigits } from "@/lib/i18n";
 import BottomNav from "@/components/ui/BottomNav";
@@ -116,6 +117,8 @@ export default function CarDetailScreen() {
   const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { isOrgContext, activeRole } = useOrg();
+  const canEditVehicle = !isOrgContext || activeRole === "admin";
 
   const [confirmModal, setConfirmModal] = useState<{
     visible: boolean;
@@ -455,21 +458,23 @@ export default function CarDetailScreen() {
             </Text>
           </View>
           <View style={[styles.headerActions, isRTL && { flexDirection: "row-reverse" }]}>
-            <Pressable
-              onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
-              hitSlop={8}
-              style={({ pressed }) => [styles.headerBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
-            >
-              <LinearGradient
-                colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
-                locations={[0, 0.55, 1]}
-                start={{ x: 0.15, y: 0 }}
-                end={{ x: 0.85, y: 1 }}
-                style={[styles.headerBtn, { borderWidth: 1, borderColor: "#64748B" }]}
+            {canEditVehicle && (
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/car/edit", params: { id: String(carId) } }); }}
+                hitSlop={8}
+                style={({ pressed }) => [styles.headerBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
-                <Feather name="edit-2" size={16} color="#334155" />
-              </LinearGradient>
-            </Pressable>
+                <LinearGradient
+                  colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+                  locations={[0, 0.55, 1]}
+                  start={{ x: 0.15, y: 0 }}
+                  end={{ x: 0.85, y: 1 }}
+                  style={[styles.headerBtn, { borderWidth: 1, borderColor: "#64748B" }]}
+                >
+                  <Feather name="edit-2" size={16} color="#334155" />
+                </LinearGradient>
+              </Pressable>
+            )}
             <Pressable
               onPress={() => { Haptics.selectionAsync(); router.push({ pathname: "/report", params: { carId: String(carId) } }); }}
               hitSlop={8}

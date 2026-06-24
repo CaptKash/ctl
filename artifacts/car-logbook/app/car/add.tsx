@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
+import { useOrg } from "@/context/OrgContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
@@ -39,6 +40,7 @@ export default function AddCarScreen() {
   const qc = useQueryClient();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const { activeOrgId } = useOrg();
 
   // Basic Info
   const [nickname, setNickname] = useState("");
@@ -96,8 +98,8 @@ export default function AddCarScreen() {
   }, [make, model, year, isElectric, tankEdited]);
 
   const mutation = useMutation({
-    mutationFn: () =>
-      apiPost("/cars", {
+    mutationFn: () => {
+      const payload = {
         make: make.trim(),
         model: model.trim(),
         year: parseInt(year),
@@ -113,10 +115,12 @@ export default function AddCarScreen() {
         isElectric,
         notes: notes.trim() || undefined,
         photos: photos.length > 0 ? JSON.stringify(photos) : undefined,
-      }),
+      };
+      return activeOrgId ? apiPost(`/orgs/${activeOrgId}/cars`, payload) : apiPost("/cars", payload);
+    },
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      qc.invalidateQueries({ queryKey: ["cars"] });
+      qc.invalidateQueries({ queryKey: activeOrgId ? ["orgs", activeOrgId, "cars"] : ["cars"] });
       router.back();
     },
   });

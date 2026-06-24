@@ -26,6 +26,8 @@ import { useTranslation } from "react-i18next";
 import BottomNav from "@/components/ui/BottomNav";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
+import { useOrg } from "@/context/OrgContext";
+import { useSubscription } from "@/lib/revenuecat";
 import { useColors, useTheme, ThemePreference } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { useCurrency, CURRENCIES, currencyOption, findCurrencyByOption } from "@/context/CurrencyContext";
@@ -493,10 +495,13 @@ export default function SettingsScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const { user, logout } = useAuth();
+  const { isEnterprise } = useSubscription();
+  const { orgs, invites } = useOrg();
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const { enabled: remindersEnabled, setEnabled: setRemindersEnabled } = useEventReminders();
+  const hasOrgAccess = isEnterprise || orgs.length > 0 || invites.length > 0;
 
   const handleRemindersToggle = async (value: boolean) => {
     if (value) {
@@ -617,41 +622,49 @@ export default function SettingsScreen() {
           </View>
         </Pressable>
 
-        {/* CTL Enterprise upgrade card (placeholder — content TBD) */}
-        <Pressable
-          style={({ pressed }) => [styles.enterpriseCard, { opacity: pressed ? 0.92 : 1 }]}
-          onPress={() =>
-            Alert.alert(
-              t("settings.enterprise.title"),
-              t("settings.enterprise.tagline"),
-              [{ text: t("common.ok") }],
-            )
-          }
-        >
-          <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
-            <MetalIcon icon="briefcase" color="#312E81" bg="#E0E7FF" size={16} style={styles.enterpriseIconWrap} />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.enterpriseTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.title")}</Text>
-              <Text style={[styles.enterpriseTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.tagline")}</Text>
-            </View>
+        {/* CTL Enterprise: members manage their org; non-members see marketing card */}
+        {hasOrgAccess ? (
+          <View style={[styles.card, { backgroundColor: C.card }]}>
+            <NavRow
+              icon="briefcase"
+              iconColor="#312E81"
+              iconBg="#E0E7FF"
+              label={t("org.title")}
+              subtitle={t("org.subtitle")}
+              badge={invites.length > 0 ? String(invites.length) : undefined}
+              onPress={() => router.push("/organization" as any)}
+            />
           </View>
-          <View style={styles.fleetFeatures}>
-            {[
-              t("settings.enterprise.feature1"),
-              t("settings.enterprise.feature2"),
-              t("settings.enterprise.feature3"),
-            ].map((f) => (
-              <View key={f} style={[styles.fleetFeatureRow, isRTL && { flexDirection: "row-reverse" }]}>
-                <Feather name="check-circle" size={13} color="#4338CA" />
-                <Text style={[styles.enterpriseFeatureText, isRTL && { textAlign: "right", writingDirection: "rtl", flex: 1 }]}>{f}</Text>
+        ) : (
+          <Pressable
+            style={({ pressed }) => [styles.enterpriseCard, { opacity: pressed ? 0.92 : 1 }]}
+            onPress={() => router.push("/enterprise-upgrade" as any)}
+          >
+            <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
+              <MetalIcon icon="briefcase" color="#312E81" bg="#E0E7FF" size={16} style={styles.enterpriseIconWrap} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.enterpriseTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.title")}</Text>
+                <Text style={[styles.enterpriseTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.enterprise.tagline")}</Text>
               </View>
-            ))}
-            <View style={[styles.enterpriseCta, isRTL && { flexDirection: "row-reverse" }]}>
-              <Text style={styles.enterpriseCtaText}>{t("settings.enterprise.cta")}</Text>
-              <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={14} color="#FFFFFF" />
             </View>
-          </View>
-        </Pressable>
+            <View style={styles.fleetFeatures}>
+              {[
+                t("settings.enterprise.feature1"),
+                t("settings.enterprise.feature2"),
+                t("settings.enterprise.feature3"),
+              ].map((f) => (
+                <View key={f} style={[styles.fleetFeatureRow, isRTL && { flexDirection: "row-reverse" }]}>
+                  <Feather name="check-circle" size={13} color="#4338CA" />
+                  <Text style={[styles.enterpriseFeatureText, isRTL && { textAlign: "right", writingDirection: "rtl", flex: 1 }]}>{f}</Text>
+                </View>
+              ))}
+              <View style={[styles.enterpriseCta, isRTL && { flexDirection: "row-reverse" }]}>
+                <Text style={styles.enterpriseCtaText}>{t("settings.enterprise.cta")}</Text>
+                <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={14} color="#FFFFFF" />
+              </View>
+            </View>
+          </Pressable>
+        )}
 
         {/* Preferences */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.preferences")}</Text>

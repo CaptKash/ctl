@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
+import { useOrg } from "@/context/OrgContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { CarCard } from "@/components/ui/CarCard";
@@ -51,34 +52,46 @@ export default function FleetScreen() {
   const openRowId = useRef<number | null>(null);
 
   const { isFleet, FREE_CAR_LIMIT } = useSubscription();
+  const { activeOrgId, isOrgContext, activeRole } = useOrg();
+
+  // Cars resolve from the active context (org shared fleet vs personal).
+  const carsQueryKey = activeOrgId ? ["orgs", activeOrgId, "cars"] : ["cars"];
 
   const { data: cars, isLoading } = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
+    queryKey: carsQueryKey,
+    queryFn: () =>
+      activeOrgId ? apiGet<Car[]>(`/orgs/${activeOrgId}/cars`) : apiGet<Car[]>("/cars"),
   });
+
+  // In an org, only admins may add or delete vehicles.
+  const canManageCars = !isOrgContext || activeRole === "admin";
 
   const handleAddCar = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setIsEditing(false);
-    if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
+    if (isOrgContext) {
+      router.push("/car/add");
+    } else if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
       router.push("/fleet-upgrade" as any);
     } else {
       router.push("/car/add");
     }
   };
 
+  // Both personal and org cars delete through /cars/:carId — access is resolved
+  // server-side (owner for personal; owner/admin for org via canMutateVehicle).
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiDelete(`/cars/${id}`),
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      qc.invalidateQueries({ queryKey: ["cars"] });
+      qc.invalidateQueries({ queryKey: carsQueryKey });
       setIsEditing(false);
     },
   });
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await qc.refetchQueries({ queryKey: ["cars"] });
+    await qc.refetchQueries({ queryKey: carsQueryKey });
     setRefreshing(false);
   };
 
@@ -126,6 +139,7 @@ export default function FleetScreen() {
   const renderRightActions = useCallback(
     (car: Car) =>
       (_progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+        if (!canManageCars) return null;
         const scale = dragX.interpolate({
           inputRange: [-100, -50, 0],
           outputRange: [1, 0.8, 0],
@@ -141,7 +155,7 @@ export default function FleetScreen() {
           </Pressable>
         );
       },
-    [handleDelete, t]
+    [handleDelete, t, canManageCars]
   );
 
   return (
@@ -164,21 +178,25 @@ export default function FleetScreen() {
             <Text style={[styles.headerTitle, { color: C.text }]}>{t("fleet.title")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary }]}>{t("fleet.subtitle")}</Text>
           </View>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setIsEditing((v) => !v);
-            }}
-            style={[styles.addBtn, { backgroundColor: isEditing ? "#DC2626" : "rgba(220,38,38,0.12)" }]}
-          >
-            <Feather name="minus" size={20} color={isEditing ? "#fff" : "#DC2626"} />
-          </Pressable>
-          <Pressable
-            onPress={handleAddCar}
-            style={[styles.addBtn, { backgroundColor: C.tint }]}
-          >
-            <Feather name="plus" size={20} color="#fff" />
-          </Pressable>
+          {canManageCars && (
+            <>
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setIsEditing((v) => !v);
+                }}
+                style={[styles.addBtn, { backgroundColor: isEditing ? "#DC2626" : "rgba(220,38,38,0.12)" }]}
+              >
+                <Feather name="minus" size={20} color={isEditing ? "#fff" : "#DC2626"} />
+              </Pressable>
+              <Pressable
+                onPress={handleAddCar}
+                style={[styles.addBtn, { backgroundColor: C.tint }]}
+              >
+                <Feather name="plus" size={20} color="#fff" />
+              </Pressable>
+            </>
+          )}
         </View>
       </View>
 
@@ -202,8 +220,8 @@ export default function FleetScreen() {
               ionIcon="car-outline"
               title={t("fleet.emptyTitle")}
               description={t("fleet.emptyDesc")}
-              actionLabel={t("fleet.addCar")}
-              onAction={handleAddCar}
+              actionLabel={canManageCars ? t("fleet.addCar") : undefined}
+              onAction={canManageCars ? handleAddCar : undefined}
             />
           }
           renderItem={({ item }) => (

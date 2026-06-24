@@ -27,6 +27,7 @@ import { CurrencyProvider } from "@/context/CurrencyContext";
 import { EventRemindersProvider } from "@/context/EventRemindersContext";
 import { CountryProvider } from "@/context/CountryContext";
 import { SubscriptionProvider, initializeRevenueCat } from "@/lib/revenuecat";
+import { OrgProvider } from "@/context/OrgContext";
 import { NotificationSyncer } from "@/components/NotificationSyncer";
 import { NotificationPermissionPrimer } from "@/components/NotificationPermissionPrimer";
 import { PasswordUpgradeModal } from "@/components/PasswordUpgradeModal";
@@ -65,6 +66,8 @@ function RootLayoutNav() {
       <Stack.Screen name="service-costs" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="nearby-service" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="fleet-upgrade" options={{ headerShown: false, presentation: "modal" }} />
+      <Stack.Screen name="enterprise-upgrade" options={{ headerShown: false, presentation: "modal" }} />
+      <Stack.Screen name="organization" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="export" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="feedback" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />
@@ -123,6 +126,7 @@ export default function RootLayout() {
               <AuthProvider>
                 <AppProvider>
                   <SubscriptionProvider>
+                  <OrgProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <KeyboardProvider>
                       <NotificationSyncer />
@@ -132,6 +136,7 @@ export default function RootLayout() {
                       <DevLanguageToggle />
                     </KeyboardProvider>
                   </GestureHandlerRootView>
+                  </OrgProvider>
                   </SubscriptionProvider>
                 </AppProvider>
               </AuthProvider>

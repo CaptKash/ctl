@@ -24,6 +24,7 @@ import { localizeDigits } from "@/lib/i18n";
 import { localizeBrand } from "@/lib/carBrandLogo";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
+import { useOrg } from "@/context/OrgContext";
 import type { ColorScheme } from "@/constants/colors";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
@@ -158,20 +159,40 @@ export default function MenuDashboardScreen() {
     }
   };
 
-  const { isFleet, FREE_CAR_LIMIT } = useSubscription();
+  const { isFleet, isEnterprise, FREE_CAR_LIMIT } = useSubscription();
+  const { orgs, invites, activeOrgId, setActiveOrgId, isOrgContext, activeRole } = useOrg();
   // Tier pill palette — matches the Subscription cards on the Settings page.
   // Free  : muted neutral
   // Fleet : amber (text #92400E on amber-100 bg, like settings.fleetCard)
   // Ent.  : indigo (text #312E81 on indigo-100 bg, like settings.enterpriseCard)
-  const tierLabel = isFleet ? "CTL Fleet" : "CTL Free";
-  const tierColors = isFleet
+  const tierLabel = isEnterprise ? "CTL Enterprise" : isFleet ? "CTL Fleet" : "CTL Free";
+  const tierColors = isEnterprise
+    ? { text: "#312E81", bg: "#E0E7FF", border: "#C7D2FE" }
+    : isFleet
     ? { text: "#92400E", bg: "#FEF3C7", border: "#FCD34D" }
     : { text: C.textTertiary, bg: C.backgroundTertiary, border: C.border };
 
+  // Cars come from the active context: an organization's shared fleet when one
+  // is selected, otherwise the user's personal vehicles.
   const { data: cars } = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
+    queryKey: activeOrgId ? ["orgs", activeOrgId, "cars"] : ["cars"],
+    queryFn: () =>
+      activeOrgId ? apiGet<Car[]>(`/orgs/${activeOrgId}/cars`) : apiGet<Car[]>("/cars"),
   });
+
+  // In an org, only admins can add vehicles. Personal context keeps the
+  // free-tier limit → upgrade flow.
+  const canAddCar = !isOrgContext || activeRole === "admin";
+  const handleAddCar = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (isOrgContext) {
+      router.push("/car/add");
+    } else if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
+      router.push("/fleet-upgrade" as any);
+    } else {
+      router.push("/car/add");
+    }
+  };
 
   const { data: upcoming, isLoading: upcomingLoading, refetch: refetchUpcoming } = useQuery<UpcomingItem[]>({
     queryKey: ["maintenance", "upcoming"],
@@ -240,6 +261,48 @@ export default function MenuDashboardScreen() {
         </View>
       </View>
 
+      {/* Context switcher — Personal + each organization the user belongs to */}
+      {orgs.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[styles.contextChips, isRTL && { flexDirection: "row-reverse" }]}
+        >
+          {[{ id: null as number | null, name: t("home.contextPersonal") }, ...orgs].map((ctx) => {
+            const active = activeOrgId === ctx.id;
+            return (
+              <Pressable
+                key={ctx.id ?? "personal"}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setActiveOrgId(ctx.id);
+                }}
+                style={[styles.contextChip, { backgroundColor: active ? "#4338CA" : C.card, borderColor: active ? "#4338CA" : C.border }]}
+              >
+                <Text style={[styles.contextChipText, { color: active ? "#fff" : C.textSecondary }]} numberOfLines={1}>{ctx.name}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
+
+      {/* Pending invite banner */}
+      {invites.length > 0 && (
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/organization" as any);
+          }}
+          style={({ pressed }) => [styles.inviteBanner, { opacity: pressed ? 0.9 : 1 }, isRTL && { flexDirection: "row-reverse" }]}
+        >
+          <Feather name="mail" size={16} color="#312E81" />
+          <Text style={[styles.inviteBannerText, isRTL && { textAlign: "right", writingDirection: "rtl" }]} numberOfLines={2}>
+            {invites.length === 1 ? t("home.inviteBannerOne") : t("home.inviteBannerMany", { count: localizeDigits(invites.length, i18n.language) })}
+          </Text>
+          <Text style={styles.inviteBannerCta}>{t("home.inviteBannerCta")}</Text>
+        </Pressable>
+      )}
+
       <View style={[styles.divider, { backgroundColor: C.border }]} />
 
       <ScrollView
@@ -294,36 +357,33 @@ export default function MenuDashboardScreen() {
                   : t("home.carsRegisteredCount", { count: localizeDigits(fleetCount, i18n.language) })}
               </Text>
             </View>
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation();
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
-                  router.push("/fleet-upgrade" as any);
-                } else {
-                  router.push("/car/add");
-                }
-              }}
-              hitSlop={6}
-              style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
-            >
-              <LinearGradient
-                colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
-                locations={[0, 0.55, 1]}
-                start={{ x: 0.15, y: 0 }}
-                end={{ x: 0.85, y: 1 }}
-                style={[
-                  styles.addCarChip,
-                  styles.addCarChipMetallic,
-                  isRTL && { flexDirection: "row-reverse" },
-                ]}
+            {canAddCar && (
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleAddCar();
+                }}
+                hitSlop={6}
+                style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
               >
-                <Feather name="plus" size={13} color="#334155" />
-                <Text style={[styles.addCarChipText, { color: "#334155" }]}>
-                  {t("home.addCar")}
-                </Text>
-              </LinearGradient>
-            </Pressable>
+                <LinearGradient
+                  colors={["#FFFFFF", "#E2E8F0", "#94A3B8"]}
+                  locations={[0, 0.55, 1]}
+                  start={{ x: 0.15, y: 0 }}
+                  end={{ x: 0.85, y: 1 }}
+                  style={[
+                    styles.addCarChip,
+                    styles.addCarChipMetallic,
+                    isRTL && { flexDirection: "row-reverse" },
+                  ]}
+                >
+                  <Feather name="plus" size={13} color="#334155" />
+                  <Text style={[styles.addCarChipText, { color: "#334155" }]}>
+                    {t("home.addCar")}
+                  </Text>
+                </LinearGradient>
+              </Pressable>
+            )}
           </View>
 
           {/* Car list */}
@@ -811,6 +871,29 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 24 },
+
+  contextChips: { paddingHorizontal: 20, paddingTop: 12, gap: 8 },
+  contextChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
+    maxWidth: 180,
+  },
+  contextChipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  inviteBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginHorizontal: 20,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "#E0E7FF",
+  },
+  inviteBannerText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium", color: "#312E81" },
+  inviteBannerCta: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#4338CA" },
 
   grid: { padding: 20, gap: 14 },
   sectionLabel: {
