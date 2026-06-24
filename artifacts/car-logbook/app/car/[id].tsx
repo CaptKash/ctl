@@ -33,10 +33,13 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { LinearGradient } from "expo-linear-gradient";
 import { apiGet, apiDelete } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { isHourBased } from "@/lib/vehicleTypes";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
 type Car = {
   id: number;
+  vehicleType?: string | null;
+  usageUnit?: string | null;
   make: string;
   model: string;
   year: number;
@@ -413,6 +416,7 @@ export default function CarDetailScreen() {
   };
 
   const car = carQuery.data;
+  const usageUnitText = isHourBased(car?.usageUnit) ? t("units.hours") : unit;
 
   if (carQuery.isLoading) {
     return (
@@ -442,6 +446,7 @@ export default function CarDetailScreen() {
             ) : (
               <BrandLogo
                 make={car.make}
+                vehicleType={car.vehicleType}
                 size={48}
                 style={styles.iconBox}
                 fallbackBg="#DBEAFE"
@@ -510,7 +515,7 @@ export default function CarDetailScreen() {
             <View style={[styles.statsRow, isRTL && { flexDirection: "row-reverse" }]}>
               {car.mileage != null && (
                 <View style={[styles.infoPill, isRTL ? { marginLeft: 16, flexDirection: "row-reverse" } : { marginRight: 16 }]}>
-                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{isRTL ? `${t("carDetail.fields.odometer")} (${unit})` : unit}</Text>
+                  <Text style={[styles.pillLabel, { color: C.textSecondary }]}>{isRTL ? `${t("carDetail.fields.odometer")} (${usageUnitText})` : usageUnitText}</Text>
                   <Text style={[styles.pillValue, { color: C.text }]} numberOfLines={1}>{car.mileage.toLocaleString()}</Text>
                 </View>
               )}

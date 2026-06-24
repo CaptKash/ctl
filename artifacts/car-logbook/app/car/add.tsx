@@ -24,9 +24,10 @@ import { SelectField } from "@/components/ui/SelectField";
 import { PhotoPicker } from "@/components/ui/PhotoPicker";
 import { apiPost } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
+import { VEHICLE_TYPES, usageUnitForType, vehicleTypeIcon } from "@/lib/vehicleTypes";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 1980 + 1 }, (_, i) =>
@@ -44,6 +45,7 @@ export default function AddCarScreen() {
 
   // Basic Info
   const [nickname, setNickname] = useState("");
+  const [vehicleType, setVehicleType] = useState("car");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState(String(CURRENT_YEAR));
@@ -68,6 +70,12 @@ export default function AddCarScreen() {
   const [notes, setNotes] = useState("");
 
   const models = getModelsForMake(make);
+  const usageUnit = usageUnitForType(vehicleType);
+  const usesHours = usageUnit === "hours";
+  const vehicleTypeLabels = VEHICLE_TYPES.reduce((acc, vt) => {
+    acc[vt] = t(`vehicleTypes.${vt}`);
+    return acc;
+  }, {} as Record<string, string>);
 
   const handleMakeSelect = (value: string) => {
     setMake(value);
@@ -100,6 +108,8 @@ export default function AddCarScreen() {
   const mutation = useMutation({
     mutationFn: () => {
       const payload = {
+        vehicleType,
+        usageUnit,
         make: make.trim(),
         model: model.trim(),
         year: parseInt(year),
@@ -142,7 +152,7 @@ export default function AddCarScreen() {
             end={{ x: 0.85, y: 1 }}
             style={[styles.iconBox, styles.iconBoxMetallic]}
           >
-            <Ionicons name="car" size={24} color="#334155" />
+            <MaterialCommunityIcons name={vehicleTypeIcon(vehicleType)} size={24} color="#334155" />
           </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.title")}</Text>
@@ -162,6 +172,17 @@ export default function AddCarScreen() {
         {/* Basic Info */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
           <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.basic")}</Text>
+
+          <SelectField
+            label={t("addCar.fields.vehicleType")}
+            value={vehicleType}
+            onSelect={setVehicleType}
+            options={VEHICLE_TYPES}
+            optionLabels={vehicleTypeLabels}
+            required
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
             label={t("addCar.fields.nickname")}
@@ -249,10 +270,10 @@ export default function AddCarScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label={t("addCar.fields.mileage", { unit })}
+            label={usesHours ? t("addCar.fields.engineHours") : t("addCar.fields.mileage", { unit })}
             value={mileage}
             onChangeText={setMileage}
-            placeholder={t("addCar.fields.mileagePlaceholder")}
+            placeholder={usesHours ? t("addCar.fields.engineHoursPlaceholder") : t("addCar.fields.mileagePlaceholder")}
             keyboardType="number-pad"
           />
 

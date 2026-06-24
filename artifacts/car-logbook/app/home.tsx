@@ -30,6 +30,7 @@ import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { isHourBased } from "@/lib/vehicleTypes";
 import { addToCalendar, getWritableCalendars, WritableCalendar } from "@/lib/addToCalendar";
 import { BrandLogo } from "@/components/BrandLogo";
 
@@ -55,6 +56,7 @@ type UpcomingItem = {
   model: string;
   year: number;
   nickname: string | null;
+  usageUnit?: string | null;
 };
 
 function daysFromNow(dateStr: string): number {
@@ -714,7 +716,7 @@ export default function MenuDashboardScreen() {
                             style={isRTL ? { marginRight: 8 } : { marginLeft: 8 }}
                           />
                           <Text style={[styles.eventCardMetaText, { color: C.textSecondary }]}>
-                            {localizeDigits(item.nextDueMileage.toLocaleString(), i18n.language)} {unit}
+                            {localizeDigits(item.nextDueMileage.toLocaleString(), i18n.language)} {isHourBased(item.usageUnit) ? t("units.hours") : unit}
                           </Text>
                         </>
                       )}

@@ -1,4 +1,15 @@
 {
+  "units": {
+    "hours": "hrs"
+  },
+  "vehicleTypes": {
+    "car": "Car",
+    "truck": "Truck",
+    "tractor": "Tractor",
+    "digger": "Digger",
+    "tow_truck": "Tow Truck",
+    "other": "Other"
+  },
   "common": {
     "appName": "CTL",
     "appTagline": "Car Technical Log",
@@ -224,6 +235,9 @@
       "notes": "Notes"
     },
     "fields": {
+      "vehicleType": "Vehicle Type",
+      "engineHours": "Current Engine Hours",
+      "engineHoursPlaceholder": "e.g. 1200",
       "nickname": "Nickname",
       "nicknamePlaceholder": "e.g. The Beast, Old Faithful",
       "make": "Make",

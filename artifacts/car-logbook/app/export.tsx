@@ -22,6 +22,7 @@ import type { TFunction } from "i18next";
 import * as XLSX from "xlsx-js-style";
 import { useColors } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { isHourBased } from "@/lib/vehicleTypes";
 import { apiGet } from "@/hooks/useApi";
 import { REPORT_LOGO } from "@/lib/reportLogo";
 
@@ -33,6 +34,7 @@ type Car = {
   nickname?: string | null;
   licensePlate?: string | null;
   mileage?: number | null;
+  usageUnit?: string | null;
 };
 
 const SECTIONS = [
@@ -459,6 +461,7 @@ export default function ExportScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       const carId = selectedCar.id;
+      const exportUnit = isHourBased(selectedCar.usageUnit) ? t("units.hours") : unit;
       const endpoints: Partial<Record<SectionId, string>> = {
         maintenance: `/cars/${carId}/maintenance`,
         fuel: `/cars/${carId}/fuel`,
@@ -486,10 +489,10 @@ export default function ExportScreen() {
       const safeName = `${selectedCar.make}_${selectedCar.model}_${selectedCar.year}`.replace(/\s+/g, "_");
 
       if (format === "pdf") {
-        const html = buildPdfHtml(selectedCar, sections, t, isRTL, unit);
+        const html = buildPdfHtml(selectedCar, sections, t, isRTL, exportUnit);
         await sharePdf(html);
       } else {
-        const wb = buildWorkbook(selectedCar, sections, t, isRTL, unit);
+        const wb = buildWorkbook(selectedCar, sections, t, isRTL, exportUnit);
         const filename = `CTL_${safeName}_${Date.now()}.xlsx`;
 
         if (Platform.OS === "web") {
@@ -519,7 +522,7 @@ export default function ExportScreen() {
               });
             }
           } else {
-            const html = buildPdfHtml(selectedCar, sections, t, isRTL, unit);
+            const html = buildPdfHtml(selectedCar, sections, t, isRTL, exportUnit);
             await sharePdf(html);
             setError(t("export.excelFallback"));
           }

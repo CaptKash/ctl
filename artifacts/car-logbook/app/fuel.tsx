@@ -19,6 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import { MetalIcon } from "@/components/ui/MetalIcon";
 import { useColors } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { isHourBased } from "@/lib/vehicleTypes";
 import { useCurrency } from "@/context/CurrencyContext";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import BottomNav from "@/components/ui/BottomNav";
@@ -32,7 +33,7 @@ import { RecordCard } from "@/components/ui/RecordCard";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 
-type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; isElectric?: boolean | null; tankCapacity?: number | null };
+type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; isElectric?: boolean | null; tankCapacity?: number | null; usageUnit?: string | null };
 
 type FuelRecord = {
   id: number;
@@ -235,6 +236,9 @@ export default function FuelScreen() {
   const carOptions = fuelCars.map(carLabel);
   const selectedFuelCar = fCarId ? fuelCars.find((c) => c.id === fCarId) ?? null : null;
   const selectedCarLabel = selectedFuelCar ? carLabel(selectedFuelCar) : "";
+  const selectedUsageUnitText = isHourBased(selectedFuelCar?.usageUnit) ? t("units.hours") : unit;
+  const recordUnit = (recCarId: number) =>
+    isHourBased(cars.find((c) => c.id === recCarId)?.usageUnit) ? t("units.hours") : unit;
   const handleCarSelect = (label: string) => {
     const car = fuelCars.find((c) => carLabel(c) === label);
     if (car) {
@@ -399,7 +403,7 @@ export default function FuelScreen() {
             const subtitleParts = [
               filterCarId === null ? r.carLabel : null,
               formatDate(r.date),
-              `${r.mileage.toLocaleString()} ${unit}`,
+              `${r.mileage.toLocaleString()} ${recordUnit(r.carId)}`,
               r.station,
             ].filter(Boolean);
             return (
@@ -455,7 +459,7 @@ export default function FuelScreen() {
               <DatePickerField label={t("fuelScreen.date")} value={fDate} onChange={setFDate} />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={t("fuelScreen.odometer", { unit })}
+                label={t("fuelScreen.odometer", { unit: selectedUsageUnitText })}
                 value={fMileage}
                 onChangeText={setFMileage}
                 placeholder={t("fuelScreen.odoPlaceholder")}

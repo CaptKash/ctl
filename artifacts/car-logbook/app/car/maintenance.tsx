@@ -30,6 +30,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { isHourBased } from "@/lib/vehicleTypes";
 
 type MaintenanceRecord = {
   id: number;
@@ -43,7 +44,7 @@ type MaintenanceRecord = {
   nextDueDate?: string | null;
 };
 
-type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
+type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; usageUnit?: string | null };
 
 const MAINTENANCE_TYPES = [
   "Oil Change",
@@ -129,6 +130,7 @@ export default function MaintenanceScreen() {
   });
 
   const car = carQuery.data;
+  const usageUnitText = isHourBased(car?.usageUnit) ? t("units.hours") : unit;
   const carTitle = car
     ? car.nickname ?? `${car.year} ${car.make} ${car.model}`
     : t("carMaintenance.carFallback");
@@ -186,7 +188,7 @@ export default function MaintenanceScreen() {
               title={r.description}
               subtitle={`${r.type} · ${formatDate(r.date)}${r.shop ? ` · ${r.shop}` : ""}`}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
-              rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} ${unit}` : undefined}
+              rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} ${usageUnitText}` : undefined}
               onDelete={() => setConfirmId(r.id)}
             />
           ))
@@ -237,7 +239,7 @@ export default function MaintenanceScreen() {
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={t("carMaintenance.mileageLabel", { unit })}
+                label={t("carMaintenance.mileageLabel", { unit: usageUnitText })}
                 value={mMileage}
                 onChangeText={setMMileage}
                 placeholder={t("carMaintenance.mileagePlaceholder")}

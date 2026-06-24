@@ -27,6 +27,7 @@ import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { Feather } from "@expo/vector-icons";
 import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
 import { useTranslation } from "react-i18next";
+import { VEHICLE_TYPES, usageUnitForType } from "@/lib/vehicleTypes";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 1980 + 1 }, (_, i) =>
@@ -35,6 +36,8 @@ const YEARS = Array.from({ length: CURRENT_YEAR - 1980 + 1 }, (_, i) =>
 
 type Car = {
   id: number;
+  vehicleType?: string | null;
+  usageUnit?: string | null;
   make: string;
   model: string;
   year: number;
@@ -67,6 +70,7 @@ export default function EditCarScreen() {
 
   // Basic Info
   const [nickname, setNickname] = useState("");
+  const [vehicleType, setVehicleType] = useState("car");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState(String(CURRENT_YEAR));
@@ -99,6 +103,7 @@ export default function EditCarScreen() {
     const car = carQuery.data;
     if (car && !ready) {
       setNickname(car.nickname ?? "");
+      setVehicleType(car.vehicleType ?? "car");
       setMake(car.make);
       setModel(car.model);
       setYear(String(car.year));
@@ -122,6 +127,12 @@ export default function EditCarScreen() {
   }, [carQuery.data, ready]);
 
   const models = getModelsForMake(make);
+  const usageUnit = usageUnitForType(vehicleType);
+  const usesHours = usageUnit === "hours";
+  const vehicleTypeLabels = VEHICLE_TYPES.reduce((acc, vt) => {
+    acc[vt] = t(`vehicleTypes.${vt}`);
+    return acc;
+  }, {} as Record<string, string>);
 
   const handleMakeSelect = (value: string) => {
     setMake(value);
@@ -167,6 +178,8 @@ export default function EditCarScreen() {
   const mutation = useMutation({
     mutationFn: () =>
       apiPut(`/cars/${carId}`, {
+        vehicleType,
+        usageUnit,
         make: make.trim(),
         model: model.trim(),
         year: parseInt(year),
@@ -233,6 +246,17 @@ export default function EditCarScreen() {
         {/* Basic Info */}
         <View style={[styles.section, { backgroundColor: C.card }]}>
           <Text style={[styles.sectionLabel, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.sections.basic")}</Text>
+
+          <SelectField
+            label={t("addCar.fields.vehicleType")}
+            value={vehicleType}
+            onSelect={setVehicleType}
+            options={VEHICLE_TYPES}
+            optionLabels={vehicleTypeLabels}
+            required
+          />
+
+          <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
             label={t("addCar.fields.nickname")}
@@ -316,10 +340,10 @@ export default function EditCarScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label={t("addCar.fields.mileage", { unit })}
+            label={usesHours ? t("addCar.fields.engineHours") : t("addCar.fields.mileage", { unit })}
             value={mileage}
             onChangeText={setMileage}
-            placeholder={t("addCar.fields.mileagePlaceholder")}
+            placeholder={usesHours ? t("addCar.fields.engineHoursPlaceholder") : t("addCar.fields.mileagePlaceholder")}
             keyboardType="number-pad"
           />
 

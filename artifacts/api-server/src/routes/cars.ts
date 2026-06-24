@@ -130,6 +130,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
         model: carsTable.model,
         year: carsTable.year,
         nickname: carsTable.nickname,
+        usageUnit: carsTable.usageUnit,
       })
       .from(maintenanceTable)
       .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.userId, userId)))
@@ -145,6 +146,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
         model: carsTable.model,
         year: carsTable.year,
         nickname: carsTable.nickname,
+        usageUnit: carsTable.usageUnit,
       })
       .from(inspectionsTable)
       .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.userId, userId)))
@@ -168,6 +170,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
       model: c.model,
       year: c.year,
       nickname: c.nickname ?? null,
+      usageUnit: c.usageUnit,
     }));
 
   const insuranceItems = cars
@@ -184,6 +187,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
       model: c.model,
       year: c.year,
       nickname: c.nickname ?? null,
+      usageUnit: c.usageUnit,
     }));
 
   // Records are ordered by id DESC — first record per car+type is always the latest
@@ -225,6 +229,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
       model: r.model,
       year: r.year,
       nickname: r.nickname ?? null,
+      usageUnit: r.usageUnit,
     }));
 
   const all = [...maintenanceItems, ...licenseItems, ...insuranceItems, ...inspectionItems].sort(

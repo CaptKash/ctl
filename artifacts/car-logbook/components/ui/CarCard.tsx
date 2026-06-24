@@ -12,9 +12,13 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { useTranslation } from "react-i18next";
 import { localizeBrand } from "@/lib/carBrandLogo";
 import { localizeDigits } from "@/lib/i18n";
+import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { isHourBased } from "@/lib/vehicleTypes";
 
 type Car = {
   id: number;
+  vehicleType?: string | null;
+  usageUnit?: string | null;
   make: string;
   model: string;
   year: number;
@@ -67,7 +71,9 @@ function getFirstPhoto(photos?: string | null): string | null {
 export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accentBorder }: Props) {
   const C = useColors();
   const { t, i18n } = useTranslation();
+  const { unit } = useDistanceUnit();
   const isRTL = i18n.language === "ar";
+  const usageUnitText = isHourBased(car.usageUnit) ? t("units.hours") : unit;
   const brand = localizeBrand(car.make, i18n.language);
   const firstPhoto = getFirstPhoto(car.photos);
   const thumbBg = accentBg ?? C.infoLight;
@@ -90,7 +96,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accent
           <Image source={{ uri: firstPhoto }} style={styles.photo} resizeMode="cover" />
         ) : (
           <>
-            <BrandLogo make={car.make} size={56} fallbackBg={thumbBg} fallbackIconColor={thumbIcon} />
+            <BrandLogo make={car.make} vehicleType={car.vehicleType} size={56} fallbackBg={thumbBg} fallbackIconColor={thumbIcon} />
             {car.color && (
               <View style={[styles.colorDot, { backgroundColor: getCarColor(car.color) }]} />
             )}
@@ -110,7 +116,7 @@ export function CarCard({ car, onPress, onLogEvent, accentBg, accentIcon, accent
           <Text style={[styles.detail, { color: C.textTertiary, textAlign }]} numberOfLines={1}>
             {[
               car.licensePlate,
-              car.mileage != null ? `${localizeDigits(car.mileage.toLocaleString(), i18n.language)} km` : null,
+              car.mileage != null ? `${localizeDigits(car.mileage.toLocaleString(), i18n.language)} ${usageUnitText}` : null,
             ]
               .filter(Boolean)
               .join("   ·   ")}

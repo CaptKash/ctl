@@ -30,6 +30,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
+import { isHourBased } from "@/lib/vehicleTypes";
 
 type MalfunctionRecord = {
   id: number;
@@ -41,7 +42,7 @@ type MalfunctionRecord = {
   phase: string;
 };
 
-type Car = { id: number; make: string; model: string; year: number; nickname?: string | null };
+type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; usageUnit?: string | null };
 
 const INPUT_METHODS = ["warning_message", "written"];
 const PHASES = ["car_running", "car_started", "parking", "during_drive"];
@@ -113,6 +114,7 @@ export default function FaultsScreen() {
   });
 
   const car = carQuery.data;
+  const usageUnitText = isHourBased(car?.usageUnit) ? t("units.hours") : unit;
   const carTitle = car
     ? car.nickname ?? `${car.year} ${car.make} ${car.model}`
     : t("faults.carFallback");
@@ -165,7 +167,7 @@ export default function FaultsScreen() {
                 r.phase ? phaseLabel(r.phase) : null,
               ].filter(Boolean).join(" · ")}
               rightText={formatDate(r.date)}
-              rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} ${unit}` : undefined}
+              rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} ${usageUnitText}` : undefined}
               onDelete={() => setConfirmId(r.id)}
             />
           ))
@@ -227,7 +229,7 @@ export default function FaultsScreen() {
               />
               <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
               <FormField
-                label={t("faults.odometer", { unit })}
+                label={t("faults.odometer", { unit: usageUnitText })}
                 value={odometer}
                 onChangeText={setOdometer}
                 placeholder={t("faults.odometerPlaceholder")}

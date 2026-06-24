@@ -1,4 +1,15 @@
 {
+  "units": {
+    "hours": "ساعة"
+  },
+  "vehicleTypes": {
+    "car": "سيارة",
+    "truck": "شاحنة",
+    "tractor": "جرّار",
+    "digger": "حفّارة",
+    "tow_truck": "شاحنة سحب",
+    "other": "أخرى"
+  },
   "common": {
     "appName": "CTL",
     "appTagline": "Car Technical Log",
@@ -232,6 +243,9 @@
       "notes": "ملاحظات"
     },
     "fields": {
+      "vehicleType": "نوع المركبة",
+      "engineHours": "ساعات المحرك الحالية",
+      "engineHoursPlaceholder": "مثال: ١٢٠٠",
       "nickname": "الاسم المستعار",
       "nicknamePlaceholder": "مثال: الوحش، العتيقة",
       "make": "المصنِّع",
