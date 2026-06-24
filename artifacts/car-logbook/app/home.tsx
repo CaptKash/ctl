@@ -43,6 +43,7 @@ type Car = {
   color?: string | null;
   licensePlate?: string | null;
   photos?: string | null;
+  vehicleType?: string | null;
 };
 type UpcomingItem = {
   id: number;
@@ -430,6 +431,7 @@ export default function MenuDashboardScreen() {
                         ) : (
                           <BrandLogo
                             make={car.make}
+                            vehicleType={car.vehicleType}
                             size={44}
                             style={styles.carChipPhotoPlaceholder}
                             fallbackBg="#DBEAFE"

@@ -165,6 +165,9 @@ export default function FuelScreen() {
     [allRecords, filterCarId]
   );
 
+  const statsCar = filterCarId != null ? cars.find((c) => c.id === filterCarId) : null;
+  const statsIsHours = isHourBased(statsCar?.usageUnit);
+
   // Stats for current filter
   const stats = useMemo(() => {
     if (filteredRecords.length === 0) return null;
@@ -175,21 +178,23 @@ export default function FuelScreen() {
     });
     let totalConsumptionPairs = 0;
     let consumptionPairCount = 0;
-    byCarId.forEach((carRecords) => {
+    byCarId.forEach((carRecords, cid) => {
+      const carHours = isHourBased(cars.find((c) => c.id === cid)?.usageUnit);
+      if (carHours !== statsIsHours) return;
       const sorted = [...carRecords].sort((a, b) => a.mileage - b.mileage);
       for (let i = 1; i < sorted.length; i++) {
         const dist = sorted[i].mileage - sorted[i - 1].mileage;
         const consumed = consumedBetween(sorted[i - 1], sorted[i]);
         if (dist > 0 && consumed !== null) {
-          totalConsumptionPairs += consumed / dist * 100;
+          totalConsumptionPairs += statsIsHours ? consumed / dist : consumed / dist * 100;
           consumptionPairCount++;
         }
       }
     });
-    const avgL100km = consumptionPairCount > 0 ? totalConsumptionPairs / consumptionPairCount : null;
+    const avg = consumptionPairCount > 0 ? totalConsumptionPairs / consumptionPairCount : null;
     const totalCost = filteredRecords.reduce((s, r) => s + r.totalCost, 0);
-    return { avgL100km, totalCost, count: filteredRecords.length };
-  }, [filteredRecords]);
+    return { avg, totalCost, count: filteredRecords.length };
+  }, [filteredRecords, cars, statsIsHours]);
 
   const consumptionMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -198,21 +203,28 @@ export default function FuelScreen() {
       if (!byCarId.has(r.carId)) byCarId.set(r.carId, []);
       byCarId.get(r.carId)!.push(r);
     });
-    byCarId.forEach((carRecords) => {
+    byCarId.forEach((carRecords, cid) => {
+      const carHours = isHourBased(cars.find((c) => c.id === cid)?.usageUnit);
       const sorted = [...carRecords].sort((a, b) => a.mileage - b.mileage);
       for (let i = 1; i < sorted.length; i++) {
         const dist = sorted[i].mileage - sorted[i - 1].mileage;
         const consumed = consumedBetween(sorted[i - 1], sorted[i]);
-        if (dist > 0 && consumed !== null) map.set(sorted[i].id, calcConsumption(consumed, dist, unit));
+        if (dist > 0 && consumed !== null) {
+          map.set(
+            sorted[i].id,
+            carHours ? `${(consumed / dist).toFixed(2)} L/${t("units.hours")}` : calcConsumption(consumed, dist, unit)
+          );
+        }
       }
     });
     return map;
-  }, [filteredRecords, unit]);
+  }, [filteredRecords, cars, unit, t]);
 
-  const formatAvg = (avgL100km: number | null) => {
-    if (avgL100km === null) return "—";
-    if (unit === "km") return avgL100km.toFixed(1) + " L/100km";
-    return (L_PER_GAL / (avgL100km / 100) * 0.621371).toFixed(1) + " mpg";
+  const formatAvg = (avg: number | null) => {
+    if (avg === null) return "—";
+    if (statsIsHours) return `${avg.toFixed(2)} L/${t("units.hours")}`;
+    if (unit === "km") return avg.toFixed(1) + " L/100km";
+    return (L_PER_GAL / (avg / 100) * 0.621371).toFixed(1) + " mpg";
   };
 
   const handleLitersChange = (val: string) => {
@@ -354,7 +366,7 @@ export default function FuelScreen() {
           <View style={[styles.statsRow, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.statCard, { backgroundColor: C.card }]}>
               <Feather name="trending-up" size={15} color="#2563EB" style={{ marginBottom: 4 }} />
-              <Text style={[styles.statValue, { color: C.text }]}>{formatAvg(stats.avgL100km)}</Text>
+              <Text style={[styles.statValue, { color: C.text }]}>{formatAvg(stats.avg)}</Text>
               <Text style={[styles.statLabel, { color: C.textSecondary }]}>{t("fuelScreen.avgEfficiency")}</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: C.card }]}>
