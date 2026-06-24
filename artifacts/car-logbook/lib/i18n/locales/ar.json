@@ -682,6 +682,31 @@
     "acceptError": "تعذّر قبول الدعوة. يرجى المحاولة مرة أخرى.",
     "noMembersYet": "لا يوجد أعضاء بعد."
   },
+  "orgActivity": {
+    "title": "سجل النشاط",
+    "subtitle": "أحدث السجلات عبر أسطولك",
+    "adminOnly": "يمكن للمشرفين فقط عرض نشاط المؤسسة.",
+    "loading": "جارٍ تحميل النشاط…",
+    "emptyTitle": "لا يوجد نشاط بعد",
+    "emptyDesc": "ستظهر هنا السجلات التي يدوّنها فريقك.",
+    "all": "الكل",
+    "vehicleFilter": "المركبة",
+    "memberFilter": "العضو",
+    "loggedBy": "بواسطة {{name}}",
+    "unknownUser": "عضو غير معروف",
+    "unknownCar": "مركبة غير معروفة",
+    "openButton": "سجل النشاط",
+    "kind": {
+      "maintenance": "صيانة",
+      "fault": "عطل",
+      "inspection": "فحص",
+      "fuel": "وقود",
+      "part": "قطعة",
+      "insurance": "تأمين",
+      "dealership": "وكالة",
+      "renewal": "تجديد"
+    }
+  },
   "renewal": {
     "listTitle": "تسجيل تجديد",
     "listSub": "اختر سيارة",

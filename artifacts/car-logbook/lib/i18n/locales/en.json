@@ -674,6 +674,31 @@
     "acceptError": "Couldn't accept the invite. Please try again.",
     "noMembersYet": "No members yet."
   },
+  "orgActivity": {
+    "title": "Activity Log",
+    "subtitle": "Recent records across your fleet",
+    "adminOnly": "Only admins can view organization activity.",
+    "loading": "Loading activity…",
+    "emptyTitle": "No activity yet",
+    "emptyDesc": "Records your team logs will appear here.",
+    "all": "All",
+    "vehicleFilter": "Vehicle",
+    "memberFilter": "Member",
+    "loggedBy": "Logged by {{name}}",
+    "unknownUser": "Unknown member",
+    "unknownCar": "Unknown vehicle",
+    "openButton": "Activity Log",
+    "kind": {
+      "maintenance": "Maintenance",
+      "fault": "Fault",
+      "inspection": "Inspection",
+      "fuel": "Fuel",
+      "part": "Part",
+      "insurance": "Insurance",
+      "dealership": "Dealership",
+      "renewal": "Renewal"
+    }
+  },
   "renewal": {
     "listTitle": "Log Renewal",
     "listSub": "Select a vehicle",

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
 import {
   db,
@@ -8,6 +8,14 @@ import {
   organizationsTable,
   organizationMembersTable,
   insertCarSchema,
+  maintenanceTable,
+  malfunctionsTable,
+  inspectionsTable,
+  fuelTable,
+  partsTable,
+  insuranceTable,
+  dealershipsTable,
+  renewalsTable,
 } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
 import { resolveOrgAccess } from "../middlewares/orgAccess";
@@ -299,6 +307,130 @@ router.post("/orgs/:orgId/cars", async (req, res) => {
     .values({ ...parsed.data, userId: null, orgId: org.id })
     .returning();
   return res.status(201).json(car);
+});
+
+// ── Oversight: recent activity ──────────────────────────────────────────
+
+type ActivityKind =
+  | "maintenance"
+  | "fault"
+  | "inspection"
+  | "fuel"
+  | "part"
+  | "insurance"
+  | "dealership"
+  | "renewal";
+
+type ActivityRaw = {
+  id: number;
+  carId: number;
+  byUserId: number | null;
+  createdAt: Date;
+  date: string | null;
+  title: string | null;
+  kind: ActivityKind;
+};
+
+// Per-table cap before merging — generous for an oversight feed, bounded so a
+// large fleet can never balloon the response.
+const ACTIVITY_PER_TABLE = 100;
+const ACTIVITY_LIMIT = 200;
+
+// Admin-only oversight feed: recent record activity across all of the org's
+// vehicles, attributed to the member who logged each entry. Staff are denied —
+// this is a management view. Filtering by vehicle/member is done client-side
+// from this feed.
+router.get("/orgs/:orgId/activity", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+
+  const cars = await db
+    .select({
+      id: carsTable.id,
+      make: carsTable.make,
+      model: carsTable.model,
+      year: carsTable.year,
+      nickname: carsTable.nickname,
+      vehicleType: carsTable.vehicleType,
+    })
+    .from(carsTable)
+    .where(eq(carsTable.orgId, org.id));
+  if (cars.length === 0) return res.json([]);
+
+  const carIds = cars.map((c) => c.id);
+  const carMap = new Map(cars.map((c) => [c.id, c]));
+
+  const collected: ActivityRaw[] = [];
+  const push = (
+    kind: ActivityKind,
+    rows: { id: number; carId: number; byUserId: number | null; createdAt: Date; date: string | null; title: string | null }[],
+  ) => {
+    for (const r of rows) collected.push({ ...r, kind });
+  };
+
+  const [maint, faults, inspections, fuel, parts, insurance, dealerships, renewals] =
+    await Promise.all([
+      db.select({ id: maintenanceTable.id, carId: maintenanceTable.carId, byUserId: maintenanceTable.createdByUserId, createdAt: maintenanceTable.createdAt, date: maintenanceTable.date, title: maintenanceTable.description })
+        .from(maintenanceTable).where(inArray(maintenanceTable.carId, carIds)).orderBy(sql`${maintenanceTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: malfunctionsTable.id, carId: malfunctionsTable.carId, byUserId: malfunctionsTable.createdByUserId, createdAt: malfunctionsTable.createdAt, date: malfunctionsTable.date, title: malfunctionsTable.description })
+        .from(malfunctionsTable).where(inArray(malfunctionsTable.carId, carIds)).orderBy(sql`${malfunctionsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: inspectionsTable.id, carId: inspectionsTable.carId, byUserId: inspectionsTable.createdByUserId, createdAt: inspectionsTable.createdAt, date: inspectionsTable.date, title: inspectionsTable.place })
+        .from(inspectionsTable).where(inArray(inspectionsTable.carId, carIds)).orderBy(sql`${inspectionsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: fuelTable.id, carId: fuelTable.carId, byUserId: fuelTable.createdByUserId, createdAt: fuelTable.createdAt, date: fuelTable.date, title: fuelTable.station })
+        .from(fuelTable).where(inArray(fuelTable.carId, carIds)).orderBy(sql`${fuelTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: partsTable.id, carId: partsTable.carId, byUserId: partsTable.createdByUserId, createdAt: partsTable.createdAt, date: partsTable.installedDate, title: partsTable.name })
+        .from(partsTable).where(inArray(partsTable.carId, carIds)).orderBy(sql`${partsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: insuranceTable.id, carId: insuranceTable.carId, byUserId: insuranceTable.createdByUserId, createdAt: insuranceTable.createdAt, date: insuranceTable.startDate, title: insuranceTable.provider })
+        .from(insuranceTable).where(inArray(insuranceTable.carId, carIds)).orderBy(sql`${insuranceTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: dealershipsTable.id, carId: dealershipsTable.carId, byUserId: dealershipsTable.createdByUserId, createdAt: dealershipsTable.createdAt, date: dealershipsTable.visitDate, title: dealershipsTable.name })
+        .from(dealershipsTable).where(inArray(dealershipsTable.carId, carIds)).orderBy(sql`${dealershipsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: renewalsTable.id, carId: renewalsTable.carId, byUserId: renewalsTable.createdByUserId, createdAt: renewalsTable.createdAt, date: renewalsTable.date, title: renewalsTable.type })
+        .from(renewalsTable).where(inArray(renewalsTable.carId, carIds)).orderBy(sql`${renewalsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+    ]);
+
+  push("maintenance", maint);
+  push("fault", faults);
+  push("inspection", inspections);
+  push("fuel", fuel);
+  push("part", parts);
+  push("insurance", insurance);
+  push("dealership", dealerships);
+  push("renewal", renewals);
+
+  collected.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  const top = collected.slice(0, ACTIVITY_LIMIT);
+
+  // Resolve creator names for attribution (distinct, non-null only).
+  const userIds = [...new Set(top.map((a) => a.byUserId).filter((v): v is number => v != null))];
+  const userMap = new Map<number, { name: string | null; email: string }>();
+  if (userIds.length > 0) {
+    const users = await db
+      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
+      .from(usersTable)
+      .where(inArray(usersTable.id, userIds));
+    for (const u of users) userMap.set(u.id, { name: u.name, email: u.email });
+  }
+
+  const items = top.map((a) => {
+    const car = carMap.get(a.carId);
+    const by = a.byUserId != null ? userMap.get(a.byUserId) : undefined;
+    return {
+      id: a.id,
+      kind: a.kind,
+      carId: a.carId,
+      car: car
+        ? { id: car.id, make: car.make, model: car.model, year: car.year, nickname: car.nickname, vehicleType: car.vehicleType }
+        : null,
+      byUserId: a.byUserId,
+      byName: by?.name ?? null,
+      byEmail: by?.email ?? null,
+      date: a.date,
+      createdAt: a.createdAt,
+      title: a.title,
+    };
+  });
+
+  return res.json(items);
 });
 
 // ── Members ─────────────────────────────────────────────────────────────

@@ -68,6 +68,7 @@ function RootLayoutNav() {
       <Stack.Screen name="fleet-upgrade" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="enterprise-upgrade" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="organization" options={{ headerShown: false, presentation: "card" }} />
+      <Stack.Screen name="org-activity" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="export" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="feedback" options={{ headerShown: false, presentation: "card" }} />
       <Stack.Screen name="settings" options={{ headerShown: false, presentation: "card" }} />

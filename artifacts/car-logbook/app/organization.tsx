@@ -335,6 +335,23 @@ export default function OrganizationScreen() {
           )}
         </View>
 
+        {/* Oversight: activity log (admin only) */}
+        {isAdmin && (
+          <Pressable
+            onPress={() => { Haptics.selectionAsync(); router.push("/org-activity" as any); }}
+            style={({ pressed }) => [styles.activityBtn, { backgroundColor: C.card, borderColor: C.border, opacity: pressed ? 0.85 : 1 }, isRTL && { flexDirection: "row-reverse" }]}
+          >
+            <View style={[styles.activityIcon, { backgroundColor: "#EEF2FF" }]}>
+              <Feather name="activity" size={18} color="#4338CA" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.activityTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("orgActivity.openButton")}</Text>
+              <Text style={[styles.activitySub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{t("orgActivity.subtitle")}</Text>
+            </View>
+            <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={20} color={C.textSecondary} />
+          </Pressable>
+        )}
+
         {/* Invite member (admin only) */}
         {isAdmin && (
           <View style={[styles.section, { backgroundColor: C.card }]}>
@@ -519,6 +536,18 @@ const styles = StyleSheet.create({
   },
   helperText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
   fieldLabel: { fontSize: 13, fontFamily: "Inter_400Regular" },
+
+  activityBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  activityIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  activityTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  activitySub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   orgChips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, maxWidth: 180 },
