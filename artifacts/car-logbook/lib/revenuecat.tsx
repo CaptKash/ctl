@@ -10,6 +10,22 @@ const REVENUECAT_ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_AP
 
 export const REVENUECAT_ENTITLEMENT_IDENTIFIER = "fleet";
 
+// CTL Enterprise: a single entitlement shared by all three seat tiers. Which
+// tier was purchased is derived from the active product identifier (below),
+// since the seat count is the only thing that differs between them.
+export const REVENUECAT_ENTERPRISE_IDENTIFIER = "enterprise";
+
+// Maps each Enterprise product to its seat limit (total org members incl.
+// admins). `null` = unlimited. Both billing periods of a tier share a limit.
+export const ENTERPRISE_SEAT_LIMITS: Record<string, number | null> = {
+  ctl_enterprise_10_monthly: 10,
+  ctl_enterprise_10_annual: 10,
+  ctl_enterprise_50_monthly: 50,
+  ctl_enterprise_50_annual: 50,
+  ctl_enterprise_unlimited_monthly: null,
+  ctl_enterprise_unlimited_annual: null,
+};
+
 export const FREE_CAR_LIMIT = 2;
 
 export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
@@ -59,6 +75,32 @@ export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
     offeringIdentifier: "default",
   } as unknown as PurchasesPackage,
 ];
+
+// Dev mock packages for the three Enterprise seat tiers (monthly + annual).
+// Lets the Enterprise upgrade flow be exercised without live store products.
+// Real prices/products are configured in the RevenueCat dashboard (owner task).
+export const DEV_MOCK_ENTERPRISE_PACKAGES: PurchasesPackage[] = [
+  ["ctl_enterprise_10_monthly", "Up to 10 — Monthly", 29.99, PACKAGE_TYPE.MONTHLY],
+  ["ctl_enterprise_10_annual", "Up to 10 — Annual", 299.99, PACKAGE_TYPE.ANNUAL],
+  ["ctl_enterprise_50_monthly", "Up to 50 — Monthly", 99.99, PACKAGE_TYPE.MONTHLY],
+  ["ctl_enterprise_50_annual", "Up to 50 — Annual", 999.99, PACKAGE_TYPE.ANNUAL],
+  ["ctl_enterprise_unlimited_monthly", "Unlimited — Monthly", 199.99, PACKAGE_TYPE.MONTHLY],
+  ["ctl_enterprise_unlimited_annual", "Unlimited — Annual", 1999.99, PACKAGE_TYPE.ANNUAL],
+].map(([id, title, price, packageType]) => ({
+  identifier: id as string,
+  packageType: packageType as PACKAGE_TYPE,
+  product: {
+    identifier: id as string,
+    description: `CTL Enterprise ${title}`,
+    title: title as string,
+    price: price as number,
+    priceString: `$${(price as number).toFixed(2)}`,
+    currencyCode: "USD",
+    introPrice: null,
+    discounts: [],
+  },
+  offeringIdentifier: "enterprise",
+}) as unknown as PurchasesPackage);
 
 function getRevenueCatApiKey() {
   if (Platform.OS === "web") return REVENUECAT_TEST_API_KEY ?? "";
@@ -176,8 +218,33 @@ function useSubscriptionContext() {
 
   const isAdmin = user?.isAdmin === true;
 
+  const enterpriseEntitlement =
+    customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTERPRISE_IDENTIFIER];
+
+  // Admin acts as an unlimited Enterprise account so the owner can test the
+  // org flows without a live purchase (mirrors how isAdmin grants Fleet).
+  const isEnterprise = isAdmin || enterpriseEntitlement !== undefined;
+
+  // Seat limit is only meaningful when `isEnterprise`. `null` = unlimited.
+  const enterpriseSeatLimit: number | null = (() => {
+    if (!isEnterprise) return null;
+    // Admin (no purchased entitlement) acts as an unlimited test account.
+    if (isAdmin && !enterpriseEntitlement) return null;
+    const pid = enterpriseEntitlement?.productIdentifier;
+    if (pid && pid in ENTERPRISE_SEAT_LIMITS) return ENTERPRISE_SEAT_LIMITS[pid];
+    // Active but unrecognized enterprise product: fall back to the most
+    // conservative known tier rather than granting unlimited seats.
+    return Math.min(
+      ...Object.values(ENTERPRISE_SEAT_LIMITS).filter(
+        (v): v is number => v !== null,
+      ),
+    );
+  })();
+
+  // Enterprise is the higher tier and includes everything Fleet unlocks.
   const isFleet =
     isAdmin ||
+    isEnterprise ||
     customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
   const realPackages: PurchasesPackage[] = (() => {
@@ -200,6 +267,8 @@ function useSubscriptionContext() {
     customerInfo: customerInfoQuery.data,
     offerings: offeringsQuery.data,
     isFleet,
+    isEnterprise,
+    enterpriseSeatLimit,
     isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
     offeringsFailed,
     usingMockPackages,
@@ -211,6 +280,7 @@ function useSubscriptionContext() {
     refetchCustomerInfo: customerInfoQuery.refetch,
     refetchOfferings: offeringsQuery.refetch,
     mockPackages: DEV_MOCK_PACKAGES,
+    mockEnterprisePackages: DEV_MOCK_ENTERPRISE_PACKAGES,
     realPackages,
     diagnostics,
     offeringsError: offeringsQuery.error

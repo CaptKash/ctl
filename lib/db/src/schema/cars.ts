@@ -41,9 +41,49 @@ export const passwordResetTokensTable = pgTable("password_reset_tokens", {
 
 export type PasswordResetToken = typeof passwordResetTokensTable.$inferSelect;
 
+// ── CTL Enterprise: organizations ────────────────────────────────────────
+// A company/establishment that owns vehicles and records shared by multiple
+// members (admin + staff). `seatLimit` mirrors the purchased Enterprise tier
+// (10 / 50 / unlimited); NULL means unlimited. The subscription entitlement
+// itself is verified client-side via RevenueCat (consistent with how Fleet
+// gating works today); the server enforces the seat limit on invites.
+export const organizationsTable = pgTable("organizations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  ownerUserId: integer("owner_user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  seatLimit: integer("seat_limit"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type Organization = typeof organizationsTable.$inferSelect;
+
+// Membership of a user in an organization. Invites are created by email
+// (`userId` NULL) and linked to a concrete user when that person signs in
+// and accepts. `role` is "admin" or "staff"; `status` is "invited" or
+// "active".
+export const organizationMembersTable = pgTable("organization_members", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").notNull().references(() => organizationsTable.id, { onDelete: "cascade" }),
+  userId: integer("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  role: text("role").notNull(),
+  status: text("status").notNull(),
+  invitedByUserId: integer("invited_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [unique("org_members_org_email_unique").on(t.orgId, t.email)]);
+
+export type OrganizationMember = typeof organizationMembersTable.$inferSelect;
+
 export const carsTable = pgTable("cars", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
+  // When set, the vehicle belongs to an organization and access is governed
+  // by membership/role rather than `userId`. Personal vehicles keep
+  // `orgId` NULL (and `userId` set), so existing single-user behavior is
+  // unchanged.
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
   make: text("make").notNull(),
   model: text("model").notNull(),
   year: integer("year").notNull(),
@@ -63,13 +103,16 @@ export const carsTable = pgTable("cars", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertCarSchema = createInsertSchema(carsTable).omit({ id: true, createdAt: true, updatedAt: true, userId: true });
+export const insertCarSchema = createInsertSchema(carsTable).omit({ id: true, createdAt: true, updatedAt: true, userId: true, orgId: true });
 export type InsertCar = z.infer<typeof insertCarSchema>;
 export type Car = typeof carsTable.$inferSelect;
 
 export const maintenanceTable = pgTable("maintenance_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  // Which user logged this record (for organization oversight). NULL for
+  // legacy rows and personal records where attribution isn't needed.
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   type: text("type").notNull(),
   description: text("description").notNull(),
   date: text("date").notNull(),
@@ -90,13 +133,14 @@ export const maintenanceTable = pgTable("maintenance_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertMaintenanceSchema = createInsertSchema(maintenanceTable).omit({ id: true, createdAt: true });
+export const insertMaintenanceSchema = createInsertSchema(maintenanceTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
 export type MaintenanceRecord = typeof maintenanceTable.$inferSelect;
 
 export const partsTable = pgTable("parts_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   partNumber: text("part_number"),
   brand: text("brand"),
@@ -111,13 +155,14 @@ export const partsTable = pgTable("parts_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertPartsSchema = createInsertSchema(partsTable).omit({ id: true, createdAt: true });
+export const insertPartsSchema = createInsertSchema(partsTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertParts = z.infer<typeof insertPartsSchema>;
 export type PartsRecord = typeof partsTable.$inferSelect;
 
 export const insuranceTable = pgTable("insurance_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   provider: text("provider").notNull(),
   policyNumber: text("policy_number").notNull(),
   type: text("type").notNull(),
@@ -133,13 +178,14 @@ export const insuranceTable = pgTable("insurance_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertInsuranceSchema = createInsertSchema(insuranceTable).omit({ id: true, createdAt: true });
+export const insertInsuranceSchema = createInsertSchema(insuranceTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertInsurance = z.infer<typeof insertInsuranceSchema>;
 export type InsuranceRecord = typeof insuranceTable.$inferSelect;
 
 export const dealershipsTable = pgTable("dealership_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   address: text("address"),
   phone: text("phone"),
@@ -153,13 +199,14 @@ export const dealershipsTable = pgTable("dealership_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertDealershipSchema = createInsertSchema(dealershipsTable).omit({ id: true, createdAt: true });
+export const insertDealershipSchema = createInsertSchema(dealershipsTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertDealership = z.infer<typeof insertDealershipSchema>;
 export type DealershipRecord = typeof dealershipsTable.$inferSelect;
 
 export const fuelTable = pgTable("fuel_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   date: text("date").notNull(),
   mileage: integer("mileage").notNull(),
   liters: real("liters").notNull(),
@@ -174,13 +221,14 @@ export const fuelTable = pgTable("fuel_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertFuelSchema = createInsertSchema(fuelTable).omit({ id: true, createdAt: true });
+export const insertFuelSchema = createInsertSchema(fuelTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertFuel = z.infer<typeof insertFuelSchema>;
 export type FuelRecord = typeof fuelTable.$inferSelect;
 
 export const malfunctionsTable = pgTable("malfunctions_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   date: text("date").notNull(),
   inputMethod: text("input_method").notNull(),
   description: text("description").notNull(),
@@ -194,7 +242,7 @@ export const malfunctionsTable = pgTable("malfunctions_records", {
 });
 
 export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable)
-  .omit({ id: true, createdAt: true })
+  .omit({ id: true, createdAt: true, createdByUserId: true })
   .extend({
     inputMethod: z.enum(["warning_message", "written"]),
     phase: z.enum(["car_running", "car_started", "parking", "during_drive"]).nullable().optional(),
@@ -209,6 +257,7 @@ export type MalfunctionRecord = typeof malfunctionsTable.$inferSelect;
 export const inspectionsTable = pgTable("inspection_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   date: text("date").notNull(),
   place: text("place"),
   results: text("results"),
@@ -218,13 +267,14 @@ export const inspectionsTable = pgTable("inspection_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertInspectionSchema = createInsertSchema(inspectionsTable).omit({ id: true, createdAt: true });
+export const insertInspectionSchema = createInsertSchema(inspectionsTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
 export type InspectionRecord = typeof inspectionsTable.$inferSelect;
 
 export const renewalsTable = pgTable("renewal_records", {
   id: serial("id").primaryKey(),
   carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  createdByUserId: integer("created_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   type: text("type").notNull(),
   date: text("date").notNull(),
   validUntil: text("valid_until"),
@@ -236,7 +286,7 @@ export const renewalsTable = pgTable("renewal_records", {
 });
 
 export const insertRenewalSchema = createInsertSchema(renewalsTable)
-  .omit({ id: true, createdAt: true })
+  .omit({ id: true, createdAt: true, createdByUserId: true })
   .extend({
     type: z.enum(["license", "insurance"]),
   });

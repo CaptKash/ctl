@@ -24,10 +24,15 @@ import {
 import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { requireAuth } from "../middlewares/auth";
+import { resolveCarAccess, canMutateVehicle } from "../middlewares/orgAccess";
 
 const router = Router();
 
 router.use(requireAuth);
+// Every `/cars/:carId/...` route is authorized here: the car must be owned by
+// the requester (personal) or belong to an organization they actively belong
+// to. Attaches `req.carAccess` with the resolved car + effective role.
+router.param("carId", resolveCarAccess);
 
 router.post("/cars/estimate-tank-capacity", async (req, res) => {
   const { make, model, year } = req.body ?? {};
@@ -82,24 +87,19 @@ router.post("/cars", async (req, res) => {
 });
 
 router.get("/cars/:carId", async (req, res) => {
-  const carId = parseInt(req.params.carId);
-  const userId = req.user!.id;
-  const [car] = await db
-    .select()
-    .from(carsTable)
-    .where(and(eq(carsTable.id, carId), eq(carsTable.userId, userId)));
-  if (!car) return res.status(404).json({ error: "Car not found" });
-  res.json(car);
+  res.json(req.carAccess!.car);
 });
 
 router.put("/cars/:carId", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const userId = req.user!.id;
+  if (!canMutateVehicle(req.carAccess!.role)) {
+    return res.status(403).json({ error: "You do not have permission to edit this vehicle." });
+  }
   const body = insertCarSchema.parse(req.body);
   const [car] = await db
     .update(carsTable)
     .set({ ...body, updatedAt: new Date() })
-    .where(and(eq(carsTable.id, carId), eq(carsTable.userId, userId)))
+    .where(eq(carsTable.id, carId))
     .returning();
   if (!car) return res.status(404).json({ error: "Car not found" });
   res.json(car);
@@ -107,8 +107,10 @@ router.put("/cars/:carId", async (req, res) => {
 
 router.delete("/cars/:carId", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const userId = req.user!.id;
-  await db.delete(carsTable).where(and(eq(carsTable.id, carId), eq(carsTable.userId, userId)));
+  if (!canMutateVehicle(req.carAccess!.role)) {
+    return res.status(403).json({ error: "You do not have permission to delete this vehicle." });
+  }
+  await db.delete(carsTable).where(eq(carsTable.id, carId));
   res.json({ success: true });
 });
 
@@ -247,7 +249,10 @@ router.post("/cars/:carId/maintenance", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const { faultId: faultIdRaw, ...restBody } = req.body;
   const body = insertMaintenanceSchema.parse({ ...restBody, carId });
-  const [record] = await db.insert(maintenanceTable).values(body).returning();
+  const [record] = await db
+    .insert(maintenanceTable)
+    .values({ ...body, createdByUserId: req.user!.id })
+    .returning();
   // Atomically resolve the linked fault if one was provided
   if (faultIdRaw !== undefined) {
     const faultId = parseInt(faultIdRaw);
@@ -294,7 +299,10 @@ router.get("/cars/:carId/parts", async (req, res) => {
 router.post("/cars/:carId/parts", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const body = insertPartsSchema.parse({ ...req.body, carId });
-  const [record] = await db.insert(partsTable).values(body).returning();
+  const [record] = await db
+    .insert(partsTable)
+    .values({ ...body, createdByUserId: req.user!.id })
+    .returning();
   res.status(201).json(record);
 });
 
@@ -334,7 +342,10 @@ router.get("/cars/:carId/insurance", async (req, res) => {
 router.post("/cars/:carId/insurance", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const body = insertInsuranceSchema.parse({ ...req.body, carId });
-  const [record] = await db.insert(insuranceTable).values(body).returning();
+  const [record] = await db
+    .insert(insuranceTable)
+    .values({ ...body, createdByUserId: req.user!.id })
+    .returning();
   res.status(201).json(record);
 });
 
@@ -374,7 +385,10 @@ router.get("/cars/:carId/dealerships", async (req, res) => {
 router.post("/cars/:carId/dealerships", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const body = insertDealershipSchema.parse({ ...req.body, carId });
-  const [record] = await db.insert(dealershipsTable).values(body).returning();
+  const [record] = await db
+    .insert(dealershipsTable)
+    .values({ ...body, createdByUserId: req.user!.id })
+    .returning();
   res.status(201).json(record);
 });
 
@@ -414,7 +428,10 @@ router.get("/cars/:carId/fuel", async (req, res) => {
 router.post("/cars/:carId/fuel", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const body = insertFuelSchema.parse({ ...req.body, carId });
-  const [record] = await db.insert(fuelTable).values(body).returning();
+  const [record] = await db
+    .insert(fuelTable)
+    .values({ ...body, createdByUserId: req.user!.id })
+    .returning();
   res.status(201).json(record);
 });
 
@@ -520,7 +537,10 @@ router.get("/cars/:carId/malfunctions", async (req, res) => {
 router.post("/cars/:carId/malfunctions", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const body = insertMalfunctionSchema.parse({ ...req.body, carId });
-  const [record] = await db.insert(malfunctionsTable).values(body).returning();
+  const [record] = await db
+    .insert(malfunctionsTable)
+    .values({ ...body, createdByUserId: req.user!.id })
+    .returning();
   res.status(201).json(record);
 });
 
@@ -547,7 +567,10 @@ router.get("/cars/:carId/inspections", async (req, res) => {
 router.post("/cars/:carId/inspections", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const body = insertInspectionSchema.parse({ ...req.body, carId });
-  const [record] = await db.insert(inspectionsTable).values(body).returning();
+  const [record] = await db
+    .insert(inspectionsTable)
+    .values({ ...body, createdByUserId: req.user!.id })
+    .returning();
   res.status(201).json(record);
 });
 
@@ -708,23 +731,18 @@ router.get("/cars/:carId/report", async (req, res) => {
 // Renewals
 router.post("/cars/:carId/renewals", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const userId = req.user!.id;
-  const [car] = await db.select().from(carsTable).where(eq(carsTable.id, carId));
-  if (!car || car.userId !== userId) return res.status(404).json({ error: "Car not found" });
-
   const parsed = insertRenewalSchema.safeParse({ ...req.body, carId });
   if (!parsed.success) return res.status(400).json({ error: "Invalid renewal data", details: parsed.error.flatten() });
 
-  const [row] = await db.insert(renewalsTable).values(parsed.data).returning();
+  const [row] = await db
+    .insert(renewalsTable)
+    .values({ ...parsed.data, createdByUserId: req.user!.id })
+    .returning();
   res.status(201).json(row);
 });
 
 router.get("/cars/:carId/renewals", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const userId = req.user!.id;
-  const [car] = await db.select().from(carsTable).where(eq(carsTable.id, carId));
-  if (!car || car.userId !== userId) return res.status(404).json({ error: "Car not found" });
-
   const rows = await db
     .select()
     .from(renewalsTable)
