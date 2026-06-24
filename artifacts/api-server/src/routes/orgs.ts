@@ -11,24 +11,22 @@ import {
 } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
 import { resolveOrgAccess } from "../middlewares/orgAccess";
+import { getEnterpriseSeatLimit } from "../lib/revenuecat";
 
 const router = Router();
 
 router.use(requireAuth);
 router.param("orgId", resolveOrgAccess);
 
+// Seat limits are NEVER accepted from the client — they are derived server-side
+// from the owner's verified RevenueCat Enterprise entitlement (see
+// `getEnterpriseSeatLimit`). The schemas below therefore only carry the name.
 const createOrgSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  // null / omitted = unlimited seats. Mirrors the purchased Enterprise tier
-  // (10 / 50 / unlimited). The subscription itself is gated client-side via
-  // RevenueCat (same trust model as Fleet); the server only enforces the
-  // resulting seat limit on invites.
-  seatLimit: z.number().int().positive().nullable().optional(),
 });
 
 const updateOrgSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
-  seatLimit: z.number().int().positive().nullable().optional(),
 });
 
 const inviteSchema = z.object({
@@ -47,6 +45,24 @@ async function countSeats(orgId: number): Promise<number> {
   return row?.n ?? 0;
 }
 
+/**
+ * Authoritative seat limit for an org, derived from the OWNER's verified
+ * RevenueCat entitlement (the owner is the subscriber). Returns `undefined`
+ * when the owner has no active Enterprise entitlement. Throws if RevenueCat
+ * is unreachable so callers fail closed.
+ */
+async function resolveOwnerSeatLimit(
+  ownerUserId: number,
+): Promise<number | null | undefined> {
+  const [owner] = await db
+    .select({ id: usersTable.id, isAdmin: usersTable.isAdmin })
+    .from(usersTable)
+    .where(eq(usersTable.id, ownerUserId))
+    .limit(1);
+  if (!owner) return undefined;
+  return getEnterpriseSeatLimit(owner);
+}
+
 // ── Organizations ─────────────────────────────────────────────────────────
 
 // Create an organization. The creator becomes its owner + an active admin.
@@ -56,7 +72,20 @@ router.post("/orgs", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid organization data", details: parsed.error.flatten() });
   }
-  const seatLimit = parsed.data.seatLimit ?? null;
+
+  // Seat limit comes from the creator's verified Enterprise entitlement, never
+  // the request body — this prevents self-upgrading to a higher seat tier.
+  let seatLimit: number | null | undefined;
+  try {
+    seatLimit = await getEnterpriseSeatLimit(req.user!);
+  } catch {
+    return res.status(503).json({ error: "Could not verify your subscription. Please try again." });
+  }
+  if (seatLimit === undefined) {
+    return res.status(403).json({
+      error: "An active CTL Enterprise subscription is required to create an organization.",
+    });
+  }
 
   const [me] = await db
     .select({ email: usersTable.email })
@@ -200,14 +229,29 @@ router.patch("/orgs/:orgId", async (req, res) => {
   }
   const next: Record<string, unknown> = { updatedAt: new Date() };
   if (parsed.data.name !== undefined) next.name = parsed.data.name;
-  if (parsed.data.seatLimit !== undefined) next.seatLimit = parsed.data.seatLimit;
 
-  // Refuse to set a seat limit below the seats already occupied.
-  if (parsed.data.seatLimit != null) {
-    const used = await countSeats(org.id);
-    if (parsed.data.seatLimit < used) {
-      return res.status(409).json({ error: `Seat limit cannot be below current members (${used}).` });
+  // Refresh the seat limit from the owner's current entitlement (authoritative)
+  // so plan upgrades/downgrades are reflected — never from client input. An
+  // `undefined` result means no active entitlement: freeze the stored limit at
+  // current usage so a stale purchased limit can never be used to grow the org.
+  let seatLimit: number | null | undefined;
+  try {
+    seatLimit = await resolveOwnerSeatLimit(org.ownerUserId);
+  } catch {
+    return res.status(503).json({ error: "Could not verify the organization's subscription. Please try again." });
+  }
+  if (seatLimit === undefined) {
+    next.seatLimit = await countSeats(org.id);
+  } else {
+    if (seatLimit != null) {
+      const used = await countSeats(org.id);
+      if (seatLimit < used) {
+        return res.status(409).json({
+          error: `Your plan's seat limit (${seatLimit}) is below the current members (${used}). Remove members or upgrade your plan.`,
+        });
+      }
     }
+    next.seatLimit = seatLimit;
   }
 
   const [updated] = await db
@@ -302,23 +346,64 @@ router.post("/orgs/:orgId/members", async (req, res) => {
     return res.status(409).json({ error: "This email is already a member or has a pending invite." });
   }
 
-  if (org.seatLimit != null) {
-    const used = await countSeats(org.id);
-    if (used >= org.seatLimit) {
-      return res.status(403).json({ error: "Seat limit reached for this plan." });
+  // Re-derive the authoritative limit from the owner's CURRENT entitlement so a
+  // lapsed/downgraded plan is enforced regardless of the stored value. An
+  // `undefined` result means the owner has no active Enterprise entitlement —
+  // deny growth outright (never fall back to a stale stored limit). A thrown
+  // error means RevenueCat is unreachable — fail closed with 503.
+  let effectiveLimit: number | null;
+  try {
+    const fresh = await resolveOwnerSeatLimit(org.ownerUserId);
+    if (fresh === undefined) {
+      return res.status(403).json({
+        error: "This organization's CTL Enterprise subscription is not active. Renew it to add members.",
+      });
     }
+    effectiveLimit = fresh;
+    if (fresh !== org.seatLimit) {
+      await db
+        .update(organizationsTable)
+        .set({ seatLimit: fresh, updatedAt: new Date() })
+        .where(eq(organizationsTable.id, org.id));
+    }
+  } catch {
+    return res.status(503).json({ error: "Could not verify the organization's subscription. Please try again." });
   }
 
-  const [member] = await db
-    .insert(organizationMembersTable)
-    .values({
-      orgId: org.id,
-      email,
-      role: parsed.data.role,
-      status: "invited",
-      invitedByUserId: req.user!.id,
-    })
-    .returning();
+  // Count seats and insert atomically: lock the org row so concurrent invites
+  // for the same org serialize and cannot both pass the seat check before
+  // committing (prevents over-allocation past the entitlement cap).
+  const member = await db.transaction(async (tx) => {
+    await tx
+      .select({ id: organizationsTable.id })
+      .from(organizationsTable)
+      .where(eq(organizationsTable.id, org.id))
+      .for("update");
+
+    if (effectiveLimit != null) {
+      const [row] = await tx
+        .select({ n: sql<number>`count(*)::int` })
+        .from(organizationMembersTable)
+        .where(eq(organizationMembersTable.orgId, org.id));
+      if ((row?.n ?? 0) >= effectiveLimit) return null;
+    }
+
+    const [created] = await tx
+      .insert(organizationMembersTable)
+      .values({
+        orgId: org.id,
+        email,
+        role: parsed.data.role,
+        status: "invited",
+        invitedByUserId: req.user!.id,
+      })
+      .returning();
+    return created;
+  });
+
+  if (!member) {
+    return res.status(403).json({ error: "Seat limit reached for this plan." });
+  }
   return res.status(201).json(member);
 });
 

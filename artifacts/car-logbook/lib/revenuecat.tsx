@@ -10,20 +10,15 @@ const REVENUECAT_ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_AP
 
 export const REVENUECAT_ENTITLEMENT_IDENTIFIER = "fleet";
 
-// CTL Enterprise: a single entitlement shared by all three seat tiers. Which
-// tier was purchased is derived from the active product identifier (below),
-// since the seat count is the only thing that differs between them.
-export const REVENUECAT_ENTERPRISE_IDENTIFIER = "enterprise";
-
-// Maps each Enterprise product to its seat limit (total org members incl.
-// admins). `null` = unlimited. Both billing periods of a tier share a limit.
-export const ENTERPRISE_SEAT_LIMITS: Record<string, number | null> = {
-  ctl_enterprise_10_monthly: 10,
-  ctl_enterprise_10_annual: 10,
-  ctl_enterprise_50_monthly: 50,
-  ctl_enterprise_50_annual: 50,
-  ctl_enterprise_unlimited_monthly: null,
-  ctl_enterprise_unlimited_annual: null,
+// CTL Enterprise uses one entitlement per seat tier. Each tier's monthly +
+// annual products both unlock the same entitlement, so the seat limit is read
+// directly from the active entitlement id — the server derives it the same way
+// (the server is authoritative; this is only for display/gating UX). `null` =
+// unlimited. Keep this map in sync with the server's ENTERPRISE_ENTITLEMENTS.
+export const ENTERPRISE_ENTITLEMENTS: Record<string, number | null> = {
+  enterprise_10: 10,
+  enterprise_50: 50,
+  enterprise_unlimited: null,
 };
 
 export const FREE_CAR_LIMIT = 2;
@@ -218,27 +213,31 @@ function useSubscriptionContext() {
 
   const isAdmin = user?.isAdmin === true;
 
-  const enterpriseEntitlement =
-    customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTERPRISE_IDENTIFIER];
+  // Most generous active Enterprise tier (unlimited wins). `undefined` = none.
+  const activeSeatLimit: number | null | undefined = (() => {
+    const active = customerInfoQuery.data?.entitlements.active;
+    if (!active) return undefined;
+    let limit: number | null | undefined = undefined;
+    for (const id of Object.keys(ENTERPRISE_ENTITLEMENTS)) {
+      if (active[id] === undefined) continue;
+      const tier = ENTERPRISE_ENTITLEMENTS[id];
+      if (tier === null) return null;
+      limit = limit === undefined ? tier : Math.max(limit, tier);
+    }
+    return limit;
+  })();
 
   // Admin acts as an unlimited Enterprise account so the owner can test the
   // org flows without a live purchase (mirrors how isAdmin grants Fleet).
-  const isEnterprise = isAdmin || enterpriseEntitlement !== undefined;
+  const isEnterprise = isAdmin || activeSeatLimit !== undefined;
 
   // Seat limit is only meaningful when `isEnterprise`. `null` = unlimited.
+  // Server-authoritative on writes; this drives display/gating only.
   const enterpriseSeatLimit: number | null = (() => {
     if (!isEnterprise) return null;
-    // Admin (no purchased entitlement) acts as an unlimited test account.
-    if (isAdmin && !enterpriseEntitlement) return null;
-    const pid = enterpriseEntitlement?.productIdentifier;
-    if (pid && pid in ENTERPRISE_SEAT_LIMITS) return ENTERPRISE_SEAT_LIMITS[pid];
-    // Active but unrecognized enterprise product: fall back to the most
-    // conservative known tier rather than granting unlimited seats.
-    return Math.min(
-      ...Object.values(ENTERPRISE_SEAT_LIMITS).filter(
-        (v): v is number => v !== null,
-      ),
-    );
+    if (activeSeatLimit !== undefined) return activeSeatLimit;
+    // Admin with no purchased tier acts as an unlimited test account.
+    return null;
   })();
 
   // Enterprise is the higher tier and includes everything Fleet unlocks.
