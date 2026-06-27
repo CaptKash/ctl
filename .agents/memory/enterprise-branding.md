@@ -7,7 +7,7 @@ description: All user-facing copy for the organization/fleet-team feature is bra
 
 In CTL (car-logbook), the multi-member organization feature is presented to users as **"Enterprise"** in ALL user-facing copy — both English and Arabic. In Arabic the Latin word "Enterprise" is used as a brand term (no Arabic translation like "المؤسسة").
 
-**Why:** The owner (Kash) decided "Enterprise" works as both a brand name and a functional descriptor, and wants it consistent everywhere users see it.
+**Why:** The product owner decided "Enterprise" works as both a brand name and a functional descriptor, and wants it consistent everywhere users see it.
 
 **How to apply:** When adding/editing any user-visible string about orgs:
 - i18n values in `artifacts/car-logbook/lib/i18n/locales/{en,ar}.json` (the `org` / `orgActivity` sections, invite banners, enterprise-upgrade copy) → use "Enterprise".

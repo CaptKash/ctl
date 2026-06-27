@@ -242,24 +242,25 @@ router.patch("/orgs/:orgId", async (req, res) => {
   // so plan upgrades/downgrades are reflected — never from client input. An
   // `undefined` result means no active entitlement: freeze the stored limit at
   // current usage so a stale purchased limit can never be used to grow the org.
-  let seatLimit: number | null | undefined;
+  // A verification failure must NOT block a plain name change: on error we
+  // leave the stored seat limit untouched and still apply the update.
   try {
-    seatLimit = await resolveOwnerSeatLimit(org.ownerUserId);
-  } catch {
-    return res.status(503).json({ error: "Could not verify the enterprise's subscription. Please try again." });
-  }
-  if (seatLimit === undefined) {
-    next.seatLimit = await countSeats(org.id);
-  } else {
-    if (seatLimit != null) {
-      const used = await countSeats(org.id);
-      if (seatLimit < used) {
-        return res.status(409).json({
-          error: `Your plan's seat limit (${seatLimit}) is below the current members (${used}). Remove members or upgrade your plan.`,
-        });
+    const seatLimit = await resolveOwnerSeatLimit(org.ownerUserId);
+    if (seatLimit === undefined) {
+      next.seatLimit = await countSeats(org.id);
+    } else {
+      if (seatLimit != null) {
+        const used = await countSeats(org.id);
+        if (seatLimit < used) {
+          return res.status(409).json({
+            error: `Your plan's seat limit (${seatLimit}) is below the current members (${used}). Remove members or upgrade your plan.`,
+          });
+        }
       }
+      next.seatLimit = seatLimit;
     }
-    next.seatLimit = seatLimit;
+  } catch {
+    // RevenueCat unreachable — keep the existing seat limit and still rename.
   }
 
   const [updated] = await db
