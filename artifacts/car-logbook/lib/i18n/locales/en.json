@@ -622,6 +622,7 @@
   },
   "org": {
     "title": "Organization",
+    "enterpriseLabel": "Enterprise",
     "subtitle": "Manage your team & shared fleet",
     "createTitle": "Create your organization",
     "createSub": "Name your organization to start inviting your team.",

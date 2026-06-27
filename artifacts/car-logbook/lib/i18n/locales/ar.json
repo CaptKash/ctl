@@ -630,6 +630,7 @@
   },
   "org": {
     "title": "المؤسسة",
+    "enterpriseLabel": "Enterprise",
     "subtitle": "أدِر فريقك والأسطول المشترك",
     "createTitle": "أنشئ مؤسستك",
     "createSub": "سمِّ مؤسستك لبدء دعوة فريقك.",

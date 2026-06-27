@@ -626,12 +626,12 @@ export default function SettingsScreen() {
 
         {/* CTL Enterprise: members manage their org; non-members see marketing card */}
         {hasOrgAccess ? (
-          <View style={[styles.card, { backgroundColor: C.card }]}>
+          <View style={[styles.card, { backgroundColor: C.card, borderWidth: 1.5, borderColor: "#4338CA" }]}>
             <NavRow
               icon="briefcase"
               iconColor="#312E81"
               iconBg="#E0E7FF"
-              label={t("org.title")}
+              label={t("org.enterpriseLabel")}
               subtitle={t("org.subtitle")}
               badge={invites.length > 0 ? String(invites.length) : undefined}
               onPress={() => router.push("/organization" as any)}
