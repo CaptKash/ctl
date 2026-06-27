@@ -78,7 +78,7 @@ router.post("/orgs", async (req, res) => {
   const userId = req.user!.id;
   const parsed = createOrgSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid organization data", details: parsed.error.flatten() });
+    return res.status(400).json({ error: "Invalid enterprise data", details: parsed.error.flatten() });
   }
 
   // Seat limit comes from the creator's verified Enterprise entitlement, never
@@ -91,7 +91,7 @@ router.post("/orgs", async (req, res) => {
   }
   if (seatLimit === undefined) {
     return res.status(403).json({
-      error: "An active CTL Enterprise subscription is required to create an organization.",
+      error: "An active CTL Enterprise subscription is required to create an enterprise.",
     });
   }
 
@@ -233,7 +233,7 @@ router.patch("/orgs/:orgId", async (req, res) => {
   if (role !== "admin") return res.status(403).json({ error: "Admins only." });
   const parsed = updateOrgSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid organization data", details: parsed.error.flatten() });
+    return res.status(400).json({ error: "Invalid enterprise data", details: parsed.error.flatten() });
   }
   const next: Record<string, unknown> = { updatedAt: new Date() };
   if (parsed.data.name !== undefined) next.name = parsed.data.name;
@@ -246,7 +246,7 @@ router.patch("/orgs/:orgId", async (req, res) => {
   try {
     seatLimit = await resolveOwnerSeatLimit(org.ownerUserId);
   } catch {
-    return res.status(503).json({ error: "Could not verify the organization's subscription. Please try again." });
+    return res.status(503).json({ error: "Could not verify the enterprise's subscription. Please try again." });
   }
   if (seatLimit === undefined) {
     next.seatLimit = await countSeats(org.id);
@@ -274,7 +274,7 @@ router.patch("/orgs/:orgId", async (req, res) => {
 router.delete("/orgs/:orgId", async (req, res) => {
   const { org } = req.orgAccess!;
   if (org.ownerUserId !== req.user!.id) {
-    return res.status(403).json({ error: "Only the owner can delete the organization." });
+    return res.status(403).json({ error: "Only the owner can delete the enterprise." });
   }
   await db.delete(organizationsTable).where(eq(organizationsTable.id, org.id));
   return res.json({ success: true });
@@ -488,7 +488,7 @@ router.post("/orgs/:orgId/members", async (req, res) => {
     const fresh = await resolveOwnerSeatLimit(org.ownerUserId);
     if (fresh === undefined) {
       return res.status(403).json({
-        error: "This organization's CTL Enterprise subscription is not active. Renew it to add members.",
+        error: "This enterprise's CTL Enterprise subscription is not active. Renew it to add members.",
       });
     }
     effectiveLimit = fresh;
@@ -499,7 +499,7 @@ router.post("/orgs/:orgId/members", async (req, res) => {
         .where(eq(organizationsTable.id, org.id));
     }
   } catch {
-    return res.status(503).json({ error: "Could not verify the organization's subscription. Please try again." });
+    return res.status(503).json({ error: "Could not verify the enterprise's subscription. Please try again." });
   }
 
   // Count seats and insert atomically: lock the org row so concurrent invites
@@ -578,7 +578,7 @@ router.patch("/orgs/:orgId/members/:memberId", async (req, res) => {
         ),
       );
     if (adminCount <= 1) {
-      return res.status(409).json({ error: "An organization must keep at least one admin." });
+      return res.status(409).json({ error: "An enterprise must keep at least one admin." });
     }
   }
 
