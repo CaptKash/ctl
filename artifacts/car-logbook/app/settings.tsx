@@ -495,7 +495,7 @@ export default function SettingsScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const { user, logout } = useAuth();
-  const { isEnterprise } = useSubscription();
+  const { isFleet, isEnterprise } = useSubscription();
   const { orgs, invites } = useOrg();
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -591,36 +591,38 @@ export default function SettingsScreen() {
         {/* Subscriptions */}
         <Text style={[styles.sectionLabel, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl", marginRight: 4, marginLeft: 0 }]}>{t("settings.sections.subscriptions")}</Text>
 
-        {/* CTL Fleet upgrade card */}
-        <Pressable
-          style={({ pressed }) => [styles.fleetCard, { opacity: pressed ? 0.92 : 1 }]}
-          onPress={() => router.push("/fleet-upgrade" as any)}
-        >
-          <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
-            <MetalIcon icon="star" color="#92400E" bg="#FEF3C7" size={16} style={styles.fleetIconWrap} />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.fleetTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.title")}</Text>
-              <Text style={[styles.fleetTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.tagline")}</Text>
-            </View>
-          </View>
-          <View style={styles.fleetFeatures}>
-            {[
-              t("settings.fleet.feature1"),
-              t("settings.fleet.feature3"),
-              t("settings.fleet.feature4"),
-              t("settings.fleet.feature5"),
-            ].map((f) => (
-              <View key={f} style={[styles.fleetFeatureRow, isRTL && { flexDirection: "row-reverse" }]}>
-                <Feather name="check-circle" size={13} color="#D97706" />
-                <Text style={[styles.fleetFeatureText, isRTL && { textAlign: "right", writingDirection: "rtl", flex: 1 }]}>{f}</Text>
+        {/* CTL Fleet upgrade card — hidden once the user is already Fleet or Enterprise */}
+        {!isFleet && (
+          <Pressable
+            style={({ pressed }) => [styles.fleetCard, { opacity: pressed ? 0.92 : 1 }]}
+            onPress={() => router.push("/fleet-upgrade" as any)}
+          >
+            <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
+              <MetalIcon icon="star" color="#92400E" bg="#FEF3C7" size={16} style={styles.fleetIconWrap} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.fleetTitle, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.title")}</Text>
+                <Text style={[styles.fleetTagline, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.fleet.tagline")}</Text>
               </View>
-            ))}
-            <View style={[styles.fleetCta, isRTL && { flexDirection: "row-reverse" }]}>
-              <Text style={styles.fleetCtaText}>{t("settings.fleet.cta")}</Text>
-              <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={14} color="#78350F" />
             </View>
-          </View>
-        </Pressable>
+            <View style={styles.fleetFeatures}>
+              {[
+                t("settings.fleet.feature1"),
+                t("settings.fleet.feature3"),
+                t("settings.fleet.feature4"),
+                t("settings.fleet.feature5"),
+              ].map((f) => (
+                <View key={f} style={[styles.fleetFeatureRow, isRTL && { flexDirection: "row-reverse" }]}>
+                  <Feather name="check-circle" size={13} color="#D97706" />
+                  <Text style={[styles.fleetFeatureText, isRTL && { textAlign: "right", writingDirection: "rtl", flex: 1 }]}>{f}</Text>
+                </View>
+              ))}
+              <View style={[styles.fleetCta, isRTL && { flexDirection: "row-reverse" }]}>
+                <Text style={styles.fleetCtaText}>{t("settings.fleet.cta")}</Text>
+                <Feather name={isRTL ? "arrow-left" : "arrow-right"} size={14} color="#78350F" />
+              </View>
+            </View>
+          </Pressable>
+        )}
 
         {/* CTL Enterprise: members manage their org; non-members see marketing card */}
         {hasOrgAccess ? (
