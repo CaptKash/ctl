@@ -183,7 +183,7 @@ export default function OrganizationScreen() {
           <Ionicons name="business" size={24} color="#312E81" />
         </LinearGradient>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("org.title")}</Text>
+          <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("org.enterpriseLabel")}</Text>
           <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("org.subtitle")}</Text>
         </View>
       </View>
