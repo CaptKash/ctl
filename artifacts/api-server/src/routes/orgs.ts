@@ -294,6 +294,131 @@ router.get("/orgs/:orgId/cars", async (req, res) => {
   return res.json(cars);
 });
 
+// Upcoming events for the organization's vehicles only. Mirrors the personal
+// `/maintenance/upcoming` feed but scopes cars by `orgId` instead of `userId`
+// so a member's personal vehicles never leak into the org dashboard.
+router.get("/orgs/:orgId/maintenance/upcoming", async (req, res) => {
+  const { org } = req.orgAccess!;
+  const [maintenanceRecords, cars, inspectionRecords] = await Promise.all([
+    db
+      .select({
+        id: maintenanceTable.id,
+        carId: maintenanceTable.carId,
+        type: maintenanceTable.type,
+        description: maintenanceTable.description,
+        nextDueDate: maintenanceTable.nextDueDate,
+        nextDueMileage: maintenanceTable.nextDueMileage,
+        make: carsTable.make,
+        model: carsTable.model,
+        year: carsTable.year,
+        nickname: carsTable.nickname,
+        usageUnit: carsTable.usageUnit,
+      })
+      .from(maintenanceTable)
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.orgId, org.id)))
+      .orderBy(sql`${maintenanceTable.id} desc`), // latest first
+    db.select().from(carsTable).where(eq(carsTable.orgId, org.id)),
+    db
+      .select({
+        id: inspectionsTable.id,
+        carId: inspectionsTable.carId,
+        nextInspectionDate: inspectionsTable.nextInspectionDate,
+        place: inspectionsTable.place,
+        make: carsTable.make,
+        model: carsTable.model,
+        year: carsTable.year,
+        nickname: carsTable.nickname,
+        usageUnit: carsTable.usageUnit,
+      })
+      .from(inspectionsTable)
+      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), eq(carsTable.orgId, org.id)))
+      .orderBy(sql`${inspectionsTable.id} desc`), // latest first
+  ]);
+
+  const carLabel = (c: typeof cars[number]) =>
+    c.nickname ?? `${c.year} ${c.make} ${c.model}`;
+
+  const licenseItems = cars
+    .filter((c) => c.licenseValidUntil)
+    .map((c) => ({
+      id: c.id,
+      carId: c.id,
+      itemKind: "license" as const,
+      type: "License Expiry",
+      description: `${carLabel(c)}${c.licensePlate ? ` · ${c.licensePlate}` : ""}`,
+      nextDueDate: c.licenseValidUntil!,
+      nextDueMileage: null,
+      make: c.make,
+      model: c.model,
+      year: c.year,
+      nickname: c.nickname ?? null,
+      usageUnit: c.usageUnit,
+    }));
+
+  const insuranceItems = cars
+    .filter((c) => c.insuredUntil)
+    .map((c) => ({
+      id: c.id,
+      carId: c.id,
+      itemKind: "insurance" as const,
+      type: "Insurance Expiry",
+      description: `${carLabel(c)}${c.insuredWith ? ` · ${c.insuredWith}` : ""}`,
+      nextDueDate: c.insuredUntil!,
+      nextDueMileage: null,
+      make: c.make,
+      model: c.model,
+      year: c.year,
+      nickname: c.nickname ?? null,
+      usageUnit: c.usageUnit,
+    }));
+
+  const latestMaintenanceByCarType = new Map<string, typeof maintenanceRecords[0]>();
+  for (const r of maintenanceRecords) {
+    const key = `${r.carId}::${r.type}`;
+    if (!latestMaintenanceByCarType.has(key)) {
+      latestMaintenanceByCarType.set(key, r);
+    }
+  }
+
+  const maintenanceItems = Array.from(latestMaintenanceByCarType.values())
+    .filter((r) => r.nextDueDate)
+    .map((r) => ({
+      ...r,
+      itemKind: "maintenance" as const,
+      nickname: r.nickname ?? null,
+    }));
+
+  const latestInspectionByCarId = new Map<number, typeof inspectionRecords[0]>();
+  for (const r of inspectionRecords) {
+    if (!latestInspectionByCarId.has(r.carId)) {
+      latestInspectionByCarId.set(r.carId, r);
+    }
+  }
+
+  const inspectionItems = Array.from(latestInspectionByCarId.values())
+    .filter((r) => r.nextInspectionDate)
+    .map((r) => ({
+      id: r.id,
+      carId: r.carId,
+      itemKind: "inspection" as const,
+      type: "Next Inspection",
+      description: `${r.nickname ?? `${r.year} ${r.make} ${r.model}`}${r.place ? ` · ${r.place}` : ""}`,
+      nextDueDate: r.nextInspectionDate!,
+      nextDueMileage: null,
+      make: r.make,
+      model: r.model,
+      year: r.year,
+      nickname: r.nickname ?? null,
+      usageUnit: r.usageUnit,
+    }));
+
+  const all = [...maintenanceItems, ...licenseItems, ...insuranceItems, ...inspectionItems].sort(
+    (a, b) => a.nextDueDate!.localeCompare(b.nextDueDate!)
+  );
+
+  return res.json(all);
+});
+
 // Add a vehicle to the organization (admin only). Org vehicles have no
 // personal owner (`userId` NULL); access flows through membership.
 router.post("/orgs/:orgId/cars", async (req, res) => {

@@ -199,8 +199,11 @@ export default function MenuDashboardScreen() {
   };
 
   const { data: upcoming, isLoading: upcomingLoading, refetch: refetchUpcoming } = useQuery<UpcomingItem[]>({
-    queryKey: ["maintenance", "upcoming"],
-    queryFn: () => apiGet<UpcomingItem[]>("/maintenance/upcoming"),
+    queryKey: activeOrgId ? ["orgs", activeOrgId, "maintenance", "upcoming"] : ["maintenance", "upcoming"],
+    queryFn: () =>
+      activeOrgId
+        ? apiGet<UpcomingItem[]>(`/orgs/${activeOrgId}/maintenance/upcoming`)
+        : apiGet<UpcomingItem[]>("/maintenance/upcoming"),
   });
 
   // Refetch upcoming events every time this screen comes into focus
