@@ -185,10 +185,10 @@ export default function AddCarScreen() {
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />
 
           <FormField
-            label={t("addCar.fields.nickname")}
+            label={activeOrgId ? t("addCar.fields.identifier") : t("addCar.fields.nickname")}
             value={nickname}
             onChangeText={setNickname}
-            placeholder={t("addCar.fields.nicknamePlaceholder")}
+            placeholder={activeOrgId ? t("addCar.fields.identifierPlaceholder") : t("addCar.fields.nicknamePlaceholder")}
           />
 
           <View style={[styles.divider, { backgroundColor: C.borderLight }]} />

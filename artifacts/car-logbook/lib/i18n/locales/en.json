@@ -240,6 +240,8 @@
       "engineHoursPlaceholder": "e.g. 1200",
       "nickname": "Nickname",
       "nicknamePlaceholder": "e.g. The Beast, Old Faithful",
+      "identifier": "Identifier",
+      "identifierPlaceholder": "e.g. Fleet #12, Unit A-3",
       "make": "Make",
       "makePlaceholder": "Select make…",
       "model": "Model",

@@ -248,6 +248,8 @@
       "engineHoursPlaceholder": "مثال: ١٢٠٠",
       "nickname": "الاسم المستعار",
       "nicknamePlaceholder": "مثال: الوحش، العتيقة",
+      "identifier": "المُعرّف",
+      "identifierPlaceholder": "مثال: المركبة رقم ١٢، الوحدة A-3",
       "make": "المصنِّع",
       "makePlaceholder": "اختر المصنِّع…",
       "model": "الموديل",
