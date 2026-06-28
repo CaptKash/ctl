@@ -164,12 +164,13 @@ export default function MenuDashboardScreen() {
 
   const { isFleet, isEnterprise, FREE_CAR_LIMIT } = useSubscription();
   const { orgs, invites, activeOrgId, setActiveOrgId, isOrgContext, activeRole } = useOrg();
+  const showEnterprise = isEnterprise || orgs.length > 0;
   // Tier pill palette — matches the Subscription cards on the Settings page.
   // Free  : muted neutral
   // Fleet : amber (text #92400E on amber-100 bg, like settings.fleetCard)
   // Ent.  : indigo (text #312E81 on indigo-100 bg, like settings.enterpriseCard)
-  const tierLabel = isEnterprise ? "CTL Enterprise" : isFleet ? "CTL Fleet" : "CTL Free";
-  const tierColors = isEnterprise
+  const tierLabel = showEnterprise ? "CTL Enterprise" : isFleet ? "CTL Fleet" : "CTL Free";
+  const tierColors = showEnterprise
     ? { text: "#312E81", bg: "#E0E7FF", border: "#C7D2FE" }
     : isFleet
     ? { text: "#92400E", bg: "#FEF3C7", border: "#FCD34D" }
