@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -102,10 +103,12 @@ export default function OrganizationScreen() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<OrgRole>("staff");
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [lastInvite, setLastInvite] = useState<{ email: string; role: OrgRole } | null>(null);
   const inviteMutation = useMutation({
-    mutationFn: () => apiPost(`/orgs/${currentOrgId}/members`, { email: inviteEmail.trim(), role: inviteRole }),
-    onSuccess: () => {
+    mutationFn: (vars: { email: string; role: OrgRole }) => apiPost(`/orgs/${currentOrgId}/members`, vars),
+    onSuccess: (_res, vars) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setLastInvite(vars);
       setInviteEmail("");
       setInviteRole("staff");
       setInviteError(null);
@@ -113,6 +116,15 @@ export default function OrganizationScreen() {
     },
     onError: (e) => setInviteError(errorMessage(e, t("org.inviteError"))),
   });
+
+  const shareInviteOnWhatsApp = async (orgName: string, email: string) => {
+    const message = t("org.whatsappMessage", { org: orgName, email });
+    try {
+      await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(message)}`);
+    } catch {
+      setInviteError(t("org.whatsappError"));
+    }
+  };
 
   // ── Role change / remove ────────────────────────────────────────────────
   const roleMutation = useMutation({
@@ -359,7 +371,7 @@ export default function OrganizationScreen() {
             <FormField
               label={t("org.inviteEmailLabel")}
               value={inviteEmail}
-              onChangeText={(v) => { setInviteEmail(v); setInviteError(null); }}
+              onChangeText={(v) => { setInviteEmail(v); setInviteError(null); setLastInvite(null); }}
               placeholder={t("org.inviteEmailPlaceholder")}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -380,12 +392,26 @@ export default function OrganizationScreen() {
             {inviteError && <Text style={styles.errorText}>{inviteError}</Text>}
             <PrimaryButton
               label={inviteMutation.isPending ? t("org.sending") : t("org.sendInvite")}
-              onPress={() => inviteMutation.mutate()}
+              onPress={() => inviteMutation.mutate({ email: inviteEmail.trim(), role: inviteRole })}
               loading={inviteMutation.isPending}
               disabled={!inviteEmail.trim()}
               variant="metallic-blue"
               icon="user-plus"
             />
+            {lastInvite && (
+              <View style={styles.inviteSentBox}>
+                <Text style={[styles.helperText, { color: "#16A34A", textAlign: isRTL ? "right" : "left" }]}>
+                  {t("org.inviteSentTo", { email: lastInvite.email })}
+                </Text>
+                <Pressable
+                  onPress={() => shareInviteOnWhatsApp(detail.organization.name, lastInvite.email)}
+                  style={({ pressed }) => [styles.whatsappBtn, { opacity: pressed ? 0.85 : 1 }, isRTL && { flexDirection: "row-reverse" }]}
+                >
+                  <Ionicons name="logo-whatsapp" size={18} color="#fff" />
+                  <Text style={styles.whatsappBtnText}>{t("org.shareWhatsapp")}</Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         )}
 
@@ -582,6 +608,9 @@ const styles = StyleSheet.create({
   inviteRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   acceptBtn: { backgroundColor: "#4338CA", paddingHorizontal: 16, paddingVertical: 9, borderRadius: 10 },
   acceptBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  inviteSentBox: { gap: 8, marginTop: 10 },
+  whatsappBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#25D366", paddingVertical: 12, borderRadius: 12 },
+  whatsappBtnText: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" },
 
   deleteOrgBtn: {
     flexDirection: "row",
