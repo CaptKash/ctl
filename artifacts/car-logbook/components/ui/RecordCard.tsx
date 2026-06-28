@@ -16,6 +16,7 @@ type Props = {
   iconBg: string;
   title: string;
   subtitle?: string;
+  metaText?: string | null;
   rightText?: string;
   rightSubtext?: string;
   onPress?: () => void;
@@ -29,6 +30,7 @@ export function RecordCard({
   iconBg,
   title,
   subtitle,
+  metaText,
   rightText,
   rightSubtext,
   onPress,
@@ -49,6 +51,12 @@ export function RecordCard({
         <Text style={[styles.title, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{title}</Text>
         {subtitle ? (
           <Text style={[styles.subtitle, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{subtitle}</Text>
+        ) : null}
+        {metaText ? (
+          <View style={[styles.metaRow, isRTL && { flexDirection: "row-reverse" }]}>
+            <Feather name="user" size={11} color={C.textTertiary} />
+            <Text style={[styles.metaText, { color: C.textTertiary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{metaText}</Text>
+          </View>
         ) : null}
       </View>
       <View style={[styles.right, isRTL && { alignItems: "flex-start" }]}>
@@ -116,6 +124,17 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  metaText: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    flexShrink: 1,
   },
   right: {
     alignItems: "flex-end",

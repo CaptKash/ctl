@@ -21,6 +21,7 @@
     "restartRequiredMessage": "يرجى إغلاق التطبيق وإعادة فتحه لتطبيق اللغة الجديدة.\n\nPlease close and reopen the app to apply the new language.",
     "delete": "حذف",
     "confirm": "تأكيد",
+    "loggedBy": "سجّله {{name}}",
     "select": "اختر…",
     "searchField": "بحث في {{label}}…",
     "addField": "+ إضافة {{label}}",

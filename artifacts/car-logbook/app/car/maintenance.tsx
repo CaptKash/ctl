@@ -29,6 +29,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
+import { useOrgMemberNames } from "@/hooks/useOrgMemberNames";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
 
@@ -42,6 +43,7 @@ type MaintenanceRecord = {
   cost?: number | null;
   shop?: string | null;
   nextDueDate?: string | null;
+  createdByUserId?: number | null;
 };
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; usageUnit?: string | null };
@@ -67,6 +69,7 @@ export default function MaintenanceScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const { t } = useTranslation();
+  const memberName = useOrgMemberNames();
   const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -179,7 +182,9 @@ export default function MaintenanceScreen() {
             onAction={() => setShowAdd(true)}
           />
         ) : (
-          maintenanceQuery.data.map((r) => (
+          maintenanceQuery.data.map((r) => {
+            const by = memberName(r.createdByUserId);
+            return (
             <RecordCard
               key={r.id}
               icon="tool"
@@ -187,11 +192,13 @@ export default function MaintenanceScreen() {
               iconBg={useColors().warningLight}
               title={r.description}
               subtitle={`${r.type} · ${formatDate(r.date)}${r.shop ? ` · ${r.shop}` : ""}`}
+              metaText={by ? t("common.loggedBy", { name: by }) : undefined}
               rightText={r.cost != null ? `$${r.cost.toFixed(2)}` : undefined}
               rightSubtext={r.mileage != null ? `${r.mileage.toLocaleString()} ${usageUnitText}` : undefined}
               onDelete={() => setConfirmId(r.id)}
             />
-          ))
+            );
+          })
         )}
       </ScrollView>
 

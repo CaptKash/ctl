@@ -32,6 +32,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { BrandLogo } from "@/components/BrandLogo";
 import { LinearGradient } from "expo-linear-gradient";
 import { apiGet, apiDelete } from "@/hooks/useApi";
+import { useOrgMemberNames } from "@/hooks/useOrgMemberNames";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
@@ -63,6 +64,7 @@ type FaultRecord = {
   completed: boolean;
   dashboardMessage?: string | null;
   warningMessage?: string | null;
+  createdByUserId?: number | null;
 };
 
 type MaintenanceRecord = {
@@ -81,6 +83,7 @@ type MaintenanceRecord = {
   warrantyDetails?: string | null;
   billPhoto?: string | null;
   warrantyPhoto?: string | null;
+  createdByUserId?: number | null;
 };
 
 type InspectionRecord = {
@@ -92,6 +95,7 @@ type InspectionRecord = {
   cost?: number | null;
   requiredRepairs?: string | null;
   nextInspectionDate?: string | null;
+  createdByUserId?: number | null;
 };
 
 type EventItem =
@@ -121,6 +125,7 @@ export default function CarDetailScreen() {
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { isOrgContext, activeRole } = useOrg();
+  const memberName = useOrgMemberNames();
   const canEditVehicle = !isOrgContext || activeRole === "admin";
 
   const [confirmModal, setConfirmModal] = useState<{
@@ -223,6 +228,7 @@ export default function CarDetailScreen() {
 
     if (ev.kind === "fault") {
       const r = ev.data;
+      const by = memberName(r.createdByUserId);
       return (
         <LinearGradient
           key={key}
@@ -258,6 +264,12 @@ export default function CarDetailScreen() {
               </View>
             );
           })()}
+          {by && (
+            <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
+              <Feather name="user" size={12} color={C.textTertiary} />
+              <Text style={[styles.metaText, { color: C.textSecondary }]}>{t("common.loggedBy", { name: by })}</Text>
+            </View>
+          )}
           <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={{ flex: 1 }} />
             <View style={[styles.cardActions, isRTL && { flexDirection: "row-reverse" }]}>
@@ -284,6 +296,7 @@ export default function CarDetailScreen() {
 
     if (ev.kind === "maintenance") {
       const r = ev.data;
+      const by = memberName(r.createdByUserId);
       return (
         <Pressable
           key={key}
@@ -321,6 +334,12 @@ export default function CarDetailScreen() {
               )}
             </View>
           )}
+          {by && (
+            <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
+              <Feather name="user" size={12} color={C.textTertiary} />
+              <Text style={[styles.metaText, { color: C.textSecondary }]}>{t("common.loggedBy", { name: by })}</Text>
+            </View>
+          )}
           <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={[styles.photoBadges, isRTL && { flexDirection: "row-reverse" }]}>
               {r.billPhoto && (
@@ -353,6 +372,7 @@ export default function CarDetailScreen() {
 
     if (ev.kind === "inspection") {
       const r = ev.data;
+      const by = memberName(r.createdByUserId);
       return (
         <Pressable
           key={key}
@@ -396,6 +416,12 @@ export default function CarDetailScreen() {
             <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
               <Feather name="calendar" size={12} color={C.textTertiary} />
               <Text style={[styles.metaText, { color: C.textSecondary }]}>{t("carDetail.inspection.next")}{formatDate(r.nextInspectionDate)}</Text>
+            </View>
+          )}
+          {by && (
+            <View style={[styles.cardMeta, isRTL && { flexDirection: "row-reverse" }]}>
+              <Feather name="user" size={12} color={C.textTertiary} />
+              <Text style={[styles.metaText, { color: C.textSecondary }]}>{t("common.loggedBy", { name: by })}</Text>
             </View>
           )}
           <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>

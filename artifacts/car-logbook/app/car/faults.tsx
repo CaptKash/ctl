@@ -28,6 +28,7 @@ import { RecordCard } from "@/components/ui/RecordCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
+import { useOrgMemberNames } from "@/hooks/useOrgMemberNames";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
@@ -40,6 +41,7 @@ type MalfunctionRecord = {
   description: string;
   odometer?: number | null;
   phase: string;
+  createdByUserId?: number | null;
 };
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; usageUnit?: string | null };
@@ -53,6 +55,7 @@ export default function FaultsScreen() {
   const insets = useSafeAreaInsets();
   const C = useColors();
   const { t, i18n } = useTranslation();
+  const memberName = useOrgMemberNames();
   const isRTL = i18n.language === "ar";
   const methodLabel = (k: string) => t(`faults.methods.${k}`);
   const phaseLabel = (k: string) => t(`faults.phases.${k}`);
@@ -155,7 +158,9 @@ export default function FaultsScreen() {
             onAction={() => setShowAdd(true)}
           />
         ) : (
-          faultsQuery.data.map((r) => (
+          faultsQuery.data.map((r) => {
+            const by = memberName(r.createdByUserId);
+            return (
             <RecordCard
               key={r.id}
               icon="alert-triangle"
@@ -166,11 +171,13 @@ export default function FaultsScreen() {
                 methodLabel(r.inputMethod),
                 r.phase ? phaseLabel(r.phase) : null,
               ].filter(Boolean).join(" · ")}
+              metaText={by ? t("common.loggedBy", { name: by }) : undefined}
               rightText={formatDate(r.date)}
               rightSubtext={r.odometer != null ? `${r.odometer.toLocaleString()} ${usageUnitText}` : undefined}
               onDelete={() => setConfirmId(r.id)}
             />
-          ))
+            );
+          })
         )}
       </ScrollView>
 

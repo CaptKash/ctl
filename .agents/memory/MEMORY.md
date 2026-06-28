@@ -1,5 +1,6 @@
 - [Driving car-logbook Expo web past Clerk for testing](car-logbook-web-test-auth.md) — inject legacy JWT into localStorage (`ctl_auth_token`) + reload to reach authed flows when Clerk CAPTCHA blocks sign-in.
 - [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
 - [Nearby-service filter pill clipping](nearby-service-filter-pills.md) — horizontal ScrollView collapses cross-axis on iOS, clipping pill text; use a wrapping row View for short chip/filter rows.
+- [CTL "Logged by" event attribution scope](ctl-logged-by-attribution.md) — member attribution shown only on per-vehicle event cards in org context, not fuel/history/report screens.
 - [lib/db schema change needs dist rebuild](db-schema-dist-rebuild.md) — after editing lib/db schema, run `tsc -p lib/db/tsconfig.json` or api-server tsc shows phantom "property does not exist" errors.
 - [CTL Enterprise subscription model](ctl-enterprise-subscription-model.md) — entitlement is per-account (one tier), not per-org; multi-sub/multi-org is planned future, deferred as "too early"; don't deepen single-entitlement coupling.
