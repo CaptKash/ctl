@@ -251,17 +251,19 @@ export default function MenuDashboardScreen() {
           >
             {t("common.appTagline")}
           </Text>
-          <View
-            style={[
-              styles.tierPill,
-              { backgroundColor: tierColors.bg, borderColor: tierColors.border, alignSelf: "flex-start", marginTop: 8 },
-              isRTL && { alignSelf: "flex-end" },
-            ]}
-          >
-            <Text style={[styles.tierPillText, { color: tierColors.text }]}>
-              {tierLabel}
-            </Text>
-          </View>
+          {(showEnterprise || isFleet) && (
+            <View
+              style={[
+                styles.tierPill,
+                { backgroundColor: tierColors.bg, borderColor: tierColors.border, alignSelf: "flex-start", marginTop: 8 },
+                isRTL && { alignSelf: "flex-end" },
+              ]}
+            >
+              <Text style={[styles.tierPillText, { color: tierColors.text }]}>
+                {tierLabel}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 
