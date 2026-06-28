@@ -273,6 +273,7 @@ export default function MenuDashboardScreen() {
         >
           {[{ id: null as number | null, name: t("home.contextPersonal") }, ...orgs].map((ctx) => {
             const active = activeOrgId === ctx.id;
+            const icon = ctx.id === null ? "user" : "briefcase";
             return (
               <Pressable
                 key={ctx.id ?? "personal"}
@@ -280,9 +281,11 @@ export default function MenuDashboardScreen() {
                   Haptics.selectionAsync();
                   setActiveOrgId(ctx.id);
                 }}
-                style={[styles.contextChip, { backgroundColor: active ? "#4338CA" : C.card, borderColor: active ? "#4338CA" : C.border }]}
+                style={[styles.contextChip, { backgroundColor: active ? "#4338CA" : C.card, borderColor: active ? "#4338CA" : C.border }, isRTL && { flexDirection: "row-reverse" }]}
               >
+                <Feather name={icon as any} size={13} color={active ? "#fff" : C.textSecondary} />
                 <Text style={[styles.contextChipText, { color: active ? "#fff" : C.textSecondary }]} numberOfLines={1}>{ctx.name}</Text>
+                {active && <Feather name="check" size={14} color="#fff" />}
               </Pressable>
             );
           })}
@@ -878,13 +881,16 @@ const styles = StyleSheet.create({
 
   contextChips: { paddingHorizontal: 20, paddingTop: 12, gap: 8 },
   contextChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 999,
     borderWidth: StyleSheet.hairlineWidth,
     maxWidth: 180,
   },
-  contextChipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  contextChipText: { fontSize: 13, fontFamily: "Inter_600SemiBold", flexShrink: 1 },
   inviteBanner: {
     flexDirection: "row",
     alignItems: "center",
