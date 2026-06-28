@@ -266,11 +266,7 @@ export default function MenuDashboardScreen() {
 
       {/* Context switcher — Personal + each organization the user belongs to */}
       {orgs.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[styles.contextChips, isRTL && { flexDirection: "row-reverse" }]}
-        >
+        <View style={[styles.contextChips, isRTL && { flexDirection: "row-reverse" }]}>
           {[{ id: null as number | null, name: t("home.contextPersonal") }, ...orgs].map((ctx) => {
             const active = activeOrgId === ctx.id;
             const icon = ctx.id === null ? "user" : "briefcase";
@@ -289,7 +285,7 @@ export default function MenuDashboardScreen() {
               </Pressable>
             );
           })}
-        </ScrollView>
+        </View>
       )}
 
       {/* Pending invite banner */}
@@ -879,7 +875,7 @@ const styles = StyleSheet.create({
   },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 24 },
 
-  contextChips: { paddingHorizontal: 20, paddingTop: 12, gap: 8 },
+  contextChips: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", paddingHorizontal: 20, paddingTop: 12, gap: 8 },
   contextChip: {
     flexDirection: "row",
     alignItems: "center",
