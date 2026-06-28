@@ -700,7 +700,7 @@
     "loggedBy": "بواسطة {{name}}",
     "unknownUser": "عضو غير معروف",
     "unknownCar": "مركبة غير معروفة",
-    "openButton": "سجل النشاط",
+    "openButton": "سِجِلّ النشاط",
     "kind": {
       "maintenance": "صيانة",
       "fault": "عطل",
