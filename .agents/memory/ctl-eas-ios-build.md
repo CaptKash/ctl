@@ -21,5 +21,11 @@ Even with `--no-wait`, the local CLI can exceed the bash tool timeout while uplo
 
 **Why:** both failures look fatal but aren't; retrying risks queuing duplicate builds and burning EAS build minutes.
 
+## Gotcha 3 — TestFlight submit fails instantly with no EAS error message
+`eas submit --platform ios` can fail immediately ("✖ Something went wrong when submitting your app to Apple App Store Connect") while the EAS API records `status: ERRORED`, `error: null`, `canRetry: false`, `appStoreConnectBuildUpload: null` (binary never reached Apple). EAS does NOT surface Apple's real error.
+**Root cause seen:** Apple returns `403 FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED` (link → /business). For CTL this is the **Paid Applications Agreement** (required because the app has in-app purchases / paid Enterprise tiers) — separate from the general Developer Program License / Free Apps agreement. Only the **Account Holder** can sign it, and it needs tax + banking completed before it flips to **Active**.
+**How to confirm the real error:** the Apple 403 shows in the interactive `eas submit` foreground output / dashboard, not the EAS GraphQL `error` field. After the agreement is Active (allow a few min to propagate), re-run submit — a healthy run goes `IN_PROGRESS` (uploads for 5–15 min) instead of instant ✖.
+**Note:** the same Paid Apps agreement is also required for RevenueCat/StoreKit purchases to function at all.
+
 ## Version bumps before a build
 Bump in `app.json` before building: `expo.version` (marketing), `expo.ios.buildNumber` (must be unique per iOS submission), `expo.android.versionCode`. Enterprise release was cut as **2.0.0** (major, not 1.1) due to the category shift to multi-user orgs.
