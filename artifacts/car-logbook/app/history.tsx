@@ -19,6 +19,7 @@ import { useColors, useTheme } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
+import { useOrg } from "@/context/OrgContext";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
 type CarStub = {
@@ -78,6 +79,7 @@ export default function HistoryScreen() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { activeOrgId } = useOrg();
 
   const carLabel = (car: CarStub | null): string => {
     if (!car) return t("history.unknownCar");
@@ -87,13 +89,19 @@ export default function HistoryScreen() {
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
 
   const faultsQuery = useQuery<FaultRecord[]>({
-    queryKey: ["malfunctions-all"],
-    queryFn: () => apiGet<FaultRecord[]>("/malfunctions"),
+    queryKey: activeOrgId ? ["orgs", activeOrgId, "malfunctions-all"] : ["malfunctions-all"],
+    queryFn: () =>
+      activeOrgId
+        ? apiGet<FaultRecord[]>(`/orgs/${activeOrgId}/malfunctions`)
+        : apiGet<FaultRecord[]>("/malfunctions"),
   });
 
   const repairsQuery = useQuery<MaintenanceRecord[]>({
-    queryKey: ["maintenance-all"],
-    queryFn: () => apiGet<MaintenanceRecord[]>("/maintenance"),
+    queryKey: activeOrgId ? ["orgs", activeOrgId, "maintenance-all"] : ["maintenance-all"],
+    queryFn: () =>
+      activeOrgId
+        ? apiGet<MaintenanceRecord[]>(`/orgs/${activeOrgId}/maintenance`)
+        : apiGet<MaintenanceRecord[]>("/maintenance"),
   });
 
   const isLoading = faultsQuery.isLoading || repairsQuery.isLoading;

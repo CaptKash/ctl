@@ -9,4 +9,4 @@ Pattern: personal endpoint scopes by `carsTable.userId`; add a mirrored org endp
 
 **Why:** the global feeds default to the personal `/malfunctions`, `/maintenance/upcoming`, etc.; without the activeOrgId switch they show fleet data while the user is in an org. Already fixed for upcoming events and the global Fault Log this way.
 
-**How to apply:** when touching home upcoming, fault log, history, or report aggregate screens, verify the activeOrgId switch exists. Still-unwired as of this note: `history.tsx` and `report/index.tsx` (both use `["malfunctions-all"]` + `/malfunctions`).
+**How to apply:** when touching any cross-car aggregate screen, verify the activeOrgId switch exists. Wired so far: home upcoming, global Fault Log, History (faults + maintenance). The report/export screen still uses personal `/malfunctions` + `/maintenance` only — check it if enterprise reports are requested.

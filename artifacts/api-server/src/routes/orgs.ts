@@ -318,6 +318,23 @@ router.get("/orgs/:orgId/malfunctions", async (req, res) => {
   })));
 });
 
+// All maintenance records across the organization's vehicles only. Mirrors the
+// personal `/maintenance` feed but scopes cars by `orgId` instead of `userId` so
+// a member's personal/fleet history never leaks into the enterprise history.
+router.get("/orgs/:orgId/maintenance", async (req, res) => {
+  const { org } = req.orgAccess!;
+  const [records, cars] = await Promise.all([
+    db
+      .select({ record: maintenanceTable })
+      .from(maintenanceTable)
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), eq(carsTable.orgId, org.id)))
+      .orderBy(desc(maintenanceTable.date)),
+    db.select().from(carsTable).where(eq(carsTable.orgId, org.id)),
+  ]);
+  const carsMap = new Map(cars.map((c) => [c.id, c]));
+  res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
+});
+
 // Upcoming events for the organization's vehicles only. Mirrors the personal
 // `/maintenance/upcoming` feed but scopes cars by `orgId` instead of `userId`
 // so a member's personal vehicles never leak into the org dashboard.
