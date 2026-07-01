@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { and, eq, sql, inArray } from "drizzle-orm";
+import { and, eq, sql, desc, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
 import {
   db,
@@ -10,6 +10,7 @@ import {
   insertCarSchema,
   maintenanceTable,
   malfunctionsTable,
+  eventCompletionsTable,
   inspectionsTable,
   fuelTable,
   partsTable,
@@ -292,6 +293,29 @@ router.get("/orgs/:orgId/cars", async (req, res) => {
     .where(eq(carsTable.orgId, org.id))
     .orderBy(carsTable.createdAt);
   return res.json(cars);
+});
+
+// All malfunctions across the organization's vehicles only. Mirrors the personal
+// `/malfunctions` feed but scopes cars by `orgId` instead of `userId` so a
+// member's personal/fleet faults never leak into the enterprise fault log.
+router.get("/orgs/:orgId/malfunctions", async (req, res) => {
+  const { org } = req.orgAccess!;
+  const [records, completions, cars] = await Promise.all([
+    db
+      .select({ record: malfunctionsTable })
+      .from(malfunctionsTable)
+      .innerJoin(carsTable, and(eq(malfunctionsTable.carId, carsTable.id), eq(carsTable.orgId, org.id)))
+      .orderBy(desc(malfunctionsTable.createdAt)),
+    db.select().from(eventCompletionsTable).where(eq(eventCompletionsTable.recordType, "malfunction")),
+    db.select().from(carsTable).where(eq(carsTable.orgId, org.id)),
+  ]);
+  const completedIds = new Set(completions.map((c) => c.recordId));
+  const carsMap = new Map(cars.map((c) => [c.id, c]));
+  res.json(records.map(({ record: r }) => ({
+    ...r,
+    completed: completedIds.has(r.id),
+    car: carsMap.get(r.carId) ?? null,
+  })));
 });
 
 // Upcoming events for the organization's vehicles only. Mirrors the personal

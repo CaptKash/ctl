@@ -21,6 +21,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { formatDate } from "@/lib/dateUtils";
 import { apiDelete, apiGet } from "@/hooks/useApi";
+import { useOrg } from "@/context/OrgContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
 
@@ -57,6 +58,7 @@ export default function FaultLogScreen() {
   const isDark = resolvedTheme === "dark";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const qc = useQueryClient();
+  const { activeOrgId } = useOrg();
 
   const carLabel = (car: Car | null) => {
     if (!car) return t("faults.unknownCar");
@@ -64,8 +66,11 @@ export default function FaultLogScreen() {
   };
 
   const { data: faults, isLoading } = useQuery<FaultRecord[]>({
-    queryKey: ["malfunctions-all"],
-    queryFn: () => apiGet<FaultRecord[]>("/malfunctions"),
+    queryKey: activeOrgId ? ["orgs", activeOrgId, "malfunctions-all"] : ["malfunctions-all"],
+    queryFn: () =>
+      activeOrgId
+        ? apiGet<FaultRecord[]>(`/orgs/${activeOrgId}/malfunctions`)
+        : apiGet<FaultRecord[]>("/malfunctions"),
   });
 
   const [confirmModal, setConfirmModal] = useState<{
@@ -76,7 +81,10 @@ export default function FaultLogScreen() {
   const deleteMutation = useMutation({
     mutationFn: ({ carId, id }: { carId: number; id: number }) =>
       apiDelete(`/cars/${carId}/malfunctions/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["malfunctions-all"] }),
+    onSuccess: () =>
+      qc.invalidateQueries({
+        queryKey: activeOrgId ? ["orgs", activeOrgId, "malfunctions-all"] : ["malfunctions-all"],
+      }),
   });
 
   const confirmDelete = (item: FaultRecord) => {
