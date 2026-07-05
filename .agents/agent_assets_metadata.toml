@@ -83,3 +83,9 @@ id = "1wo1fogT2y_Knql-k0Wrw"
 uri = "file://exports/ctl-partner-brief.pdf"
 type = "pdf"
 title = "CTL — Partnership Brief (PDF)"
+
+[[outputs]]
+id = "0hshsrH34Ox-rD74o4EYl"
+uri = "file://exports/CTL-Product-Overview.pdf"
+type = "pdf"
+title = "CTL — Product Overview (PDF)"
