@@ -39,3 +39,6 @@ yarn-error.*
 .vercel
 
 .env
+
+# Google Play service account key (provided via secret at submit time)
+google-service-account.json
