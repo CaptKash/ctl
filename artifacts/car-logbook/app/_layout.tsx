@@ -126,8 +126,8 @@ export default function RootLayout() {
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
                 <AppProvider>
-                  <SubscriptionProvider>
                   <OrgProvider>
+                  <SubscriptionProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <KeyboardProvider>
                       <NotificationSyncer />
@@ -137,8 +137,8 @@ export default function RootLayout() {
                       <DevLanguageToggle />
                     </KeyboardProvider>
                   </GestureHandlerRootView>
-                  </OrgProvider>
                   </SubscriptionProvider>
+                  </OrgProvider>
                 </AppProvider>
               </AuthProvider>
             </QueryClientProvider>

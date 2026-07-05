@@ -7,7 +7,7 @@ description: How to kick off a native EAS iOS build (needed for on-device Revenu
 
 On-device purchase testing (RevenueCat) and multi-device sync QA require a **native EAS build → TestFlight**, NOT the `pnpm --filter @workspace/car-logbook run build` script. That `scripts/build.js` only produces the static Expo Go OTA JS bundle (Metro bundle + manifest) for the Replit-hosted deployment; in-app purchases do not run there.
 
-Native build command (auth uses the `EXPO_TOKEN` secret; account is `mkashour`):
+Native build command (auth uses the `EXPO_TOKEN` secret for the project's configured Expo account):
 `EAS_NO_VCS=1 EXPO_TOKEN="$EXPO_TOKEN" npx --no-install eas build --platform ios --profile production --non-interactive --no-wait`
 (eas-cli is available via npx; `production` profile = store distribution → TestFlight, `ascAppId 6760766535`.)
 

@@ -3,6 +3,7 @@ import { Platform, NativeModules, TurboModuleRegistry } from "react-native";
 import Purchases, { PurchasesOfferings, CustomerInfo, PurchasesPackage, PACKAGE_TYPE, STOREKIT_VERSION } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
+import { useOrg } from "@/context/OrgContext";
 
 const REVENUECAT_TEST_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY;
 const REVENUECAT_IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
@@ -156,6 +157,7 @@ export function initializeRevenueCat() {
 
 function useSubscriptionContext() {
   const { user } = useAuth();
+  const { orgs } = useOrg();
 
   // Track the RevenueCat user ID only after logIn/logOut has actually resolved,
   // so the customerInfo query never runs against the wrong RC identity.
@@ -240,10 +242,13 @@ function useSubscriptionContext() {
     return null;
   })();
 
+  const isEnterpriseMember = orgs.length > 0;
+
   // Enterprise is the higher tier and includes everything Fleet unlocks.
   const isFleet =
     isAdmin ||
     isEnterprise ||
+    isEnterpriseMember ||
     customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
   const realPackages: PurchasesPackage[] = (() => {
