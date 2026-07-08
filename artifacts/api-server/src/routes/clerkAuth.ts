@@ -463,5 +463,21 @@ router.post("/auth/clerk/migrate", async (req, res) => {
   }
 });
 
+/**
+ * GET /auth/clerk/config
+ *
+ * Public endpoint returning this server's Clerk publishable key (publishable
+ * keys are public by design). Used to read the production (pk_live) key that
+ * Replit injects only into the deployment environment, so mobile builds can
+ * be compiled against the correct Clerk tenant.
+ */
+router.get("/auth/clerk/config", (_req, res) => {
+  const publishableKey = process.env.CLERK_PUBLISHABLE_KEY;
+  if (!publishableKey) {
+    return res.status(503).json({ error: "Clerk is not configured on this server." });
+  }
+  return res.json({ publishableKey });
+});
+
 export default router;
 export { CLERK_MANAGED_SENTINEL };

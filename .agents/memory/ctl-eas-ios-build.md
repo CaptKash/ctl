@@ -34,3 +34,11 @@ Even with `--no-wait`, the local CLI can exceed the bash tool timeout while uplo
 
 ## Version bumps before a build
 Bump in `app.json` before building: `expo.version` (marketing), `expo.ios.buildNumber` (must be unique per iOS submission), `expo.android.versionCode`. Enterprise release was cut as **2.0.0** (major, not 1.1) due to the category shift to multi-user orgs.
+
+## Gotcha 5 — Replit-managed Clerk: mobile builds need pk_live, but only the deployment has it
+Replit-managed Clerk auto-swaps `pk_test`/`sk_test` → live keys ONLY inside Replit deployments. EAS mobile builds bake in whatever `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` value you give them — using the Replit-secret value ships a `pk_test` (dev-tenant) key, so store builds create sessions on the DEV Clerk tenant while the prod api-server verifies with `sk_live` → every sign-in 401s at `/auth/clerk/sync-user`. Dev and prod Clerk user stores are fully separate.
+**Fix pattern:** api-server exposes public `GET /api/auth/clerk/config` returning its `CLERK_PUBLISHABLE_KEY`; after a production republish, curl it to read the `pk_live` key, then set that as the EAS-hosted `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` for the production environment and rebuild. Keep the pk_test value for dev/Expo Go.
+**Why:** publishable keys are public by design, so the endpoint is safe; there is no other way to read the deployment-injected live key from the workspace.
+
+## Store-review demo account
+Dedicated reviewer login exists in PROD as a legacy user (email `reviewer@ctl-car-technical-log.replit.app`, local users row, bcrypt password — credentials stored in Play Console/ASC review fields, not here) with a seeded demo car + maintenance records. First app sign-in migrates it to a live-tenant Clerk user via `/auth/clerk/migrate` — requires the pk_live fix above to work.
