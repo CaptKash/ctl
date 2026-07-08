@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ctl.carlogbook",
-      "buildNumber": "31",
+      "buildNumber": "32",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "CTL uses your location to find nearby service centers and repair shops, for example showing the closest oil change or tire shop near you.",
@@ -27,7 +27,7 @@
     },
     "android": {
       "package": "com.ctl.carlogbook",
-      "versionCode": 17,
+      "versionCode": 18,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0F2D5E"

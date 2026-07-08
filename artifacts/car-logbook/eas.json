@@ -18,7 +18,8 @@
       "ios": {
         "distribution": "store",
         "image": "sdk-54"
-      }
+      },
+      "environment": "preview"
     },
     "production": {
       "distribution": "store",
@@ -33,7 +34,8 @@
       },
       "ios": {
         "image": "sdk-54"
-      }
+      },
+      "environment": "production"
     }
   },
   "submit": {

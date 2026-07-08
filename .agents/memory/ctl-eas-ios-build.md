@@ -27,5 +27,10 @@ Even with `--no-wait`, the local CLI can exceed the bash tool timeout while uplo
 **How to confirm the real error:** the Apple 403 shows in the interactive `eas submit` foreground output / dashboard, not the EAS GraphQL `error` field. After the agreement is Active (allow a few min to propagate), re-run submit — a healthy run goes `IN_PROGRESS` (uploads for 5–15 min) instead of instant ✖.
 **Note:** the same Paid Apps agreement is also required for RevenueCat/StoreKit purchases to function at all.
 
+## Gotcha 4 — EAS builds do NOT see Replit secrets → release-only crash on launch
+`EXPO_PUBLIC_*` vars are inlined at bundle time from the EAS build server's env, which is ONLY `eas.json` `build.<profile>.env` plus EAS-hosted env vars (`eas env:list --environment production`). Replit secrets never transfer. The Clerk publishable key lived only in Replit secrets → TestFlight builds shipped with an empty key → `ClerkProvider` (outermost, above ErrorBoundary) threw on mount → instant crash on launch, while dev worked fine.
+**Fix pattern:** `eas env:create --environment production --name <VAR> --value "$VAR" --visibility plaintext --scope project --type string --non-interactive` (shell substitution, value never printed) + set `"environment": "production"` on the build profile in eas.json so hosted vars are pulled in.
+**How to verify a suspected missing var without a device:** download the build IPA, unzip, `strings Payload/*.app/main.jsbundle | grep <key-prefix>` — beware coincidental substring matches (Clerk SDK contains literal `pk_live`/`pk_test` text); anchor the grep to the full key shape.
+
 ## Version bumps before a build
 Bump in `app.json` before building: `expo.version` (marketing), `expo.ios.buildNumber` (must be unique per iOS submission), `expo.android.versionCode`. Enterprise release was cut as **2.0.0** (major, not 1.1) due to the category shift to multi-user orgs.
