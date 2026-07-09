@@ -27,6 +27,12 @@ How to apply:
 it took significant effort to discover and is not obvious from the code.
 
 Notes:
+- runTest's browser CANNOT reach the dev api-server (cross-origin requests die upstream with
+  401/500 and the app boot then clears the stored token) — so runTest cannot exercise authed
+  flows. For authed store-style captures, add a temporary web-only hook that reads a
+  `?shot_token=` query param into `localStorage('ctl_auth_token')`, then use the app-preview
+  screenshot tool with that param on each route (each capture is a fresh browser, so the param
+  must be on every URL). Remove the hook afterwards.
 - The api-server dev port is 8080 (`http://localhost:8080/api`) for direct HTTP repro.
 - For deterministic backend checks, prefer direct HTTP (POST + GET) over UI: the maintenance
   "Type" field opens a separate picker screen that runTest struggles to drive.

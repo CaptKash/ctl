@@ -101,3 +101,27 @@ id = "DY22lK_YSgu57gkcc4VCl"
 uri = "file://exports/ctl-feature-graphic-1024x500.png"
 type = "image"
 title = "CTL Feature Graphic 1024x500 (Play Store)"
+
+[[outputs]]
+id = "ScqrU9V0Db-KepwoyZi7s"
+uri = "file://exports/ctl-screenshot-1-dashboard.jpg"
+type = "image"
+title = "CTL 2.0 — Dashboard"
+
+[[outputs]]
+id = "tRSzRhv2c-wPeycjNEDke"
+uri = "file://exports/ctl-screenshot-2-faultlog.jpg"
+type = "image"
+title = "CTL 2.0 — Fault Log"
+
+[[outputs]]
+id = "snZQtNQUsYI1td2pz6elv"
+uri = "file://exports/ctl-screenshot-3-history.jpg"
+type = "image"
+title = "CTL 2.0 — History"
+
+[[outputs]]
+id = "2_iTKEcdM5_OvO_idoqQK"
+uri = "file://exports/ctl-screenshot-4-tools.jpg"
+type = "image"
+title = "CTL 2.0 — Tools"
