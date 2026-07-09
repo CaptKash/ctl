@@ -95,3 +95,9 @@ id = "84Slh7rXWJS3L_3taOoAA"
 uri = "file://exports/ctl-app-icon-512.png"
 type = "image"
 title = "CTL App Icon 512x512 (Play Store)"
+
+[[outputs]]
+id = "DY22lK_YSgu57gkcc4VCl"
+uri = "file://exports/ctl-feature-graphic-1024x500.png"
+type = "image"
+title = "CTL Feature Graphic 1024x500 (Play Store)"
