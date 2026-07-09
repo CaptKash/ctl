@@ -39,6 +39,7 @@ export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
       discounts: [],
     },
     offeringIdentifier: "default",
+    presentedOfferingContext: { offeringIdentifier: "default", placementIdentifier: null, targetingContext: null },
   } as unknown as PurchasesPackage,
   {
     identifier: "$rc_annual",
@@ -54,6 +55,7 @@ export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
       discounts: [],
     },
     offeringIdentifier: "default",
+    presentedOfferingContext: { offeringIdentifier: "default", placementIdentifier: null, targetingContext: null },
   } as unknown as PurchasesPackage,
   {
     identifier: "$rc_lifetime",
@@ -69,6 +71,7 @@ export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
       discounts: [],
     },
     offeringIdentifier: "default",
+    presentedOfferingContext: { offeringIdentifier: "default", placementIdentifier: null, targetingContext: null },
   } as unknown as PurchasesPackage,
 ];
 
@@ -96,6 +99,7 @@ export const DEV_MOCK_ENTERPRISE_PACKAGES: PurchasesPackage[] = [
     discounts: [],
   },
   offeringIdentifier: "enterprise",
+  presentedOfferingContext: { offeringIdentifier: "enterprise", placementIdentifier: null, targetingContext: null },
 }) as unknown as PurchasesPackage);
 
 function getRevenueCatApiKey() {
