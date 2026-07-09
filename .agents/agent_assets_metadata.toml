@@ -89,3 +89,9 @@ id = "0hshsrH34Ox-rD74o4EYl"
 uri = "file://exports/CTL-Product-Overview.pdf"
 type = "pdf"
 title = "CTL — Product Overview (PDF)"
+
+[[outputs]]
+id = "84Slh7rXWJS3L_3taOoAA"
+uri = "file://exports/ctl-app-icon-512.png"
+type = "image"
+title = "CTL App Icon 512x512 (Play Store)"
