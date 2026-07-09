@@ -75,12 +75,7 @@ export default function SignupScreen() {
     confirmPassword === password &&
     signUpLoaded;
 
-  // Map Clerk error codes to user-safe messages. We deliberately do NOT
-  // surface the raw Clerk error string for sign-up — that leaks account
-  // existence (e.g., "form_identifier_exists" → "email already in use"),
-  // which is an enumeration channel. Verification + password rule errors
-  // are safe to make specific because they reveal nothing about whether
-  // an account already exists.
+  // Map Clerk error codes to user-safe messages.
   const formatSignUpError = (err: unknown, fallback: string): string => {
     if (isClerkAPIResponseError(err) && err.errors.length > 0) {
       const code = err.errors[0].code;
@@ -93,9 +88,8 @@ export default function SignupScreen() {
         case "form_param_format_invalid":
         case "form_param_nil":
           return t("signup.errorInvalidDetails");
-        // form_identifier_exists, form_identifier_not_allowed, and any
-        // other identifier-related codes fall through to the generic
-        // message to avoid revealing whether the email is already taken.
+        case "form_identifier_exists":
+          return t("signup.errorEmailExists");
         default:
           return fallback;
       }

@@ -82,6 +82,7 @@
     "back": "Back",
     "errorWeakPassword": "Please choose a stronger password.",
     "errorInvalidDetails": "Please double-check the details you entered.",
+    "errorEmailExists": "This email is already registered. Please sign in instead.",
     "errorCreateFailed": "Couldn't create your account. Please check your details and try again.",
     "errorVerifyIncomplete": "Verification incomplete. Please try again.",
     "errorVerifyInvalid": "Invalid or expired code. Please try again.",
