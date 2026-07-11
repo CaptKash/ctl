@@ -1,5 +1,5 @@
 import { createClient } from "@replit/revenuecat-sdk/client";
-import { listCustomerActiveEntitlements } from "@replit/revenuecat-sdk";
+import { listCustomerActiveEntitlements, listEntitlements } from "@replit/revenuecat-sdk";
 
 // Per-tier CTL Enterprise entitlements, configured in the RevenueCat dashboard.
 // Each tier's monthly + annual products both unlock the same entitlement, so
@@ -52,6 +52,34 @@ async function getClient() {
   });
 }
 
+// The active-entitlements REST endpoint returns each entitlement's object id
+// (e.g. "entlb80aa2449c"), NOT its lookup key ("enterprise_unlimited"). Cache a
+// map from object id → lookup key (per project) so we can match against
+// ENTERPRISE_ENTITLEMENTS. Refreshed on demand when an unknown id is seen, so
+// newly-created entitlements don't require a process restart.
+const entitlementLookupCache = new Map<string, Record<string, string>>();
+
+async function getEntitlementLookupById(
+  client: ReturnType<typeof createClient>,
+  projectId: string,
+  forceRefresh = false,
+): Promise<Record<string, string>> {
+  if (!forceRefresh) {
+    const cached = entitlementLookupCache.get(projectId);
+    if (cached) return cached;
+  }
+  const { data, error } = await listEntitlements({
+    client,
+    path: { project_id: projectId },
+    query: { limit: 100 },
+  });
+  if (error) throw new Error("Failed to fetch RevenueCat entitlements");
+  const map: Record<string, string> = {};
+  for (const e of data?.items ?? []) map[e.id] = e.lookup_key;
+  entitlementLookupCache.set(projectId, map);
+  return map;
+}
+
 export type EntitlementUser = { id: number; isAdmin?: boolean };
 
 /**
@@ -79,12 +107,23 @@ export async function getEnterpriseSeatLimit(
   });
   if (error) throw new Error("Failed to fetch RevenueCat entitlements");
 
-  const now = Date.now();
+  const activeItems = (data?.items ?? []).filter(
+    (e) => e.expires_at == null || e.expires_at > Date.now(),
+  );
+
+  let lookupById = await getEntitlementLookupById(client, projectId);
+  // If a currently-active entitlement id isn't in the cached map, the map is
+  // stale (e.g. a new tier was just created) — refresh once before matching.
+  if (activeItems.some((e) => !(e.entitlement_id in lookupById))) {
+    lookupById = await getEntitlementLookupById(client, projectId, true);
+  }
+
   let limit: number | null | undefined = undefined;
-  for (const e of data?.items ?? []) {
-    if (e.expires_at != null && e.expires_at <= now) continue;
-    if (!(e.entitlement_id in ENTERPRISE_ENTITLEMENTS)) continue;
-    const tier = ENTERPRISE_ENTITLEMENTS[e.entitlement_id];
+  for (const e of activeItems) {
+    // The REST endpoint returns entitlement object ids; map to lookup keys.
+    const lookupKey = lookupById[e.entitlement_id];
+    if (!lookupKey || !(lookupKey in ENTERPRISE_ENTITLEMENTS)) continue;
+    const tier = ENTERPRISE_ENTITLEMENTS[lookupKey];
     // Most generous active tier wins; unlimited beats any finite limit.
     if (tier === null) return null;
     limit = limit === undefined ? tier : Math.max(limit, tier);
