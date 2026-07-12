@@ -38,3 +38,5 @@ Notes:
   "Type" field opens a separate picker screen that runTest struggles to drive.
 - Always clean up any DB rows you create for testing (maintenance_records, event_completions,
   malfunctions_records) — the dev DB is shared with the user.
+- Enterprise/organization screen gates on `isEnterprise` (RC entitlement or `users.is_admin`); RC is in Browser Mode on web, so temporarily set `is_admin=true` for the shoot user (revert after).
+- Root `/` route often hangs on the boot spinner in capture browsers; screenshot `/home` and deep routes directly instead.

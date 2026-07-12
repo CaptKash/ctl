@@ -125,3 +125,39 @@ id = "2_iTKEcdM5_OvO_idoqQK"
 uri = "file://exports/ctl-screenshot-4-tools.jpg"
 type = "image"
 title = "CTL 2.0 — Tools"
+
+[[outputs]]
+id = "gDh9zGePap3SBJED536zh"
+uri = "file://exports/ctl-v2-shot-1-dashboard.jpg"
+type = "image"
+title = "1 — Dashboard (Enterprise badge, fleet, upcoming events)"
+
+[[outputs]]
+id = "GK1je9Wb2eFvBxGp77lDo"
+uri = "file://exports/ctl-v2-shot-2-car-detail.jpg"
+type = "image"
+title = "2 — Car detail (BMW X5 log)"
+
+[[outputs]]
+id = "Cd_8GPsclSFQY_MRTwA-P"
+uri = "file://exports/ctl-v2-shot-3-report.jpg"
+type = "image"
+title = "3 — Full report (lifetime cost breakdown)"
+
+[[outputs]]
+id = "gYJmNtv59xDf7Y2toLORl"
+uri = "file://exports/ctl-v2-shot-4-faultlog.jpg"
+type = "image"
+title = "4 — Fault Log"
+
+[[outputs]]
+id = "TRCZWmEDSI7S6-_WigBdf"
+uri = "file://exports/ctl-v2-shot-5-enterprise.jpg"
+type = "image"
+title = "5 — Enterprise (team & seats)"
+
+[[outputs]]
+id = "E31da-gnT73xmo0W-9xOc"
+uri = "file://exports/ctl-v2-shot-6-history.jpg"
+type = "image"
+title = "6 — History (all records timeline)"
