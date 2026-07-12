@@ -197,3 +197,9 @@ id = "hhsyAytKmivFUW5ydPHSb"
 uri = "file://exports/ctl-dark-shot-6-history.jpg"
 type = "image"
 title = "Shot 6 — History (dark)"
+
+[[outputs]]
+id = "X_7LiSXM9rnIEDGFo8gbN"
+uri = "file://exports/ctl-android-upload-cert.txt"
+type = "text"
+title = "CTL Android Upload Certificate (PEM)"
