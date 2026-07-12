@@ -40,3 +40,12 @@ Notes:
   malfunctions_records) — the dev DB is shared with the user.
 - Enterprise/organization screen gates on `isEnterprise` (RC entitlement or `users.is_admin`); RC is in Browser Mode on web, so temporarily set `is_admin=true` for the shoot user (revert after).
 - Root `/` route often hangs on the boot spinner in capture browsers; screenshot `/home` and deep routes directly instead.
+- Capture timing races on multi-fetch screens (e.g. /organization: verify → orgs → org detail):
+  the app-preview screenshot fires at network-idle, which coincides with Clerk's remote script
+  finishing — usually BEFORE the sequential data chain completes, so you capture spinners/gates.
+  Deterministic fix: during shot captures, (1) skip the clerkLoaded wait in the auth boot so the
+  legacy JWT resolves immediately, and (2) give ClerkProvider an unreachable publishable key
+  (e.g. pk_test_c2hvdC5pbnZhbGlkJA → DNS-fails instantly) so network-idle happens only after the
+  app's own API calls finish. Both are temp hooks keyed off the shot query param; remove after.
+- Beware: the Clerk sync effect clears user/token whenever Clerk reports signed-out — it will
+  wipe an optimistically seeded legacy user the moment Clerk loads; guard it in shot mode.

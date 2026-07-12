@@ -161,3 +161,39 @@ id = "E31da-gnT73xmo0W-9xOc"
 uri = "file://exports/ctl-v2-shot-6-history.jpg"
 type = "image"
 title = "6 — History (all records timeline)"
+
+[[outputs]]
+id = "VIu0dWwzMUGnFWtKLoVSC"
+uri = "file://exports/ctl-dark-shot-1-dashboard.jpg"
+type = "image"
+title = "Shot 1 — Dashboard (dark)"
+
+[[outputs]]
+id = "XvfpBryIYDt5YUIJnd_wx"
+uri = "file://exports/ctl-dark-shot-2-car-detail.jpg"
+type = "image"
+title = "Shot 2 — Car Detail (dark)"
+
+[[outputs]]
+id = "ILY1IarLvnTJftrUGYwA9"
+uri = "file://exports/ctl-dark-shot-3-report.jpg"
+type = "image"
+title = "Shot 3 — Report (dark)"
+
+[[outputs]]
+id = "9_57VHmdp5-qViMz5G8D1"
+uri = "file://exports/ctl-dark-shot-4-faultlog.jpg"
+type = "image"
+title = "Shot 4 — Fault Log (dark)"
+
+[[outputs]]
+id = "PLUzrZGQbdIVFTZM95jmb"
+uri = "file://exports/ctl-dark-shot-5-enterprise.jpg"
+type = "image"
+title = "Shot 5 — Enterprise (dark)"
+
+[[outputs]]
+id = "hhsyAytKmivFUW5ydPHSb"
+uri = "file://exports/ctl-dark-shot-6-history.jpg"
+type = "image"
+title = "Shot 6 — History (dark)"
