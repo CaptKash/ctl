@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
   },
   divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 24 },
 
-  contextChips: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", paddingHorizontal: 20, paddingTop: 12, gap: 8 },
+  contextChips: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 12, gap: 8 },
   contextChip: {
     flexDirection: "row",
     alignItems: "center",
