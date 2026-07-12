@@ -1,6 +1,7 @@
 - [Driving car-logbook Expo web past Clerk for testing](car-logbook-web-test-auth.md) — inject legacy JWT into localStorage (`ctl_auth_token`) + reload to reach authed flows when Clerk CAPTCHA blocks sign-in.
 - [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
 - [Nearby-service filter pill clipping](nearby-service-filter-pills.md) — horizontal ScrollView collapses cross-axis on iOS, clipping pill text; use a wrapping row View for short chip/filter rows.
+- [CTL "Failed to save" triage](ctl-failed-save-diagnosis.md) — owner tests DEV app on phone; check dev vs prod DB first; generic banners + no request logging; Zod parse errors surface as 500.
 - [RC REST entitlement ids](rc-rest-entitlement-ids.md) — REST v2 active-entitlements return entitlement OBJECT ids not lookup keys; translate server-side or subscribed users get false 403.
 - [CTL entitlement gating is client-only](ctl-entitlement-gating.md) — FREE_CAR_LIMIT & premium locks enforced only in app UI (server doesn't cap personal cars); flip isFleet/isEnterprise in lib/revenuecat.tsx to grant perks.
 - [EAS iOS build from main agent](ctl-eas-ios-build.md) — native EAS build (not `run build`) for purchase QA; set `EAS_NO_VCS=1` (git blocked), CLI may time out but build still queues — verify via `build:list`, don't retry.
