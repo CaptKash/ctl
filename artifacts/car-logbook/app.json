@@ -27,7 +27,7 @@
     },
     "android": {
       "package": "com.ctl.carlogbook",
-      "versionCode": 19,
+      "versionCode": 20,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0F2D5E"
