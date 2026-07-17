@@ -8,6 +8,7 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_cmVsYXhlZC1wdXAtODQuY2xlcmsuYWNjb3VudHMuZGV2JA",
         "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
         "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ",
         "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
@@ -25,6 +26,7 @@
       "distribution": "store",
       "env": {
         "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_cmVsYXhlZC1wdXAtODQuY2xlcmsuYWNjb3VudHMuZGV2JA",
         "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
         "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ",
         "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
