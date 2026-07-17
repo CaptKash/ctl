@@ -91,27 +91,23 @@ export default function RootLayout() {
     ...Feather.font,
     ...Ionicons.font,
   });
-  const [i18nReady, setI18nReady] = React.useState(false);
-
   useEffect(() => {
     initializeRevenueCat();
   }, []);
 
   useEffect(() => {
-    initI18n()
-      .catch((err) => {
-        if (__DEV__) console.warn("[i18n] init failed", err);
-      })
-      .finally(() => setI18nReady(true));
+    initI18n().catch((err) => {
+      if (__DEV__) console.warn("[i18n] init failed", err);
+    });
   }, []);
 
   useEffect(() => {
-    if ((fontsLoaded || fontError) && i18nReady) {
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError, i18nReady]);
+  }, [fontsLoaded, fontError]);
 
-  if ((!fontsLoaded && !fontError) || !i18nReady) return null;
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <ClerkProvider
