@@ -27,7 +27,7 @@
     },
     "android": {
       "package": "com.inroomstudio.ctl",
-      "versionCode": 20,
+      "versionCode": 21,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0F2D5E"
