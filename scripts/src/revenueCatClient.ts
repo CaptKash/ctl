@@ -18,15 +18,18 @@ async function getApiKey() {
     throw new Error('X-Replit-Token not found for repl/depl');
   }
 
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=revenuecat',
+  const data = await fetch(
+    'https://' + hostname + '/api/v2/connection?include_secrets=true&limit=50',
     {
       headers: {
         'Accept': 'application/json',
         'X-Replit-Token': xReplitToken
       }
     }
-  ).then(res => res.json()).then(data => data.items?.[0]);
+  ).then(res => res.json());
+  connectionSettings = data.items?.find((item: any) =>
+    item.connector_config_id?.toLowerCase().includes('revenuecat')
+  );
 
   const accessToken = connectionSettings?.settings?.access_token || connectionSettings?.settings?.oauth?.credentials?.access_token;
 
