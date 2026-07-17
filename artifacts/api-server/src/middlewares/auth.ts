@@ -70,6 +70,9 @@ async function authenticate(req: Request): Promise<AuthPayload | null> {
   }
   const auth = getAuth(req);
   const clerkUserId = auth?.userId;
+  if (!clerkUserId) {
+    console.warn("[authenticate] Clerk path — userId NULL | header:", header ? header.substring(0, 20) + "..." : "MISSING");
+  }
   if (!clerkUserId) return null;
 
   const [user] = await db

@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { getClerkInstance } from "@clerk/clerk-expo";
+import { getClerkTokenForApi } from "../context/AuthContext";
 
 const TOKEN_KEY = "ctl_auth_token";
 
@@ -23,6 +24,15 @@ async function getLegacyToken(): Promise<string | null> {
 // for users who haven't migrated yet on this device. The Phase 1 dual-auth
 // middleware on the API server accepts either credential.
 async function getToken(): Promise<string | null> {
+  // Primary: hook-based getToken from AuthContext (works on both native + web,
+  // and is the same function used by the sync effect).
+  try {
+    const hookToken = await getClerkTokenForApi();
+    if (hookToken) return hookToken;
+  } catch {
+    // Not yet set — fall through.
+  }
+  // Secondary: global Clerk instance (native-reliable fallback).
   try {
     const clerkToken = await getClerkInstance().session?.getToken();
     if (clerkToken) return clerkToken;

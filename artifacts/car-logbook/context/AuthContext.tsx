@@ -17,6 +17,14 @@ const INSTALL_SENTINEL_SECURE_KEY = "ctl_install_id";
 // own server instead.
 export const SIGNUP_NAME_KEY = "ctl_pending_signup_name";
 
+// Module-level ref so non-React code (useApi.ts) can call the hook-based
+// getToken without needing to be inside a component. Set/cleared by
+// AuthProvider whenever the Clerk session changes.
+let _clerkGetToken: (() => Promise<string | null>) | null = null;
+export function getClerkTokenForApi(): Promise<string | null> {
+  return _clerkGetToken ? _clerkGetToken() : Promise.resolve(null);
+}
+
 const BASE_URL = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : "/api";
@@ -60,7 +68,13 @@ async function syncUserWithServer(clerkSessionToken: string): Promise<AuthUser |
       },
       body: JSON.stringify(body),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (__DEV__) {
+        const errText = await res.text().catch(() => "(unreadable)");
+        console.warn("[syncUserWithServer] failed", res.status, errText);
+      }
+      return null;
+    }
     const data = await res.json();
     // Successful sync — safe to clear the pending name now.
     if (pendingName) {
@@ -167,6 +181,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [bootDone, setBootDone] = useState(false);
+
+  // Keep the module-level ref in sync with the hook-based getToken.
+  useEffect(() => {
+    _clerkGetToken = isSignedIn ? getClerkToken : null;
+    return () => { _clerkGetToken = null; };
+  }, [isSignedIn, getClerkToken]);
+
   const [syncing, setSyncing] = useState(false);
 
   // Track which Clerk user id we've already synced to avoid hammering
@@ -274,7 +295,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let succeeded = false;
       try {
         const sessionToken = await getClerkToken();
-        if (!sessionToken) return;
+        if (!sessionToken) throw new Error("Clerk token not ready yet");
         const synced = await syncUserWithServer(sessionToken);
         if (cancelled) return;
         if (synced) {
@@ -287,7 +308,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await clearLegacyTokens();
           succeeded = true;
         }
-      } catch { /* fall through to retry */ }
+      } catch (err) {
+        if (__DEV__) console.warn("[Clerk sync] attempt", attempt, "failed:", err);
+      }
       finally {
         if (!cancelled) setSyncing(false);
       }
