@@ -294,7 +294,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSyncing(true);
       let succeeded = false;
       try {
-        const sessionToken = await getClerkToken();
+        const sessionToken = await Promise.race([
+          getClerkToken(),
+          new Promise<null>((_, reject) =>
+            setTimeout(() => reject(new Error("Clerk token timeout after 8s")), 8000)
+          ),
+        ]);
         if (!sessionToken) throw new Error("Clerk token not ready yet");
         const synced = await syncUserWithServer(sessionToken);
         if (cancelled) return;
