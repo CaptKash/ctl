@@ -188,6 +188,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { _clerkGetToken = null; };
   }, [isSignedIn, getClerkToken]);
 
+  // Stable ref so the sync effect can call getClerkToken without including
+  // it in the dependency array (Clerk recreates the function on every render
+  // during session restore, which would otherwise cancel/restart the sync
+  // in a tight loop and leave initialSyncPending stuck on true).
+  const getClerkTokenRef = useRef(getClerkToken);
+  useEffect(() => { getClerkTokenRef.current = getClerkToken; }, [getClerkToken]);
+
   const [initialSyncPending, setInitialSyncPending] = useState(false);
 
   // Track which Clerk user id we've already synced to avoid hammering
@@ -289,7 +296,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let succeeded = false;
       try {
         const sessionToken = await Promise.race([
-          getClerkToken(),
+          getClerkTokenRef.current(),
           new Promise<null>((_, reject) =>
             setTimeout(() => reject(new Error("Clerk token timeout after 8s")), 8000)
           ),
@@ -321,7 +328,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (retryTimer) clearTimeout(retryTimer);
       setInitialSyncPending(false);
     };
-  }, [clerkLoaded, isSignedIn, clerkUser, getClerkToken]);
+  }, [clerkLoaded, isSignedIn, clerkUser?.id]);
 
   // ── Legacy compatibility shim ────────────────────────────────────────────
   // Pre-Phase-3 callers handed us a server-issued JWT after /auth/register
