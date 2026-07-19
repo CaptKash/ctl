@@ -1,12 +1,12 @@
 import { router } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import { Platform, View, type ViewStyle } from "react-native";
+import { Platform, View, type ViewStyle, type StyleProp } from "react-native";
 import React from "react";
 
 type Props = {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 function goBack() {

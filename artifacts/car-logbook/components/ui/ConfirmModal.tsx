@@ -15,6 +15,7 @@ type Props = {
   message: string;
   confirmLabel?: string;
   confirmStyle?: "destructive" | "default";
+  destructive?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -25,13 +26,14 @@ export function ConfirmModal({
   message,
   confirmLabel,
   confirmStyle = "default",
+  destructive,
   onConfirm,
   onCancel,
 }: Props) {
   const C = useColors();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
-  const isDestructive = confirmStyle === "destructive";
+  const isDestructive = destructive || confirmStyle === "destructive";
 
   return (
     <Modal

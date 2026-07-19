@@ -278,13 +278,13 @@ export default function CarDetailScreen() {
                   pathname: "/maintenance/form",
                   params: { carId: String(carId), faultDescription: r.description, faultId: String(r.id) },
                 } as any)}
-                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+                style={[styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
               >
                 <Feather name="tool" size={14} color={meta.color} />
               </Pressable>
               <Pressable
                 onPress={() => confirmDelete(`/cars/${carId}/malfunctions/${r.id}`, "malfunctions")}
-                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+                style={[styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
               >
                 <Feather name="trash-2" size={14} color={meta.color} />
               </Pressable>
@@ -359,7 +359,7 @@ export default function CarDetailScreen() {
             <View style={[styles.cardActions, isRTL && { flexDirection: "row-reverse" }]}>
               <TouchableOpacity
                 onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
-                style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+                style={[styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
               >
                 <Feather name="trash-2" size={14} color={meta.color} />
               </TouchableOpacity>
@@ -428,7 +428,7 @@ export default function CarDetailScreen() {
             <View style={{ flex: 1 }} />
             <TouchableOpacity
               onPress={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
-              style={[styles.actionBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+              style={[styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
             >
               <Feather name="trash-2" size={14} color={meta.color} />
             </TouchableOpacity>
@@ -893,7 +893,7 @@ const styles = StyleSheet.create({
   warningMsgText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
   warningMsgLabel: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
   iconsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, alignItems: "center", alignSelf: "flex-start", backgroundColor: "#4B5563", borderRadius: 10, padding: 10 },
-  actionBtn: {
+  iconBtn: {
     width: 30, height: 30,
     alignItems: "center", justifyContent: "center",
     borderRadius: 8, borderWidth: 1,

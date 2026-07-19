@@ -21,6 +21,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     priority: Notifications.AndroidNotificationPriority.HIGH,
   }),
 });
@@ -120,7 +122,7 @@ export async function syncNotifications(events: NotificationEvent[]): Promise<vo
             body,
             data: { eventId: event.id, carId: event.carId },
           },
-          trigger: { date: triggerDate },
+          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerDate },
         })
       );
     }
@@ -137,7 +139,7 @@ export async function syncNotifications(events: NotificationEvent[]): Promise<vo
           body: "No upcoming service events. Keep up the great maintenance.",
           data: { type: "weekly_digest" },
         },
-        trigger: { date: sundayTrigger },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: sundayTrigger },
       })
     );
   } else {
@@ -155,7 +157,7 @@ export async function syncNotifications(events: NotificationEvent[]): Promise<vo
           body: lines + extra,
           data: { type: "weekly_digest" },
         },
-        trigger: { date: sundayTrigger },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: sundayTrigger },
       })
     );
   }

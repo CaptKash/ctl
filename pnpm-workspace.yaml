@@ -121,4 +121,4 @@ overrides:
   rollup>@rollup/rollup-win32-x64-msvc: '-'
 
 patchedDependencies:
-  react-native-purchases@9.14.0: patches/react-native-purchases@9.14.0.patch
+  react-native-purchases@10.4.3: patches/react-native-purchases@10.4.3.patch

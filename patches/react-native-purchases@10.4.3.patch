@@ -1,0 +1,26 @@
+diff --git a/dist/purchases.js b/dist/purchases.js
+index 5c82be03102261ffd7948cfa1b0e2dff728deeff..c6fb4979d29601c9d3d8464fd5db6e9e46d9a2e8 100644
+--- a/dist/purchases.js
++++ b/dist/purchases.js
+@@ -62,7 +62,7 @@ var NATIVE_MODULE_ERROR = "[RevenueCat] Native module (RNPurchases) not found. T
+     "- Check that you have rebuilt the app after installing the package\n";
+ // Get the native module or use the browser implementation
+ var usingBrowserMode = (0, environment_1.shouldUseBrowserMode)();
+-var RNPurchases = usingBrowserMode ? nativeModule_1.browserNativeModuleRNPurchases : react_native_1.NativeModules.RNPurchases;
++var RNPurchases = usingBrowserMode ? nativeModule_1.browserNativeModuleRNPurchases : (react_native_1.NativeModules.RNPurchases || (react_native_1.TurboModuleRegistry && react_native_1.TurboModuleRegistry.get("RNPurchases")));
+ // Only create event emitter if native module is available to avoid crash on import
+ //
+ // React Native 0.79+ requires native modules to implement addListener() and removeListeners()
+diff --git a/dist/utils/environment.js b/dist/utils/environment.js
+index 7c5d45335627847a5e4276f555b4c8aa01dd407a..b42822a621eabdbd48c1b23f15a2180c731441ac 100644
+--- a/dist/utils/environment.js
++++ b/dist/utils/environment.js
+@@ -32,7 +32,7 @@ exports.shouldUseBrowserMode = shouldUseBrowserMode;
+  */
+ function isExpoGo() {
+     var _a, _b;
+-    if (!!react_native_1.NativeModules.RNPurchases) {
++    if (!!(react_native_1.NativeModules.RNPurchases || (react_native_1.TurboModuleRegistry && react_native_1.TurboModuleRegistry.get("RNPurchases")))) {
+         return false;
+     }
+     return !!((_b = (_a = globalThis.expo) === null || _a === void 0 ? void 0 : _a.modules) === null || _b === void 0 ? void 0 : _b.ExpoGo);

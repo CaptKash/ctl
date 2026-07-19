@@ -287,7 +287,7 @@ function SteeringIcon({ color, size }: IconProps) {
   );
 }
 
-const ICON_MAP: Record<string, (props: IconProps) => JSX.Element> = {
+const ICON_MAP: Record<string, (props: IconProps) => React.JSX.Element> = {
   checkEngine: CheckEngineIcon,
   oil: OilIcon,
   battery: BatteryIcon,
