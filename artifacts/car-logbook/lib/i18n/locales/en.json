@@ -13,7 +13,7 @@
   "common": {
     "appName": "CTL",
     "appTagline": "Car Technical Log",
-    "version": "CTL v1.0.0",
+    "version": "CTL v2.0.0",
     "cancel": "Cancel",
     "ok": "OK",
     "dash": "—",
