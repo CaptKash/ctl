@@ -201,38 +201,40 @@ export default function EditProfileScreen() {
           </Text>
 
           {/* Reset Password — only for legacy (non-Clerk) users */}
-          {!isClerkUser && <Pressable
-            onPress={handleResetPassword}
-            disabled={resetSent || resetLoading}
-            style={({ pressed }) => [
-              styles.resetBtn,
-              {
-                borderColor: resetSent ? "#059669" : C.tint,
-                backgroundColor: resetSent ? "#D1FAE5" : C.infoLight,
-                opacity: pressed || resetLoading ? 0.7 : 1,
-              },
-              isRTL && { flexDirection: "row-reverse" },
-            ]}
-          >
-            <Feather
-              name={resetSent ? "check-circle" : "lock"}
-              size={17}
-              color={resetSent ? "#059669" : C.tint}
-            />
-            <View style={{ alignItems: "center" }}>
-              <Text style={[styles.resetBtnLabel, { color: resetSent ? "#059669" : C.tint }]}>
-                {resetLoading ? t("editProfile.sending") : resetSent ? t("editProfile.resetLinkSent") : t("editProfile.resetPassword")}
-              </Text>
-              {resetSent && (
-                <Text style={[styles.resetHint, { color: "#059669" }]}>
-                  {t("editProfile.sentTo", { email: user?.email })}
+          {!isClerkUser && (
+            <Pressable
+              onPress={handleResetPassword}
+              disabled={resetSent || resetLoading}
+              style={({ pressed }) => [
+                styles.resetBtn,
+                {
+                  borderColor: resetSent ? "#059669" : C.tint,
+                  backgroundColor: resetSent ? "#D1FAE5" : C.infoLight,
+                  opacity: pressed || resetLoading ? 0.7 : 1,
+                },
+                isRTL && { flexDirection: "row-reverse" },
+              ]}
+            >
+              <Feather
+                name={resetSent ? "check-circle" : "lock"}
+                size={17}
+                color={resetSent ? "#059669" : C.tint}
+              />
+              <View style={{ alignItems: "center" }}>
+                <Text style={[styles.resetBtnLabel, { color: resetSent ? "#059669" : C.tint }]}>
+                  {resetLoading ? t("editProfile.sending") : resetSent ? t("editProfile.resetLinkSent") : t("editProfile.resetPassword")}
                 </Text>
-              )}
-              {resetError !== "" && (
-                <Text style={[styles.resetHint, { color: C.danger }]}>{resetError}</Text>
-              )}
-            </View>
-          </Pressable>}
+                {resetSent && (
+                  <Text style={[styles.resetHint, { color: "#059669" }]}>
+                    {t("editProfile.sentTo", { email: user?.email })}
+                  </Text>
+                )}
+                {resetError !== "" && (
+                  <Text style={[styles.resetHint, { color: C.danger }]}>{resetError}</Text>
+                )}
+              </View>
+            </Pressable>
+          )}
         </ScrollView>
       </SwipeBackView>
     </KeyboardAvoidingView>
