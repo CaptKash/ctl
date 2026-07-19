@@ -46,7 +46,7 @@ interface ClerkUser {
   email_addresses: Array<{
     id: string;
     email_address: string;
-    verification?: { status?: string };
+    verification?: { status?: string; strategy?: string };
   }>;
   primary_email_address_id?: string | null;
   first_name?: string | null;
@@ -87,13 +87,21 @@ function pickPrimaryEmail(u: ClerkUser): string | null {
 }
 
 /**
- * True iff the Clerk user's primary email address is `verified`. We refuse to
- * link any pre-existing local account to a Clerk identity unless this holds —
- * otherwise a malicious sign-up could claim a victim's account by simply
- * registering an unverified Clerk session with the victim's email.
+ * True iff the Clerk user's primary email address is considered verified.
+ * We accept either:
+ *   - status === "verified"  (email+password and migrated accounts)
+ *   - strategy starts with "from_oauth" (Apple/Google — the OAuth provider
+ *     itself verified the address, so Clerk may record a non-"verified"
+ *     status string while still guaranteeing ownership).
+ * This prevents a malicious sign-up with an unverified email from claiming
+ * a victim's legacy account.
  */
 function isPrimaryEmailVerified(u: ClerkUser): boolean {
-  return pickPrimary(u)?.verification?.status === "verified";
+  const v = pickPrimary(u)?.verification;
+  if (!v) return false;
+  if (v.status === "verified") return true;
+  if (typeof v.strategy === "string" && v.strategy.startsWith("from_oauth")) return true;
+  return false;
 }
 
 /**

@@ -33,8 +33,19 @@ export default function EditProfileScreen() {
   const { user: clerkUser } = useUser();
   const isClerkUser = !!clerkUser;
 
-  const [name, setName] = useState(user?.name ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
+  // For Clerk users (Apple, Google, email-via-Clerk), prefer the Clerk
+  // profile as the source of truth for name/email. Clerk caches the Apple
+  // name from first sign-in and always has the canonical email, even when
+  // the DB row holds stale or placeholder values.
+  const clerkName = isClerkUser
+    ? (clerkUser.fullName?.trim() || [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ").trim() || "")
+    : "";
+  const clerkEmail = isClerkUser
+    ? (clerkUser.primaryEmailAddress?.emailAddress ?? "")
+    : "";
+
+  const [name, setName] = useState(clerkName || (user?.name ?? ""));
+  const [email, setEmail] = useState(clerkEmail || (user?.email ?? ""));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -42,9 +53,11 @@ export default function EditProfileScreen() {
   const [resetSent, setResetSent] = useState(false);
   const [resetError, setResetError] = useState("");
 
+  const baseName = isClerkUser ? (clerkName || (user?.name ?? "")) : (user?.name ?? "");
+  const baseEmail = isClerkUser ? (clerkEmail || (user?.email ?? "")) : (user?.email ?? "");
   const hasChanges = isClerkUser
-    ? name.trim() !== (user?.name ?? "")
-    : name.trim() !== (user?.name ?? "") || email.trim() !== (user?.email ?? "");
+    ? name.trim() !== baseName
+    : name.trim() !== baseName || email.trim() !== baseEmail;
   const canSave = hasChanges && name.trim().length > 0;
 
   const handleSave = async () => {

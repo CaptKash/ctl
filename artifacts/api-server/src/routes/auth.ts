@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Resend } from "resend";
+import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { usersTable, passwordResetTokensTable } from "@workspace/db";
 import { eq, and, gt, isNull } from "drizzle-orm";
@@ -178,27 +179,35 @@ router.patch("/auth/profile", requireAuth, async (req, res) => {
     if (!name?.trim()) {
       return res.status(400).json({ error: "Name is required." });
     }
-    if (!email?.trim() || !email.includes("@")) {
-      return res.status(400).json({ error: "A valid email is required." });
-    }
 
-    const newEmail = email.toLowerCase().trim();
-    const newName = name.trim();
+    // Clerk-authenticated users: email is managed entirely by Clerk.
+    // Ignore any body email and keep the current DB email unchanged.
+    const isClerkRequest = !!getAuth(req)?.userId;
 
-    if (newEmail !== req.user!.email) {
-      const existing = await db
-        .select({ id: usersTable.id })
-        .from(usersTable)
-        .where(eq(usersTable.email, newEmail))
-        .limit(1);
-      if (existing.length > 0) {
-        return res.status(409).json({ error: "That email is already in use by another account." });
+    let newEmail: string;
+    if (isClerkRequest) {
+      newEmail = req.user!.email;
+    } else {
+      if (!email?.trim() || !email.includes("@")) {
+        return res.status(400).json({ error: "A valid email is required." });
+      }
+      newEmail = email.toLowerCase().trim();
+
+      if (newEmail !== req.user!.email) {
+        const existing = await db
+          .select({ id: usersTable.id })
+          .from(usersTable)
+          .where(eq(usersTable.email, newEmail))
+          .limit(1);
+        if (existing.length > 0) {
+          return res.status(409).json({ error: "That email is already in use by another account." });
+        }
       }
     }
 
     const [updated] = await db
       .update(usersTable)
-      .set({ name: newName, email: newEmail })
+      .set({ name: name.trim(), email: newEmail })
       .where(eq(usersTable.id, req.user!.id))
       .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
 
