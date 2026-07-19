@@ -71,6 +71,9 @@
     "i18next": "^26.0.10",
     "react-i18next": "^17.0.7",
     "react-native-purchases": "~10.4.3",
-    "xlsx-js-style": "^1.2.0"
+    "xlsx-js-style": "^1.2.0",
+    "expo": "~57.0.7",
+    "react": "19.2.3",
+    "react-native": "0.86.0"
   }
 }

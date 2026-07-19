@@ -1,0 +1,15 @@
+.cache/
+.local/
+.pythonlibs/
+attached_assets/
+exports/
+*.mp4
+*.mov
+*.heic
+node_modules/
+.git/
+artifacts/api-server/dist/
+artifacts/mockup-sandbox/node_modules/
+artifacts/ctl-promo-video/node_modules/
+artifacts/api-server/node_modules/
+artifacts/car-logbook/ios/

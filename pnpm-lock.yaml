@@ -154,9 +154,9 @@ overrides:
   rollup>@rollup/rollup-win32-x64-msvc: '-'
 
 patchedDependencies:
-  react-native-purchases@10.4.3:
-    hash: 737137490d1123206ab29b098037dc403002df09de11f5847d2e283917d44cbc
-    path: patches/react-native-purchases@10.4.3.patch
+  expo-modules-core@57.0.6:
+    hash: 431d4594dc15c3b41adb0efa2fb2d5922e79abd1b6c52a518c237ed2b44da6c2
+    path: patches/expo-modules-core@57.0.6.patch
   react-native-purchases@9.14.0:
     hash: 6ca8109f7fd9d4ff2ffdd5a33cef6982d46c98f74938b78704a2fc9bcd65d2e8
     path: patches/react-native-purchases@9.14.0.patch
@@ -269,6 +269,9 @@ importers:
       '@react-native-community/datetimepicker':
         specifier: ~9.1.0
         version: 9.1.0(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
+      expo:
+        specifier: ~57.0.7
+        version: 57.0.7(@babel/core@7.29.0)(@expo/metro-runtime@57.0.6)(expo-router@57.0.7)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       expo-auth-session:
         specifier: ~57.0.4
         version: 57.0.4(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
@@ -302,12 +305,18 @@ importers:
       i18next:
         specifier: ^26.0.10
         version: 26.0.10(typescript@6.0.3)
+      react:
+        specifier: 19.2.3
+        version: 19.2.3
       react-i18next:
         specifier: ^17.0.7
         version: 17.0.7(i18next@26.0.10(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      react-native:
+        specifier: 0.86.0
+        version: 0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3)
       react-native-purchases:
         specifier: ~10.4.3
-        version: 10.4.3(patch_hash=737137490d1123206ab29b098037dc403002df09de11f5847d2e283917d44cbc)(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
+        version: 10.4.3(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
       xlsx-js-style:
         specifier: ^1.2.0
         version: 1.2.0
@@ -348,9 +357,6 @@ importers:
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
-      expo:
-        specifier: ~57.0.7
-        version: 57.0.7(@babel/core@7.29.0)(@expo/metro-runtime@57.0.6)(expo-router@57.0.7)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       expo-blur:
         specifier: ~57.0.2
         version: 57.0.2(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
@@ -399,15 +405,9 @@ importers:
       expo-web-browser:
         specifier: ~57.0.1
         version: 57.0.1(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))
-      react:
-        specifier: 19.2.3
-        version: 19.2.3
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
-      react-native:
-        specifier: 0.86.0
-        version: 0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3)
       react-native-gesture-handler:
         specifier: ~2.32.0
         version: 2.32.0(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
@@ -11277,7 +11277,7 @@ snapshots:
       - supports-color
       - typescript
 
-  expo-modules-core@57.0.6(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0):
+  expo-modules-core@57.0.6(patch_hash=431d4594dc15c3b41adb0efa2fb2d5922e79abd1b6c52a518c237ed2b44da6c2)(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0):
     dependencies:
       '@expo/expo-modules-macros-plugin': 0.6.1
       expo-modules-jsi: 57.0.3(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))
@@ -11288,7 +11288,7 @@ snapshots:
       react-native-worklets: 0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
     optional: true
 
-  expo-modules-core@57.0.6(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
+  expo-modules-core@57.0.6(patch_hash=431d4594dc15c3b41adb0efa2fb2d5922e79abd1b6c52a518c237ed2b44da6c2)(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
     dependencies:
       '@expo/expo-modules-macros-plugin': 0.6.1
       expo-modules-jsi: 57.0.3(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))
@@ -11519,7 +11519,7 @@ snapshots:
       expo-font: 57.0.1(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
       expo-keep-awake: 57.0.1(expo@57.0.7)(react@19.1.0)
       expo-modules-autolinking: 57.0.8(typescript@5.9.3)
-      expo-modules-core: 57.0.6(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
+      expo-modules-core: 57.0.6(patch_hash=431d4594dc15c3b41adb0efa2fb2d5922e79abd1b6c52a518c237ed2b44da6c2)(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
       pretty-format: 29.7.0
       react: 19.1.0
       react-native: 0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0)
@@ -11562,7 +11562,7 @@ snapshots:
       expo-font: 57.0.1(expo@57.0.7)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
       expo-keep-awake: 57.0.1(expo@57.0.7)(react@19.2.3)
       expo-modules-autolinking: 57.0.8(typescript@6.0.3)
-      expo-modules-core: 57.0.6(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
+      expo-modules-core: 57.0.6(patch_hash=431d4594dc15c3b41adb0efa2fb2d5922e79abd1b6c52a518c237ed2b44da6c2)(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
       pretty-format: 29.7.0
       react: 19.2.3
       react-native: 0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3)
@@ -13020,7 +13020,7 @@ snapshots:
       react-native-is-edge-to-edge: 1.3.1(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
       react-native-reanimated: 4.5.0(react-native-worklets@0.10.0(@babel/core@7.29.0)(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
 
-  react-native-purchases@10.4.3(patch_hash=737137490d1123206ab29b098037dc403002df09de11f5847d2e283917d44cbc)(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
+  react-native-purchases@10.4.3(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
     dependencies:
       '@revenuecat/purchases-js-hybrid-mappings': 18.21.0
       '@revenuecat/purchases-typescript-internal': 18.21.0

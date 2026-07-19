@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ctl.carlogbook",
-      "buildNumber": "42",
+      "buildNumber": "54",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "CTL uses your location to find nearby service centers and repair shops, for example showing the closest oil change or tire shop near you.",
@@ -47,6 +47,7 @@
       "favicon": "./assets/images/icon.png"
     },
     "plugins": [
+      "./plugins/fix-expo-swift",
       [
         "expo-router",
         {
