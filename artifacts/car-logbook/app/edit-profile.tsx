@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { useUser } from "@clerk/clerk-expo";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/context/ThemeContext";
 import { FormField } from "@/components/ui/FormField";
@@ -29,6 +30,8 @@ export default function EditProfileScreen() {
   const isRTL = i18n.language === "ar";
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { user, updateUser } = useAuth();
+  const { user: clerkUser } = useUser();
+  const isClerkUser = !!clerkUser;
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -39,9 +42,10 @@ export default function EditProfileScreen() {
   const [resetSent, setResetSent] = useState(false);
   const [resetError, setResetError] = useState("");
 
-  const hasChanges =
-    name.trim() !== (user?.name ?? "") || email.trim() !== (user?.email ?? "");
-  const canSave = hasChanges && name.trim().length > 0 && email.includes("@");
+  const hasChanges = isClerkUser
+    ? name.trim() !== (user?.name ?? "")
+    : name.trim() !== (user?.name ?? "") || email.trim() !== (user?.email ?? "");
+  const canSave = hasChanges && name.trim().length > 0;
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -156,13 +160,14 @@ export default function EditProfileScreen() {
               label={t("editProfile.emailLabel")}
               required
               value={email}
-              onChangeText={(v) => { setEmail(v); setError(""); setSaved(false); }}
+              onChangeText={isClerkUser ? undefined : (v) => { setEmail(v); setError(""); setSaved(false); }}
               placeholder={t("editProfile.emailPlaceholder")}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="done"
               onSubmitEditing={handleSave}
+              editable={!isClerkUser}
             />
           </View>
 
@@ -195,8 +200,8 @@ export default function EditProfileScreen() {
             {t("editProfile.emailHint")}
           </Text>
 
-          {/* Reset Password */}
-          <Pressable
+          {/* Reset Password — only for legacy (non-Clerk) users */}
+          {!isClerkUser && <Pressable
             onPress={handleResetPassword}
             disabled={resetSent || resetLoading}
             style={({ pressed }) => [
@@ -227,7 +232,7 @@ export default function EditProfileScreen() {
                 <Text style={[styles.resetHint, { color: C.danger }]}>{resetError}</Text>
               )}
             </View>
-          </Pressable>
+          </Pressable>}
         </ScrollView>
       </SwipeBackView>
     </KeyboardAvoidingView>

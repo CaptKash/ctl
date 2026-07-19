@@ -271,12 +271,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!clerkLoaded) return;
     if (!isSignedIn || !clerkUser) {
-      // Signed out: drop local state. We do NOT clear legacy SecureStore
-      // here so the boot effect can still validate it on next cold start
-      // for users who never explicitly logged out.
       syncedClerkIdRef.current = null;
       setUser((prev) => (prev ? null : prev));
       setToken((prev) => (prev ? null : prev));
+      setInitialSyncPending(false);
       return;
     }
     if (syncedClerkIdRef.current === clerkUser.id) return;
@@ -321,6 +319,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
       if (retryTimer) clearTimeout(retryTimer);
+      setInitialSyncPending(false);
     };
   }, [clerkLoaded, isSignedIn, clerkUser, getClerkToken]);
 
