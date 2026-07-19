@@ -203,3 +203,9 @@ id = "X_7LiSXM9rnIEDGFo8gbN"
 uri = "file://exports/ctl-android-upload-cert.txt"
 type = "text"
 title = "CTL Android Upload Certificate (PEM)"
+
+[[outputs]]
+id = "nnLOYLSnY_JrKm3-VSS2V"
+uri = "file://car-logbook-source.zip"
+type = "unspecified"
+title = "CTL Car Logbook — Source Code"

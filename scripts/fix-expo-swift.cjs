@@ -39,39 +39,58 @@ const TARGETS = [
   },
 ];
 
-let entries;
 try {
-  entries = fs.readdirSync(PNPM_STORE);
-} catch {
-  console.log("No pnpm store found, skipping Swift fix");
-  process.exit(0);
-}
+  let entries;
+  try {
+    entries = fs.readdirSync(PNPM_STORE);
+  } catch {
+    console.log("No pnpm store found, skipping Swift fix");
+    process.exit(0);
+  }
 
-const expoEntries = entries.filter((e) => e.startsWith("expo-modules-core@57.0.6"));
+  const expoEntries = entries.filter((e) =>
+    e.startsWith("expo-modules-core@57.0.6")
+  );
 
-let patchedCount = 0;
+  let patchedCount = 0;
 
-for (const entry of expoEntries) {
-  for (const { relPath, replacements } of TARGETS) {
-    const filePath = path.join(PNPM_STORE, entry, relPath);
-    if (!fs.existsSync(filePath)) continue;
+  for (const entry of expoEntries) {
+    for (const { relPath, replacements } of TARGETS) {
+      const filePath = path.join(PNPM_STORE, entry, relPath);
+      if (!fs.existsSync(filePath)) continue;
 
-    let content = fs.readFileSync(filePath, "utf8");
-    let changed = false;
+      let content;
+      try {
+        content = fs.readFileSync(filePath, "utf8");
+      } catch {
+        console.log("Could not read:", filePath);
+        continue;
+      }
 
-    for (const [from, to] of replacements) {
-      if (content.includes(from)) {
-        content = content.split(from).join(to);
-        changed = true;
+      let changed = false;
+      for (const [from, to] of replacements) {
+        if (content.includes(from)) {
+          content = content.split(from).join(to);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        try {
+          try {
+            fs.chmodSync(filePath, 0o644);
+          } catch {}
+          fs.writeFileSync(filePath, content, "utf8");
+          console.log("Patched:", filePath);
+          patchedCount++;
+        } catch (e) {
+          console.log("Could not patch (read-only):", filePath, e.code);
+        }
       }
     }
-
-    if (changed) {
-      fs.writeFileSync(filePath, content, "utf8");
-      console.log("Patched:", filePath);
-      patchedCount++;
-    }
   }
-}
 
-console.log("Swift weak-let fix: patched " + patchedCount + " file(s).");
+  console.log("Swift weak-let fix: patched " + patchedCount + " file(s).");
+} catch (e) {
+  console.log("Swift fix skipped:", e.message);
+}
