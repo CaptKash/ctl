@@ -10,3 +10,4 @@
 - [lib/db schema change needs dist rebuild](db-schema-dist-rebuild.md) — after editing lib/db schema, run `tsc -p lib/db/tsconfig.json` or api-server tsc shows phantom "property does not exist" errors.
 - [CTL Enterprise subscription model](ctl-enterprise-subscription-model.md) — entitlement is per-account (one tier), not per-org; multi-sub/multi-org is planned future, deferred as "too early"; don't deepen single-entitlement coupling.
 - [CTL Clerk sync token reliability](ctl-clerk-sync-token.md) — hook-based getToken (useAuth) must be the primary token source for all API calls; getClerkInstance().session?.getToken() can silently return null on web after clearLegacyTokens wipes SecureStore fallback.
+- [CTL Clerk sync isLoading stuck](ctl-clerk-sync-isloading.md) — `syncing` in isLoading blocks up to 71s across all retries; use `initialSyncPending` (cleared after attempt 0 only) instead.

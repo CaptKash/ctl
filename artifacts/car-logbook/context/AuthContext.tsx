@@ -188,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { _clerkGetToken = null; };
   }, [isSignedIn, getClerkToken]);
 
-  const [syncing, setSyncing] = useState(false);
+  const [initialSyncPending, setInitialSyncPending] = useState(false);
 
   // Track which Clerk user id we've already synced to avoid hammering
   // /auth/clerk/sync-user on every re-render of the Clerk hook.
@@ -284,14 +284,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
-    // Retry with bounded exponential backoff so a flaky network at app
-    // open doesn't leave a Clerk-signed-in user stuck with no local
-    // user record (and therefore no RevenueCat login). 5 attempts at
-    // 1s, 2s, 4s, 8s, 16s — total ~30s — then give up until the next
-    // dependency change re-triggers the effect.
+    setInitialSyncPending(true);
+
     const attemptSync = async (attempt: number): Promise<void> => {
       if (cancelled) return;
-      setSyncing(true);
       let succeeded = false;
       try {
         const sessionToken = await Promise.race([
@@ -307,17 +303,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           syncedClerkIdRef.current = clerkUser.id;
           setUser(synced);
           setToken(sessionToken);
-          // Once on Clerk, the legacy SecureStore JWT is no longer the
-          // source of truth — flush it so we never accidentally hand a
-          // stale legacy token to the API on a future cold start.
           await clearLegacyTokens();
           succeeded = true;
         }
       } catch (err) {
         if (__DEV__) console.warn("[Clerk sync] attempt", attempt, "failed:", err);
-      }
-      finally {
-        if (!cancelled) setSyncing(false);
+      } finally {
+        if (attempt === 0 && !cancelled) setInitialSyncPending(false);
       }
       if (!succeeded && !cancelled && attempt < 5) {
         const delay = 1000 * Math.pow(2, attempt);
@@ -369,7 +361,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isLoading = !clerkLoaded || !bootDone || syncing;
+  const isLoading = !clerkLoaded || !bootDone || initialSyncPending;
 
   return (
     <AuthContext.Provider
