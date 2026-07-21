@@ -49,6 +49,7 @@
     "signUp": "Sign up",
     "errorGeneric": "Invalid email or password.",
     "errorTooManyAttempts": "Too many attempts. Please try again in a few minutes.",
+    "errorOAuthFailed": "Sign-in failed. Please try again.",
     "languageToggleEnglish": "English",
     "languageToggleArabic": "العربية"
   },

@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignUp, useSSO, isClerkAPIResponseError } from "@clerk/clerk-expo";
+import { useSignUp, useSSO, isClerkAPIResponseError, useSignInWithApple } from "@clerk/clerk-expo";
 import { useTranslation } from "react-i18next";
 import * as SecureStore from "expo-secure-store";
 import { useColors, useTheme } from "@/context/ThemeContext";
@@ -34,6 +34,7 @@ export default function SignupScreen() {
   const { width: screenW } = useWindowDimensions();
   const { signUp, setActive, isLoaded: signUpLoaded } = useSignUp();
   const { startSSOFlow } = useSSO();
+  const { startAppleAuthenticationFlow } = useSignInWithApple();
 
   const [step, setStep] = useState<"form" | "verify">("form");
   const [name, setName] = useState("");
@@ -194,21 +195,22 @@ export default function SignupScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      // Use the app scheme root rather than a route-group path. Route
-      // groups (parens) aren't URL-facing in Expo Router so deep-link
-      // matching against "/(tabs)" is fragile across providers.
-      const redirectUrl = Linking.createURL("/");
-      const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
-        strategy,
-        redirectUrl,
-      });
+      let createdSessionId: string | null = null;
+      let activator = setActive;
+      if (strategy === "oauth_apple" && Platform.OS === "ios") {
+        const result = await startAppleAuthenticationFlow();
+        createdSessionId = result.createdSessionId;
+        activator = result.setActive ?? setActive;
+      } else {
+        const result = await startSSOFlow({ strategy });
+        createdSessionId = result.createdSessionId;
+        activator = result.setActive ?? setActive;
+      }
       if (createdSessionId) {
-        const activator = ssoSetActive ?? setActive;
         await activator({ session: createdSessionId });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         router.replace("/home");
       }
-      // No createdSessionId means the user cancelled — silent no-op.
     } catch (err: unknown) {
       if (__DEV__) {
         console.log("[SSO error]", strategy, JSON.stringify(err, null, 2), err);

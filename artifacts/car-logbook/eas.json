@@ -24,7 +24,7 @@
     "production": {
       "distribution": "store",
       "cache": {
-        "key": "sdk57-fix-v14"
+        "key": "sdk57-fix-v15"
       },
       "env": {
         "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",

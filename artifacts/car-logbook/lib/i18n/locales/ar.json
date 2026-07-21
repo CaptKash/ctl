@@ -49,6 +49,7 @@
     "signUp": "إنشاء حساب",
     "errorGeneric": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "errorTooManyAttempts": "تجاوزت حد المحاولات المسموح. حاول مرة أخرى بعد قليل.",
+    "errorOAuthFailed": "فشل تسجيل الدخول. حاول مرة أخرى.",
     "languageToggleEnglish": "English",
     "languageToggleArabic": "العربية"
   },
