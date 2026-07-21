@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn, useSSO, useSignInWithApple } from "@clerk/clerk-expo";
+import { useSignIn, useSSO } from "@clerk/clerk-expo";
 import { isClerkAPIResponseError } from "@clerk/clerk-expo";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -79,7 +79,6 @@ export default function LoginScreen() {
   } = useAuth();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
   const { startSSOFlow } = useSSO();
-  const { startAppleAuthenticationFlow } = useSignInWithApple();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -147,18 +146,15 @@ export default function LoginScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      let createdSessionId: string | null = null;
-      let activator = setActive;
-      if (strategy === "oauth_apple" && Platform.OS === "ios") {
-        const result = await startAppleAuthenticationFlow();
-        createdSessionId = result.createdSessionId;
-        activator = result.setActive ?? setActive;
-      } else {
-        const result = await startSSOFlow({ strategy });
-        createdSessionId = result.createdSessionId;
-        activator = result.setActive ?? setActive;
-      }
+      const redirectUrl = Platform.OS !== "web" && process.env.EXPO_PUBLIC_DOMAIN
+        ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/sso-callback`
+        : undefined;
+      const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
+        strategy,
+        ...(redirectUrl ? { redirectUrl } : {}),
+      });
       if (createdSessionId) {
+        const activator = ssoSetActive ?? setActive;
         await activator({ session: createdSessionId });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         router.replace("/home");

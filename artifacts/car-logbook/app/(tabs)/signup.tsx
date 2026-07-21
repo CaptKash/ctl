@@ -1,6 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -16,7 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignUp, useSSO, isClerkAPIResponseError, useSignInWithApple } from "@clerk/clerk-expo";
+import { useSignUp, useSSO, isClerkAPIResponseError } from "@clerk/clerk-expo";
 import { useTranslation } from "react-i18next";
 import * as SecureStore from "expo-secure-store";
 import { useColors, useTheme } from "@/context/ThemeContext";
@@ -34,7 +33,6 @@ export default function SignupScreen() {
   const { width: screenW } = useWindowDimensions();
   const { signUp, setActive, isLoaded: signUpLoaded } = useSignUp();
   const { startSSOFlow } = useSSO();
-  const { startAppleAuthenticationFlow } = useSignInWithApple();
 
   const [step, setStep] = useState<"form" | "verify">("form");
   const [name, setName] = useState("");
@@ -195,18 +193,15 @@ export default function SignupScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      let createdSessionId: string | null = null;
-      let activator = setActive;
-      if (strategy === "oauth_apple" && Platform.OS === "ios") {
-        const result = await startAppleAuthenticationFlow();
-        createdSessionId = result.createdSessionId;
-        activator = result.setActive ?? setActive;
-      } else {
-        const result = await startSSOFlow({ strategy });
-        createdSessionId = result.createdSessionId;
-        activator = result.setActive ?? setActive;
-      }
+      const redirectUrl = Platform.OS !== "web" && process.env.EXPO_PUBLIC_DOMAIN
+        ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/sso-callback`
+        : undefined;
+      const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
+        strategy,
+        ...(redirectUrl ? { redirectUrl } : {}),
+      });
       if (createdSessionId) {
+        const activator = ssoSetActive ?? setActive;
         await activator({ session: createdSessionId });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         router.replace("/home");
