@@ -495,6 +495,7 @@ export default function SettingsScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const { user, logout } = useAuth();
+  const { user: clerkUser } = useUser();
   const { isFleet, isEnterprise } = useSubscription();
   const { orgs, invites } = useOrg();
   const [showSignOutModal, setShowSignOutModal] = useState(false);
@@ -527,10 +528,13 @@ export default function SettingsScreen() {
     staleTime: 30_000,
   });
 
+  const displayName = user?.name || clerkUser?.fullName || clerkUser?.firstName || null;
+  const displayEmail = user?.email || clerkUser?.primaryEmailAddress?.emailAddress || null;
+
   const initials = (() => {
-    if (!user?.name) return "?";
-    const parts = user.name.split(" ").filter(Boolean).map((n) => n[0]).slice(0, 2);
-    const isArabic = /[\u0600-\u06FF]/.test(user.name);
+    if (!displayName) return "?";
+    const parts = displayName.split(" ").filter(Boolean).map((n: string) => n[0]).slice(0, 2);
+    const isArabic = /[\u0600-\u06FF]/.test(displayName);
     return isArabic ? parts.join(".") : parts.join("").toUpperCase();
   })();
 
@@ -562,8 +566,8 @@ export default function SettingsScreen() {
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={[styles.profileName, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{user?.name ?? t("common.dash")}</Text>
-            <Text style={[styles.profileEmail, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{user?.email ?? t("common.dash")}</Text>
+            <Text style={[styles.profileName, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{displayName ?? t("common.dash")}</Text>
+            <Text style={[styles.profileEmail, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{displayEmail ?? t("common.dash")}</Text>
           </View>
           <View style={[styles.statBubble, { backgroundColor: C.tint + "15" }]}>
             <Text style={[styles.statValue, { color: C.tint }]}>{cars.length}</Text>

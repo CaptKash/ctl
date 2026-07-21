@@ -29,6 +29,7 @@ import type { ColorScheme } from "@/constants/colors";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
+import { useUser } from "@clerk/clerk-expo";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
 import { addToCalendar, getWritableCalendars, WritableCalendar } from "@/lib/addToCalendar";
@@ -111,6 +112,7 @@ export default function MenuDashboardScreen() {
   const { unit } = useDistanceUnit();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { user, isAuthenticated } = useAuth();
+  const { user: clerkUser } = useUser();
   const [calendarLoading, setCalendarLoading] = useState<string | null>(null);
   const [activeCarIndex, setActiveCarIndex] = useState(0);
   const CHIP_WIDTH = 170;
@@ -221,6 +223,11 @@ export default function MenuDashboardScreen() {
     day: "numeric",
   });
 
+  const greetingFirstName = (user?.name || clerkUser?.fullName || clerkUser?.firstName || "").split(" ")[0];
+  const headerTitle = greetingFirstName
+    ? t("home.helloUser", { name: greetingFirstName })
+    : "CTL";
+
   return (
     <View style={[styles.container, { backgroundColor: C.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
@@ -241,9 +248,7 @@ export default function MenuDashboardScreen() {
               isRTL && { textAlign: "right", writingDirection: "rtl" },
             ]}
           >
-            {isAuthenticated && user
-              ? t("home.helloUser", { name: user.name.split(" ")[0] })
-              : "CTL"}
+            {headerTitle}
           </Text>
           <Text
             style={[

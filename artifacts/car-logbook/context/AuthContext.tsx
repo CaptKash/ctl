@@ -298,7 +298,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const sessionToken = await Promise.race([
           getClerkTokenRef.current(),
           new Promise<null>((_, reject) =>
-            setTimeout(() => reject(new Error("Clerk token timeout after 8s")), 8000)
+            setTimeout(() => reject(new Error("Clerk token timeout after 30s")), 30000)
           ),
         ]);
         if (!sessionToken) throw new Error("Clerk token not ready yet");
