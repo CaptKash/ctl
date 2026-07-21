@@ -1,6 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -141,20 +140,13 @@ export default function LoginScreen() {
     return data?.migrated === true || data?.alreadyMigrated === true;
   };
 
-  // Apple/Google sign-in via Clerk's hosted SSO flow. Same generic-error
-  // contract as password sign-in — never reveal anything provider-specific.
-  // Cancellation by the user (no createdSessionId) is a silent no-op.
   const handleOAuth = async (strategy: "oauth_apple" | "oauth_google") => {
     if (!setActive) return;
     setError("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      const redirectUrl = Linking.createURL("/");
-      const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
-        strategy,
-        redirectUrl,
-      });
+      const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({ strategy });
       if (createdSessionId) {
         const activator = ssoSetActive ?? setActive;
         await activator({ session: createdSessionId });
@@ -165,7 +157,7 @@ export default function LoginScreen() {
       if (__DEV__) {
         console.log("[SSO error]", strategy, JSON.stringify(err, null, 2), err);
       }
-      setError(GENERIC_ERROR);
+      setError(t("login.errorOAuthFailed"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
