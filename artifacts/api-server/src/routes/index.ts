@@ -9,12 +9,12 @@ import ssoCallbackRouter from "./ssoCallback";
 
 const router: IRouter = Router();
 
+router.use(ssoCallbackRouter);
 router.use(authRouter);
 router.use(clerkAuthRouter);
 router.use(healthRouter);
 router.use(feedbackRouter);
 router.use(orgsRouter);
 router.use(carsRouter);
-router.use(ssoCallbackRouter);
 
 export default router;
