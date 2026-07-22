@@ -33,7 +33,7 @@ function requireClerkSession(req: Request, res: Response, next: NextFunction) {
   }
   const auth = getAuth(req);
   const authHeader = req.headers.authorization;
-  console.log("[requireClerkSession] auth.userId:", auth?.userId ?? "NULL", "| header prefix:", authHeader ? authHeader.substring(0, 20) + "..." : "MISSING");
+  if (process.env.NODE_ENV !== "production") console.log("[requireClerkSession] auth.userId:", auth?.userId ?? "NULL", "| header prefix:", authHeader ? authHeader.substring(0, 20) + "..." : "MISSING");
   if (!auth?.userId) {
     return res.status(401).json({ error: "A valid Clerk session is required." });
   }

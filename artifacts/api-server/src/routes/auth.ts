@@ -333,7 +333,7 @@ router.post("/auth/forgot-password", async (req, res) => {
       const publicHost = forwardedHost || (directHost.startsWith("localhost") ? "" : directHost);
       const baseUrl = publicHost ? `${proto}://${publicHost}` : RESET_BASE_URL;
       const resetLink = `${baseUrl}/api/reset-password?token=${record.token}`;
-      console.log(`[forgot-password] Reset link for ${user.email}: ${resetLink}`);
+      if (process.env.NODE_ENV !== "production") console.log(`[forgot-password] Reset link for ${user.email}: ${resetLink}`);
 
       if (resend) {
         await resend.emails.send({

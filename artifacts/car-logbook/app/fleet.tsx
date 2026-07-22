@@ -170,7 +170,7 @@ export default function FleetScreen() {
             locations={[0, 0.55, 1]}
             start={{ x: 0.15, y: 0 }}
             end={{ x: 0.85, y: 1 }}
-            style={[styles.iconBox, { borderWidth: 1, borderColor: "#64748B", shadowColor: "#0F172A", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.18, shadowRadius: 2 }]}
+            style={[styles.iconBox, { borderWidth: 1, borderColor: "#64748B", ...Platform.select({ ios: { shadowColor: "#0F172A", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.18, shadowRadius: 2 } }) }]}
           >
             <Ionicons name="car" size={26} color="#334155" />
           </LinearGradient>
