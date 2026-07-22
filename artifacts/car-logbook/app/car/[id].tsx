@@ -33,6 +33,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { BrandLogo } from "@/components/BrandLogo";
 import { LinearGradient } from "expo-linear-gradient";
 import { apiGet, apiDelete } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
 import { useOrgMemberNames } from "@/hooks/useOrgMemberNames";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
@@ -182,10 +183,7 @@ export default function CarDetailScreen() {
     }
   };
 
-  const carQuery = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-  });
+  const carQuery = useCar<Car>(carId);
 
   const faultsQuery = useQuery<FaultRecord[]>({
     queryKey: ["malfunctions", carId],

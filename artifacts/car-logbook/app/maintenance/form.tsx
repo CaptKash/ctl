@@ -30,6 +30,7 @@ import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 
 import { apiGet, apiPost } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
 
 type Car = {
   id: number;
@@ -183,10 +184,7 @@ export default function MaintenanceFormScreen() {
     }
   };
 
-  const carQuery = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-  });
+  const carQuery = useCar<Car>(carId);
 
   const mutation = useMutation({
     mutationFn: () =>

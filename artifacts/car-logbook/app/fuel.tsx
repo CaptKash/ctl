@@ -30,8 +30,10 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { RecordCard } from "@/components/ui/RecordCard";
-import { formatDate } from "@/lib/dateUtils";
+import { formatDate, getTodayISODate } from "@/lib/dateUtils";
+import { carLabel } from "@/lib/carUtils";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
+import { useCars } from "@/hooks/useCars";
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; isElectric?: boolean | null; tankCapacity?: number | null; usageUnit?: string | null };
 
@@ -88,9 +90,6 @@ function consumedBetween(prev: FuelRecord, curr: FuelRecord): number | null {
   return null;
 }
 
-function carLabel(car: Car) {
-  return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
-}
 
 export default function FuelScreen() {
   const insets = useSafeAreaInsets();
@@ -118,7 +117,7 @@ export default function FuelScreen() {
 
   // form state
   const [fCarId, setFCarId] = useState<number | null>(null);
-  const [fDate, setFDate] = useState(new Date().toISOString().split("T")[0]);
+  const [fDate, setFDate] = useState(getTodayISODate());
   const [fMileage, setFMileage] = useState("");
   const [fGauge, setFGauge] = useState("");
   const [fLiters, setFLiters] = useState("");
@@ -128,10 +127,7 @@ export default function FuelScreen() {
   const [fStation, setFStation] = useState("");
   const [fNotes, setFNotes] = useState("");
 
-  const carsQuery = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
-  });
+  const carsQuery = useCars<Car>();
   const cars = carsQuery.data ?? [];
   const fuelCars = useMemo(() => cars.filter((c) => !c.isElectric), [cars]);
 
@@ -240,12 +236,12 @@ export default function FuelScreen() {
   };
 
   const resetForm = () => {
-    setFDate(new Date().toISOString().split("T")[0]);
+    setFDate(getTodayISODate());
     setFMileage(""); setFGauge(""); setFLiters(""); setFPricePerUnit(""); setFTotalCost("");
     setFFuelType(""); setFStation(""); setFNotes("");
   };
 
-  const carOptions = fuelCars.map(carLabel);
+  const carOptions = fuelCars.map((c) => carLabel(c));
   const selectedFuelCar = fCarId ? fuelCars.find((c) => c.id === fCarId) ?? null : null;
   const selectedCarLabel = selectedFuelCar ? carLabel(selectedFuelCar) : "";
   const selectedUsageUnitText = isHourBased(selectedFuelCar?.usageUnit) ? t("units.hours") : unit;

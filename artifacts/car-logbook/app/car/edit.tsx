@@ -23,6 +23,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SelectField } from "@/components/ui/SelectField";
 import { PhotoPicker } from "@/components/ui/PhotoPicker";
 import { apiGet, apiPost, apiPut } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { Feather } from "@expo/vector-icons";
 import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
@@ -94,10 +95,7 @@ export default function EditCarScreen() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
 
-  const carQuery = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-  });
+  const carQuery = useCar<Car>(carId);
 
   useEffect(() => {
     const car = carQuery.data;

@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
+import { carLabel as labelForCar } from "@/lib/carUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useOrg } from "@/context/OrgContext";
 import { DashboardIcon, DASHBOARD_LIGHTS } from "@/components/ui/DashboardLightIcons";
@@ -81,10 +82,8 @@ export default function HistoryScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { activeOrgId } = useOrg();
 
-  const carLabel = (car: CarStub | null): string => {
-    if (!car) return t("history.unknownCar");
-    return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
-  };
+  const carLabel = (car: CarStub | null): string =>
+    labelForCar(car, t("history.unknownCar"));
 
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
 

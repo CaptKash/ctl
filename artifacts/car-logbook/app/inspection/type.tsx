@@ -28,6 +28,8 @@ import { FormField } from "@/components/ui/FormField";
 import { SelectField } from "@/components/ui/SelectField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiGet, apiPost } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
+import { getTodayISODate } from "@/lib/dateUtils";
 
 type Car = {
   id: number;
@@ -163,17 +165,13 @@ export default function RepairServiceFormScreen() {
   const totalCost = (parseFloat(costOfParts) || 0) + (parseFloat(laborCost) || 0);
 
   // Inspection state
-  const [inspDate, setInspDate] = useState(new Date().toISOString().split("T")[0]);
+  const [inspDate, setInspDate] = useState(getTodayISODate());
   const [place, setPlace] = useState("");
   const [results, setResults] = useState<ResultOption | "">("");
   const [inspCost, setInspCost] = useState("");
   const [inspNextDate, setInspNextDate] = useState("");
 
-  const carQuery = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-    enabled: Boolean(carId),
-  });
+  const carQuery = useCar<Car>(carId);
   const car = carQuery.data;
   const carTitle = car ? `${car.year} ${car.make} ${car.model}` : "";
 

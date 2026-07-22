@@ -24,6 +24,7 @@ import { useColors } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
 import { apiGet } from "@/hooks/useApi";
+import { useCars } from "@/hooks/useCars";
 import { REPORT_LOGO } from "@/lib/reportLogo";
 
 type Car = {
@@ -437,10 +438,7 @@ export default function ExportScreen() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: cars, isLoading: carsLoading } = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
-  });
+  const { data: cars, isLoading: carsLoading } = useCars<Car>();
 
   const selectedCar = cars?.find((c) => c.id === selectedCarId) ?? cars?.[0] ?? null;
 

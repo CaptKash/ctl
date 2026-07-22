@@ -12,3 +12,15 @@ export function toISODate(date: Date): string {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+
+export function getTodayISODate(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+export function daysFromNow(dateStr: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dateStr);
+  due.setHours(0, 0, 0, 0);
+  return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}

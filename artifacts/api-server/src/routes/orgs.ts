@@ -21,6 +21,12 @@ import {
 import { requireAuth } from "../middlewares/auth";
 import { resolveOrgAccess } from "../middlewares/orgAccess";
 import { getEnterpriseSeatLimit } from "../lib/revenuecat";
+import {
+  buildLicenseItems,
+  buildInsuranceItems,
+  buildMaintenanceItems,
+  buildInspectionItems,
+} from "../lib/upcomingItems";
 
 const router = Router();
 
@@ -376,82 +382,10 @@ router.get("/orgs/:orgId/maintenance/upcoming", async (req, res) => {
       .orderBy(sql`${inspectionsTable.id} desc`), // latest first
   ]);
 
-  const carLabel = (c: typeof cars[number]) =>
-    c.nickname ?? `${c.year} ${c.make} ${c.model}`;
-
-  const licenseItems = cars
-    .filter((c) => c.licenseValidUntil)
-    .map((c) => ({
-      id: c.id,
-      carId: c.id,
-      itemKind: "license" as const,
-      type: "License Expiry",
-      description: `${carLabel(c)}${c.licensePlate ? ` · ${c.licensePlate}` : ""}`,
-      nextDueDate: c.licenseValidUntil!,
-      nextDueMileage: null,
-      make: c.make,
-      model: c.model,
-      year: c.year,
-      nickname: c.nickname ?? null,
-      usageUnit: c.usageUnit,
-    }));
-
-  const insuranceItems = cars
-    .filter((c) => c.insuredUntil)
-    .map((c) => ({
-      id: c.id,
-      carId: c.id,
-      itemKind: "insurance" as const,
-      type: "Insurance Expiry",
-      description: `${carLabel(c)}${c.insuredWith ? ` · ${c.insuredWith}` : ""}`,
-      nextDueDate: c.insuredUntil!,
-      nextDueMileage: null,
-      make: c.make,
-      model: c.model,
-      year: c.year,
-      nickname: c.nickname ?? null,
-      usageUnit: c.usageUnit,
-    }));
-
-  const latestMaintenanceByCarType = new Map<string, typeof maintenanceRecords[0]>();
-  for (const r of maintenanceRecords) {
-    const key = `${r.carId}::${r.type}`;
-    if (!latestMaintenanceByCarType.has(key)) {
-      latestMaintenanceByCarType.set(key, r);
-    }
-  }
-
-  const maintenanceItems = Array.from(latestMaintenanceByCarType.values())
-    .filter((r) => r.nextDueDate)
-    .map((r) => ({
-      ...r,
-      itemKind: "maintenance" as const,
-      nickname: r.nickname ?? null,
-    }));
-
-  const latestInspectionByCarId = new Map<number, typeof inspectionRecords[0]>();
-  for (const r of inspectionRecords) {
-    if (!latestInspectionByCarId.has(r.carId)) {
-      latestInspectionByCarId.set(r.carId, r);
-    }
-  }
-
-  const inspectionItems = Array.from(latestInspectionByCarId.values())
-    .filter((r) => r.nextInspectionDate)
-    .map((r) => ({
-      id: r.id,
-      carId: r.carId,
-      itemKind: "inspection" as const,
-      type: "Next Inspection",
-      description: `${r.nickname ?? `${r.year} ${r.make} ${r.model}`}${r.place ? ` · ${r.place}` : ""}`,
-      nextDueDate: r.nextInspectionDate!,
-      nextDueMileage: null,
-      make: r.make,
-      model: r.model,
-      year: r.year,
-      nickname: r.nickname ?? null,
-      usageUnit: r.usageUnit,
-    }));
+  const licenseItems = buildLicenseItems(cars);
+  const insuranceItems = buildInsuranceItems(cars);
+  const maintenanceItems = buildMaintenanceItems(maintenanceRecords);
+  const inspectionItems = buildInspectionItems(inspectionRecords);
 
   const all = [...maintenanceItems, ...licenseItems, ...insuranceItems, ...inspectionItems].sort(
     (a, b) => a.nextDueDate!.localeCompare(b.nextDueDate!)

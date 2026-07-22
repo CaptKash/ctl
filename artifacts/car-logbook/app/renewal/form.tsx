@@ -21,6 +21,7 @@ import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiGet, apiPost, apiPut } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
 
 type Car = {
   id: number;
@@ -60,10 +61,7 @@ export default function RenewalFormScreen() {
   const [cost, setCost] = useState("");
   const [notes, setNotes] = useState("");
 
-  const { data: car } = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-  });
+  const { data: car } = useCar<Car>(carId);
 
   const mutation = useMutation({
     mutationFn: async () => {

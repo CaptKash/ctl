@@ -28,6 +28,7 @@ import { RecordCard } from "@/components/ui/RecordCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
 import { useOrgMemberNames } from "@/hooks/useOrgMemberNames";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
@@ -72,10 +73,7 @@ export default function FaultsScreen() {
   const [odometer, setOdometer] = useState("");
   const [phase, setPhase] = useState("during_drive");
 
-  const carQuery = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-  });
+  const carQuery = useCar<Car>(carId);
 
   const faultsQuery = useQuery<MalfunctionRecord[]>({
     queryKey: ["malfunctions", carId],

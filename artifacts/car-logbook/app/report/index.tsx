@@ -23,6 +23,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
+import { useCars } from "@/hooks/useCars";
 import { useCurrency } from "@/context/CurrencyContext";
 import { REPORT_LOGO } from "@/lib/reportLogo";
 
@@ -414,10 +415,7 @@ export default function ReportScreen() {
   const [includeRepairs, setIncludeRepairs] = useState(true);
   const [includeRenewals, setIncludeRenewals] = useState(true);
 
-  const carsQuery = useQuery<CarStub[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<CarStub[]>("/cars"),
-  });
+  const carsQuery = useCars<CarStub>();
 
   const faultsQuery = useQuery<FaultRecord[]>({
     queryKey: ["malfunctions-all"],

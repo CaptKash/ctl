@@ -1,6 +1,7 @@
 - [Driving car-logbook Expo web past Clerk for testing](car-logbook-web-test-auth.md) — inject legacy JWT into localStorage (`ctl_auth_token`) + reload to reach authed flows when Clerk CAPTCHA blocks sign-in.
 - [Clerk Expo native SSO redirect](clerk-expo-native-sso.md) — relay OAuth through HTTPS server endpoint to bridge Clerk's scheme restriction; mount public route before requireAuth routers; build dist locally before publishing.
 - [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
+- [Refactoring inline queries into shared hooks](refactor-query-hooks.md) — carry per-call options (staleTime); never pass multi-arg helpers directly to .map.
 - [Nearby-service filter pill clipping](nearby-service-filter-pills.md) — horizontal ScrollView collapses cross-axis on iOS, clipping pill text; use a wrapping row View for short chip/filter rows.
 - [CTL "Failed to save" triage](ctl-failed-save-diagnosis.md) — owner tests DEV app on phone; check dev vs prod DB first; generic banners + no request logging; Zod parse errors surface as 500.
 - [RC REST entitlement ids](rc-rest-entitlement-ids.md) — REST v2 active-entitlements return entitlement OBJECT ids not lookup keys; translate server-side or subscribed users get false 403.

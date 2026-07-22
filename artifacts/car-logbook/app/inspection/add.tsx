@@ -19,7 +19,7 @@ import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 import { CarCard } from "@/components/ui/CarCard";
-import { apiGet } from "@/hooks/useApi";
+import { useCars } from "@/hooks/useCars";
 
 type Car = {
   id: number;
@@ -41,10 +41,7 @@ export default function AddInspectionSelectCarScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { carId: preselectedCarId } = useLocalSearchParams<{ carId?: string }>();
 
-  const { data: cars, isLoading } = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
-  });
+  const { data: cars, isLoading } = useCars<Car>();
 
   useEffect(() => {
     if (preselectedCarId && cars) {

@@ -26,7 +26,7 @@ import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/context/SubscriptionContext";
 import { useOrg } from "@/context/OrgContext";
 import type { ColorScheme } from "@/constants/colors";
-import { formatDate } from "@/lib/dateUtils";
+import { formatDate, daysFromNow } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
 import { useAuth } from "@/context/AuthContext";
 import { useUser } from "@clerk/clerk-expo";
@@ -60,14 +60,6 @@ type UpcomingItem = {
   nickname: string | null;
   usageUnit?: string | null;
 };
-
-function daysFromNow(dateStr: string): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const due = new Date(dateStr);
-  due.setHours(0, 0, 0, 0);
-  return Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
 
 function urgencyMetallic(days: number): { gradient: [string, string, string]; outline: string } {
   if (days < 0) {

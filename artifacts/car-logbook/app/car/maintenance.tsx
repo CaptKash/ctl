@@ -29,6 +29,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { apiGet, apiPost, apiDelete } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
 import { useOrgMemberNames } from "@/hooks/useOrgMemberNames";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
@@ -85,10 +86,7 @@ export default function MaintenanceScreen() {
   const [mShop, setMShop] = useState("");
   const [mNextDate, setMNextDate] = useState("");
 
-  const carQuery = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-  });
+  const carQuery = useCar<Car>(carId);
 
   const maintenanceQuery = useQuery<MaintenanceRecord[]>({
     queryKey: ["maintenance", carId],

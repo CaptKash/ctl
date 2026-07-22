@@ -22,6 +22,7 @@ import { DatePickerField } from "@/components/ui/DatePickerField";
 import { FormField } from "@/components/ui/FormField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { apiGet, apiPost } from "@/hooks/useApi";
+import { useCar } from "@/hooks/useCar";
 
 type Car = {
   id: number;
@@ -50,10 +51,7 @@ export default function InspectionFormScreen() {
   const [cost, setCost] = useState("");
   const [nextInspectionDate, setNextInspectionDate] = useState("");
 
-  const carQuery = useQuery<Car>({
-    queryKey: ["car", carId],
-    queryFn: () => apiGet<Car>(`/cars/${carId}`),
-  });
+  const carQuery = useCar<Car>(carId);
 
   const mutation = useMutation({
     mutationFn: () =>

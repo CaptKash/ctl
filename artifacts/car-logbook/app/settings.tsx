@@ -36,6 +36,7 @@ import { useCountry, COUNTRIES, countryOption, countryName, findCountryByOption 
 import { registerPicker } from "@/components/ui/selectPickerStore";
 import { requestNotificationPermissions } from "@/lib/notifications";
 import { apiGet, apiDelete } from "@/hooks/useApi";
+import { useCars } from "@/hooks/useCars";
 import { setLanguage, type SupportedLanguage } from "@/lib/i18n";
 
 const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
@@ -527,11 +528,7 @@ export default function SettingsScreen() {
     setRemindersEnabled(value);
   };
 
-  const { data: cars = [] } = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
-    staleTime: 30_000,
-  });
+  const { data: cars = [] } = useCars<Car>({ staleTime: 30_000 });
 
   const displayName = user?.name || clerkUser?.fullName || clerkUser?.firstName || null;
   const displayEmail = user?.email || clerkUser?.primaryEmailAddress?.emailAddress || null;

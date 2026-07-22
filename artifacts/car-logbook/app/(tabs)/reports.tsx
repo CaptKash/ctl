@@ -1,6 +1,5 @@
 import { Feather } from "@expo/vector-icons";
 import { MetalIcon } from "@/components/ui/MetalIcon";
-import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
@@ -17,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { apiGet } from "@/hooks/useApi";
+import { useCars } from "@/hooks/useCars";
 
 type Car = {
   id: number;
@@ -33,10 +32,7 @@ export default function ReportsScreen() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
 
-  const { data: cars, isLoading } = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
-  });
+  const { data: cars, isLoading } = useCars<Car>();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const rtlText = isRTL ? { textAlign: "right" as const, writingDirection: "rtl" as const } : null;

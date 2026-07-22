@@ -21,6 +21,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/dateUtils";
 import { apiGet } from "@/hooks/useApi";
+import { useCars } from "@/hooks/useCars";
 
 type Car = { id: number; make: string; model: string; year: number; nickname?: string | null; isElectric?: boolean | null };
 
@@ -79,10 +80,7 @@ export default function ServiceCostsScreen() {
 
   const [filterCarId, setFilterCarId] = useState<number | null>(null);
 
-  const carsQuery = useQuery<Car[]>({
-    queryKey: ["cars"],
-    queryFn: () => apiGet<Car[]>("/cars"),
-  });
+  const carsQuery = useCars<Car>();
   const cars = carsQuery.data ?? [];
 
   const reportQueries = useQueries({
