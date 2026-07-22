@@ -15,7 +15,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -362,12 +361,12 @@ export default function CarDetailScreen() {
               {!r.billPhoto && !r.warrantyPhoto && <View style={{ flex: 1 }} />}
             </View>
             <View style={[styles.cardActions, isRTL && { flexDirection: "row-reverse" }]}>
-              <TouchableOpacity
+              <Pressable
                 onPress={() => confirmDelete(`/cars/${carId}/maintenance/${r.id}`, "maintenance")}
-                style={[styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+                style={({ pressed }) => [styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }, { opacity: pressed ? 0.75 : 1 }]}
               >
                 <Feather name="trash-2" size={14} color={meta.color} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
           </LinearGradient>
@@ -431,12 +430,12 @@ export default function CarDetailScreen() {
           )}
           <View style={[styles.cardFooter, isRTL && { flexDirection: "row-reverse" }]}>
             <View style={{ flex: 1 }} />
-            <TouchableOpacity
+            <Pressable
               onPress={() => confirmDelete(`/cars/${carId}/inspections/${r.id}`, "inspections")}
-              style={[styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
+              style={({ pressed }) => [styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }, { opacity: pressed ? 0.75 : 1 }]}
             >
               <Feather name="trash-2" size={14} color={meta.color} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
           </LinearGradient>
         </Pressable>

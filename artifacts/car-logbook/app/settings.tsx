@@ -15,7 +15,6 @@ import {
   StyleSheet,
   Switch,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -323,7 +322,7 @@ function CountryRow() {
   };
 
   return (
-    <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
+    <Pressable style={({ pressed }) => [styles.row, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed ? 0.75 : 1 }]} onPress={handlePress}>
       <MetalIcon icon="globe" color="#7C3AED" bg="#EDE9FE" size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.account.country")}</Text>
@@ -332,7 +331,7 @@ function CountryRow() {
         </Text>
       </View>
       <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -367,14 +366,14 @@ function LanguageRow() {
   };
 
   return (
-    <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
+    <Pressable style={({ pressed }) => [styles.row, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed ? 0.75 : 1 }]} onPress={handlePress}>
       <MetalIcon icon="message-circle" color="#DB2777" bg="#FCE7F3" size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.account.language")}</Text>
         <Text style={[styles.rowSub, { color: C.textSecondary }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{optionFor(current)}</Text>
       </View>
       <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -398,7 +397,7 @@ function CurrencyRow() {
   };
 
   return (
-    <TouchableOpacity style={[styles.row, isRTL && { flexDirection: "row-reverse" }]} onPress={handlePress} activeOpacity={0.7}>
+    <Pressable style={({ pressed }) => [styles.row, isRTL && { flexDirection: "row-reverse" }, { opacity: pressed ? 0.75 : 1 }]} onPress={handlePress}>
       <MetalIcon icon="dollar-sign" color="#059669" bg="#D1FAE5" size={16} style={styles.rowIcon} />
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: C.text }, isRTL && { textAlign: "right", writingDirection: "rtl" }]}>{t("settings.preferences.currency")}</Text>
@@ -407,7 +406,7 @@ function CurrencyRow() {
         </Text>
       </View>
       <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={16} color={C.textTertiary} />
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -427,19 +426,18 @@ function DistanceRow() {
         {DISTANCE_OPTIONS.map((opt) => {
           const active = unit === opt.value;
           return (
-            <TouchableOpacity
+            <Pressable
               key={opt.value}
               onPress={() => {
                 Haptics.selectionAsync();
                 setUnit(opt.value);
               }}
-              style={[styles.segmentBtn, active && { backgroundColor: C.tint }]}
-              activeOpacity={0.7}
+              style={({ pressed }) => [styles.segmentBtn, active && { backgroundColor: C.tint }, { opacity: pressed ? 0.8 : 1 }]}
             >
               <Text style={[styles.segmentText, { color: active ? "#fff" : C.textSecondary }]}>
                 {opt.label}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -463,24 +461,24 @@ function ThemeRow() {
         {THEME_VALUES.map((opt) => {
           const active = preference === opt.value;
           return (
-            <TouchableOpacity
+            <Pressable
               key={opt.value}
               onPress={() => {
                 Haptics.selectionAsync();
                 setPreference(opt.value);
               }}
-              style={[
+              style={({ pressed }) => [
                 styles.segmentBtn,
                 { flex: 1, justifyContent: "center" },
                 active && { backgroundColor: C.tint },
+                { opacity: pressed ? 0.8 : 1 },
               ]}
-              activeOpacity={0.7}
             >
               <Feather name={opt.icon} size={13} color={active ? "#fff" : C.textSecondary} />
               <Text style={[styles.segmentText, { color: active ? "#fff" : C.textSecondary }]}>
                 {t(`settings.preferences.${opt.key}`)}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>

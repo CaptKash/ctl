@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
+import { EmptyState } from "@/components/ui/EmptyState";
 import BottomNav from "@/components/ui/BottomNav";
 import { formatDate } from "@/lib/dateUtils";
 import { carLabel as labelForCar } from "@/lib/carUtils";
@@ -238,11 +239,11 @@ export default function HistoryScreen() {
         </View>
       ) : items.length === 0 ? (
         <View style={styles.centered}>
-          <Feather name="clock" size={40} color={C.textTertiary} />
-          <Text style={[styles.emptyTitle, { color: C.text }]}>{t("history.emptyTitle")}</Text>
-          <Text style={[styles.emptySub, { color: C.textSecondary }]}>
-            {t("history.emptyDesc")}
-          </Text>
+          <EmptyState
+            icon="clock"
+            title={t("history.emptyTitle")}
+            description={t("history.emptyDesc")}
+          />
         </View>
       ) : (
         <ScrollView

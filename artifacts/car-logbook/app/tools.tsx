@@ -12,7 +12,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -187,9 +186,9 @@ export default function ToolsScreen() {
           <View style={[styles.modalContainer, { backgroundColor: C.background }]}>
             <View style={[styles.modalHeader, { borderBottomColor: C.border }, isRTL && { flexDirection: "row-reverse" }]}>
               <Text style={[styles.modalTitle, { color: C.text }]}>{t("tools.suggest.title")}</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)} hitSlop={12}>
+              <Pressable onPress={() => setModalVisible(false)} hitSlop={12} style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}>
                 <Feather name="x" size={22} color={C.textSecondary} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
             {sent ? (
@@ -199,9 +198,9 @@ export default function ToolsScreen() {
                 <Text style={[styles.sentSub, { color: C.textSecondary }]}>
                   {t("tools.suggest.sentSub")}
                 </Text>
-                <TouchableOpacity style={styles.doneBtn} onPress={() => setModalVisible(false)}>
+                <Pressable style={({ pressed }) => [styles.doneBtn, { opacity: pressed ? 0.8 : 1 }]} onPress={() => setModalVisible(false)}>
                   <Text style={styles.doneBtnText}>{t("tools.suggest.done")}</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             ) : (
               <ScrollView
@@ -223,8 +222,8 @@ export default function ToolsScreen() {
                   maxLength={800}
                 />
 
-                <TouchableOpacity
-                  style={[styles.submitBtn, loading && { opacity: 0.6 }]}
+                <Pressable
+                  style={({ pressed }) => [styles.submitBtn, { opacity: loading ? 0.6 : pressed ? 0.85 : 1 }]}
                   onPress={handleSubmit}
                   disabled={loading}
                 >
@@ -233,7 +232,7 @@ export default function ToolsScreen() {
                   ) : (
                     <Text style={styles.submitBtnText}>{t("tools.suggest.send")}</Text>
                   )}
-                </TouchableOpacity>
+                </Pressable>
               </ScrollView>
             )}
           </View>

@@ -22,6 +22,8 @@ export function PrimaryButton({ label, onPress, loading, disabled, variant = "pr
       <Pressable
         onPress={onPress}
         disabled={disabled || loading}
+        accessibilityRole="button"
+        accessibilityLabel={label}
         style={({ pressed }) => [
           styles.btn,
           styles.metallicWrap,
@@ -61,6 +63,8 @@ export function PrimaryButton({ label, onPress, loading, disabled, variant = "pr
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={label}
       style={({ pressed }) => [
         styles.btn,
         {

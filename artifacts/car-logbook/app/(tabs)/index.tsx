@@ -317,7 +317,7 @@ export default function LoginScreen() {
                   {
                     backgroundColor: "#FFFFFF",
                     borderWidth: 1,
-                    borderColor: isDark ? "transparent" : C.border,
+                    borderColor: C.border,
                     opacity: pressed || loading ? 0.7 : 1,
                   },
                 ]}
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular" },
   sep: { height: StyleSheet.hairlineWidth },
 
-  signupRow: { flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 4 },
+  signupRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: 4 },
   signupText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   signupLink: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 
