@@ -295,12 +295,14 @@
     "options": {
       "fault": "Fault / Breakdown / Damage",
       "inspection": "Repair / Service",
-      "renewal": "License / Insurance Renewal"
+      "renewal": "License / Insurance Renewal",
+      "fuel": "Fuel Log"
     },
     "descriptions": {
       "fault": "Log a fault, breakdown or damage",
       "inspection": "Log a repair or scheduled service",
-      "renewal": "Update license or insurance dates"
+      "renewal": "Update license or insurance dates",
+      "fuel": "Record a refuel — liters, cost, and odometer"
     },
     "comingSoonTitle": "Coming Soon",
     "comingSoonBody": "{{type}} logging will be available in a future update.",

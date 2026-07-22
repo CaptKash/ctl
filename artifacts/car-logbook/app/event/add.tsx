@@ -18,7 +18,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import { SwipeBackView } from "@/components/ui/SwipeBackView";
 
 type EventOption = {
-  id: "malfunction" | "inspection" | "registration";
+  id: "malfunction" | "inspection" | "registration" | "fuel";
   titleKey: string;
   descKey: string;
   icon: keyof typeof Feather.glyphMap;
@@ -59,6 +59,16 @@ const eventOptions: EventOption[] = [
     iconColor: "#134E4A",
     available: true,
   },
+  {
+    id: "fuel",
+    titleKey: "technicalLog.options.fuel",
+    descKey: "technicalLog.descriptions.fuel",
+    icon: "droplet",
+    gradient: ["#EDE9FE", "#A78BFA", "#7C3AED"],
+    border: "#4C1D95",
+    iconColor: "#3B0764",
+    available: true,
+  },
 ];
 
 export default function AddEventScreen() {
@@ -85,6 +95,8 @@ export default function AddEventScreen() {
       router.push({ pathname: "/inspection/add", params });
     } else if (option.id === "registration") {
       router.push({ pathname: "/renewal/add", params });
+    } else if (option.id === "fuel") {
+      router.push("/fuel");
     }
   };
 

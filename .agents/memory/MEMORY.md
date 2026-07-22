@@ -1,16 +1,4 @@
 - [Driving car-logbook Expo web past Clerk for testing](car-logbook-web-test-auth.md) — inject legacy JWT into localStorage (`ctl_auth_token`) + reload to reach authed flows when Clerk CAPTCHA blocks sign-in.
-- [Clerk Expo native SSO redirect](clerk-expo-native-sso.md) — relay OAuth through HTTPS server endpoint to bridge Clerk's scheme restriction; mount public route before requireAuth routers; build dist locally before publishing.
 - [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
-- [Refactoring inline queries into shared hooks](refactor-query-hooks.md) — carry per-call options (staleTime); never pass multi-arg helpers directly to .map.
 - [Nearby-service filter pill clipping](nearby-service-filter-pills.md) — horizontal ScrollView collapses cross-axis on iOS, clipping pill text; use a wrapping row View for short chip/filter rows.
-- [CTL "Failed to save" triage](ctl-failed-save-diagnosis.md) — owner tests DEV app on phone; check dev vs prod DB first; generic banners + no request logging; Zod parse errors surface as 500.
-- [RC REST entitlement ids](rc-rest-entitlement-ids.md) — REST v2 active-entitlements return entitlement OBJECT ids not lookup keys; translate server-side or subscribed users get false 403.
-- [CTL entitlement gating is client-only](ctl-entitlement-gating.md) — FREE_CAR_LIMIT & premium locks enforced only in app UI (server doesn't cap personal cars); flip isFleet/isEnterprise in lib/revenuecat.tsx to grant perks.
-- [EAS iOS build from main agent](ctl-eas-ios-build.md) — native EAS build (not `run build`) for purchase QA; set `EAS_NO_VCS=1` (git blocked), CLI may time out but build still queues — verify via `build:list`, don't retry.
-- [CTL "Logged by" event attribution scope](ctl-logged-by-attribution.md) — member attribution shown only on per-vehicle event cards in org context, not fuel/history/report screens.
-- [CTL org-context aggregate feeds leak personal data](ctl-org-context-aggregate-leak.md) — cross-car list screens must switch endpoint+queryKey by activeOrgId or fleet data leaks into enterprise.
-- [lib/db schema change needs dist rebuild](db-schema-dist-rebuild.md) — after editing lib/db schema, run `tsc -p lib/db/tsconfig.json` or api-server tsc shows phantom "property does not exist" errors.
-- [CTL Enterprise subscription model](ctl-enterprise-subscription-model.md) — entitlement is per-account (one tier), not per-org; multi-sub/multi-org is planned future, deferred as "too early"; don't deepen single-entitlement coupling.
-- [CTL Clerk sync token reliability](ctl-clerk-sync-token.md) — hook-based getToken (useAuth) must be the primary token source for all API calls; getClerkInstance().session?.getToken() can silently return null on web after clearLegacyTokens wipes SecureStore fallback.
-- [CTL Clerk sync isLoading stuck](ctl-clerk-sync-isloading.md) — `syncing` in isLoading blocks up to 71s across all retries; use `initialSyncPending` (cleared after attempt 0 only) instead.
-- [expo-modules-jsi Xcode 26 Swift fixes](expo-jsi-xcode26-fixes.md) — 3 cascading Swift 6 errors + missing babel-preset-expo; all fixed via Podfile post-install hook in fix-expo-swift.js.
+- [CTL 2.0.0 release state](ctl-2.0.0-release.md) — summary of what was fixed, shipped, and remaining tech debt after v2.0.0 release.

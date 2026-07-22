@@ -1,9 +1,10 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import path from "path";
 import { clerkMiddleware } from "@clerk/express";
 import router from "./routes";
 import privacyRouter from "./routes/privacy";
+import { checkRateLimit, getClientIp } from "./lib/rateLimit";
 
 const app: Express = express();
 
@@ -60,6 +61,19 @@ const staticDir = typeof import.meta.dirname !== "undefined"
 app.use("/static", express.static(staticDir));
 
 app.use("/", privacyRouter);
+
+// Global rate limit: 300 requests per minute per IP across all /api routes.
+// Individual sensitive routes (auth, feedback) enforce their own tighter limits
+// in addition to this baseline guard.
+app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+  const ip = getClientIp(req);
+  if (!checkRateLimit(`global:${ip}`, 300, 60_000)) {
+    res.status(429).json({ error: "Too many requests. Please slow down." });
+    return;
+  }
+  next();
+});
+
 app.use("/api", router);
 
 export default app;
