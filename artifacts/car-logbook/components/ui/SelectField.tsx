@@ -4,10 +4,10 @@ import {
   Keyboard,
   Modal,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -85,17 +85,20 @@ export function SelectField({
           {label}
           {required && <Text style={{ color: C.danger }}> *</Text>}
         </Text>
-        <TouchableOpacity
+        <Pressable
           onPress={handleOpen}
-          activeOpacity={0.7}
-          style={[
+          style={({ pressed }) => [
             styles.trigger,
             isRTL && { flexDirection: "row-reverse" },
             {
               borderColor: C.border,
               backgroundColor: disabled ? C.backgroundTertiary : C.backgroundSecondary,
+              opacity: pressed ? 0.7 : 1,
             },
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={label}
+          accessibilityState={{ disabled }}
         >
           <Text
             style={[
@@ -107,10 +110,10 @@ export function SelectField({
             {value ? labelOf(value) : resolvedPlaceholder}
           </Text>
           <Feather name="chevron-down" size={17} color={C.textSecondary} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
-      {Platform.OS === "ios" && (
+      {Platform.OS !== "android" && (
         <Modal
           visible={open}
           animationType="slide"
@@ -120,13 +123,15 @@ export function SelectField({
           <View style={[styles.modal, { backgroundColor: C.background }]}>
             <View style={[styles.modalHeader, { paddingTop: insets.top + 12, borderBottomColor: C.border }]}>
               <Text style={[styles.modalTitle, { color: C.text }]}>{label}</Text>
-              <TouchableOpacity
+              <Pressable
                 onPress={() => { setOpen(false); setSearch(""); }}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                style={styles.closeBtn}
+                style={({ pressed }) => [styles.closeBtn, { opacity: pressed ? 0.6 : 1 }]}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
               >
                 <Feather name="x" size={20} color={C.textSecondary} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
             <View style={[styles.searchRow, { borderBottomColor: C.border }]}>
@@ -149,23 +154,24 @@ export function SelectField({
               keyboardShouldPersistTaps="always"
               contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
               renderItem={({ item }) => (
-                <TouchableOpacity
+                <Pressable
                   onPress={() => handleSelect(item)}
-                  activeOpacity={0.6}
-                  style={[
+                  style={({ pressed }) => [
                     styles.option,
                     isRTL && { flexDirection: "row-reverse" },
                     {
                       backgroundColor: item === value ? C.infoLight : C.backgroundSecondary,
                       borderBottomColor: C.borderLight,
+                      opacity: pressed ? 0.6 : 1,
                     },
                   ]}
+                  accessibilityRole="menuitem"
                 >
                   <Text style={[styles.optionText, { flex: 1, color: item === value ? C.tint : C.text, textAlign: isRTL ? "right" : "left", writingDirection: isRTL ? "rtl" : "ltr" }]}>
                     {labelOf(item)}
                   </Text>
                   {item === value && <Feather name="check" size={16} color={C.tint} />}
-                </TouchableOpacity>
+                </Pressable>
               )}
               ListEmptyComponent={
                 <View style={styles.empty}>
@@ -174,10 +180,14 @@ export function SelectField({
               }
               ListFooterComponent={
                 allowCustom && search.trim() && !options.some((o) => o.toLowerCase() === search.trim().toLowerCase()) ? (
-                  <TouchableOpacity
+                  <Pressable
                     onPress={() => handleSelect(search.trim())}
-                    activeOpacity={0.6}
-                    style={[styles.option, styles.customOption, { backgroundColor: C.backgroundSecondary, borderBottomColor: C.borderLight }]}
+                    style={({ pressed }) => [
+                      styles.option,
+                      styles.customOption,
+                      { backgroundColor: C.backgroundSecondary, borderBottomColor: C.borderLight, opacity: pressed ? 0.6 : 1 },
+                    ]}
+                    accessibilityRole="button"
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                       <Feather name="plus-circle" size={18} color={C.tint} />
@@ -185,7 +195,7 @@ export function SelectField({
                         {t("common.useValue", { value: search.trim() })}
                       </Text>
                     </View>
-                  </TouchableOpacity>
+                  </Pressable>
                 ) : null
               }
             />
