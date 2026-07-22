@@ -5,7 +5,7 @@ import BottomNav from "@/components/ui/BottomNav";
 import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -111,7 +111,12 @@ export default function MenuDashboardScreen() {
   const isRTL = i18n.language === "ar";
   const { unit } = useDistanceUnit();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated, isLoading]);
   const { user: clerkUser } = useUser();
   const [calendarLoading, setCalendarLoading] = useState<string | null>(null);
   const [activeCarIndex, setActiveCarIndex] = useState(0);

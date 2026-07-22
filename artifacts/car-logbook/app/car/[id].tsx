@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -21,6 +21,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useColors, useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
 import { useOrg } from "@/context/OrgContext";
 import { localizeBrand } from "@/lib/carBrandLogo";
 import { localizeDigits } from "@/lib/i18n";
@@ -124,6 +125,12 @@ export default function CarDetailScreen() {
   const { unit } = useDistanceUnit();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated, authLoading]);
   const { isOrgContext, activeRole } = useOrg();
   const memberName = useOrgMemberNames();
   const canEditVehicle = !isOrgContext || activeRole === "admin";

@@ -254,17 +254,17 @@ router.post("/cars/:carId/maintenance", async (req, res) => {
   const carId = parseInt(req.params.carId);
   const { faultId: faultIdRaw, ...restBody } = req.body;
   const body = insertMaintenanceSchema.parse({ ...restBody, carId });
-  const [record] = await db
-    .insert(maintenanceTable)
-    .values({ ...body, createdByUserId: req.user!.id })
-    .returning();
-  // Atomically resolve the linked fault if one was provided
-  if (faultIdRaw !== undefined) {
-    const faultId = parseInt(faultIdRaw);
-    if (!isNaN(faultId)) {
-      await db.insert(eventCompletionsTable).values({ carId, recordType: "malfunction", recordId: faultId });
+  const faultId = faultIdRaw !== undefined ? parseInt(faultIdRaw) : null;
+  const record = await db.transaction(async (tx) => {
+    const [inserted] = await tx
+      .insert(maintenanceTable)
+      .values({ ...body, createdByUserId: req.user!.id })
+      .returning();
+    if (faultId !== null && !isNaN(faultId)) {
+      await tx.insert(eventCompletionsTable).values({ carId, recordType: "malfunction", recordId: faultId });
     }
-  }
+    return inserted;
+  });
   res.status(201).json(record);
 });
 

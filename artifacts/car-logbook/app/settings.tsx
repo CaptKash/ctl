@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import * as ExpoLinking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -494,7 +494,12 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated, isLoading]);
   const { user: clerkUser } = useUser();
   const { isFleet, isEnterprise } = useSubscription();
   const { orgs, invites } = useOrg();
