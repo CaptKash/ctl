@@ -7,7 +7,32 @@ import privacyRouter from "./routes/privacy";
 
 const app: Express = express();
 
-app.use(cors());
+// Restrict CORS to explicitly configured origins.
+// In non-production environments every origin is reflected so local/dev
+// tooling keeps working without configuration. In production, set
+// ALLOWED_ORIGINS to a comma-separated list of trusted origins
+// (e.g. "https://myapp.replit.app"). Native mobile requests carry no
+// Origin header and are always allowed regardless of this setting.
+const configuredOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim())
+  : null;
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // No origin = native app or server-to-server — always allow.
+      if (!origin) return callback(null, true);
+      // In non-production, allow everything (dev tooling, Expo web, etc.).
+      if (process.env.NODE_ENV !== "production") return callback(null, true);
+      // In production, allow only the configured allowlist.
+      if (configuredOrigins && configuredOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS: origin ${origin} not allowed`), false);
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 

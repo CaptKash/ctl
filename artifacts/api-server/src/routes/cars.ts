@@ -22,6 +22,7 @@ import {
   insertRenewalSchema,
 } from "@workspace/db";
 import { eq, desc, and, isNotNull, asc, inArray } from "drizzle-orm";
+import { z } from "zod";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { requireAuth } from "../middlewares/auth";
 import { resolveCarAccess, canMutateVehicle } from "../middlewares/orgAccess";
@@ -528,14 +529,32 @@ router.delete("/cars/:carId/inspections/:recordId", async (req, res) => {
   return res.json({ success: true });
 });
 
+// Schema for event completion — recordType must be one of the known record
+// kinds; a free-form string here would let a caller insert arbitrary values
+// into the completions table and potentially enumerate unrelated records.
+const eventCompleteSchema = z.object({
+  recordType: z.enum([
+    "maintenance",
+    "malfunction",
+    "inspection",
+    "parts",
+    "insurance",
+    "dealership",
+    "fuel",
+    "renewal",
+  ]),
+  recordId: z.number().int().positive(),
+});
+
 // Event completions
 router.post("/cars/:carId/events/complete", async (req, res) => {
   const carId = parseInt(req.params.carId);
-  const { recordType, recordId } = req.body;
-  if (!recordType || !recordId) {
-    return res.status(400).json({ error: "recordType and recordId are required" });
+  const parsed = eventCompleteSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.errors[0]?.message ?? "Invalid request body." });
   }
-  await db.insert(eventCompletionsTable).values({ carId, recordType, recordId: parseInt(recordId) });
+  const { recordType, recordId } = parsed.data;
+  await db.insert(eventCompletionsTable).values({ carId, recordType, recordId });
   return res.json({ success: true });
 });
 

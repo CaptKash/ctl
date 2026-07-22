@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { timingSafeEqual } from "crypto";
 import { Resend } from "resend";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
@@ -8,6 +9,7 @@ import { usersTable, passwordResetTokensTable } from "@workspace/db";
 import { eq, and, gt, isNull } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { CLERK_MANAGED_SENTINEL } from "./clerkAuth";
+import { checkRateLimit, getClientIp } from "../lib/rateLimit";
 
 /**
  * True if a users row should NOT participate in legacy email+password flows
@@ -53,6 +55,10 @@ function validatePassword(pw: string): string | null {
 }
 
 router.post("/auth/register", async (req, res) => {
+  // 5 registration attempts per IP per hour — prevents mass account creation.
+  if (!checkRateLimit(`register:${getClientIp(req)}`, 5, 60 * 60 * 1000)) {
+    return res.status(429).json({ error: "Too many registration attempts. Please try again later." });
+  }
   try {
     const { name, email, password } = req.body as {
       name?: string;
@@ -103,6 +109,11 @@ router.post("/auth/register", async (req, res) => {
 });
 
 router.post("/auth/login", async (req, res) => {
+  // 10 login attempts per IP per 15 minutes — limits brute-force and
+  // credential-stuffing attacks without blocking legitimate users.
+  if (!checkRateLimit(`login:${getClientIp(req)}`, 10, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: "Too many login attempts. Please wait a few minutes and try again." });
+  }
   try {
     const { email, password } = req.body as { email?: string; password?: string };
 
@@ -284,6 +295,10 @@ router.post("/auth/change-password", requireAuth, async (req, res) => {
 });
 
 router.post("/auth/forgot-password", async (req, res) => {
+  // 3 attempts per IP per hour — prevents flooding reset emails at victims.
+  if (!checkRateLimit(`forgot:${getClientIp(req)}`, 3, 60 * 60 * 1000)) {
+    return res.status(429).json({ error: "Too many password reset requests. Please try again later." });
+  }
   try {
     const { email } = req.body as { email?: string };
     if (!email?.trim()) {
@@ -412,12 +427,34 @@ router.post("/auth/reset-password", async (req, res) => {
   }
 });
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET ?? "ctl-admin-secret-2025";
+// If ADMIN_SECRET is not configured, disable admin endpoints entirely.
+// This is safer than keeping a known hard-coded fallback: an unconfigured
+// deployment simply cannot grant/revoke admin rather than accepting a
+// publicly-known secret. Set ADMIN_SECRET in environment secrets to enable.
+const ADMIN_SECRET = process.env.ADMIN_SECRET ?? null;
+if (!ADMIN_SECRET) {
+  console.warn("[auth] ADMIN_SECRET is not set — /auth/admin/* endpoints are disabled.");
+}
+
+/**
+ * Constant-time string comparison to prevent timing-oracle attacks
+ * on the admin secret comparison.
+ */
+function adminSecretMatches(candidate: string): boolean {
+  if (!ADMIN_SECRET) return false;
+  const a = Buffer.from(candidate);
+  const b = Buffer.from(ADMIN_SECRET);
+  // timingSafeEqual requires equal-length buffers; length mismatch is itself
+  // safe to short-circuit because secret length is not sensitive here.
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
 
 router.post("/auth/admin/grant", async (req, res) => {
+  if (!ADMIN_SECRET) return res.status(503).json({ error: "Admin endpoints are not configured on this server." });
   try {
     const { email, secret } = req.body as { email?: string; secret?: string };
-    if (!secret || secret !== ADMIN_SECRET) {
+    if (!secret || !adminSecretMatches(secret)) {
       return res.status(403).json({ error: "Forbidden." });
     }
     if (!email?.trim()) {
@@ -438,9 +475,10 @@ router.post("/auth/admin/grant", async (req, res) => {
 });
 
 router.post("/auth/admin/revoke", async (req, res) => {
+  if (!ADMIN_SECRET) return res.status(503).json({ error: "Admin endpoints are not configured on this server." });
   try {
     const { email, secret } = req.body as { email?: string; secret?: string };
-    if (!secret || secret !== ADMIN_SECRET) {
+    if (!secret || !adminSecretMatches(secret)) {
       return res.status(403).json({ error: "Forbidden." });
     }
     if (!email?.trim()) {
