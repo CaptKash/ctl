@@ -16,14 +16,10 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
-    "@replit/revenuecat-sdk": "^4.1.0",
-    "pdfkit": "^0.18.0",
-    "react-native-purchases": "^9.14.0",
-    "sharp": "^0.34.5"
+    "@replit/revenuecat-sdk": "^4.1.0"
   },
   "pnpm": {
     "patchedDependencies": {
-      "react-native-purchases@9.14.0": "patches/react-native-purchases@9.14.0.patch",
       "expo-modules-core@57.0.6": "patches/expo-modules-core@57.0.6.patch"
     }
   }

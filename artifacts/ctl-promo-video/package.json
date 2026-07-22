@@ -24,7 +24,6 @@
     "clsx": "catalog:",
     "framer-motion": "catalog:",
     "gsap": "^3.14.2",
-    "lottie-react": "^2.4.1",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

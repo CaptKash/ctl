@@ -10,7 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@clerk/express": "^2.1.15",
+    "@clerk/express": "^2.1.43",
     "@replit/revenuecat-sdk": "^4.1.0",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
@@ -21,12 +21,11 @@
     "drizzle-orm": "catalog:",
     "express": "^5",
     "jsonwebtoken": "^9.0.3",
-    "node-cron": "^4.2.1",
-    "resend": "^6.9.4",
+    "node-cron": "^4.6.0",
+    "resend": "^6.17.2",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
