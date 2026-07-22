@@ -21,7 +21,7 @@ import {
   insertInspectionSchema,
   insertRenewalSchema,
 } from "@workspace/db";
-import { eq, desc, and, isNotNull, asc } from "drizzle-orm";
+import { eq, desc, and, isNotNull, asc, inArray } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { requireAuth } from "../middlewares/auth";
 import { resolveCarAccess, canMutateVehicle } from "../middlewares/orgAccess";
@@ -414,15 +414,21 @@ router.get("/maintenance", async (req, res) => {
 // All faults across all cars
 router.get("/malfunctions", async (req, res) => {
   const userId = req.user!.id;
-  const [records, completions, cars] = await Promise.all([
+  const [records, cars] = await Promise.all([
     db
       .select({ record: malfunctionsTable })
       .from(malfunctionsTable)
       .innerJoin(carsTable, and(eq(malfunctionsTable.carId, carsTable.id), eq(carsTable.userId, userId)))
       .orderBy(desc(malfunctionsTable.createdAt)),
-    db.select().from(eventCompletionsTable).where(eq(eventCompletionsTable.recordType, "malfunction")),
     db.select().from(carsTable).where(eq(carsTable.userId, userId)),
   ]);
+  const carIds = cars.map((c) => c.id);
+  const completions = carIds.length
+    ? await db
+        .select()
+        .from(eventCompletionsTable)
+        .where(and(eq(eventCompletionsTable.recordType, "malfunction"), inArray(eventCompletionsTable.carId, carIds)))
+    : [];
   const completedIds = new Set(completions.map((c) => c.recordId));
   const carsMap = new Map(cars.map((c) => [c.id, c]));
   return res.json(records.map(({ record: r }) => ({
@@ -607,12 +613,14 @@ router.get("/cars/:carId/report", async (req, res) => {
   const [car] = await db.select().from(carsTable).where(eq(carsTable.id, carId));
   if (!car) return res.status(404).json({ error: "Car not found" });
 
-  const maintenance = await db.select().from(maintenanceTable).where(eq(maintenanceTable.carId, carId));
-  const parts = await db.select().from(partsTable).where(eq(partsTable.carId, carId));
-  const insurance = await db.select().from(insuranceTable).where(eq(insuranceTable.carId, carId));
-  const fuel = await db.select().from(fuelTable).where(eq(fuelTable.carId, carId));
-  const dealerships = await db.select().from(dealershipsTable).where(eq(dealershipsTable.carId, carId));
-  const renewals = await db.select().from(renewalsTable).where(eq(renewalsTable.carId, carId));
+  const [maintenance, parts, insurance, fuel, dealerships, renewals] = await Promise.all([
+    db.select().from(maintenanceTable).where(eq(maintenanceTable.carId, carId)),
+    db.select().from(partsTable).where(eq(partsTable.carId, carId)),
+    db.select().from(insuranceTable).where(eq(insuranceTable.carId, carId)),
+    db.select().from(fuelTable).where(eq(fuelTable.carId, carId)),
+    db.select().from(dealershipsTable).where(eq(dealershipsTable.carId, carId)),
+    db.select().from(renewalsTable).where(eq(renewalsTable.carId, carId)),
+  ]);
 
   const today = new Date().toISOString().split("T")[0];
 

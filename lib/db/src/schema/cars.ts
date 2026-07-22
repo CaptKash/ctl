@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, real, boolean, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, real, boolean, timestamp, unique, uuid, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -72,7 +72,11 @@ export const organizationMembersTable = pgTable("organization_members", {
   invitedByUserId: integer("invited_by_user_id").references(() => usersTable.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (t) => [unique("org_members_org_email_unique").on(t.orgId, t.email)]);
+}, (t) => [
+  unique("org_members_org_email_unique").on(t.orgId, t.email),
+  index("org_members_org_id_idx").on(t.orgId),
+  index("org_members_user_id_idx").on(t.userId),
+]);
 
 export type OrganizationMember = typeof organizationMembersTable.$inferSelect;
 
@@ -103,7 +107,10 @@ export const carsTable = pgTable("cars", {
   photos: text("photos"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("cars_user_id_idx").on(t.userId),
+  index("cars_org_id_idx").on(t.orgId),
+]);
 
 export const insertCarSchema = createInsertSchema(carsTable).omit({ id: true, createdAt: true, updatedAt: true, userId: true, orgId: true });
 export type InsertCar = z.infer<typeof insertCarSchema>;
@@ -133,7 +140,7 @@ export const maintenanceTable = pgTable("maintenance_records", {
   nextDueDate: text("next_due_date"),
   nextDueMileage: integer("next_due_mileage"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("maintenance_car_id_idx").on(t.carId)]);
 
 export const insertMaintenanceSchema = createInsertSchema(maintenanceTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
@@ -155,7 +162,7 @@ export const partsTable = pgTable("parts_records", {
   warranty: text("warranty"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("parts_car_id_idx").on(t.carId)]);
 
 export const insertPartsSchema = createInsertSchema(partsTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertParts = z.infer<typeof insertPartsSchema>;
@@ -178,7 +185,7 @@ export const insuranceTable = pgTable("insurance_records", {
   agentPhone: text("agent_phone"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("insurance_car_id_idx").on(t.carId)]);
 
 export const insertInsuranceSchema = createInsertSchema(insuranceTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertInsurance = z.infer<typeof insertInsuranceSchema>;
@@ -199,7 +206,7 @@ export const dealershipsTable = pgTable("dealership_records", {
   notes: text("notes"),
   rating: integer("rating"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("dealerships_car_id_idx").on(t.carId)]);
 
 export const insertDealershipSchema = createInsertSchema(dealershipsTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertDealership = z.infer<typeof insertDealershipSchema>;
@@ -221,7 +228,7 @@ export const fuelTable = pgTable("fuel_records", {
   fullTank: boolean("full_tank"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("fuel_car_id_idx").on(t.carId)]);
 
 export const insertFuelSchema = createInsertSchema(fuelTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertFuel = z.infer<typeof insertFuelSchema>;
@@ -241,7 +248,7 @@ export const malfunctionsTable = pgTable("malfunctions_records", {
   dashboardMessage: text("dashboard_message"),
   warningMessage: text("warning_message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("malfunctions_car_id_idx").on(t.carId)]);
 
 export const insertMalfunctionSchema = createInsertSchema(malfunctionsTable)
   .omit({ id: true, createdAt: true, createdByUserId: true })
@@ -267,7 +274,7 @@ export const inspectionsTable = pgTable("inspection_records", {
   requiredRepairs: text("required_repairs"),
   nextInspectionDate: text("next_inspection_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("inspections_car_id_idx").on(t.carId)]);
 
 export const insertInspectionSchema = createInsertSchema(inspectionsTable).omit({ id: true, createdAt: true, createdByUserId: true });
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
@@ -285,7 +292,7 @@ export const renewalsTable = pgTable("renewal_records", {
   cost: real("cost"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [index("renewals_car_id_idx").on(t.carId)]);
 
 export const insertRenewalSchema = createInsertSchema(renewalsTable)
   .omit({ id: true, createdAt: true, createdByUserId: true })
@@ -301,4 +308,4 @@ export const eventCompletionsTable = pgTable("event_completions", {
   recordType: text("record_type").notNull(),
   recordId: integer("record_id").notNull(),
   completedAt: timestamp("completed_at").defaultNow().notNull(),
-});
+}, (t) => [index("event_completions_car_id_idx").on(t.carId)]);
