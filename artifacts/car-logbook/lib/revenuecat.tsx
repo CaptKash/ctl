@@ -24,83 +24,58 @@ export const ENTERPRISE_ENTITLEMENTS: Record<string, number | null> = {
 
 export const FREE_CAR_LIMIT = 2;
 
+// Dev-only mock factory. The mock intentionally carries only the fields the
+// upgrade screens read — a single documented cast here instead of scattered
+// `as unknown as PurchasesPackage` throughout the mock definitions.
+function mockPackage(args: {
+  identifier: string;
+  packageType: PACKAGE_TYPE;
+  productId: string;
+  description: string;
+  title: string;
+  price: number;
+  offering: string;
+}): PurchasesPackage {
+  return {
+    identifier: args.identifier,
+    packageType: args.packageType,
+    product: {
+      identifier: args.productId,
+      description: args.description,
+      title: args.title,
+      price: args.price,
+      priceString: `$${args.price.toFixed(2)}`,
+      currencyCode: "USD",
+      introPrice: null,
+      discounts: [],
+    },
+    offeringIdentifier: args.offering,
+    presentedOfferingContext: { offeringIdentifier: args.offering, placementIdentifier: null, targetingContext: null },
+  } as unknown as PurchasesPackage;
+}
+
 export const DEV_MOCK_PACKAGES: PurchasesPackage[] = [
-  {
-    identifier: "$rc_monthly",
-    packageType: PACKAGE_TYPE.MONTHLY,
-    product: {
-      identifier: "ctl_fleet_monthly",
-      description: "CTL Fleet Monthly",
-      title: "Monthly",
-      price: 2.99,
-      priceString: "$2.99",
-      currencyCode: "USD",
-      introPrice: null,
-      discounts: [],
-    },
-    offeringIdentifier: "default",
-    presentedOfferingContext: { offeringIdentifier: "default", placementIdentifier: null, targetingContext: null },
-  } as unknown as PurchasesPackage,
-  {
-    identifier: "$rc_annual",
-    packageType: PACKAGE_TYPE.ANNUAL,
-    product: {
-      identifier: "ctl_fleet_annual",
-      description: "CTL Fleet Annual",
-      title: "Annual",
-      price: 19.99,
-      priceString: "$19.99",
-      currencyCode: "USD",
-      introPrice: null,
-      discounts: [],
-    },
-    offeringIdentifier: "default",
-    presentedOfferingContext: { offeringIdentifier: "default", placementIdentifier: null, targetingContext: null },
-  } as unknown as PurchasesPackage,
-  {
-    identifier: "$rc_lifetime",
-    packageType: PACKAGE_TYPE.LIFETIME,
-    product: {
-      identifier: "ctl_fleet_lifetime",
-      description: "CTL Fleet Lifetime",
-      title: "Lifetime",
-      price: 24.99,
-      priceString: "$24.99",
-      currencyCode: "USD",
-      introPrice: null,
-      discounts: [],
-    },
-    offeringIdentifier: "default",
-    presentedOfferingContext: { offeringIdentifier: "default", placementIdentifier: null, targetingContext: null },
-  } as unknown as PurchasesPackage,
+  mockPackage({ identifier: "$rc_monthly", packageType: PACKAGE_TYPE.MONTHLY, productId: "ctl_fleet_monthly", description: "CTL Fleet Monthly", title: "Monthly", price: 2.99, offering: "default" }),
+  mockPackage({ identifier: "$rc_annual", packageType: PACKAGE_TYPE.ANNUAL, productId: "ctl_fleet_annual", description: "CTL Fleet Annual", title: "Annual", price: 19.99, offering: "default" }),
+  mockPackage({ identifier: "$rc_lifetime", packageType: PACKAGE_TYPE.LIFETIME, productId: "ctl_fleet_lifetime", description: "CTL Fleet Lifetime", title: "Lifetime", price: 24.99, offering: "default" }),
 ];
 
 // Dev mock packages for the three Enterprise seat tiers (monthly + annual).
 // Lets the Enterprise upgrade flow be exercised without live store products.
 // Real prices/products are configured in the RevenueCat dashboard (owner task).
-export const DEV_MOCK_ENTERPRISE_PACKAGES: PurchasesPackage[] = [
+const ENTERPRISE_MOCK_DEFS: [string, string, number, PACKAGE_TYPE][] = [
   ["ctl_enterprise_10_monthly", "Up to 10 — Monthly", 29.99, PACKAGE_TYPE.MONTHLY],
   ["ctl_enterprise_10_annual", "Up to 10 — Annual", 299.99, PACKAGE_TYPE.ANNUAL],
   ["ctl_enterprise_50_monthly", "Up to 50 — Monthly", 99.99, PACKAGE_TYPE.MONTHLY],
   ["ctl_enterprise_50_annual", "Up to 50 — Annual", 999.99, PACKAGE_TYPE.ANNUAL],
   ["ctl_enterprise_unlimited_monthly", "Unlimited — Monthly", 199.99, PACKAGE_TYPE.MONTHLY],
   ["ctl_enterprise_unlimited_annual", "Unlimited — Annual", 1999.99, PACKAGE_TYPE.ANNUAL],
-].map(([id, title, price, packageType]) => ({
-  identifier: id as string,
-  packageType: packageType as PACKAGE_TYPE,
-  product: {
-    identifier: id as string,
-    description: `CTL Enterprise ${title}`,
-    title: title as string,
-    price: price as number,
-    priceString: `$${(price as number).toFixed(2)}`,
-    currencyCode: "USD",
-    introPrice: null,
-    discounts: [],
-  },
-  offeringIdentifier: "enterprise",
-  presentedOfferingContext: { offeringIdentifier: "enterprise", placementIdentifier: null, targetingContext: null },
-}) as unknown as PurchasesPackage);
+];
+
+export const DEV_MOCK_ENTERPRISE_PACKAGES: PurchasesPackage[] = ENTERPRISE_MOCK_DEFS.map(
+  ([id, title, price, packageType]) =>
+    mockPackage({ identifier: id, packageType, productId: id, description: `CTL Enterprise ${title}`, title, price, offering: "enterprise" }),
+);
 
 function getRevenueCatApiKey() {
   if (Platform.OS === "web") return REVENUECAT_TEST_API_KEY ?? "";
@@ -115,7 +90,7 @@ let _initError: string | null = null;
 
 export function getRevenueCatDiagnostics(): string {
   const legacyModule = NativeModules.RNPurchases;
-  const turboModule = (TurboModuleRegistry as any)?.get?.("RNPurchases");
+  const turboModule = TurboModuleRegistry.get("RNPurchases");
   const apiKey = getRevenueCatApiKey();
   return [
     `NativeModules.RNPurchases: ${legacyModule ? "OK" : "NULL"}`,
@@ -131,7 +106,7 @@ export function initializeRevenueCat() {
   if (_configured) return;
 
   const legacyModule = NativeModules.RNPurchases;
-  const turboModule = (TurboModuleRegistry as any)?.get?.("RNPurchases");
+  const turboModule = TurboModuleRegistry.get("RNPurchases");
   console.log(`[RevenueCat] NativeModules.RNPurchases: ${legacyModule ? "OK" : "NULL"}`);
   console.log(`[RevenueCat] TurboModuleRegistry: ${turboModule ? "OK" : "NULL"}`);
 

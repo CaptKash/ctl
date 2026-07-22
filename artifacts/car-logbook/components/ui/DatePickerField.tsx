@@ -364,7 +364,7 @@ const calStyles = StyleSheet.create({
     gap: 0,
   },
   cell: {
-    width: `${100 / 7}%` as any,
+    width: `${100 / 7}%`,
     aspectRatio: 1,
     alignItems: "center",
     justifyContent: "center",

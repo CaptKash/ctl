@@ -72,7 +72,7 @@ export default function FleetScreen() {
     if (isOrgContext) {
       router.push("/car/add");
     } else if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
-      router.push("/fleet-upgrade" as any);
+      router.push("/fleet-upgrade");
     } else {
       router.push("/car/add");
     }

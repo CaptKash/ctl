@@ -95,10 +95,10 @@ router.post("/auth/register", async (req, res) => {
       expiresIn: "90d",
     });
 
-    res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, passwordUpgradeRequired: false } });
+    return res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, passwordUpgradeRequired: false } });
   } catch (err) {
     console.error("Register error:", err);
-    res.status(500).json({ error: "Registration failed. Please try again." });
+    return res.status(500).json({ error: "Registration failed. Please try again." });
   }
 });
 
@@ -138,10 +138,10 @@ router.post("/auth/login", async (req, res) => {
       expiresIn: "90d",
     });
 
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, passwordUpgradeRequired: user.passwordUpgradeRequired } });
+    return res.json({ token, user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, passwordUpgradeRequired: user.passwordUpgradeRequired } });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ error: "Login failed. Please try again." });
+    return res.status(500).json({ error: "Login failed. Please try again." });
   }
 });
 
@@ -211,20 +211,20 @@ router.patch("/auth/profile", requireAuth, async (req, res) => {
       .where(eq(usersTable.id, req.user!.id))
       .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
 
-    res.json({ user: updated });
+    return res.json({ user: updated });
   } catch (err) {
     console.error("Update profile error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
 
 router.delete("/auth/account", requireAuth, async (req, res) => {
   try {
     await db.delete(usersTable).where(eq(usersTable.id, req.user!.id));
-    res.json({ message: "Account deleted successfully." });
+    return res.json({ message: "Account deleted successfully." });
   } catch (err) {
     console.error("Delete account error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
 
@@ -276,10 +276,10 @@ router.post("/auth/change-password", requireAuth, async (req, res) => {
       .set({ passwordHash: newHash, passwordUpgradeRequired: false })
       .where(eq(usersTable.id, req.user!.id));
 
-    res.json({ message: "Password changed successfully." });
+    return res.json({ message: "Password changed successfully." });
   } catch (err) {
     console.error("Change password error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
 
@@ -348,10 +348,10 @@ router.post("/auth/forgot-password", async (req, res) => {
       }
     }
 
-    res.json({ message: "If an account with that email exists, a reset link has been sent." });
+    return res.json({ message: "If an account with that email exists, a reset link has been sent." });
   } catch (err) {
     console.error("Forgot password error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
 
@@ -405,10 +405,10 @@ router.post("/auth/reset-password", async (req, res) => {
       .set({ usedAt: new Date() })
       .where(eq(passwordResetTokensTable.id, record.id));
 
-    res.json({ message: "Password updated successfully. You can now sign in." });
+    return res.json({ message: "Password updated successfully. You can now sign in." });
   } catch (err) {
     console.error("Reset password error:", err);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    return res.status(500).json({ error: "Something went wrong. Please try again." });
   }
 });
 
@@ -430,10 +430,10 @@ router.post("/auth/admin/grant", async (req, res) => {
       .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
     if (!user) return res.status(404).json({ error: "User not found." });
     console.log(`[admin] Granted admin to ${user.email}`);
-    res.json({ ok: true, user });
+    return res.json({ ok: true, user });
   } catch (err) {
     console.error("[admin] Grant error:", err);
-    res.status(500).json({ error: "Something went wrong." });
+    return res.status(500).json({ error: "Something went wrong." });
   }
 });
 
@@ -453,15 +453,15 @@ router.post("/auth/admin/revoke", async (req, res) => {
       .returning({ id: usersTable.id, name: usersTable.name, email: usersTable.email });
     if (!user) return res.status(404).json({ error: "User not found." });
     console.log(`[admin] Revoked admin from ${user.email}`);
-    res.json({ ok: true, user });
+    return res.json({ ok: true, user });
   } catch (err) {
     console.error("[admin] Revoke error:", err);
-    res.status(500).json({ error: "Something went wrong." });
+    return res.status(500).json({ error: "Something went wrong." });
   }
 });
 
 router.get("/reset-password", (_req, res) => {
-  res.send(`<!DOCTYPE html>
+  return res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>

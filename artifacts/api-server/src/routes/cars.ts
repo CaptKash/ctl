@@ -68,9 +68,9 @@ router.post("/cars/estimate-tank-capacity", async (req, res) => {
     if (!Number.isFinite(liters) || liters <= 0) {
       return res.status(422).json({ error: "Could not estimate tank capacity" });
     }
-    res.json({ liters: Math.round(liters) });
+    return res.json({ liters: Math.round(liters) });
   } catch {
-    res.status(502).json({ error: "Tank capacity estimation failed" });
+    return res.status(502).json({ error: "Tank capacity estimation failed" });
   }
 });
 
@@ -82,18 +82,18 @@ router.get("/cars", async (req, res) => {
     .from(carsTable)
     .where(eq(carsTable.userId, userId))
     .orderBy(desc(carsTable.createdAt));
-  res.json(cars);
+  return res.json(cars);
 });
 
 router.post("/cars", async (req, res) => {
   const userId = req.user!.id;
   const body = insertCarSchema.parse(req.body);
   const [car] = await db.insert(carsTable).values({ ...body, userId }).returning();
-  res.status(201).json(car);
+  return res.status(201).json(car);
 });
 
 router.get("/cars/:carId", async (req, res) => {
-  res.json(req.carAccess!.car);
+  return res.json(req.carAccess!.car);
 });
 
 router.put("/cars/:carId", async (req, res) => {
@@ -108,7 +108,7 @@ router.put("/cars/:carId", async (req, res) => {
     .where(eq(carsTable.id, carId))
     .returning();
   if (!car) return res.status(404).json({ error: "Car not found" });
-  res.json(car);
+  return res.json(car);
 });
 
 router.delete("/cars/:carId", async (req, res) => {
@@ -117,7 +117,7 @@ router.delete("/cars/:carId", async (req, res) => {
     return res.status(403).json({ error: "You do not have permission to delete this vehicle." });
   }
   await db.delete(carsTable).where(eq(carsTable.id, carId));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Upcoming maintenance (user's cars only)
@@ -170,7 +170,7 @@ router.get("/maintenance/upcoming", async (req, res) => {
     (a, b) => a.nextDueDate!.localeCompare(b.nextDueDate!)
   );
 
-  res.json(all);
+  return res.json(all);
 });
 
 // Maintenance
@@ -181,7 +181,7 @@ router.get("/cars/:carId/maintenance", async (req, res) => {
     .from(maintenanceTable)
     .where(eq(maintenanceTable.carId, carId))
     .orderBy(desc(maintenanceTable.date));
-  res.json(records);
+  return res.json(records);
 });
 
 router.post("/cars/:carId/maintenance", async (req, res) => {
@@ -199,7 +199,7 @@ router.post("/cars/:carId/maintenance", async (req, res) => {
     }
     return inserted;
   });
-  res.status(201).json(record);
+  return res.status(201).json(record);
 });
 
 router.put("/cars/:carId/maintenance/:recordId", async (req, res) => {
@@ -212,7 +212,7 @@ router.put("/cars/:carId/maintenance/:recordId", async (req, res) => {
     .where(and(eq(maintenanceTable.id, recordId), eq(maintenanceTable.carId, carId)))
     .returning();
   if (!record) return res.status(404).json({ error: "Record not found" });
-  res.json(record);
+  return res.json(record);
 });
 
 router.delete("/cars/:carId/maintenance/:recordId", async (req, res) => {
@@ -221,7 +221,7 @@ router.delete("/cars/:carId/maintenance/:recordId", async (req, res) => {
   await db
     .delete(maintenanceTable)
     .where(and(eq(maintenanceTable.id, recordId), eq(maintenanceTable.carId, carId)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Parts
@@ -232,7 +232,7 @@ router.get("/cars/:carId/parts", async (req, res) => {
     .from(partsTable)
     .where(eq(partsTable.carId, carId))
     .orderBy(desc(partsTable.createdAt));
-  res.json(records);
+  return res.json(records);
 });
 
 router.post("/cars/:carId/parts", async (req, res) => {
@@ -242,7 +242,7 @@ router.post("/cars/:carId/parts", async (req, res) => {
     .insert(partsTable)
     .values({ ...body, createdByUserId: req.user!.id })
     .returning();
-  res.status(201).json(record);
+  return res.status(201).json(record);
 });
 
 router.put("/cars/:carId/parts/:recordId", async (req, res) => {
@@ -255,7 +255,7 @@ router.put("/cars/:carId/parts/:recordId", async (req, res) => {
     .where(and(eq(partsTable.id, recordId), eq(partsTable.carId, carId)))
     .returning();
   if (!record) return res.status(404).json({ error: "Record not found" });
-  res.json(record);
+  return res.json(record);
 });
 
 router.delete("/cars/:carId/parts/:recordId", async (req, res) => {
@@ -264,7 +264,7 @@ router.delete("/cars/:carId/parts/:recordId", async (req, res) => {
   await db
     .delete(partsTable)
     .where(and(eq(partsTable.id, recordId), eq(partsTable.carId, carId)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Insurance
@@ -275,7 +275,7 @@ router.get("/cars/:carId/insurance", async (req, res) => {
     .from(insuranceTable)
     .where(eq(insuranceTable.carId, carId))
     .orderBy(desc(insuranceTable.createdAt));
-  res.json(records);
+  return res.json(records);
 });
 
 router.post("/cars/:carId/insurance", async (req, res) => {
@@ -285,7 +285,7 @@ router.post("/cars/:carId/insurance", async (req, res) => {
     .insert(insuranceTable)
     .values({ ...body, createdByUserId: req.user!.id })
     .returning();
-  res.status(201).json(record);
+  return res.status(201).json(record);
 });
 
 router.put("/cars/:carId/insurance/:recordId", async (req, res) => {
@@ -298,7 +298,7 @@ router.put("/cars/:carId/insurance/:recordId", async (req, res) => {
     .where(and(eq(insuranceTable.id, recordId), eq(insuranceTable.carId, carId)))
     .returning();
   if (!record) return res.status(404).json({ error: "Record not found" });
-  res.json(record);
+  return res.json(record);
 });
 
 router.delete("/cars/:carId/insurance/:recordId", async (req, res) => {
@@ -307,7 +307,7 @@ router.delete("/cars/:carId/insurance/:recordId", async (req, res) => {
   await db
     .delete(insuranceTable)
     .where(and(eq(insuranceTable.id, recordId), eq(insuranceTable.carId, carId)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Dealerships
@@ -318,7 +318,7 @@ router.get("/cars/:carId/dealerships", async (req, res) => {
     .from(dealershipsTable)
     .where(eq(dealershipsTable.carId, carId))
     .orderBy(desc(dealershipsTable.visitDate));
-  res.json(records);
+  return res.json(records);
 });
 
 router.post("/cars/:carId/dealerships", async (req, res) => {
@@ -328,7 +328,7 @@ router.post("/cars/:carId/dealerships", async (req, res) => {
     .insert(dealershipsTable)
     .values({ ...body, createdByUserId: req.user!.id })
     .returning();
-  res.status(201).json(record);
+  return res.status(201).json(record);
 });
 
 router.put("/cars/:carId/dealerships/:recordId", async (req, res) => {
@@ -341,7 +341,7 @@ router.put("/cars/:carId/dealerships/:recordId", async (req, res) => {
     .where(and(eq(dealershipsTable.id, recordId), eq(dealershipsTable.carId, carId)))
     .returning();
   if (!record) return res.status(404).json({ error: "Record not found" });
-  res.json(record);
+  return res.json(record);
 });
 
 router.delete("/cars/:carId/dealerships/:recordId", async (req, res) => {
@@ -350,7 +350,7 @@ router.delete("/cars/:carId/dealerships/:recordId", async (req, res) => {
   await db
     .delete(dealershipsTable)
     .where(and(eq(dealershipsTable.id, recordId), eq(dealershipsTable.carId, carId)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Fuel
@@ -361,7 +361,7 @@ router.get("/cars/:carId/fuel", async (req, res) => {
     .from(fuelTable)
     .where(eq(fuelTable.carId, carId))
     .orderBy(desc(fuelTable.date));
-  res.json(records);
+  return res.json(records);
 });
 
 router.post("/cars/:carId/fuel", async (req, res) => {
@@ -371,7 +371,7 @@ router.post("/cars/:carId/fuel", async (req, res) => {
     .insert(fuelTable)
     .values({ ...body, createdByUserId: req.user!.id })
     .returning();
-  res.status(201).json(record);
+  return res.status(201).json(record);
 });
 
 router.put("/cars/:carId/fuel/:recordId", async (req, res) => {
@@ -384,7 +384,7 @@ router.put("/cars/:carId/fuel/:recordId", async (req, res) => {
     .where(and(eq(fuelTable.id, recordId), eq(fuelTable.carId, carId)))
     .returning();
   if (!record) return res.status(404).json({ error: "Record not found" });
-  res.json(record);
+  return res.json(record);
 });
 
 router.delete("/cars/:carId/fuel/:recordId", async (req, res) => {
@@ -393,7 +393,7 @@ router.delete("/cars/:carId/fuel/:recordId", async (req, res) => {
   await db
     .delete(fuelTable)
     .where(and(eq(fuelTable.id, recordId), eq(fuelTable.carId, carId)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // All maintenance logs across all cars
@@ -408,7 +408,7 @@ router.get("/maintenance", async (req, res) => {
     db.select().from(carsTable).where(eq(carsTable.userId, userId)),
   ]);
   const carsMap = new Map(cars.map((c) => [c.id, c]));
-  res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
+  return res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
 });
 
 // All faults across all cars
@@ -425,7 +425,7 @@ router.get("/malfunctions", async (req, res) => {
   ]);
   const completedIds = new Set(completions.map((c) => c.recordId));
   const carsMap = new Map(cars.map((c) => [c.id, c]));
-  res.json(records.map(({ record: r }) => ({
+  return res.json(records.map(({ record: r }) => ({
     ...r,
     completed: completedIds.has(r.id),
     car: carsMap.get(r.carId) ?? null,
@@ -444,7 +444,7 @@ router.get("/inspections", async (req, res) => {
     db.select().from(carsTable).where(eq(carsTable.userId, userId)),
   ]);
   const carsMap = new Map(cars.map((c) => [c.id, c]));
-  res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
+  return res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
 });
 
 // All renewals across all cars
@@ -459,7 +459,7 @@ router.get("/renewals", async (req, res) => {
     db.select().from(carsTable).where(eq(carsTable.userId, userId)),
   ]);
   const carsMap = new Map(cars.map((c) => [c.id, c]));
-  res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
+  return res.json(records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null })));
 });
 
 // Malfunctions
@@ -470,7 +470,7 @@ router.get("/cars/:carId/malfunctions", async (req, res) => {
     db.select().from(eventCompletionsTable).where(and(eq(eventCompletionsTable.carId, carId), eq(eventCompletionsTable.recordType, "malfunction"))),
   ]);
   const completedIds = new Set(completions.map((c) => c.recordId));
-  res.json(records.map((r) => ({ ...r, completed: completedIds.has(r.id) })));
+  return res.json(records.map((r) => ({ ...r, completed: completedIds.has(r.id) })));
 });
 
 router.post("/cars/:carId/malfunctions", async (req, res) => {
@@ -480,7 +480,7 @@ router.post("/cars/:carId/malfunctions", async (req, res) => {
     .insert(malfunctionsTable)
     .values({ ...body, createdByUserId: req.user!.id })
     .returning();
-  res.status(201).json(record);
+  return res.status(201).json(record);
 });
 
 router.delete("/cars/:carId/malfunctions/:recordId", async (req, res) => {
@@ -489,7 +489,7 @@ router.delete("/cars/:carId/malfunctions/:recordId", async (req, res) => {
   await db
     .delete(malfunctionsTable)
     .where(and(eq(malfunctionsTable.id, recordId), eq(malfunctionsTable.carId, carId)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Inspections
@@ -500,7 +500,7 @@ router.get("/cars/:carId/inspections", async (req, res) => {
     .from(inspectionsTable)
     .where(eq(inspectionsTable.carId, carId))
     .orderBy(desc(inspectionsTable.createdAt));
-  res.json(records);
+  return res.json(records);
 });
 
 router.post("/cars/:carId/inspections", async (req, res) => {
@@ -510,7 +510,7 @@ router.post("/cars/:carId/inspections", async (req, res) => {
     .insert(inspectionsTable)
     .values({ ...body, createdByUserId: req.user!.id })
     .returning();
-  res.status(201).json(record);
+  return res.status(201).json(record);
 });
 
 router.delete("/cars/:carId/inspections/:recordId", async (req, res) => {
@@ -519,7 +519,7 @@ router.delete("/cars/:carId/inspections/:recordId", async (req, res) => {
   await db
     .delete(inspectionsTable)
     .where(and(eq(inspectionsTable.id, recordId), eq(inspectionsTable.carId, carId)));
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Event completions
@@ -530,7 +530,7 @@ router.post("/cars/:carId/events/complete", async (req, res) => {
     return res.status(400).json({ error: "recordType and recordId are required" });
   }
   await db.insert(eventCompletionsTable).values({ carId, recordType, recordId: parseInt(recordId) });
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Events (unified timeline)
@@ -598,7 +598,7 @@ router.get("/cars/:carId/events", async (req, res) => {
     .filter((ev) => includeCompleted || !completedKeys.has(`${ev.type}-${ev.id}`))
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  res.json(events);
+  return res.json(events);
 });
 
 // Report
@@ -648,7 +648,7 @@ router.get("/cars/:carId/report", async (req, res) => {
 
   const sortedMaintenance = [...maintenance].sort((a, b) => b.date.localeCompare(a.date));
 
-  res.json({
+  return res.json({
     car,
     totalMaintenanceCost,
     totalPartsCost,
@@ -677,7 +677,7 @@ router.post("/cars/:carId/renewals", async (req, res) => {
     .insert(renewalsTable)
     .values({ ...parsed.data, createdByUserId: req.user!.id })
     .returning();
-  res.status(201).json(row);
+  return res.status(201).json(row);
 });
 
 router.get("/cars/:carId/renewals", async (req, res) => {
@@ -687,7 +687,7 @@ router.get("/cars/:carId/renewals", async (req, res) => {
     .from(renewalsTable)
     .where(eq(renewalsTable.carId, carId))
     .orderBy(desc(renewalsTable.date));
-  res.json(rows);
+  return res.json(rows);
 });
 
 export default router;

@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { router, usePathname } from "expo-router";
+import { router, usePathname, type Href } from "expo-router";
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,7 +15,7 @@ const TABS: {
   id: BottomNavTab;
   labelKey: string;
   icon: React.ComponentProps<typeof Feather>["name"];
-  route: string;
+  route: Href;
   activeColor?: string;
 }[] = [
   { id: "dashboard", labelKey: "nav.dashboard", icon: "grid",            route: "/home" },
@@ -68,7 +68,7 @@ export default function BottomNav({ active }: Props) {
             onPress={() => {
               if (pathname === tab.route) return;
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.replace(tab.route as any);
+              router.replace(tab.route);
             }}
             style={styles.tab}
             hitSlop={4}
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
       },
       android: { elevation: 12 },
-      web: { boxShadow: "0 -2px 10px rgba(0,0,0,0.08)" } as any,
+      web: { boxShadow: "0 -2px 10px rgba(0,0,0,0.08)" },
     }),
   },
   tab: {

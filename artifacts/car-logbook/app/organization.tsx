@@ -27,6 +27,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/hooks/useApi";
+import { errorMessage } from "@/lib/errors";
 
 type Member = {
   id: number;
@@ -43,9 +44,6 @@ type OrgDetail = {
   members: Member[];
 };
 
-function errorMessage(e: any, fallback: string): string {
-  return e?.body?.error ?? e?.message ?? fallback;
-}
 
 export default function OrganizationScreen() {
   const insets = useSafeAreaInsets();
@@ -270,7 +268,7 @@ export default function OrganizationScreen() {
               title={t("org.needEnterpriseTitle")}
               description={t("org.needEnterpriseSub")}
               actionLabel={t("org.upgradeCta")}
-              onAction={() => router.push("/enterprise-upgrade" as any)}
+              onAction={() => router.push("/enterprise-upgrade")}
             />
           )
         )}
@@ -350,7 +348,7 @@ export default function OrganizationScreen() {
         {/* Oversight: activity log (admin only) */}
         {isAdmin && (
           <Pressable
-            onPress={() => { Haptics.selectionAsync(); router.push("/org-activity" as any); }}
+            onPress={() => { Haptics.selectionAsync(); router.push("/org-activity"); }}
             style={({ pressed }) => [styles.activityBtn, { backgroundColor: C.card, borderColor: C.border, opacity: pressed ? 0.85 : 1 }, isRTL && { flexDirection: "row-reverse" }]}
           >
             <View style={[styles.activityIcon, { backgroundColor: "#EEF2FF" }]}>

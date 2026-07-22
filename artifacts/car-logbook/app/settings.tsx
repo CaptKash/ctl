@@ -601,7 +601,7 @@ export default function SettingsScreen() {
         {!isFleet && (
           <Pressable
             style={({ pressed }) => [styles.fleetCard, { opacity: pressed ? 0.92 : 1 }]}
-            onPress={() => router.push("/fleet-upgrade" as any)}
+            onPress={() => router.push("/fleet-upgrade")}
           >
             <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
               <MetalIcon icon="star" color="#92400E" bg="#FEF3C7" size={16} style={styles.fleetIconWrap} />
@@ -640,13 +640,13 @@ export default function SettingsScreen() {
               label={t("org.enterpriseLabel")}
               subtitle={t("org.subtitle")}
               badge={invites.length > 0 ? String(invites.length) : undefined}
-              onPress={() => router.push("/organization" as any)}
+              onPress={() => router.push("/organization")}
             />
           </View>
         ) : (
           <Pressable
             style={({ pressed }) => [styles.enterpriseCard, { opacity: pressed ? 0.92 : 1 }]}
-            onPress={() => router.push("/enterprise-upgrade" as any)}
+            onPress={() => router.push("/enterprise-upgrade")}
           >
             <View style={[styles.fleetHeader, isRTL && { flexDirection: "row-reverse" }]}>
               <MetalIcon icon="briefcase" color="#312E81" bg="#E0E7FF" size={16} style={styles.enterpriseIconWrap} />

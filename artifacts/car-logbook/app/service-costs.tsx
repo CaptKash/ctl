@@ -49,7 +49,7 @@ function carLabel(car: Car) {
   return car.nickname ?? `${car.year} ${car.make} ${car.model}`;
 }
 
-const CATEGORY_META: Record<string, { label: string; icon: string; color: string; bg: string }> = {
+const CATEGORY_META: Record<string, { label: string; icon: keyof typeof Feather.glyphMap; color: string; bg: string }> = {
   maintenance: { label: "Maintenance", icon: "tool",        color: "#2563EB", bg: "#DBEAFE" },
   parts:       { label: "Parts",        icon: "package",    color: "#7C3AED", bg: "#EDE9FE" },
   dealership:  { label: "Dealership",   icon: "map-pin",    color: "#D97706", bg: "#FEF3C7" },
@@ -233,14 +233,14 @@ export default function ServiceCostsScreen() {
                     <View key={cat.key}>
                       {idx > 0 && <View style={[styles.divider, { backgroundColor: C.borderLight }]} />}
                       <View style={[styles.categoryRow, isRTL && { flexDirection: "row-reverse" }]}>
-                        <MetalIcon icon={meta.icon as any} color={meta.color} bg={meta.bg} size={16} style={styles.catIconBox} />
+                        <MetalIcon icon={meta.icon} color={meta.color} bg={meta.bg} size={16} style={styles.catIconBox} />
                         <View style={styles.catBody}>
                           <View style={[styles.catLabelRow, isRTL && { flexDirection: "row-reverse" }]}>
                             <Text style={[styles.catLabel, { color: C.text }]}>{catLabel(cat.key)}</Text>
                             <Text style={[styles.catAmount, { color: C.text }]}>{fmt(cat.cost)}</Text>
                           </View>
                           <View style={[styles.barTrack, { backgroundColor: C.border }]}>
-                            <View style={[styles.barFill, { width: `${Math.round(pct * 100)}%` as any, backgroundColor: meta.color }]} />
+                            <View style={[styles.barFill, { width: `${Math.round(pct * 100)}%` as const, backgroundColor: meta.color }]} />
                           </View>
                           <Text style={[styles.catCount, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
                             {t("costTracker.records", { count: cat.count })} · {t("costTracker.percentOfTotal", { pct: Math.round(pct * 100) })}
@@ -264,13 +264,13 @@ export default function ServiceCostsScreen() {
                       <View key={idx}>
                         {idx > 0 && <View style={[styles.divider, { backgroundColor: C.borderLight }]} />}
                         <View style={[styles.entryRow, isRTL && { flexDirection: "row-reverse" }]}>
-                          <MetalIcon icon={meta.icon as any} color={meta.color} bg={meta.bg} size={15} style={styles.entryIconBox} />
+                          <MetalIcon icon={meta.icon} color={meta.color} bg={meta.bg} size={15} style={styles.entryIconBox} />
                           <View style={styles.entryBody}>
                             <Text style={[styles.entryTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>
                               {entryDescription(item)}
                             </Text>
                             <Text style={[styles.entrySub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>
-                              {filterCarId === null ? `${(item as any).carLabel} · ` : ""}{formatDate(item.date)} · {catLabel(item.type)}
+                              {filterCarId === null ? `${item.carLabel} · ` : ""}{formatDate(item.date)} · {catLabel(item.type)}
                             </Text>
                           </View>
                           {item.cost != null && (

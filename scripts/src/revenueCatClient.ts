@@ -1,10 +1,25 @@
 import { createClient } from '@replit/revenuecat-sdk/client';
 
-let connectionSettings: any;
+interface ConnectionSettings {
+  connector_config_id?: string;
+  settings?: {
+    expires_at?: string;
+    access_token?: string;
+    oauth?: { credentials?: { access_token?: string } };
+  };
+}
 
-async function getApiKey() {
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
+interface ConnectionListResponse {
+  items?: ConnectionSettings[];
+}
+
+let connectionSettings: ConnectionSettings | undefined;
+
+async function getApiKey(): Promise<string> {
+  const cachedToken = connectionSettings?.settings?.access_token;
+  const expiresAt = connectionSettings?.settings?.expires_at;
+  if (cachedToken && expiresAt && new Date(expiresAt).getTime() > Date.now()) {
+    return cachedToken;
   }
 
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
@@ -18,7 +33,7 @@ async function getApiKey() {
     throw new Error('X-Replit-Token not found for repl/depl');
   }
 
-  const data = await fetch(
+  const data = (await fetch(
     'https://' + hostname + '/api/v2/connection?include_secrets=true&limit=50',
     {
       headers: {
@@ -26,8 +41,8 @@ async function getApiKey() {
         'X-Replit-Token': xReplitToken
       }
     }
-  ).then(res => res.json());
-  connectionSettings = data.items?.find((item: any) =>
+  ).then(res => res.json())) as ConnectionListResponse;
+  connectionSettings = data.items?.find((item) =>
     item.connector_config_id?.toLowerCase().includes('revenuecat')
   );
 

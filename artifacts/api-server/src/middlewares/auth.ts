@@ -32,6 +32,19 @@ declare global {
   }
 }
 
+// Full runtime type guard for legacy JWT payloads — every AuthPayload field
+// is validated before the decoded token is trusted.
+function isAuthPayload(v: unknown): v is AuthPayload {
+  if (!v || typeof v !== "object") return false;
+  const o = v as Record<string, unknown>;
+  return (
+    typeof o.id === "number" &&
+    typeof o.email === "string" &&
+    typeof o.name === "string" &&
+    (o.isAdmin === undefined || typeof o.isAdmin === "boolean")
+  );
+}
+
 /**
  * Resolve the request's authenticated user via either:
  *   1. Legacy JWT (existing 71 prod users on bcrypt + custom JWT) — cheap
@@ -49,10 +62,17 @@ async function authenticate(req: Request): Promise<AuthPayload | null> {
   if (header?.startsWith("Bearer ")) {
     const token = header.slice(7);
     try {
-      // jwt.verify's return type is Jwt | JwtPayload | string. Cast through
-      // unknown — we re-validate the shape immediately below before trusting.
-      const payload = jwt.verify(token, JWT_SECRET) as unknown as AuthPayload;
-      if (typeof payload?.id === "number") return payload;
+      // jwt.verify returns Jwt | JwtPayload | string — validate the shape
+      // before trusting it as an AuthPayload.
+      const decoded: unknown = jwt.verify(token, JWT_SECRET);
+      if (isAuthPayload(decoded)) {
+        return {
+          id: decoded.id,
+          email: decoded.email,
+          name: decoded.name,
+          isAdmin: decoded.isAdmin,
+        };
+      }
     } catch {
       // Not a legacy JWT — fall through to Clerk path.
     }
@@ -71,9 +91,10 @@ async function authenticate(req: Request): Promise<AuthPayload | null> {
   const auth = getAuth(req);
   const clerkUserId = auth?.userId;
   if (!clerkUserId) {
-    console.warn("[authenticate] Clerk path — userId NULL | header:", header ? header.substring(0, 20) + "..." : "MISSING");
+    // Never log header contents — even partial bearer token material.
+    console.warn("[authenticate] Clerk path — userId NULL | auth header:", header ? "present" : "missing");
+    return null;
   }
-  if (!clerkUserId) return null;
 
   const [user] = await db
     .select({

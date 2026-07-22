@@ -20,6 +20,7 @@ import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/lib/revenuecat";
 import { localizeDigits } from "@/lib/i18n";
 import { PurchasesPackage } from "react-native-purchases";
+import { errorMessage, isUserCancelled } from "@/lib/errors";
 
 const PACKAGE_ORDER = ["$rc_monthly", "$rc_annual", "$rc_lifetime"];
 
@@ -79,9 +80,9 @@ export default function FleetUpgradeScreen() {
     try {
       await purchase(pkg);
       router.back();
-    } catch (e: any) {
-      if (!e.userCancelled) {
-        setError(e.message ?? t("fleetUpgrade.purchaseFailed"));
+    } catch (e) {
+      if (!isUserCancelled(e)) {
+        setError(errorMessage(e, t("fleetUpgrade.purchaseFailed")));
       }
     }
   };
@@ -91,7 +92,7 @@ export default function FleetUpgradeScreen() {
     setError(null);
     try {
       await restore();
-    } catch (e: any) {
+    } catch {
       setError(t("fleetUpgrade.restoreFailed"));
     }
   };

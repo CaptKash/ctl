@@ -12,14 +12,30 @@ export const ENTERPRISE_ENTITLEMENTS: Record<string, number | null> = {
 };
 
 // Cached RevenueCat connector credentials (refreshed when expired).
-let connectionSettings: { settings?: Record<string, any> } | undefined;
+interface ConnectionSettings {
+  settings?: {
+    expires_at?: string;
+    access_token?: string;
+    oauth?: { credentials?: { access_token?: string } };
+  };
+}
+let connectionSettings: ConnectionSettings | undefined;
+
+function cachedAccessToken(): string | undefined {
+  return (
+    connectionSettings?.settings?.access_token ||
+    connectionSettings?.settings?.oauth?.credentials?.access_token
+  );
+}
 
 async function getApiKey(): Promise<string> {
+  const cached = cachedAccessToken();
   if (
+    cached &&
     connectionSettings?.settings?.expires_at &&
     new Date(connectionSettings.settings.expires_at).getTime() > Date.now()
   ) {
-    return connectionSettings.settings.access_token;
+    return cached;
   }
 
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
@@ -34,8 +50,8 @@ async function getApiKey(): Promise<string> {
     "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=revenuecat",
     { headers: { Accept: "application/json", "X-Replit-Token": xReplitToken } },
   )
-    .then((r) => r.json())
-    .then((d: any) => d.items?.[0]);
+    .then((r) => r.json() as Promise<{ items?: ConnectionSettings[] }>)
+    .then((d) => d.items?.[0]);
 
   const accessToken =
     connectionSettings?.settings?.access_token ||

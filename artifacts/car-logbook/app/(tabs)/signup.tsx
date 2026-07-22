@@ -489,7 +489,7 @@ export default function SignupScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push("/(tabs)/" as any);
+              router.push("/");
             }}
             style={({ pressed }) => [
               styles.signinBtn,

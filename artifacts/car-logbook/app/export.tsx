@@ -24,6 +24,7 @@ import { useColors } from "@/context/ThemeContext";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { isHourBased } from "@/lib/vehicleTypes";
 import { apiGet } from "@/hooks/useApi";
+import { errorMessage } from "@/lib/errors";
 import { useCars } from "@/hooks/useCars";
 import { REPORT_LOGO } from "@/lib/reportLogo";
 
@@ -162,7 +163,7 @@ function buildWorkbook(
     usedNames.add(name.toLowerCase());
     return name;
   };
-  (wb as any).Props = {
+  wb.Props = {
     Title: `${t("export.doc.title")} – ${carLabel(car)}`,
     Author: t("common.appName", { defaultValue: "Car Technical Log" }),
     CreatedDate: new Date(),
@@ -511,7 +512,7 @@ export default function ExportScreen() {
           if (cacheDir) {
             const base64 = XLSX.write(wb, { bookType: "xlsx", type: "base64" }) as string;
             const path = cacheDir + filename;
-            await FileSystem.writeAsStringAsync(path, base64, { encoding: "base64" as any });
+            await FileSystem.writeAsStringAsync(path, base64, { encoding: FileSystem.EncodingType.Base64 });
             const canShare = await Sharing.isAvailableAsync();
             if (canShare) {
               await Sharing.shareAsync(path, {
@@ -526,8 +527,8 @@ export default function ExportScreen() {
           }
         }
       }
-    } catch (e: any) {
-      setError(e?.message ?? t("export.exportFailed"));
+    } catch (e) {
+      setError(errorMessage(e, t("export.exportFailed")));
     } finally {
       setGenerating(false);
     }

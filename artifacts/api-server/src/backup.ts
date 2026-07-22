@@ -39,8 +39,8 @@ async function runBackup(): Promise<void> {
       const result = await pool.query(`SELECT * FROM ${table}`);
       snapshot[table] = result.rows;
       counts.push(`${table}: ${result.rows.length} rows`);
-    } catch (err: any) {
-      console.error(`[backup] Failed to query ${table}:`, err.message);
+    } catch (err) {
+      console.error(`[backup] Failed to query ${table}:`, err instanceof Error ? err.message : err);
       snapshot[table] = [];
       counts.push(`${table}: ERROR`);
     }

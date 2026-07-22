@@ -163,7 +163,7 @@ export default function FaultLogScreen() {
                     faultDescription: item.description,
                     faultId: String(item.id),
                   },
-                } as any)
+                })
               }
             >
               <MetalIcon icon="tool" color={REPAIR_COLOR} size={14} containerSize={30} radius={8} style={{ width: 60 }} />
@@ -215,7 +215,7 @@ export default function FaultLogScreen() {
           <View style={styles.emptyBtnWrap}>
             <PrimaryButton
               label={t("faults.logFault")}
-              onPress={() => router.push("/malfunction/add" as any)}
+              onPress={() => router.push("/malfunction/add")}
               variant="metallic-blue"
               icon="plus"
             />
@@ -244,7 +244,7 @@ export default function FaultLogScreen() {
 
           <PrimaryButton
             label={t("faults.logFault")}
-            onPress={() => router.push("/malfunction/add" as any)}
+            onPress={() => router.push("/malfunction/add")}
             variant="metallic-blue"
             icon="plus"
           />

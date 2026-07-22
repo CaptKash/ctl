@@ -16,10 +16,20 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+import { errorMessage } from "@/lib/errors";
 import { useColors } from "@/context/ThemeContext";
 import BottomNav from "@/components/ui/BottomNav";
 
 // ── Types ────────────────────────────────────────────────────────────────────
+
+interface OverpassElement {
+  id: number;
+  lat?: number;
+  lon?: number;
+  center?: { lat?: number; lon?: number };
+  tags?: Record<string, string>;
+}
 
 interface ServiceCenter {
   id: number;
@@ -99,21 +109,21 @@ async function fetchNearby(
         lastError = `Server error ${resp.status}`;
         continue;
       }
-      const data = await resp.json();
+      const data = (await resp.json()) as { elements?: OverpassElement[] };
       if (!data.elements) {
         lastError = "Unexpected response format";
         continue;
       }
       const results: ServiceCenter[] = data.elements
-        .filter((el: any) => {
+        .filter((el) => {
           const elLat = el.lat ?? el.center?.lat;
           const elLon = el.lon ?? el.center?.lon;
           return elLat != null && elLon != null;
         })
-        .map((el: any) => {
+        .map((el) => {
           const tags: Record<string, string> = el.tags ?? {};
-          const elLat: number = el.lat ?? el.center.lat;
-          const elLon: number = el.lon ?? el.center.lon;
+          const elLat = (el.lat ?? el.center?.lat)!;
+          const elLon = (el.lon ?? el.center?.lon)!;
           return {
             id: el.id,
             name: tags.name ?? "",
@@ -127,10 +137,10 @@ async function fetchNearby(
             distanceKm: haversineKm(lat, lon, elLat, elLon),
           };
         })
-        .sort((a: ServiceCenter, b: ServiceCenter) => a.distanceKm - b.distanceKm);
+        .sort((a, b) => a.distanceKm - b.distanceKm);
       return results;
-    } catch (e: any) {
-      lastError = e.message ?? "Network error";
+    } catch (e) {
+      lastError = errorMessage(e, "Network error");
     }
   }
   throw new Error(lastError);
@@ -147,7 +157,7 @@ function openMaps(center: ServiceCenter) {
   }
 }
 
-function formatDist(km: number, t: (k: string, o?: any) => string): string {
+function formatDist(km: number, t: TFunction): string {
   if (km < 1) return t("nearbyService.distMeters", { value: Math.round(km * 1000) });
   return t("nearbyService.distKm", { value: km.toFixed(1) });
 }
@@ -194,8 +204,8 @@ export default function NearbyServiceScreen() {
       );
       setCenters(data);
       setPhase("done");
-    } catch (e: any) {
-      setErrorMsg(e.message ?? "Something went wrong");
+    } catch (e) {
+      setErrorMsg(errorMessage(e, "Something went wrong"));
       setPhase("error");
     }
   }, []);

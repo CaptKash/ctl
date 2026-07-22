@@ -282,7 +282,7 @@ export default function CarDetailScreen() {
                 onPress={() => router.push({
                   pathname: "/maintenance/form",
                   params: { carId: String(carId), faultDescription: r.description, faultId: String(r.id) },
-                } as any)}
+                })}
                 style={[styles.iconBtn, { backgroundColor: meta.bg, borderColor: meta.color }]}
               >
                 <Feather name="tool" size={14} color={meta.color} />
@@ -603,7 +603,7 @@ export default function CarDetailScreen() {
           <>
             <View style={[styles.actionRow, isRTL && { flexDirection: "row-reverse" }]}>
               <Pressable
-                onPress={() => { Haptics.selectionAsync(); router.push("/fleet" as any); }}
+                onPress={() => { Haptics.selectionAsync(); router.push("/fleet"); }}
                 style={({ pressed }) => [styles.actionBtnWrap, { opacity: pressed ? 0.85 : 1 }]}
               >
                 <LinearGradient

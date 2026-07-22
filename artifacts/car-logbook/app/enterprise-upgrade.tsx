@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/lib/revenuecat";
 import { PurchasesPackage } from "react-native-purchases";
+import { errorMessage, isUserCancelled } from "@/lib/errors";
 
 type Tier = "10" | "50" | "unlimited";
 type Period = "monthly" | "annual";
@@ -111,10 +112,10 @@ export default function EnterpriseUpgradeScreen() {
       await purchase(pkg);
       // The subscriber becomes the owner/admin of a new org — send them to the
       // organization screen, which shows the create-org flow when none exists.
-      router.replace("/organization" as any);
-    } catch (e: any) {
-      if (!e.userCancelled) {
-        setError(e.message ?? t("enterpriseUpgrade.purchaseFailed"));
+      router.replace("/organization");
+    } catch (e) {
+      if (!isUserCancelled(e)) {
+        setError(errorMessage(e, t("enterpriseUpgrade.purchaseFailed")));
       }
     }
   };
@@ -136,7 +137,7 @@ export default function EnterpriseUpgradeScreen() {
         <Text style={[styles.heroTitle, { color: C.text, marginTop: 16 }]}>{t("enterpriseUpgrade.alreadyTitle")}</Text>
         <Text style={[styles.heroSub, { color: C.textSecondary, marginTop: 8 }]}>{t("enterpriseUpgrade.alreadySub")}</Text>
         <Pressable
-          onPress={() => router.replace("/organization" as any)}
+          onPress={() => router.replace("/organization")}
           style={[styles.ctaBtn, { marginTop: 28, paddingHorizontal: 32 }]}
         >
           <Text style={styles.ctaBtnText}>{t("enterpriseUpgrade.manageOrg")}</Text>

@@ -20,6 +20,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { localizeDigits } from "@/lib/i18n";
 import { localizeBrand } from "@/lib/carBrandLogo";
 import { useColors } from "@/context/ThemeContext";
@@ -81,7 +82,7 @@ function urgencyColor(days: number, C: ColorScheme): string {
   return C.success;
 }
 
-function localizedEventType(item: UpcomingItem, t: (k: string, o?: any) => string): string {
+function localizedEventType(item: UpcomingItem, t: TFunction): string {
   if (item.itemKind === "license") return t("home.eventType.licenseExpiry");
   if (item.itemKind === "insurance") return t("home.eventType.insuranceExpiry");
   if (item.itemKind === "inspection") return t("home.eventType.nextService");
@@ -89,7 +90,7 @@ function localizedEventType(item: UpcomingItem, t: (k: string, o?: any) => strin
   return item.type;
 }
 
-function urgencyLabel(days: number, t: (k: string, o?: any) => string): string {
+function urgencyLabel(days: number, t: TFunction): string {
   if (days < 0) return t("home.overdue", { count: Math.abs(days) });
   if (days === 0) return t("home.dueToday");
   if (days === 1) return t("home.dueTomorrow");
@@ -124,7 +125,7 @@ export default function MenuDashboardScreen() {
     } else if (item.itemKind === "maintenance") {
       router.push({ pathname: "/maintenance/form", params: { carId: String(item.carId), preType: item.type } });
     } else {
-      router.push(`/car/${item.carId}` as any);
+      router.push(`/car/${item.carId}`);
     }
   };
 
@@ -191,7 +192,7 @@ export default function MenuDashboardScreen() {
     if (isOrgContext) {
       router.push("/car/add");
     } else if (!isFleet && (cars?.length ?? 0) >= FREE_CAR_LIMIT) {
-      router.push("/fleet-upgrade" as any);
+      router.push("/fleet-upgrade");
     } else {
       router.push("/car/add");
     }
@@ -277,7 +278,7 @@ export default function MenuDashboardScreen() {
         <View style={[styles.contextChips, isRTL && { flexDirection: "row-reverse" }]}>
           {[{ id: null as number | null, name: t("home.contextPersonal") }, ...orgs].map((ctx) => {
             const active = activeOrgId === ctx.id;
-            const icon = ctx.id === null ? "user" : "briefcase";
+            const icon: keyof typeof Feather.glyphMap = ctx.id === null ? "user" : "briefcase";
             return (
               <Pressable
                 key={ctx.id ?? "personal"}
@@ -287,7 +288,7 @@ export default function MenuDashboardScreen() {
                 }}
                 style={[styles.contextChip, { backgroundColor: active ? "#4338CA" : C.card, borderColor: active ? "#4338CA" : C.border }, isRTL && { flexDirection: "row-reverse" }]}
               >
-                <Feather name={icon as any} size={13} color={active ? "#fff" : C.textSecondary} />
+                <Feather name={icon} size={13} color={active ? "#fff" : C.textSecondary} />
                 <Text style={[styles.contextChipText, { color: active ? "#fff" : C.textSecondary }]} numberOfLines={1}>{ctx.name}</Text>
                 {active && <Feather name="check" size={14} color="#fff" />}
               </Pressable>
@@ -301,7 +302,7 @@ export default function MenuDashboardScreen() {
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push("/organization" as any);
+            router.push("/organization");
           }}
           style={({ pressed }) => [styles.inviteBanner, { opacity: pressed ? 0.9 : 1 }, isRTL && { flexDirection: "row-reverse" }]}
         >

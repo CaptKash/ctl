@@ -76,7 +76,7 @@ export default function ToolsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Pressable
-          onPress={() => router.push("/nearby-service" as any)}
+          onPress={() => router.push("/nearby-service")}
           style={({ pressed }) => [
             styles.tool,
             isRTL && { flexDirection: "row-reverse" },
@@ -96,7 +96,7 @@ export default function ToolsScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => router.push("/fuel" as any)}
+          onPress={() => router.push("/fuel")}
           style={({ pressed }) => [
             styles.tool,
             isRTL && { flexDirection: "row-reverse" },
@@ -116,7 +116,7 @@ export default function ToolsScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => isFleet ? router.push("/service-costs" as any) : router.push("/fleet-upgrade" as any)}
+          onPress={() => isFleet ? router.push("/service-costs") : router.push("/fleet-upgrade")}
           style={({ pressed }) => [
             styles.tool,
             isRTL && { flexDirection: "row-reverse" },
@@ -139,7 +139,7 @@ export default function ToolsScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => isFleet ? router.push("/export" as any) : router.push("/fleet-upgrade" as any)}
+          onPress={() => isFleet ? router.push("/export") : router.push("/fleet-upgrade")}
           style={({ pressed }) => [
             styles.tool,
             isRTL && { flexDirection: "row-reverse" },
