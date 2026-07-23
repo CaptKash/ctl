@@ -24,11 +24,11 @@
     "production": {
       "distribution": "store",
       "cache": {
-        "key": "sdk57-fix-v19"
+        "key": "sdk57-fix-v20"
       },
       "env": {
         "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
-        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuY3RsLWNhci10ZWNobmljYWwtbG9nLnJlcGxpdC5hcHAk",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_cmVsYXhlZC1wdXAtODQuY2xlcmsuYWNjb3VudHMuZGV2JA",
         "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
         "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ",
         "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
