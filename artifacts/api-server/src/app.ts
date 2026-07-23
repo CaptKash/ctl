@@ -5,8 +5,13 @@ import { clerkMiddleware } from "@clerk/express";
 import router from "./routes";
 import privacyRouter from "./routes/privacy";
 import { checkRateLimit, getClientIp } from "./lib/rateLimit";
+import { CLERK_PROXY_PATH, clerkProxyMiddleware } from "./middlewares/clerkProxyMiddleware";
 
 const app: Express = express();
+
+// Clerk Frontend API proxy — must come before body parsers so raw bytes are
+// streamed through untouched. Active in production only; no-ops in dev.
+app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
 // Restrict CORS to explicitly configured origins.
 // In non-production environments every origin is reflected so local/dev

@@ -109,10 +109,13 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !fontError) return null;
 
+  const clerkProxyUrl = process.env.EXPO_PUBLIC_CLERK_PROXY_URL || undefined;
+
   return (
     <ClerkProvider
       publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}
       tokenCache={tokenCache}
+      proxyUrl={clerkProxyUrl}
     >
       <SafeAreaProvider>
         <ErrorBoundary>
