@@ -2,3 +2,4 @@
 - [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
 - [Nearby-service filter pill clipping](nearby-service-filter-pills.md) — horizontal ScrollView collapses cross-axis on iOS, clipping pill text; use a wrapping row View for short chip/filter rows.
 - [CTL 2.0.0 release state](ctl-2.0.0-release.md) — summary of what was fixed, shipped, and remaining tech debt after v2.0.0 release.
+- [EAS build git index lock workaround](eas-build-git-lock-workaround.md) — use /tmp/git wrapper (skips stash/add/reset) + PATH=/tmp:$PATH when sandbox blocks .git/index.lock deletion.
