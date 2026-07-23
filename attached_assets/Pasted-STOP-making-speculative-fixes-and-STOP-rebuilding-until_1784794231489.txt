@@ -1,0 +1,99 @@
+STOP making speculative fixes and STOP rebuilding until the root cause is identified.
+
+You have attempted more than 15 iOS builds and the problem still exists. This indicates we are debugging incorrectly.
+
+Your task is to act as a senior iOS engineer performing a complete root-cause investigation.
+
+Follow this process exactly:
+
+PHASE 1 – IDENTIFY THE FAILURE
+- State the exact symptom.
+- State where it occurs.
+- State whether it happens:
+  - during compilation
+  - during archive
+  - during upload
+  - during installation
+  - during app launch
+  - after launch
+  - only on TestFlight
+  - only on physical devices
+- Quote the exact error messages instead of summarizing them.
+
+PHASE 2 – FIND THE ROOT CAUSE
+Inspect every possible source including:
+- Expo configuration
+- React Native configuration
+- iOS native project
+- app.json/app.config
+- eas.json
+- package.json
+- dependencies
+- plugins
+- Podfile
+- Info.plist
+- entitlements
+- signing configuration
+- bundle identifier
+- provisioning profiles
+- certificates
+- capabilities
+- Apple permissions
+- build scripts
+- environment variables
+- outdated packages
+- incompatible package versions
+
+Do NOT change anything yet.
+
+PHASE 3 – RANK LIKELY CAUSES
+Create a table:
+
+Likelihood | Root Cause | Evidence | Confidence
+
+Only include causes supported by evidence.
+
+PHASE 4 – CREATE A FIX PLAN
+List the smallest possible changes required.
+
+Avoid unrelated refactoring.
+
+PHASE 5 – IMPLEMENT
+Apply only the approved fixes.
+
+PHASE 6 – VERIFY
+Confirm:
+- No build warnings introduced.
+- No dependency conflicts.
+- No duplicate plugins.
+- No duplicate permissions.
+- No broken imports.
+- No TypeScript errors.
+- No lint issues.
+
+PHASE 7 – FINAL AUDIT
+Search the entire repository for:
+- duplicate configuration
+- dead code
+- conflicting plugins
+- multiple bundle identifiers
+- duplicate entitlements
+- duplicate Info.plist entries
+- duplicate permissions
+- invalid Expo plugins
+- deprecated packages
+
+Provide a report of everything found.
+
+IMPORTANT RULES
+
+- Do NOT guess.
+- Do NOT rebuild after every tiny change.
+- Do NOT make cosmetic improvements.
+- Do NOT modify unrelated files.
+- Every modification must include the reason it is necessary.
+- If the problem cannot be proven from the codebase, explicitly state what external dependency (Apple, Expo, EAS, certificates, provisioning, App Store Connect, etc.) is blocking progress.
+
+Your objective is not "make another build."
+
+Your objective is to prove the root cause and eliminate it permanently.
