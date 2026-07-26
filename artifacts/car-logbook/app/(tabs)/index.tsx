@@ -146,12 +146,9 @@ export default function LoginScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      const redirectUrl = Platform.OS !== "web" && process.env.EXPO_PUBLIC_DOMAIN
-        ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/sso-callback`
-        : undefined;
       const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
         strategy,
-        ...(redirectUrl ? { redirectUrl } : {}),
+        redirectUrl: "car-logbook://sso-callback",
       });
       if (createdSessionId) {
         const activator = ssoSetActive ?? setActive;
