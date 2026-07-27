@@ -9,6 +9,16 @@ import { CLERK_PROXY_PATH, clerkProxyMiddleware } from "./middlewares/clerkProxy
 
 const app: Express = express();
 
+// Temporary catch-all request logger — helps diagnose which paths the iOS
+// app is actually hitting (Clerk SDK may be calling /v1/* directly instead
+// of /api/__clerk/v1/*). Remove once SSO is confirmed working.
+if (process.env.NODE_ENV === "production") {
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    console.log(`[req] ${req.method} ${req.path}`);
+    next();
+  });
+}
+
 // Clerk Frontend API proxy — must come before body parsers so raw bytes are
 // streamed through untouched. Active in production only; no-ops in dev.
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
