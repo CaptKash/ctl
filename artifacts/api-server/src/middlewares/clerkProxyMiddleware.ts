@@ -20,11 +20,22 @@
  */
 
 import { createProxyMiddleware } from "http-proxy-middleware";
-import type { RequestHandler } from "express";
+import type { RequestHandler, Request } from "express";
 import type { IncomingHttpHeaders } from "http";
 
 const CLERK_FAPI = "https://frontend-api.clerk.dev";
 export const CLERK_PROXY_PATH = "/api/__clerk";
+
+// Paths that are safe to cache in-memory (rarely change, same for all clients).
+const CACHEABLE_PATHS = new Set(["/v1/environment"]);
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+interface CacheEntry {
+  body: Buffer;
+  headers: Record<string, string | string[]>;
+  status: number;
+  ts: number;
+}
 
 /**
  * Returns the first effective public hostname for the given request,
@@ -63,7 +74,10 @@ export function clerkProxyMiddleware(): RequestHandler {
     return (_req, _res, next) => next();
   }
 
-  return createProxyMiddleware({
+  // In-memory response cache for stable, shared Clerk endpoints.
+  const responseCache = new Map<string, CacheEntry>();
+
+  const proxy = createProxyMiddleware({
     target: CLERK_FAPI,
     changeOrigin: true,
     // Take over the response so it can be re-sent with a Content-Length (see
@@ -97,13 +111,20 @@ export function clerkProxyMiddleware(): RequestHandler {
       // Content-Encoding is preserved. Length-known responses (e.g. /npm/*
       // assets) and body-less responses stream through without buffering.
       proxyRes: (proxyRes, req, res) => {
+        const expressReq = req as Request;
+        const clerkPath: string = expressReq.path ?? "";
+        const status = proxyRes.statusCode ?? 502;
+        const shouldCache =
+          req.method === "GET" &&
+          status === 200 &&
+          CACHEABLE_PATHS.has(clerkPath);
+
         const headers = { ...proxyRes.headers };
         // Transfer-Encoding/Connection are hop-by-hop (RFC 7230 §6.1).
         delete headers["transfer-encoding"];
         delete headers["connection"];
         delete headers["keep-alive"];
 
-        const status = proxyRes.statusCode ?? 502;
         // Content-Length is forbidden on 1xx/204; HEAD/304 may keep theirs.
         if (status < 200 || status === 204) {
           delete headers["content-length"];
@@ -129,6 +150,16 @@ export function clerkProxyMiddleware(): RequestHandler {
         proxyRes.on("end", () => {
           const body = Buffer.concat(chunks);
           headers["content-length"] = String(body.length);
+
+          if (shouldCache) {
+            responseCache.set(clerkPath, {
+              body,
+              headers: headers as Record<string, string | string[]>,
+              status,
+              ts: Date.now(),
+            });
+          }
+
           res.writeHead(status, headers);
           res.end(body);
         });
@@ -143,4 +174,23 @@ export function clerkProxyMiddleware(): RequestHandler {
       },
     },
   }) as RequestHandler;
+
+  // Outer middleware: serve cache hits without touching Clerk FAPI at all,
+  // otherwise fall through to the proxy (which populates the cache on success).
+  return (req, res, next) => {
+    if (req.method === "GET" && CACHEABLE_PATHS.has(req.path)) {
+      const entry = responseCache.get(req.path);
+      if (entry && Date.now() - entry.ts < CACHE_TTL_MS) {
+        const headers = {
+          ...entry.headers,
+          "x-clerk-cache": "HIT",
+          "content-length": String(entry.body.length),
+        };
+        res.writeHead(entry.status, headers);
+        res.end(entry.body);
+        return;
+      }
+    }
+    proxy(req, res, next);
+  };
 }

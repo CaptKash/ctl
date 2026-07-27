@@ -34,7 +34,7 @@ async function registerClerkRedirectUrls() {
     const listRes = await fetch("https://api.clerk.com/v1/redirect_urls", {
       headers: { Authorization: `Bearer ${secretKey}` },
     });
-    const existing: Array<{ url: string }> = await listRes.json();
+    const existing = (await listRes.json()) as Array<{ url: string }>;
     const existingUrls = new Set(existing.map((r) => r.url));
 
     for (const url of REQUIRED) {
