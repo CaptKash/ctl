@@ -136,6 +136,12 @@ export function clerkProxyMiddleware(): RequestHandler {
           status === 204 ||
           status === 304;
         if (headers["content-length"] !== undefined || bodyless) {
+          // Log streamed (content-length-known) responses too — previously
+          // these were silently piped and never appeared in diagnostics.
+          console.log(
+            `[clerk-proxy PIPE] ${req.method} ${clerkPath} → HTTP ${status}`,
+            `(content-length: ${headers["content-length"] ?? "n/a"}, encoding: ${headers["content-encoding"] ?? "none"})`
+          );
           res.writeHead(status, headers);
           // Headers are already sent, so abort the response if the upstream
           // stream errors mid-pipe (e.g. ECONNRESET) rather than leaving an
