@@ -37,6 +37,8 @@ cp /home/runner/workspace/.git/index /tmp/eas-git-index 2>/dev/null || true
 cd artifacts/car-logbook && \
   PATH=/tmp:$PATH \
   GIT_INDEX_FILE=/tmp/eas-git-index \
+  EAS_SKIP_AUTO_FINGERPRINT=1 \
+  EAS_BUILD_NO_EXPO_GO_WARNING=true \
   eas build --profile production --platform ios --non-interactive
 ```
 
