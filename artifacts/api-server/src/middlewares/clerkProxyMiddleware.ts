@@ -160,6 +160,38 @@ export function clerkProxyMiddleware(): RequestHandler {
             });
           }
 
+          // Temporary SSO diagnostics: log sign_in requests/responses so
+          // production errors are visible in deployment logs.
+          if (
+            clerkPath.startsWith("/v1/client/sign_in") ||
+            clerkPath.startsWith("/v1/client/sessions")
+          ) {
+            try {
+              const bodyStr = body.toString("utf8");
+              const parsed = JSON.parse(bodyStr);
+              const errors = parsed?.errors;
+              const response = parsed?.response;
+              console.log(
+                `[clerk-proxy] ${req.method} ${clerkPath} → ${status}`,
+                JSON.stringify({
+                  errors: errors ?? null,
+                  status: response?.status ?? null,
+                  firstFactorStatus:
+                    response?.first_factor_verification?.status ?? null,
+                  externalUrl: response?.first_factor_verification
+                    ?.external_verification_redirect_url
+                    ? "[set]"
+                    : "[missing]",
+                })
+              );
+            } catch {
+              // JSON parse failed — log raw status only
+              console.log(
+                `[clerk-proxy] ${req.method} ${clerkPath} → ${status} (non-JSON body)`
+              );
+            }
+          }
+
           res.writeHead(status, headers);
           res.end(body);
         });
