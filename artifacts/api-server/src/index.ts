@@ -31,6 +31,17 @@ async function registerClerkRedirectUrls() {
   ];
 
   try {
+    // Log instance config to diagnose native_api_disabled errors on iOS.
+    const instanceRes = await fetch("https://api.clerk.com/v1/instance", {
+      headers: { Authorization: `Bearer ${secretKey}` },
+    });
+    const instanceData = (await instanceRes.json()) as Record<string, unknown>;
+    const experimental = instanceData?.experimental as Record<string, unknown> | undefined;
+    console.log("[clerk-instance] status:", instanceRes.status,
+      "| native_app_support:", experimental?.native_app_support ?? "not found",
+      "| keys:", Object.keys(experimental ?? {}).join(", ") || "none"
+    );
+
     const listRes = await fetch("https://api.clerk.com/v1/redirect_urls", {
       headers: { Authorization: `Bearer ${secretKey}` },
     });

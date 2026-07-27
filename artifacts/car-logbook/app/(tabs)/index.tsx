@@ -157,9 +157,7 @@ export default function LoginScreen() {
         router.replace("/home");
       }
     } catch (err: unknown) {
-      if (__DEV__) {
-        console.log("[SSO error]", strategy, JSON.stringify(err, null, 2), err);
-      }
+      console.warn("[SSO error]", strategy, JSON.stringify(err, null, 2));
       setError(t("login.errorOAuthFailed"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
