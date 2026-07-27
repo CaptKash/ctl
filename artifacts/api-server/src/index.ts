@@ -23,7 +23,10 @@ app.listen(port, () => {
 
 async function registerClerkRedirectUrls() {
   const secretKey = process.env.CLERK_SECRET_KEY;
-  if (!secretKey || !secretKey.startsWith("sk_live")) return;
+  if (!secretKey) return;
+  // Run for both sk_test_ and sk_live_ — registrations on the test instance are
+  // visible in dev and confirm the mechanism works; the production deployment uses
+  // sk_live_ so it registers on the live instance (which the TestFlight build hits).
 
   const REQUIRED = [
     "https://ctl-car-technical-log.replit.app/api/sso-callback",
