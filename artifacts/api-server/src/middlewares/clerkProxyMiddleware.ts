@@ -160,36 +160,37 @@ export function clerkProxyMiddleware(): RequestHandler {
             });
           }
 
-          // Temporary SSO diagnostics: log sign_in requests/responses so
-          // production errors are visible in deployment logs.
-          if (
-            clerkPath.startsWith("/v1/client/sign_in") ||
-            clerkPath.startsWith("/v1/client/sessions")
-          ) {
-            try {
-              const bodyStr = body.toString("utf8");
+          // Temporary SSO diagnostics — log ALL Clerk proxy requests so we can
+          // see whether the app is reaching the proxy and what Clerk returns.
+          try {
+            const bodyStr = body.toString("utf8");
+            let logPayload: Record<string, unknown> = {};
+            if (clerkPath.startsWith("/v1/client/sign_in") ||
+                clerkPath.startsWith("/v1/client/sessions")) {
               const parsed = JSON.parse(bodyStr);
               const errors = parsed?.errors;
               const response = parsed?.response;
-              console.log(
-                `[clerk-proxy] ${req.method} ${clerkPath} → ${status}`,
-                JSON.stringify({
-                  errors: errors ?? null,
-                  status: response?.status ?? null,
-                  firstFactorStatus:
-                    response?.first_factor_verification?.status ?? null,
-                  externalUrl: response?.first_factor_verification
-                    ?.external_verification_redirect_url
-                    ? "[set]"
-                    : "[missing]",
-                })
-              );
-            } catch {
-              // JSON parse failed — log raw status only
-              console.log(
-                `[clerk-proxy] ${req.method} ${clerkPath} → ${status} (non-JSON body)`
-              );
+              logPayload = {
+                errors: errors ?? null,
+                clerkStatus: response?.status ?? null,
+                firstFactorStatus:
+                  response?.first_factor_verification?.status ?? null,
+                externalUrl: response?.first_factor_verification
+                  ?.external_verification_redirect_url
+                  ? "[set]"
+                  : "[missing]",
+              };
             }
+            console.log(
+              `[clerk-proxy] ${req.method} ${clerkPath} → HTTP ${status}`,
+              Object.keys(logPayload).length
+                ? JSON.stringify(logPayload)
+                : "(cached/non-JSON)"
+            );
+          } catch {
+            console.log(
+              `[clerk-proxy] ${req.method} ${clerkPath} → HTTP ${status}`
+            );
           }
 
           res.writeHead(status, headers);
@@ -213,6 +214,7 @@ export function clerkProxyMiddleware(): RequestHandler {
     if (req.method === "GET" && CACHEABLE_PATHS.has(req.path)) {
       const entry = responseCache.get(req.path);
       if (entry && Date.now() - entry.ts < CACHE_TTL_MS) {
+        console.log(`[clerk-proxy] ${req.method} ${req.path} → HTTP ${entry.status} (cache HIT)`);
         const headers = {
           ...entry.headers,
           "x-clerk-cache": "HIT",
