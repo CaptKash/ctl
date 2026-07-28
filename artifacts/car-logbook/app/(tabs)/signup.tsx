@@ -203,6 +203,7 @@ export default function SignupScreen() {
         // the stale-closure issue in useSSO where the closed-over signIn
         // still has externalVerificationRedirectURL=null after create().
         const createdSignIn = await signIn.create({ strategy, redirectUrl });
+        Alert.alert("SSO raw result", JSON.stringify(createdSignIn, null, 2));
         const externalUrl = createdSignIn.firstFactorVerification?.externalVerificationRedirectURL;
         Alert.alert("SSO create()", `status: ${createdSignIn.status}\nextUrl: ${String(externalUrl)}`);
         if (!externalUrl) {
