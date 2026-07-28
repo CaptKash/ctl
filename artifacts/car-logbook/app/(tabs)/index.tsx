@@ -142,57 +142,63 @@ export default function LoginScreen() {
 
   const handleOAuth = async (strategy: "oauth_apple" | "oauth_google") => {
     console.error("[SSO] handleOAuth called", strategy);
-    if (!setActive) return;
-    setError("");
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setLoading(true);
+    Alert.alert("SSO Debug", `handleOAuth called: ${strategy}`);
     try {
-      const { createdSessionId, setActive: ssoSetActive, signIn: ssoSignIn, signUp: ssoSignUp, authSessionResult } = await startSSOFlow({
-        strategy,
-        redirectUrl: "car-logbook://sso-callback",
-      });
-      if (createdSessionId) {
-        const activator = ssoSetActive ?? setActive;
-        await activator({ session: createdSessionId });
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        router.replace("/home");
-      } else {
-        const resultType = authSessionResult?.type ?? null;
-        if (!resultType || resultType === "cancel" || resultType === "dismiss") {
-          // Clerk not yet loaded, or user cancelled the OAuth sheet — no error
-        } else if (resultType === "success") {
-          // OAuth completed but Clerk couldn't create a session
-          console.error("[SSO no session]", strategy,
-            "signIn.status:", ssoSignIn?.status,
-            "signUp.status:", ssoSignUp?.status,
-            "missingFields:", ssoSignUp?.missingFields,
-            "unverifiedFields:", ssoSignUp?.unverifiedFields,
-          );
-          if (ssoSignUp?.status === "missing_requirements" && !(ssoSignUp.missingFields?.length)) {
-            try {
-              const updated = await ssoSignUp.update({});
-              if (updated.status === "complete" && updated.createdSessionId) {
-                await (ssoSetActive ?? setActive)({ session: updated.createdSessionId });
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                router.replace("/home");
-                return;
-              }
-            } catch { /* fallthrough */ }
-          }
-          setError(t("login.errorOAuthIncomplete"));
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      if (!setActive) return;
+      setError("");
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setLoading(true);
+      try {
+        const { createdSessionId, setActive: ssoSetActive, signIn: ssoSignIn, signUp: ssoSignUp, authSessionResult } = await startSSOFlow({
+          strategy,
+          redirectUrl: "car-logbook://sso-callback",
+        });
+        if (createdSessionId) {
+          const activator = ssoSetActive ?? setActive;
+          await activator({ session: createdSessionId });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          router.replace("/home");
         } else {
-          console.error("[SSO unexpected result]", strategy, resultType);
-          setError(t("login.errorOAuthFailed"));
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          const resultType = authSessionResult?.type ?? null;
+          if (!resultType || resultType === "cancel" || resultType === "dismiss") {
+            // Clerk not yet loaded, or user cancelled the OAuth sheet — no error
+          } else if (resultType === "success") {
+            // OAuth completed but Clerk couldn't create a session
+            console.error("[SSO no session]", strategy,
+              "signIn.status:", ssoSignIn?.status,
+              "signUp.status:", ssoSignUp?.status,
+              "missingFields:", ssoSignUp?.missingFields,
+              "unverifiedFields:", ssoSignUp?.unverifiedFields,
+            );
+            if (ssoSignUp?.status === "missing_requirements" && !(ssoSignUp.missingFields?.length)) {
+              try {
+                const updated = await ssoSignUp.update({});
+                if (updated.status === "complete" && updated.createdSessionId) {
+                  await (ssoSetActive ?? setActive)({ session: updated.createdSessionId });
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  router.replace("/home");
+                  return;
+                }
+              } catch { /* fallthrough */ }
+            }
+            setError(t("login.errorOAuthIncomplete"));
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          } else {
+            console.error("[SSO unexpected result]", strategy, resultType);
+            setError(t("login.errorOAuthFailed"));
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          }
         }
+      } catch (err: unknown) {
+        console.error("[SSO error]", strategy, JSON.stringify(err, null, 2));
+        Alert.alert("SSO Error", JSON.stringify(err));
+        setError(t("login.errorOAuthFailed"));
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: unknown) {
-      console.error("[SSO error]", strategy, JSON.stringify(err, null, 2));
-      setError(t("login.errorOAuthFailed"));
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setLoading(false);
+    } catch (outerErr: unknown) {
+      Alert.alert("SSO Error", `Outer: ${JSON.stringify(outerErr)}`);
     }
   };
 
