@@ -154,9 +154,27 @@ export default function LoginScreen() {
         // Call signIn.create() directly and use its RETURN VALUE — bypasses
         // the stale-closure issue in useSSO where the closed-over signIn
         // still has externalVerificationRedirectURL=null after create().
+        // Diagnostic: raw fetch to the proxy before calling signIn.create(),
+        // so we can see what the proxy actually returns vs what the SDK gets.
+        try {
+          const proxyBase = process.env.EXPO_PUBLIC_CLERK_PROXY_URL ?? "";
+          const diagResp = await fetch(`${proxyBase}/v1/client/sign_ins`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `strategy=${strategy}&redirect_url=${encodeURIComponent(redirectUrl)}`,
+          });
+          const diagText = await diagResp.text();
+          Alert.alert(
+            `Raw proxy (${diagResp.status})`,
+            diagText.substring(0, 800),
+          );
+        } catch (fetchErr: unknown) {
+          Alert.alert("Raw proxy fetch FAILED", String((fetchErr as any)?.message));
+        }
+
         const createdSignIn = await signIn.create({ strategy, redirectUrl });
         Alert.alert("SSO raw result", JSON.stringify(createdSignIn, null, 2));
-        const externalUrl = createdSignIn.firstFactorVerification?.externalVerificationRedirectURL;
+        const externalUrl = signIn.firstFactorVerification?.externalVerificationRedirectURL;
         Alert.alert("SSO create()", `status: ${createdSignIn.status}\nextUrl: ${String(externalUrl)}`);
         if (!externalUrl) {
           throw new Error(`No external verification URL returned for ${strategy}`);
