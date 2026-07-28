@@ -31,29 +31,42 @@ async function registerClerkRedirectUrls() {
   const REQUIRED = [
     "https://ctl-car-technical-log.replit.app/api/sso-callback",
     "car-logbook://sso-callback",
+    "car-logbook://",
   ];
 
+  const keyPrefix = secretKey.slice(0, 15);
+
   try {
-    // Log instance config to diagnose native_api_disabled errors on iOS.
+    // Log instance config — including instance ID so we can confirm which instance we're hitting.
     const instanceRes = await fetch("https://api.clerk.com/v1/instance", {
       headers: { Authorization: `Bearer ${secretKey}` },
     });
     const instanceData = (await instanceRes.json()) as Record<string, unknown>;
+    const instanceId = instanceData?.id ?? "unknown";
+    const envType = instanceData?.environment_type ?? "unknown";
     const experimental = instanceData?.experimental as Record<string, unknown> | undefined;
-    console.log("[clerk-instance] status:", instanceRes.status,
+    console.log(
+      "[clerk-instance] status:", instanceRes.status,
+      "| id:", instanceId,
+      "| env:", envType,
+      "| key_prefix:", keyPrefix,
       "| native_app_support:", experimental?.native_app_support ?? "not found",
-      "| keys:", Object.keys(experimental ?? {}).join(", ") || "none"
     );
 
     const listRes = await fetch("https://api.clerk.com/v1/redirect_urls", {
       headers: { Authorization: `Bearer ${secretKey}` },
     });
-    const existing = (await listRes.json()) as Array<{ url: string }>;
-    const existingUrls = new Set(existing.map((r) => r.url));
+    const listBody = (await listRes.json()) as Array<{ id: string; url: string }>;
+    const existingUrls = new Set(listBody.map((r) => r.url));
+    console.log("[clerk-redirect-urls] list status:", listRes.status,
+      "| existing:", JSON.stringify([...existingUrls]));
 
     for (const url of REQUIRED) {
-      if (existingUrls.has(url)) continue;
-      await fetch("https://api.clerk.com/v1/redirect_urls", {
+      if (existingUrls.has(url)) {
+        console.log(`[clerk-redirect-urls] already registered: ${url}`);
+        continue;
+      }
+      const regRes = await fetch("https://api.clerk.com/v1/redirect_urls", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${secretKey}`,
@@ -61,9 +74,10 @@ async function registerClerkRedirectUrls() {
         },
         body: JSON.stringify({ url }),
       });
-      console.log(`[clerk] registered redirect URL: ${url}`);
+      const regBody = await regRes.text();
+      console.log(`[clerk-redirect-urls] register "${url}" → HTTP ${regRes.status} | body: ${regBody.slice(0, 200)}`);
     }
   } catch (err) {
-    console.warn("[clerk] failed to register redirect URLs:", err);
+    console.error("[clerk-redirect-urls] failed:", err);
   }
 }

@@ -18,8 +18,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn, useSSO } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp } from "@clerk/clerk-expo";
 import { isClerkAPIResponseError } from "@clerk/clerk-expo";
+import * as WebBrowser from "expo-web-browser";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useAuth } from "@/context/AuthContext";
@@ -78,7 +79,7 @@ export default function LoginScreen() {
     isLoading: authLoading,
   } = useAuth();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
-  const { startSSOFlow } = useSSO();
+  const { signUp } = useSignUp();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -143,51 +144,56 @@ export default function LoginScreen() {
   const handleOAuth = async (strategy: "oauth_apple" | "oauth_google") => {
     console.error("[SSO] handleOAuth called", strategy);
     Alert.alert("SSO Debug", `handleOAuth called: ${strategy}`);
+    if (!signIn || !signUp || !setActive) return;
     try {
-      if (!setActive) return;
       setError("");
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setLoading(true);
+      const redirectUrl = "car-logbook://sso-callback";
       try {
-        const { createdSessionId, setActive: ssoSetActive, signIn: ssoSignIn, signUp: ssoSignUp, authSessionResult } = await startSSOFlow({
-          strategy,
-          redirectUrl: "car-logbook://sso-callback",
-        });
-        if (createdSessionId) {
-          const activator = ssoSetActive ?? setActive;
-          await activator({ session: createdSessionId });
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          router.replace("/home");
-        } else {
-          const resultType = authSessionResult?.type ?? null;
-          if (!resultType || resultType === "cancel" || resultType === "dismiss") {
-            // Clerk not yet loaded, or user cancelled the OAuth sheet — no error
-          } else if (resultType === "success") {
-            // OAuth completed but Clerk couldn't create a session
-            console.error("[SSO no session]", strategy,
-              "signIn.status:", ssoSignIn?.status,
-              "signUp.status:", ssoSignUp?.status,
-              "missingFields:", ssoSignUp?.missingFields,
-              "unverifiedFields:", ssoSignUp?.unverifiedFields,
-            );
-            if (ssoSignUp?.status === "missing_requirements" && !(ssoSignUp.missingFields?.length)) {
-              try {
-                const updated = await ssoSignUp.update({});
-                if (updated.status === "complete" && updated.createdSessionId) {
-                  await (ssoSetActive ?? setActive)({ session: updated.createdSessionId });
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  router.replace("/home");
-                  return;
-                }
-              } catch { /* fallthrough */ }
-            }
-            setError(t("login.errorOAuthIncomplete"));
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        // Call signIn.create() directly and use its RETURN VALUE — bypasses
+        // the stale-closure issue in useSSO where the closed-over signIn
+        // still has externalVerificationRedirectURL=null after create().
+        const createdSignIn = await signIn.create({ strategy, redirectUrl });
+        const externalUrl = createdSignIn.firstFactorVerification?.externalVerificationRedirectURL;
+        Alert.alert("SSO create()", `status: ${createdSignIn.status}\nextUrl: ${String(externalUrl)}`);
+        if (!externalUrl) {
+          throw new Error(`No external verification URL returned for ${strategy}`);
+        }
+        const authSessionResult = await WebBrowser.openAuthSessionAsync(
+          externalUrl.toString(),
+          redirectUrl,
+        );
+        if (authSessionResult.type !== "success" || !("url" in authSessionResult) || !authSessionResult.url) {
+          if (authSessionResult.type === "cancel" || authSessionResult.type === "dismiss") {
+            // User cancelled — no error
           } else {
-            console.error("[SSO unexpected result]", strategy, resultType);
+            console.error("[SSO browser non-success]", strategy, authSessionResult.type);
             setError(t("login.errorOAuthFailed"));
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
           }
+          return;
+        }
+        const params = new URL(authSessionResult.url).searchParams;
+        const rotatingTokenNonce = params.get("rotating_token_nonce") ?? "";
+        await createdSignIn.reload({ rotatingTokenNonce });
+        if (createdSignIn.firstFactorVerification.status === "transferable") {
+          await signUp.create({ transfer: true });
+          if (signUp.status === "complete" && signUp.createdSessionId) {
+            await setActive({ session: signUp.createdSessionId });
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            router.replace("/home");
+            return;
+          }
+        }
+        if (createdSignIn.createdSessionId) {
+          await setActive({ session: createdSignIn.createdSessionId });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          router.replace("/home");
+        } else {
+          console.error("[SSO no session]", strategy, "status:", createdSignIn.status);
+          setError(t("login.errorOAuthIncomplete"));
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
       } catch (err: unknown) {
         const e = err as any;
