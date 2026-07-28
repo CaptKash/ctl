@@ -1,34 +1,39 @@
 ---
 name: Clerk SSO stale-closure fix
-description: useSSO's startSSOFlow has a React stale-closure bug in Expo; fix is to call signIn.create() directly and use its return value.
+description: useSSO and direct signIn.create() both suffer a React stale-closure bug; fix is to read clerk.client.signIn after create(), not the captured closure reference.
 ---
 
 ## Rule
-Never use `useSSO` / `startSSOFlow` from `@clerk/clerk-expo` in production Expo builds. Call `signIn.create()` directly and read `externalVerificationRedirectURL` from its **return value**, not from the closed-over `signIn` reference.
+Never read `signIn.firstFactorVerification` (or any field) from the `signIn` reference captured by the React hook closure after calling `signIn.create()`. Clerk replaces `clerk.client.signIn` with a **new object** when the API response arrives — the closure reference stays pointing at the old empty resource.
 
-**Why:** After `signIn.create()` resolves, Clerk replaces the SignIn resource in its internal state (new object). The `signIn` variable captured in the closure at render-time still points to the pre-create object, which has `externalVerificationRedirectURL: null`. Reading the return value of `signIn.create()` bypasses this entirely.
-
-Symptom: `"@clerk/clerk-expo: Missing external verification redirect URL for SSO flow"` even though the Clerk backend IS returning the URL (confirmed via direct API call to `/v1/client/sign_ins`).
+**Why:** Confirmed via raw `fetch()` diagnostic in build 93: the proxy correctly returns HTTP 200 with `external_verification_redirect_url`. The Clerk SDK receives the correct response but creates a new SignIn instance from it (`clerk.client.signIn = new SignIn(responseData)`). The old `signIn` closure reference remains empty. `JSON.stringify(signIn)` shows `_status: null`, all fields null — this is the tell.
 
 **How to apply:**
 ```typescript
-// WRONG — stale closure
-await startSSOFlow({ strategy, redirectUrl });
-const { externalVerificationRedirectURL } = signIn.firstFactorVerification; // null!
+import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-expo";
 
-// CORRECT — use return value
-const createdSignIn = await signIn.create({ strategy, redirectUrl });
-const externalUrl = createdSignIn.firstFactorVerification?.externalVerificationRedirectURL; // ✅
-await WebBrowser.openAuthSessionAsync(externalUrl.toString(), redirectUrl);
+// In the component:
+const clerk = useClerk();
+const { signIn } = useSignIn();
+
+// In handleOAuth:
+await signIn.create({ strategy, redirectUrl });
+// ✅ Read from the live Clerk client — always current
+const freshSignIn = clerk.client?.signIn;
+const externalUrl = freshSignIn?.firstFactorVerification?.externalVerificationRedirectURL;
+
+// Then use freshSignIn for reload(), createdSessionId, etc.
+await freshSignIn.reload({ rotatingTokenNonce });
 ```
 
-After browser returns:
-1. `await createdSignIn.reload({ rotatingTokenNonce })` using nonce from callback URL
-2. If `createdSignIn.firstFactorVerification.status === "transferable"` → `signUp.create({ transfer: true })`
-3. Otherwise use `createdSignIn.createdSessionId` with `setActive`
+`useSSO` / `startSSOFlow` also has this bug (reads stale `signIn.firstFactorVerification` after `await signIn.create()`), so DO NOT use `useSSO` for OAuth flows.
+
+## Proxy is healthy
+The Clerk proxy at `https://ctl-car-technical-log.replit.app/api/__clerk` works correctly — it returns the full Clerk response including `external_verification_redirect_url`. The middleware order (proxy before `express.json()`) in `app.ts` is correct. The 1375 vs 2349 byte discrepancy noted in earlier investigation was a red herring.
 
 ## Clerk production instance state (confirmed)
 - `oauth_apple` and `oauth_google`: both `enabled=True, authenticatable=True` on production instance
 - `car-logbook://sso-callback` registered on both dev and prod Clerk instances
-- Production publishable key: `pk_live_*` (loaded from EAS production env, not workspace secret)
-- Workspace `CLERK_SECRET_KEY` is always `sk_test_*` (dev); prod key injected by Replit at deploy time
+- Production publishable key: `pk_live_*` loaded from EAS "production" environment (not eas.json)
+- eas.json production profile does NOT hardcode `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` — it comes from EAS dashboard
+- `useClerk` is exported from `@clerk/clerk-expo` (via re-export from `@clerk/clerk-react`)

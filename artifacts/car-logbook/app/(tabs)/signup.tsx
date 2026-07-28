@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn, useSignUp, isClerkAPIResponseError } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp, useClerk, isClerkAPIResponseError } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser";
 import { useTranslation } from "react-i18next";
 import * as SecureStore from "expo-secure-store";
@@ -35,6 +35,7 @@ export default function SignupScreen() {
   const { width: screenW } = useWindowDimensions();
   const { signIn } = useSignIn();
   const { signUp, setActive, isLoaded: signUpLoaded } = useSignUp();
+  const clerk = useClerk();
 
   const [step, setStep] = useState<"form" | "verify">("form");
   const [name, setName] = useState("");
@@ -202,26 +203,13 @@ export default function SignupScreen() {
         // Call signIn.create() directly and use its RETURN VALUE — bypasses
         // the stale-closure issue in useSSO where the closed-over signIn
         // still has externalVerificationRedirectURL=null after create().
-        try {
-          const proxyBase = process.env.EXPO_PUBLIC_CLERK_PROXY_URL ?? "";
-          const diagResp = await fetch(`${proxyBase}/v1/client/sign_ins`, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `strategy=${strategy}&redirect_url=${encodeURIComponent(redirectUrl)}`,
-          });
-          const diagText = await diagResp.text();
-          Alert.alert(
-            `Raw proxy (${diagResp.status})`,
-            diagText.substring(0, 800),
-          );
-        } catch (fetchErr: unknown) {
-          Alert.alert("Raw proxy fetch FAILED", String((fetchErr as any)?.message));
-        }
-
-        const createdSignIn = await signIn.create({ strategy, redirectUrl });
-        Alert.alert("SSO raw result", JSON.stringify(createdSignIn, null, 2));
-        const externalUrl = signIn.firstFactorVerification?.externalVerificationRedirectURL;
-        Alert.alert("SSO create()", `status: ${createdSignIn.status}\nextUrl: ${String(externalUrl)}`);
+        await signIn.create({ strategy, redirectUrl });
+        // signIn.create() replaces clerk.client.signIn with a new object —
+        // the `signIn` closure reference is stale. Read from clerk.client.signIn
+        // to get the freshly-populated resource.
+        const freshSignIn = clerk.client?.signIn;
+        Alert.alert("SSO create()", `status: ${freshSignIn?.status}\nextUrl: ${String(freshSignIn?.firstFactorVerification?.externalVerificationRedirectURL)}`);
+        const externalUrl = freshSignIn?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
           throw new Error(`No external verification URL returned for ${strategy}`);
         }
@@ -241,8 +229,8 @@ export default function SignupScreen() {
         }
         const params = new URL(authSessionResult.url).searchParams;
         const rotatingTokenNonce = params.get("rotating_token_nonce") ?? "";
-        await createdSignIn.reload({ rotatingTokenNonce });
-        if (createdSignIn.firstFactorVerification.status === "transferable") {
+        await freshSignIn.reload({ rotatingTokenNonce });
+        if (freshSignIn.firstFactorVerification.status === "transferable") {
           await signUp.create({ transfer: true });
           if (signUp.status === "complete" && signUp.createdSessionId) {
             await setActive({ session: signUp.createdSessionId });
@@ -251,12 +239,12 @@ export default function SignupScreen() {
             return;
           }
         }
-        if (createdSignIn.createdSessionId) {
-          await setActive({ session: createdSignIn.createdSessionId });
+        if (freshSignIn.createdSessionId) {
+          await setActive({ session: freshSignIn.createdSessionId });
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           router.replace("/home");
         } else {
-          console.error("[SSO no session]", strategy, "status:", createdSignIn.status);
+          console.error("[SSO no session]", strategy, "status:", freshSignIn.status);
           setError(t("signup.errorOAuthIncomplete"));
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
