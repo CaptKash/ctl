@@ -188,6 +188,7 @@ export default function SignupScreen() {
   };
 
   const handleOAuth = async (strategy: "oauth_apple" | "oauth_google") => {
+    console.error("[SSO] handleOAuth called", strategy);
     if (!setActive) return;
     setError("");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
