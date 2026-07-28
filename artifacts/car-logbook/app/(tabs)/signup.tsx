@@ -193,7 +193,7 @@ export default function SignupScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      const { createdSessionId, setActive: ssoSetActive, signIn: ssoSignIn, signUp: ssoSignUp } = await startSSOFlow({
+      const { createdSessionId, setActive: ssoSetActive, signIn: ssoSignIn, signUp: ssoSignUp, authSessionResult } = await startSSOFlow({
         strategy,
         redirectUrl: "car-logbook://sso-callback",
       });
@@ -203,15 +203,18 @@ export default function SignupScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         router.replace("/home");
       } else {
-        console.warn("[SSO no session]", strategy,
-          "signIn.status:", ssoSignIn?.status,
-          "signIn.firstFactor:", ssoSignIn?.firstFactorVerification?.status,
-          "signUp.status:", ssoSignUp?.status,
-          "missingFields:", ssoSignUp?.missingFields,
-          "unverifiedFields:", ssoSignUp?.unverifiedFields,
-        );
-        if (ssoSignUp?.status === "missing_requirements") {
-          if ((ssoSignUp.missingFields ?? []).length === 0) {
+        const resultType = authSessionResult?.type ?? null;
+        if (!resultType || resultType === "cancel" || resultType === "dismiss") {
+          // Clerk not yet loaded, or user cancelled the OAuth sheet — no error
+        } else if (resultType === "success") {
+          // OAuth completed but Clerk couldn't create a session
+          console.error("[SSO no session]", strategy,
+            "signIn.status:", ssoSignIn?.status,
+            "signUp.status:", ssoSignUp?.status,
+            "missingFields:", ssoSignUp?.missingFields,
+            "unverifiedFields:", ssoSignUp?.unverifiedFields,
+          );
+          if (ssoSignUp?.status === "missing_requirements" && !(ssoSignUp.missingFields?.length)) {
             try {
               const updated = await ssoSignUp.update({});
               if (updated.status === "complete" && updated.createdSessionId) {
@@ -223,28 +226,15 @@ export default function SignupScreen() {
             } catch { /* fallthrough */ }
           }
           setError(t("signup.errorOAuthIncomplete"));
-        } else if (ssoSignIn?.firstFactorVerification?.status === "transferable") {
-          try {
-            const linked = await signUp?.create({ transfer: true });
-            if (linked?.status === "complete" && linked.createdSessionId) {
-              await (ssoSetActive ?? setActive)({ session: linked.createdSessionId });
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              router.replace("/home");
-              return;
-            }
-          } catch (linkErr) {
-            console.warn("[SSO transfer error]", linkErr);
-          }
-          setError(t("signup.errorOAuthExistingAccount"));
-        } else if (ssoSignIn) {
-          setError(t("signup.errorOAuthExistingAccount"));
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } else {
+          console.error("[SSO unexpected result]", strategy, resultType);
           setError(t("signup.errorOAuthFailed"));
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err: unknown) {
-      console.warn("[SSO error]", strategy, JSON.stringify(err, null, 2));
+      console.error("[SSO error]", strategy, JSON.stringify(err, null, 2));
       setError(formatSignUpError(err, t("signup.errorOAuthFailed")));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
