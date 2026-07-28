@@ -190,15 +190,16 @@ export default function LoginScreen() {
           }
         }
       } catch (err: unknown) {
-        console.error("[SSO error]", strategy, JSON.stringify(err, null, 2));
-        Alert.alert("SSO Error", JSON.stringify(err));
+        const e = err as any;
+        console.error("[SSO error]", strategy, `name: ${e?.name} | message: ${e?.message} | code: ${e?.code} | stack: ${e?.stack}`);
+        Alert.alert("SSO Error", `name: ${e?.name}\nmessage: ${e?.message}\ncode: ${e?.code}\nstack: ${e?.stack}`);
         setError(t("login.errorOAuthFailed"));
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } finally {
         setLoading(false);
       }
     } catch (outerErr: unknown) {
-      Alert.alert("SSO Error", `Outer: ${JSON.stringify(outerErr)}`);
+      Alert.alert("SSO Error", `Outer\nname: ${(outerErr as any)?.name}\nmessage: ${(outerErr as any)?.message}\ncode: ${(outerErr as any)?.code}\nstack: ${(outerErr as any)?.stack}`);
     }
   };
 
