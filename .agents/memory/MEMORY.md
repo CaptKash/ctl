@@ -1,4 +1,5 @@
 - [Driving car-logbook Expo web past Clerk for testing](car-logbook-web-test-auth.md) — inject legacy JWT into localStorage (`ctl_auth_token`) + reload to reach authed flows when Clerk CAPTCHA blocks sign-in.
+- [CTL production console logging + Clerk v2 startSSOFlow](ctl-production-console-logging.md) — console.warn is a no-op in production RN/Hermes; use console.error. Clerk v2 handles transfer flow internally; authSessionResult.type drives else-branch logic.
 - [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
 - [Nearby-service filter pill clipping](nearby-service-filter-pills.md) — horizontal ScrollView collapses cross-axis on iOS, clipping pill text; use a wrapping row View for short chip/filter rows.
 - [CTL 2.0.0 release state](ctl-2.0.0-release.md) — summary of what was fixed, shipped, and remaining tech debt after v2.0.0 release.
