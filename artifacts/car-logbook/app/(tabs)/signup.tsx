@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn, useSignUp, useClerk, isClerkAPIResponseError } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp, isClerkAPIResponseError } from "@clerk/clerk-expo";
 import * as WebBrowser from "expo-web-browser";
 import { useTranslation } from "react-i18next";
 import * as SecureStore from "expo-secure-store";
@@ -35,7 +35,6 @@ export default function SignupScreen() {
   const { width: screenW } = useWindowDimensions();
   const { signIn } = useSignIn();
   const { signUp, setActive, isLoaded: signUpLoaded } = useSignUp();
-  const clerk = useClerk();
 
   const [step, setStep] = useState<"form" | "verify">("form");
   const [name, setName] = useState("");
@@ -200,16 +199,10 @@ export default function SignupScreen() {
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
       try {
-        // Call signIn.create() directly and use its RETURN VALUE — bypasses
-        // the stale-closure issue in useSSO where the closed-over signIn
-        // still has externalVerificationRedirectURL=null after create().
-        await signIn.create({ strategy, redirectUrl });
-        // signIn.create() replaces clerk.client.signIn with a new object —
-        // the `signIn` closure reference is stale. Read from clerk.client.signIn
-        // to get the freshly-populated resource.
-        const freshSignIn = clerk.client?.signIn;
-        Alert.alert("SSO create()", `status: ${freshSignIn?.status}\nextUrl: ${String(freshSignIn?.firstFactorVerification?.externalVerificationRedirectURL)}`);
-        const externalUrl = freshSignIn?.firstFactorVerification?.externalVerificationRedirectURL;
+        const result = await signIn.create({ strategy, redirectUrl });
+        console.error("[SSO] create() result status:", result?.status);
+        Alert.alert("SSO create()", `status: ${result?.status}\nextUrl: ${String(result?.firstFactorVerification?.externalVerificationRedirectURL)}`);
+        const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
           throw new Error(`No external verification URL returned for ${strategy}`);
         }
@@ -229,8 +222,8 @@ export default function SignupScreen() {
         }
         const params = new URL(authSessionResult.url).searchParams;
         const rotatingTokenNonce = params.get("rotating_token_nonce") ?? "";
-        await freshSignIn.reload({ rotatingTokenNonce });
-        if (freshSignIn.firstFactorVerification.status === "transferable") {
+        await result.reload({ rotatingTokenNonce });
+        if (result.firstFactorVerification.status === "transferable") {
           await signUp.create({ transfer: true });
           if (signUp.status === "complete" && signUp.createdSessionId) {
             await setActive({ session: signUp.createdSessionId });
@@ -239,12 +232,12 @@ export default function SignupScreen() {
             return;
           }
         }
-        if (freshSignIn.createdSessionId) {
-          await setActive({ session: freshSignIn.createdSessionId });
+        if (result.createdSessionId) {
+          await setActive({ session: result.createdSessionId });
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           router.replace("/home");
         } else {
-          console.error("[SSO no session]", strategy, "status:", freshSignIn.status);
+          console.error("[SSO no session]", strategy, "status:", result.status);
           setError(t("signup.errorOAuthIncomplete"));
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
