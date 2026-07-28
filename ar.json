@@ -28,7 +28,10 @@
     "errorGeneric": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     "errorTooManyAttempts": "تجاوزت حد المحاولات المسموح. حاول مرة أخرى بعد قليل.",
     "languageToggleEnglish": "English",
-    "languageToggleArabic": "العربية"
+    "languageToggleArabic": "العربية",
+    "errorOAuthFailed": "فشل تسجيل الدخول. حاول مرة أخرى.",
+    "errorOAuthExistingAccount": "هذا البريد الإلكتروني مرتبط بحساب آخر. يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور.",
+    "errorOAuthIncomplete": "تعذر إتمام تسجيل الدخول. حاول مرة أخرى أو استخدم البريد الإلكتروني وكلمة المرور."
   },
   "signup": {
     "title": "إنشاء حساب",
@@ -64,7 +67,9 @@
     "errorVerifyIncomplete": "لم يكتمل التحقق. حاول مرة أخرى.",
     "errorVerifyInvalid": "رمز غير صحيح أو منتهي الصلاحية. حاول مرة أخرى.",
     "errorResendFailed": "تعذر إعادة إرسال الرمز الآن.",
-    "errorOAuthFailed": "فشل تسجيل الدخول. حاول مرة أخرى."
+    "errorOAuthFailed": "فشل تسجيل الدخول. حاول مرة أخرى.",
+    "errorOAuthExistingAccount": "لديك حساب بالفعل. يرجى تسجيل الدخول.",
+    "errorOAuthIncomplete": "تعذر إتمام إنشاء الحساب. حاول مرة أخرى أو استخدم البريد الإلكتروني وكلمة المرور."
   },
   "settings": {
     "title": "الإعدادات",

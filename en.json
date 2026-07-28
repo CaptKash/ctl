@@ -28,7 +28,10 @@
     "errorGeneric": "Invalid email or password.",
     "errorTooManyAttempts": "Too many attempts. Please try again in a few minutes.",
     "languageToggleEnglish": "English",
-    "languageToggleArabic": "العربية"
+    "languageToggleArabic": "العربية",
+    "errorOAuthFailed": "Sign-in failed. Please try again.",
+    "errorOAuthExistingAccount": "This email already has an account. Please sign in with email and password.",
+    "errorOAuthIncomplete": "Sign-in couldn't complete. Please try again or use email and password."
   },
   "signup": {
     "title": "Create account",
@@ -64,7 +67,9 @@
     "errorVerifyIncomplete": "Verification incomplete. Please try again.",
     "errorVerifyInvalid": "Invalid or expired code. Please try again.",
     "errorResendFailed": "Couldn't resend the code right now.",
-    "errorOAuthFailed": "Sign-in failed. Please try again."
+    "errorOAuthFailed": "Sign-in failed. Please try again.",
+    "errorOAuthExistingAccount": "You already have an account. Please sign in instead.",
+    "errorOAuthIncomplete": "Sign-up couldn't complete. Please try again or use email and password."
   },
   "settings": {
     "title": "Settings",

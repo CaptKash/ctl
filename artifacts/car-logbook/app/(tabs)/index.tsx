@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn, useSSO } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp, useSSO } from "@clerk/clerk-expo";
 import { isClerkAPIResponseError } from "@clerk/clerk-expo";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -78,6 +78,7 @@ export default function LoginScreen() {
     isLoading: authLoading,
   } = useAuth();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
+  const { signUp } = useSignUp();
   const { startSSOFlow } = useSSO();
 
   const [email, setEmail] = useState("");
@@ -146,7 +147,7 @@ export default function LoginScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
-      const { createdSessionId, setActive: ssoSetActive } = await startSSOFlow({
+      const { createdSessionId, setActive: ssoSetActive, signIn: ssoSignIn, signUp: ssoSignUp } = await startSSOFlow({
         strategy,
         redirectUrl: "car-logbook://sso-callback",
       });
@@ -155,6 +156,46 @@ export default function LoginScreen() {
         await activator({ session: createdSessionId });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         router.replace("/home");
+      } else {
+        console.warn("[SSO no session]", strategy,
+          "signIn.status:", ssoSignIn?.status,
+          "signIn.firstFactor:", ssoSignIn?.firstFactorVerification?.status,
+          "signUp.status:", ssoSignUp?.status,
+          "missingFields:", ssoSignUp?.missingFields,
+          "unverifiedFields:", ssoSignUp?.unverifiedFields,
+        );
+        if (ssoSignUp?.status === "missing_requirements") {
+          if ((ssoSignUp.missingFields ?? []).length === 0) {
+            try {
+              const updated = await ssoSignUp.update({});
+              if (updated.status === "complete" && updated.createdSessionId) {
+                await (ssoSetActive ?? setActive)({ session: updated.createdSessionId });
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                router.replace("/home");
+                return;
+              }
+            } catch { /* fallthrough */ }
+          }
+          setError(t("login.errorOAuthIncomplete"));
+        } else if (ssoSignIn?.firstFactorVerification?.status === "transferable") {
+          try {
+            const linked = await signUp?.create({ transfer: true });
+            if (linked?.status === "complete" && linked.createdSessionId) {
+              await setActive({ session: linked.createdSessionId });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              router.replace("/home");
+              return;
+            }
+          } catch (linkErr) {
+            console.warn("[SSO transfer error]", linkErr);
+          }
+          setError(t("login.errorOAuthExistingAccount"));
+        } else if (ssoSignIn) {
+          setError(t("login.errorOAuthExistingAccount"));
+        } else {
+          setError(t("login.errorOAuthFailed"));
+        }
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err: unknown) {
       console.warn("[SSO error]", strategy, JSON.stringify(err, null, 2));
