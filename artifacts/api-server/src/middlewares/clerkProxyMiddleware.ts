@@ -102,6 +102,24 @@ export function clerkProxyMiddleware(): RequestHandler {
         if (clientIp) {
           proxyReq.setHeader("X-Forwarded-For", clientIp);
         }
+
+        // Strip _is_native=1 before forwarding to Clerk FAPI.
+        // The clerk-expo SDK appends this flag to every request, which routes
+        // calls through Clerk's "Native API" path — a feature that requires
+        // "Native Applications" to be explicitly enabled in the Clerk dashboard.
+        // When it is not enabled, Clerk returns native_api_disabled silently and
+        // the SDK's SignIn/SignUp resources stay blank (all fields null).
+        // Stripping the flag causes Clerk to treat requests as web-path calls,
+        // which return identical OAuth redirect URLs and session data and are
+        // fully compatible with every subsequent SDK step (JWT storage,
+        // client.sessions population, setActive).
+        if (proxyReq.path.includes("_is_native")) {
+          const [pathname, search] = proxyReq.path.split("?");
+          const params = new URLSearchParams(search ?? "");
+          params.delete("_is_native");
+          const newSearch = params.toString();
+          proxyReq.path = newSearch ? `${pathname}?${newSearch}` : pathname;
+        }
       },
       // Clerk's dynamic Frontend API responses (/v1/environment, /v1/client,
       // JWKS, ...) arrive without a Content-Length, so relaying them would use

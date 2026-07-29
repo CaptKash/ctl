@@ -142,74 +142,14 @@ export default function LoginScreen() {
   };
 
   const handleOAuth = async (strategy: "oauth_apple" | "oauth_google") => {
-    console.error("[SSO] handleOAuth called", strategy);
-    Alert.alert("SSO Debug", `handleOAuth called: ${strategy}`);
     if (!signIn || !signUp || !setActive) return;
     try {
       setError("");
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
-      const proxyUrl = process.env.EXPO_PUBLIC_CLERK_PROXY_URL ?? "(none)";
       try {
-        Alert.alert("SSO PRE-create", `strategy: ${strategy}\nredirectUrl: "${redirectUrl}"\nproxyUrl: "${proxyUrl}"\nsignIn.status pre: ${(signIn as any)?.status ?? "(null)"}`);
-
-        const t0 = Date.now();
         const result = await signIn.create({ strategy, redirectUrl });
-        const elapsed = Date.now() - t0;
-
-        // Direct field access — bypasses JSON.stringify prototype-getter blindspot
-        const fv = result?.firstFactorVerification;
-        Alert.alert(
-          `SSO create() elapsed: ${elapsed}ms`,
-          `result.status: ${result?.status}\n` +
-          `result.id: ${result?.id}\n` +
-          `result.createdSessionId: ${result?.createdSessionId}\n` +
-          `fv.status: ${fv?.status}\n` +
-          `fv.strategy: ${fv?.strategy}\n` +
-          `fv.extUrl: ${String(fv?.externalVerificationRedirectURL)}\n` +
-          `Object.keys: ${Object.keys(result ?? {}).join(",")}\n` +
-          `ownProps: ${Object.getOwnPropertyNames(result ?? {}).slice(0, 10).join(",")}`
-        );
-
-        // Fetch A: no _is_native (web path — known to work)
-        // Fetch B: with _is_native=1 + SDK headers (mimics exactly what clerk-expo sends)
-        // If B returns native_api_disabled → root cause confirmed.
-        const clerkProxyBase = process.env.EXPO_PUBLIC_CLERK_PROXY_URL ?? "";
-        const formBody = new URLSearchParams({ strategy, redirect_url: redirectUrl }).toString();
-        try {
-          const [respA, respB] = await Promise.all([
-            fetch(`${clerkProxyBase}/v1/client/sign_ins`, {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: formBody,
-            }),
-            fetch(`${clerkProxyBase}/v1/client/sign_ins?_is_native=1`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "authorization": "",
-                "x-mobile": "1",
-                "x-expo-sdk-version": "2.19.31",
-              },
-              body: formBody,
-            }),
-          ]);
-          const [jsonA, jsonB] = await Promise.all([respA.json(), respB.json()]);
-          Alert.alert(
-            `Fetch A (no _is_native) HTTP ${respA.status}`,
-            `ext_url: ${jsonA?.response?.external_verification_redirect_url ?? "(absent)"}\n` +
-            `errors: ${JSON.stringify(jsonA?.errors ?? []).slice(0, 200)}`
-          );
-          Alert.alert(
-            `Fetch B (+_is_native=1) HTTP ${respB.status}`,
-            `ext_url: ${jsonB?.response?.external_verification_redirect_url ?? "(absent)"}\n` +
-            `errors: ${JSON.stringify(jsonB?.errors ?? []).slice(0, 300)}`
-          );
-        } catch (fe: any) {
-          Alert.alert("Fetch A/B THREW", `${fe?.message}`);
-        }
-
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
           throw new Error(`No external verification URL returned for ${strategy}`);
@@ -219,17 +159,15 @@ export default function LoginScreen() {
           redirectUrl,
         );
         if (authSessionResult.type !== "success" || !("url" in authSessionResult) || !authSessionResult.url) {
-          if (authSessionResult.type === "cancel" || authSessionResult.type === "dismiss") {
-            // User cancelled — no error
-          } else {
+          if (authSessionResult.type !== "cancel" && authSessionResult.type !== "dismiss") {
             console.error("[SSO browser non-success]", strategy, authSessionResult.type);
             setError(t("login.errorOAuthFailed"));
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
           }
           return;
         }
-        const params = new URL(authSessionResult.url).searchParams;
-        const rotatingTokenNonce = params.get("rotating_token_nonce") ?? "";
+        const rotatingTokenNonce =
+          new URL(authSessionResult.url).searchParams.get("rotating_token_nonce") ?? "";
         await result.reload({ rotatingTokenNonce });
         if (result.firstFactorVerification.status === "transferable") {
           await signUp.create({ transfer: true });
@@ -251,15 +189,14 @@ export default function LoginScreen() {
         }
       } catch (err: unknown) {
         const e = err as any;
-        console.error("[SSO error]", strategy, `name: ${e?.name} | message: ${e?.message} | code: ${e?.code} | stack: ${e?.stack}`);
-        Alert.alert("SSO Error", `name: ${e?.name}\nmessage: ${e?.message}\ncode: ${e?.code}\nstack: ${e?.stack}`);
+        console.error("[SSO error]", strategy, e?.message);
         setError(t("login.errorOAuthFailed"));
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } finally {
         setLoading(false);
       }
     } catch (outerErr: unknown) {
-      Alert.alert("SSO Error", `Outer\nname: ${(outerErr as any)?.name}\nmessage: ${(outerErr as any)?.message}\ncode: ${(outerErr as any)?.code}\nstack: ${(outerErr as any)?.stack}`);
+      console.error("[SSO outer error]", outerErr);
     }
   };
 
