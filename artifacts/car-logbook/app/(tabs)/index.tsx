@@ -172,26 +172,42 @@ export default function LoginScreen() {
           `ownProps: ${Object.getOwnPropertyNames(result ?? {}).slice(0, 10).join(",")}`
         );
 
-        // Independent raw fetch — same endpoint, same params, bypass Clerk SDK entirely
+        // Fetch A: no _is_native (web path — known to work)
+        // Fetch B: with _is_native=1 + SDK headers (mimics exactly what clerk-expo sends)
+        // If B returns native_api_disabled → root cause confirmed.
+        const clerkProxyBase = process.env.EXPO_PUBLIC_CLERK_PROXY_URL ?? "";
+        const formBody = new URLSearchParams({ strategy, redirect_url: redirectUrl }).toString();
         try {
-          const directResp = await fetch(
-            `${process.env.EXPO_PUBLIC_CLERK_PROXY_URL}/v1/client/sign_ins`,
-            {
+          const [respA, respB] = await Promise.all([
+            fetch(`${clerkProxyBase}/v1/client/sign_ins`, {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: new URLSearchParams({ strategy, redirect_url: redirectUrl }).toString(),
-            }
-          );
-          const directJson = await directResp.json();
+              body: formBody,
+            }),
+            fetch(`${clerkProxyBase}/v1/client/sign_ins?_is_native=1`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "authorization": "",
+                "x-mobile": "1",
+                "x-expo-sdk-version": "2.19.31",
+              },
+              body: formBody,
+            }),
+          ]);
+          const [jsonA, jsonB] = await Promise.all([respA.json(), respB.json()]);
           Alert.alert(
-            `Direct fetch HTTP ${directResp.status}`,
-            `ext_url: ${directJson?.response?.external_verification_redirect_url ?? "(absent)"}\n` +
-            `resp.status: ${directJson?.response?.status ?? "(absent)"}\n` +
-            `errors: ${JSON.stringify(directJson?.errors ?? [])}\n` +
-            `raw: ${JSON.stringify(directJson).slice(0, 600)}`
+            `Fetch A (no _is_native) HTTP ${respA.status}`,
+            `ext_url: ${jsonA?.response?.external_verification_redirect_url ?? "(absent)"}\n` +
+            `errors: ${JSON.stringify(jsonA?.errors ?? []).slice(0, 200)}`
+          );
+          Alert.alert(
+            `Fetch B (+_is_native=1) HTTP ${respB.status}`,
+            `ext_url: ${jsonB?.response?.external_verification_redirect_url ?? "(absent)"}\n` +
+            `errors: ${JSON.stringify(jsonB?.errors ?? []).slice(0, 300)}`
           );
         } catch (fe: any) {
-          Alert.alert("Direct fetch THREW", `${fe?.message}`);
+          Alert.alert("Fetch A/B THREW", `${fe?.message}`);
         }
 
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
