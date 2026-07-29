@@ -198,6 +198,7 @@ export default function SignupScreen() {
       const redirectUrl = "car-logbook://sso-callback";
       try {
         const result = await signIn.create({ strategy, redirectUrl });
+        Alert.alert("create() result", `status: ${result?.status ?? "null"}\nextURL: ${result?.firstFactorVerification?.externalVerificationRedirectURL ?? "null"}`);
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
           throw new Error(`No external verification URL returned for ${strategy}`);
