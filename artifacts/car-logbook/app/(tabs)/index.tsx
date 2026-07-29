@@ -150,10 +150,50 @@ export default function LoginScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
+      const proxyUrl = process.env.EXPO_PUBLIC_CLERK_PROXY_URL ?? "(none)";
       try {
-        Alert.alert("SSO PRE-create", `strategy: ${strategy}\nredirectUrl: "${redirectUrl}"`);
+        Alert.alert("SSO PRE-create", `strategy: ${strategy}\nredirectUrl: "${redirectUrl}"\nproxyUrl: "${proxyUrl}"\nsignIn.status pre: ${(signIn as any)?.status ?? "(null)"}`);
+
+        const t0 = Date.now();
         const result = await signIn.create({ strategy, redirectUrl });
-        Alert.alert("SSO RAW result", JSON.stringify(result, null, 2).slice(0, 2000));
+        const elapsed = Date.now() - t0;
+
+        // Direct field access — bypasses JSON.stringify prototype-getter blindspot
+        const fv = result?.firstFactorVerification;
+        Alert.alert(
+          `SSO create() elapsed: ${elapsed}ms`,
+          `result.status: ${result?.status}\n` +
+          `result.id: ${result?.id}\n` +
+          `result.createdSessionId: ${result?.createdSessionId}\n` +
+          `fv.status: ${fv?.status}\n` +
+          `fv.strategy: ${fv?.strategy}\n` +
+          `fv.extUrl: ${String(fv?.externalVerificationRedirectURL)}\n` +
+          `Object.keys: ${Object.keys(result ?? {}).join(",")}\n` +
+          `ownProps: ${Object.getOwnPropertyNames(result ?? {}).slice(0, 10).join(",")}`
+        );
+
+        // Independent raw fetch — same endpoint, same params, bypass Clerk SDK entirely
+        try {
+          const directResp = await fetch(
+            `${process.env.EXPO_PUBLIC_CLERK_PROXY_URL}/v1/client/sign_ins`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({ strategy, redirect_url: redirectUrl }).toString(),
+            }
+          );
+          const directJson = await directResp.json();
+          Alert.alert(
+            `Direct fetch HTTP ${directResp.status}`,
+            `ext_url: ${directJson?.response?.external_verification_redirect_url ?? "(absent)"}\n` +
+            `resp.status: ${directJson?.response?.status ?? "(absent)"}\n` +
+            `errors: ${JSON.stringify(directJson?.errors ?? [])}\n` +
+            `raw: ${JSON.stringify(directJson).slice(0, 600)}`
+          );
+        } catch (fe: any) {
+          Alert.alert("Direct fetch THREW", `${fe?.message}`);
+        }
+
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
           throw new Error(`No external verification URL returned for ${strategy}`);
