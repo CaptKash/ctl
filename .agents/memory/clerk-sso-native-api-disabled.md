@@ -1,34 +1,51 @@
 ---
-name: Clerk SSO native_api_disabled — proxy fix
-description: Root cause and fix for Clerk SDK returning blank SignIn objects on production iOS builds. Fix is in clerkProxyMiddleware.ts.
+name: Clerk SSO production instance — confirmed configuration
+description: Production FAPI /v1/environment findings and current state of the SSO investigation. The native_api_disabled hypothesis was incorrect.
 ---
 
-## Root cause
-`@clerk/clerk-expo` appends `_is_native=1` to every FAPI request via its `onBeforeRequest` hook. When `_is_native=1` is present, Clerk routes the call through its "Native API" path, which requires **Native Applications** to be enabled in the Clerk dashboard. When it is not enabled, Clerk returns `errors[0].code = "native_api_disabled"`. The SDK's `onAfterResponse` handler sees this error, logs it via `console.error` (a no-op in production Hermes/RN), and silently leaves the SignIn resource in its default blank state (all fields null, no errors surfaced to the caller).
+## Production Clerk instance — confirmed facts (from /v1/environment)
 
-**Confirmed by:** raw `fetch()` to the same endpoint *without* `_is_native=1` returned a fully valid response including `external_verification_redirect_url`.
+**Instance:** ins_3DZXnlXiRxxclmNzWH1UimHKqtt  
+**FAPI domain:** clerk.ctl-car-technical-log.replit.app  
+**Workspace key:** `sk_test_*` only — production `sk_live_*` is EAS-only, not accessible from workspace.
 
-## Fix
-`clerkProxyMiddleware.ts` → `proxyReq` handler: strip `_is_native` from the URL query string before forwarding to Clerk FAPI:
-
-```typescript
-if (proxyReq.path.includes("_is_native")) {
-  const [pathname, search] = proxyReq.path.split("?");
-  const params = new URLSearchParams(search ?? "");
-  params.delete("_is_native");
-  const newSearch = params.toString();
-  proxyReq.path = newSearch ? `${pathname}?${newSearch}` : pathname;
-}
+### OAuth providers
+Both are fully enabled and not blocked:
 ```
+oauth_apple:  enabled=true, authenticatable=true, not_selectable=false, deprecated=false
+oauth_google: enabled=true, authenticatable=true, not_selectable=false, deprecated=false
+```
+Both appear in `first_factors` and `identification_strategies`.
 
-This causes Clerk to treat all SDK calls as web-path requests. The OAuth redirect URL, session data, client JWT chain, and `client.sessions` population all work identically — Clerk's web path is fully compatible with the Expo OAuth flow.
+### "Native Applications" / native_app_support
+**This field does not exist** in the production /v1/environment response. "native_app_support: not found" in startup logs = SDK looked for an undefined key. There is no Native Applications toggle on this Clerk plan. `PATCH /v1/instance` with `{"native_app_support": true}` silently ignores the field.
 
-**Why:** The proxy is the single chokepoint for all Clerk FAPI calls. Stripping here preserves the entire SDK flow: `onAfterResponse` still fires, client JWT is still saved to SecureStore, `client.sessions` is still populated, and `setActive` can find the session.
+### fraud_settings.native
+```json
+{ "device_attestation_mode": "disabled" }
+```
+This is fraud/attestation — entirely separate from OAuth. Irrelevant to sign-in.
+
+### clerk_js_version
+`display_config.clerk_js_version = "6"` — dashboard expects v6, but `@clerk/clerk-js` in the lock file is `5.125.10`. Mismatch exists; for native builds the bundled version wins.
+
+## SDK version history
+`@clerk/clerk-expo`, `@clerk/clerk-js`, and `@clerk/shared` (mobile tier) have been **identical across all of git history**:
+- `@clerk/clerk-expo`: always `2.19.31`
+- `@clerk/clerk-js`: always `5.125.10`
+- `@clerk/shared` (mobile): always `3.47.5`
+
+The "dependency cleanup" audit bumped server-side packages only (`@clerk/backend`, `@clerk/express`, `@clerk/shared@4.x`). No mobile SDK regression to pin back to.
+
+## Current hypothesis (as of build 102)
+Proxy logs show **zero** `POST /v1/client/sign_ins` hits from any device build (builds 91–102). The SDK is either:
+(a) not calling fetch at all before returning null/null — suggests internal bail-out before the network call (captcha, SDK state machine, or internal config check)
+(b) calling a URL that doesn't go through the proxy
+
+Build 102 has a global fetch interceptor in `_layout.tsx` (globalThis.fetch override) that alerts the URL for any call containing `sign_in`, `__clerk`, `clerk.dev`, or `frontend-api`. If it doesn't fire, the SDK bails before fetch.
+
+## _is_native=1 stripping
+Still in place in `clerkProxyMiddleware.ts`. Harmless. The original "native_api_disabled" root cause was incorrect — no such gate exists on this instance.
 
 ## Why raw-fetch bypass is wrong
-If you bypass `signIn.create()` with raw fetch, the SDK's `onAfterResponse` never fires for those calls → client JWT (stored under `__clerk_client_jwt` in SecureStore) is never updated → subsequent SDK calls send stale/empty JWT → `clerk.client.sessions` is never populated → `setActive({ session: id })` does `sessions.find(...)` which returns null → sign-in fails silently.
-
-## Keys
-- Replit workspace has `sk_test_*` dev keys only. Production `pk_live_*` / `sk_live_*` live in EAS environment variables. Cannot call Clerk Backend API for production instance from this workspace.
-- The production Clerk instance does NOT have Native Applications enabled (as of the fix date).
-- Stripping `_is_native=1` at the proxy is the permanent fix — no Clerk dashboard change needed.
+If you bypass `signIn.create()` with raw fetch, the SDK's `onAfterResponse` never fires → `__clerk_client_jwt` in SecureStore is never updated → subsequent SDK calls send stale JWT → `clerk.client.sessions` is never populated → `setActive` returns null → sign-in fails silently.
