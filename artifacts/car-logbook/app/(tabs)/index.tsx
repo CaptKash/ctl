@@ -158,7 +158,7 @@ export default function LoginScreen() {
             ? `len ${storedJwt.length}\n${storedJwt.slice(0, 60)}…`
             : "null (no stored JWT)"
         );
-        const result = await signIn.create({ strategy, redirectUrl });
+        const result = await signIn.create({ strategy, redirectUrl, actionCompleteRedirectUrl: redirectUrl });
         Alert.alert("create() result", `status: ${result?.status ?? "null"}\nextURL: ${result?.firstFactorVerification?.externalVerificationRedirectURL ?? "null"}`);
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {

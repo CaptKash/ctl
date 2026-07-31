@@ -37,12 +37,34 @@ This is fraud/attestation — entirely separate from OAuth. Irrelevant to sign-i
 
 The "dependency cleanup" audit bumped server-side packages only (`@clerk/backend`, `@clerk/express`, `@clerk/shared@4.x`). No mobile SDK regression to pin back to.
 
-## Current hypothesis (as of build 102)
-Proxy logs show **zero** `POST /v1/client/sign_ins` hits from any device build (builds 91–102). The SDK is either:
-(a) not calling fetch at all before returning null/null — suggests internal bail-out before the network call (captcha, SDK state machine, or internal config check)
-(b) calling a URL that doesn't go through the proxy
+## Root cause — confirmed (build 103)
 
-Build 102 has a global fetch interceptor in `_layout.tsx` (globalThis.fetch override) that alerts the URL for any call containing `sign_in`, `__clerk`, `clerk.dev`, or `frontend-api`. If it doesn't fire, the SDK bails before fetch.
+`signIn.create({ strategy, redirectUrl })` called without `actionCompleteRedirectUrl`.
+
+Inside clerk-js v5 headless `sso()` method (called for all OAuth strategies):
+```javascript
+let { strategy, redirectUrl: i, redirectCallbackUrl: n } = e;
+// public redirectUrl     → n (redirectCallbackUrl) → buildUrlWithAuth(n)
+// public actionCompleteRedirectUrl → i (redirectUrl) → try { new URL(i) } catch { window.location.origin + i }
+let e = i;  // i = undefined when actionCompleteRedirectUrl not passed
+try { new URL(i) }      // new URL(undefined) throws
+catch { e = window.location.origin + i }  // window.location is null on RN → TypeError in catch
+```
+
+The TypeError inside the catch block propagates to the `ny()` wrapper which swallows all exceptions silently → SignIn resource stays blank → `status: null`, `externalVerificationRedirectURL: null`, **no fetch call ever made**.
+
+**Fix (build 103):** Pass `actionCompleteRedirectUrl: redirectUrl` (same native scheme URL). This lets `new URL(redirectUrl)` succeed in the try block, skipping the `window.location` reference entirely.
+
+```typescript
+await signIn.create({
+  strategy,
+  redirectUrl,
+  actionCompleteRedirectUrl: redirectUrl,  // ← prevents window.location crash on RN
+});
+```
+
+`redirectCallbackUrl` is NOT a public API parameter (TypeScript error if you try to pass it).
+The public API params for OAuth signIn.create() are: `strategy`, `redirectUrl`, `actionCompleteRedirectUrl`, `identifier`, `oidcPrompt`, `oidcLoginHint`.
 
 ## _is_native=1 stripping
 Still in place in `clerkProxyMiddleware.ts`. Harmless. The original "native_api_disabled" root cause was incorrect — no such gate exists on this instance.
