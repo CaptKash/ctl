@@ -120,6 +120,16 @@ export function clerkProxyMiddleware(): RequestHandler {
           const newSearch = params.toString();
           proxyReq.path = newSearch ? `${pathname}?${newSearch}` : pathname;
         }
+
+        // Log the authorization header the SDK sends for SSO requests so we
+        // can see whether it's empty, a valid client JWT, or a stale token.
+        if (proxyReq.path.includes("/client/sign_in")) {
+          const authHeader = proxyReq.getHeader("authorization") as string | undefined;
+          const preview = authHeader
+            ? `${String(authHeader).slice(0, 50)}… (len ${String(authHeader).length})`
+            : "(empty)";
+          console.log(`[clerk-proxy auth] ${req.method} ${proxyReq.path} | authorization: ${preview}`);
+        }
       },
       // Clerk's dynamic Frontend API responses (/v1/environment, /v1/client,
       // JWKS, ...) arrive without a Content-Length, so relaying them would use
@@ -138,6 +148,10 @@ export function clerkProxyMiddleware(): RequestHandler {
           CACHEABLE_PATHS.has(clerkPath);
 
         const headers = { ...proxyRes.headers };
+        // Prevent iOS NSURLCache from serving a stale cached error/empty response
+        // from earlier failed SSO attempts. Clerk FAPI responses are session-specific
+        // and must never be served from cache.
+        headers["cache-control"] = "no-store";
         // Transfer-Encoding/Connection are hop-by-hop (RFC 7230 §6.1).
         delete headers["transfer-encoding"];
         delete headers["connection"];

@@ -1,6 +1,7 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -149,6 +150,14 @@ export default function LoginScreen() {
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
       try {
+        const storedJwt = await SecureStore.getItemAsync("__clerk_client_jwt");
+        await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
+        Alert.alert(
+          "JWT before create()",
+          storedJwt
+            ? `len ${storedJwt.length}\n${storedJwt.slice(0, 60)}…`
+            : "null (no stored JWT)"
+        );
         const result = await signIn.create({ strategy, redirectUrl });
         Alert.alert("create() result", `status: ${result?.status ?? "null"}\nextURL: ${result?.firstFactorVerification?.externalVerificationRedirectURL ?? "null"}`);
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
