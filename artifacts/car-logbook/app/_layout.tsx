@@ -17,39 +17,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import * as WebBrowser from "expo-web-browser";
-import { Alert } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
-
-// Global fetch interceptor — captures every URL the Clerk SDK calls so we can
-// see whether signIn.create() reaches the network at all, and which URL it
-// targets (proxy or direct Clerk FAPI). Runs once at module load; the
-// guard prevents double-wrapping across hot reloads.
-if (!(globalThis as any).__clerkFetchIntercepted) {
-  (globalThis as any).__clerkFetchIntercepted = true;
-  const _origFetch = globalThis.fetch;
-  (globalThis as any).fetch = async function (
-    input: RequestInfo,
-    init?: RequestInit
-  ) {
-    const url =
-      typeof input === "string"
-        ? input
-        : (input as Request).url ?? "";
-    if (
-      url.includes("sign_in") ||
-      url.includes("__clerk") ||
-      url.includes("clerk.dev") ||
-      url.includes("frontend-api")
-    ) {
-      Alert.alert(
-        "fetch intercepted",
-        `${(init?.method ?? "GET").toUpperCase()} ${url.slice(0, 140)}`
-      );
-    }
-    return _origFetch.call(this, input, init);
-  };
-}
 
 import { initI18n } from "@/lib/i18n";
 import { ErrorBoundary } from "@/components/ErrorBoundary";

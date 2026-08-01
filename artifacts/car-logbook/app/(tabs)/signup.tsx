@@ -3,7 +3,6 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,9 +16,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
 import { useSignIn, useSignUp, isClerkAPIResponseError } from "@clerk/clerk-expo";
+import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import { useTranslation } from "react-i18next";
-import * as SecureStore from "expo-secure-store";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { SIGNUP_NAME_KEY } from "@/context/AuthContext";
@@ -197,16 +196,7 @@ export default function SignupScreen() {
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
       try {
-        const storedJwt = await SecureStore.getItemAsync("__clerk_client_jwt");
-        await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
-        Alert.alert(
-          "JWT before create()",
-          storedJwt
-            ? `len ${storedJwt.length}\n${storedJwt.slice(0, 60)}…`
-            : "null (no stored JWT)"
-        );
         const result = await signIn.create({ strategy, redirectUrl, actionCompleteRedirectUrl: redirectUrl });
-        Alert.alert("create() result", `status: ${result?.status ?? "null"}\nextURL: ${result?.firstFactorVerification?.externalVerificationRedirectURL ?? "null"}`);
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
           throw new Error(`No external verification URL returned for ${strategy}`);
