@@ -3,6 +3,7 @@
 - [CTL upcoming reminder labels](ctl-upcoming-reminders.md) — all maintenance-table upcoming cards share one "Next Service" label; repair vs service indistinguishable in storage (no source col, no migrations).
 - [Nearby-service filter pill clipping](nearby-service-filter-pills.md) — horizontal ScrollView collapses cross-axis on iOS, clipping pill text; use a wrapping row View for short chip/filter rows.
 - [CTL 2.0.0 release state](ctl-2.0.0-release.md) — summary of what was fixed, shipped, and remaining tech debt after v2.0.0 release.
+- [Pre-release Clerk blockers](clerk-pre-release-blockers.md) — two things MUST be done before next App Store release: migrate existing users + set up custom Google/Apple OAuth credentials.
 - [EAS build git index lock workaround](eas-build-git-lock-workaround.md) — use /tmp/git wrapper (skips stash/add/reset) + PATH=/tmp:$PATH when sandbox blocks .git/index.lock deletion.
 - [iOS SSO HTTPS scheme bug](ios-sso-https-scheme-bug.md) — never use https:// as redirectUrl in startSSOFlow; iOS rejects "https" as callbackURLScheme and throws immediately.
 - [Clerk production redirect URL config](clerk-prod-redirect-urls.md) — prod Clerk allowlist is empty by default; every startSSOFlow redirectUrl must be registered via sk_live key before it works.
