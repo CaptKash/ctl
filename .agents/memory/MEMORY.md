@@ -8,3 +8,4 @@
 - [iOS SSO HTTPS scheme bug](ios-sso-https-scheme-bug.md) — never use https:// as redirectUrl in startSSOFlow; iOS rejects "https" as callbackURLScheme and throws immediately.
 - [Clerk production redirect URL config](clerk-prod-redirect-urls.md) — prod Clerk allowlist is empty by default; every startSSOFlow redirectUrl must be registered via sk_live key before it works.
 - [Clerk SSO stale-closure fix](clerk-sso-stale-closure.md) — useSSO/startSSOFlow has stale-closure bug in Expo; call signIn.create() directly and use its return value instead.
+- [Clerk SSO stale JWT cleanup](clerk-sso-stale-jwt-cleanup.md) — must delete __clerk_client_jwt from SecureStore before signIn.create() for OAuth or SDK silently bails pre-fetch on cross-tenant JWT.

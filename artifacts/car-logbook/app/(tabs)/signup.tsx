@@ -196,6 +196,7 @@ export default function SignupScreen() {
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
       try {
+        await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
         const result = await signIn.create({ strategy, redirectUrl, actionCompleteRedirectUrl: redirectUrl });
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {

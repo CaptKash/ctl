@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
 import { useSignIn, useSignUp } from "@clerk/clerk-expo";
 import { isClerkAPIResponseError } from "@clerk/clerk-expo";
+import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import { useColors, useTheme } from "@/context/ThemeContext";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -148,6 +149,7 @@ export default function LoginScreen() {
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
       try {
+        await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
         const result = await signIn.create({ strategy, redirectUrl, actionCompleteRedirectUrl: redirectUrl });
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
