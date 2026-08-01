@@ -319,6 +319,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!succeeded && !cancelled && attempt < 5) {
         const delay = 1000 * Math.pow(2, attempt);
         retryTimer = setTimeout(() => { void attemptSync(attempt + 1); }, delay);
+      } else if (!succeeded && !cancelled) {
+        // All retries exhausted — sign out to avoid a permanently stuck loading screen.
+        console.error("[Clerk sync] all sync retries exhausted, signing out");
+        clerk.signOut().catch(() => {});
       }
     };
 
@@ -367,7 +371,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const isLoading = !clerkLoaded || !bootDone || initialSyncPending;
+  const isLoading = !clerkLoaded || !bootDone || initialSyncPending || (isSignedIn && !user);
 
   return (
     <AuthContext.Provider
