@@ -23,7 +23,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import type { RequestHandler, Request } from "express";
 import type { IncomingHttpHeaders } from "http";
 
-const CLERK_FAPI = "https://frontend-api.clerk.dev";
+const CLERK_FAPI = "https://charmed-garfish-1.clerk.accounts.dev";
 export const CLERK_PROXY_PATH = "/api/__clerk";
 
 // Paths that are safe to cache in-memory (rarely change, same for all clients).
