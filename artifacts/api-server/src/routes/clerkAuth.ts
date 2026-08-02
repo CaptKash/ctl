@@ -20,16 +20,64 @@ const CLERK_API = "https://api.clerk.com/v1";
 const CLERK_MANAGED_SENTINEL = "__CLERK_MANAGED__";
 
 /**
+ * Derive the expected JWT `iss` (issuer) URL from the Clerk publishable key.
+ * Publishable keys encode the FAPI hostname in base64url after the `pk_test_`
+ * / `pk_live_` prefix, followed by a trailing `$`. Stripping the prefix,
+ * decoding, and prepending `https://` gives the canonical issuer.
+ *
+ * Example: pk_test_Y2hhcm1lZC1... → "charmed-garfish-1.clerk.accounts.dev"
+ *          → expectedIss = "https://charmed-garfish-1.clerk.accounts.dev"
+ */
+function expectedClerkIssuer(publishableKey: string): string | null {
+  try {
+    const b64 = publishableKey.replace(/^pk_(test|live)_/, "");
+    const decoded = Buffer.from(b64, "base64url").toString("utf8").replace(/\$$/, "");
+    if (!decoded.includes(".")) return null;
+    return `https://${decoded}`;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Authentication boundary for `/sync-user`: require a valid Clerk session,
  * but do NOT require a local users row (the whole point of sync-user is to
  * create one). This is intentionally narrower than the dual-auth `requireAuth`
  * in middlewares/auth.ts.
+ *
+ * Includes an explicit `iss` check: @clerk/express verifies signatures against
+ * whichever JWKS the token's own `iss` points to, so without this guard a JWT
+ * from any Clerk tenant would pass verification. We hard-reject anything whose
+ * issuer doesn't match the FAPI domain encoded in CLERK_PUBLISHABLE_KEY.
  */
 function requireClerkSession(req: Request, res: Response, next: NextFunction) {
   if (!process.env.CLERK_SECRET_KEY || !process.env.CLERK_PUBLISHABLE_KEY) {
     return res
       .status(503)
       .json({ error: "Clerk authentication is not configured on this server." });
+  }
+
+  // Explicit issuer check — must run before trusting auth.userId.
+  const rawToken = req.headers.authorization?.replace(/^Bearer\s+/i, "");
+  if (rawToken) {
+    try {
+      const segment = rawToken.split(".")[1];
+      const payload = JSON.parse(
+        Buffer.from(segment, "base64url").toString("utf8"),
+      ) as Record<string, unknown>;
+      const expected = expectedClerkIssuer(process.env.CLERK_PUBLISHABLE_KEY!);
+      const actual = payload.iss as string | undefined;
+      if (expected && actual !== expected) {
+        console.error(
+          "[requireClerkSession] ISS MISMATCH — expected:", expected,
+          "| got:", actual ?? "NONE",
+          "— rejecting token from wrong Clerk tenant",
+        );
+        return res.status(401).json({ error: "A valid Clerk session is required." });
+      }
+    } catch {
+      // Malformed JWT — let getAuth() handle it below.
+    }
   }
 
   const auth = getAuth(req);
