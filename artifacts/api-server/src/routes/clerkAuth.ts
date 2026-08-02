@@ -31,6 +31,34 @@ function requireClerkSession(req: Request, res: Response, next: NextFunction) {
       .status(503)
       .json({ error: "Clerk authentication is not configured on this server." });
   }
+
+  // Production-only: decode JWT claims WITHOUT verification so we can log
+  // the exact azp/iss/aud values — the most likely cause of userId NULL.
+  // This runs before getAuth() so we see the claims even on a failed verify.
+  if (process.env.NODE_ENV === "production") {
+    const rawToken = req.headers.authorization?.replace(/^Bearer\s+/i, "");
+    if (rawToken) {
+      try {
+        const segment = rawToken.split(".")[1];
+        const payload = JSON.parse(
+          Buffer.from(segment, "base64url").toString("utf8"),
+        ) as Record<string, unknown>;
+        console.error(
+          "[requireClerkSession] JWT claims — azp:",
+          payload.azp ?? "NONE",
+          "| iss:",
+          payload.iss ?? "NONE",
+          "| aud:",
+          JSON.stringify(payload.aud) ?? "NONE",
+          "| exp:",
+          payload.exp ?? "NONE",
+        );
+      } catch {
+        console.error("[requireClerkSession] JWT payload decode failed — token may be malformed");
+      }
+    }
+  }
+
   const auth = getAuth(req);
   const authHeader = req.headers.authorization;
   if (process.env.NODE_ENV !== "production") console.log("[requireClerkSession] auth.userId:", auth?.userId ?? "NULL", "| header prefix:", authHeader ? authHeader.substring(0, 20) + "..." : "MISSING");
