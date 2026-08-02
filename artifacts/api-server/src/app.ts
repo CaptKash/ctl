@@ -58,7 +58,14 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // Safe even when no Clerk session is present — getAuth() simply returns
 // userId: null and the dual-auth path falls back to legacy JWT.
 if (process.env.CLERK_SECRET_KEY && process.env.CLERK_PUBLISHABLE_KEY) {
-  app.use(clerkMiddleware());
+  // jwtKey enables local JWT verification — no outbound JWKS network call
+  // on every request. Without it, @clerk/express fetches the JWKS from
+  // Clerk's servers each time, and any network hiccup silently returns
+  // userId: null. Set via CLERK_JWT_KEY secret (Clerk dashboard →
+  // Configure → API Keys → JWT public key).
+  app.use(clerkMiddleware({
+    jwtKey: process.env.CLERK_JWT_KEY,
+  }));
 } else {
   // Loud warning: if Clerk keys are absent in any environment that's
   // expected to support new sign-ins (i.e. anything beyond Phase 0/1),
