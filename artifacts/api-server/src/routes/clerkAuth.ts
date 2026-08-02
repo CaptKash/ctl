@@ -58,6 +58,8 @@ function requireClerkSession(req: Request, res: Response, next: NextFunction) {
   }
 
   // Explicit issuer check — must run before trusting auth.userId.
+  // CLERK_EXPECTED_ISSUER takes precedence over derivation from CLERK_PUBLISHABLE_KEY
+  // so the check works even when CLERK_PUBLISHABLE_KEY still holds a stale value.
   const rawToken = req.headers.authorization?.replace(/^Bearer\s+/i, "");
   if (rawToken) {
     try {
@@ -65,7 +67,9 @@ function requireClerkSession(req: Request, res: Response, next: NextFunction) {
       const payload = JSON.parse(
         Buffer.from(segment, "base64url").toString("utf8"),
       ) as Record<string, unknown>;
-      const expected = expectedClerkIssuer(process.env.CLERK_PUBLISHABLE_KEY!);
+      const expected =
+        process.env.CLERK_EXPECTED_ISSUER ||
+        expectedClerkIssuer(process.env.CLERK_PUBLISHABLE_KEY!);
       const actual = payload.iss as string | undefined;
       if (expected && actual !== expected) {
         console.error(

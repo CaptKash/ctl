@@ -42,6 +42,7 @@ REVENUECAT_TEST_STORE_APP_ID = "app58d0059e08"
 REVENUECAT_APPLE_APP_STORE_APP_ID = "app7c6bc0a718"
 REVENUECAT_GOOGLE_PLAY_STORE_APP_ID = "appcb2fcb6c98"
 JWT_SECRET = "ctl-logbook-secret-2025"
+CLERK_EXPECTED_ISSUER = "https://charmed-garfish-1.clerk.accounts.dev"
 
 [userenv.production]
 ALLOWED_ORIGINS = "https://ctl-car-technical-log.replit.app"
