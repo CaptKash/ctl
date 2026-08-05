@@ -114,11 +114,13 @@ interface ClerkUser {
 async function clerkApi<T = unknown>(
   path: string,
   init: RequestInit = {},
+  secretKeyOverride?: string,
 ): Promise<{ status: number; body: T | { errors?: unknown } }> {
+  const key = secretKeyOverride ?? process.env.CLERK_SECRET_KEY;
   const r = await fetch(`${CLERK_API}${path}`, {
     ...init,
     headers: {
-      Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+      Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
       ...(init.headers ?? {}),
     },
@@ -263,8 +265,14 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       clerkFirstName = userInfoData.given_name ?? null;
       clerkLastName = userInfoData.family_name ?? null;
     } else {
-      // Backend API fallback (requires correct CLERK_SECRET_KEY).
-      const clerkResp = await clerkApi<ClerkUser>(`/users/${clerkUserId}`);
+      // Backend API fallback. CLERK_LOOKUP_SECRET_KEY is a dedicated secret
+      // for user lookups — it always uses the shared Replit Secret value and
+      // is not overridden by any production-specific deployment secret, unlike
+      // CLERK_SECRET_KEY which the Replit deployment environment may override
+      // with a live-instance key that doesn't match the dev-instance users.
+      const lookupKey =
+        process.env.CLERK_LOOKUP_SECRET_KEY ?? process.env.CLERK_SECRET_KEY;
+      const clerkResp = await clerkApi<ClerkUser>(`/users/${clerkUserId}`, {}, lookupKey);
       if (clerkResp.status >= 400) {
         console.error(
           "[sync-user] Clerk getUser failed:",
