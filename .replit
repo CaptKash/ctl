@@ -32,7 +32,7 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-RESET_BASE_URL = "https://e4258cb0-84c7-443c-ad62-0aa669b73cb1-00-48k7an1ynz04.spock.replit.dev"
+RESET_BASE_URL = "https://ctl-car-technical-log.replit.app"
 FROM_EMAIL = "CTL App <ctl.support@inroomstudio.com>"
 EXPO_PUBLIC_REVENUECAT_TEST_API_KEY = "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ"
 EXPO_PUBLIC_REVENUECAT_IOS_API_KEY = "appl_LRjDIRTvidTYYIqipELDpvRAyjX"
