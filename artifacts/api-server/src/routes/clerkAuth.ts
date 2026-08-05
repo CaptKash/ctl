@@ -272,7 +272,13 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       // with a live-instance key that doesn't match the dev-instance users.
       const lookupKey =
         process.env.CLERK_LOOKUP_SECRET_KEY ?? process.env.CLERK_SECRET_KEY;
+      console.error(
+        "[sync-user] backend fallback: userId:", clerkUserId,
+        "| key_prefix:", lookupKey?.slice(0, 10) ?? "MISSING",
+        "| LOOKUP_KEY_set:", !!process.env.CLERK_LOOKUP_SECRET_KEY,
+      );
       const clerkResp = await clerkApi<ClerkUser>(`/users/${clerkUserId}`, {}, lookupKey);
+      console.error("[sync-user] backend fallback: status:", clerkResp.status);
       if (clerkResp.status >= 400) {
         console.error(
           "[sync-user] Clerk getUser failed:",
@@ -286,7 +292,14 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       emailVerified = isPrimaryEmailVerified(clerkUser);
       clerkFirstName = clerkUser.first_name ?? null;
       clerkLastName = clerkUser.last_name ?? null;
+      console.error(
+        "[sync-user] backend fallback: email:", email,
+        "| verified:", emailVerified,
+        "| name:", clerkFirstName, clerkLastName,
+      );
     }
+
+    console.error("[sync-user] post-lookup: email:", email, "| emailVerified:", emailVerified);
 
     if (!email) {
       return res.status(400).json({ error: "Clerk account has no email address." });
