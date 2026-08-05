@@ -272,13 +272,7 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       // with a live-instance key that doesn't match the dev-instance users.
       const lookupKey =
         process.env.CLERK_LOOKUP_SECRET_KEY ?? process.env.CLERK_SECRET_KEY;
-      console.error(
-        "[sync-user] backend fallback: userId:", clerkUserId,
-        "| key_prefix:", lookupKey?.slice(0, 10) ?? "MISSING",
-        "| LOOKUP_KEY_set:", !!process.env.CLERK_LOOKUP_SECRET_KEY,
-      );
       const clerkResp = await clerkApi<ClerkUser>(`/users/${clerkUserId}`, {}, lookupKey);
-      console.error("[sync-user] backend fallback: status:", clerkResp.status);
       if (clerkResp.status >= 400) {
         console.error(
           "[sync-user] Clerk getUser failed:",
@@ -292,14 +286,7 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       emailVerified = isPrimaryEmailVerified(clerkUser);
       clerkFirstName = clerkUser.first_name ?? null;
       clerkLastName = clerkUser.last_name ?? null;
-      console.error(
-        "[sync-user] backend fallback: email:", email,
-        "| verified:", emailVerified,
-        "| name:", clerkFirstName, clerkLastName,
-      );
     }
-
-    console.error("[sync-user] post-lookup: email:", email, "| emailVerified:", emailVerified);
 
     if (!email) {
       return res.status(400).json({ error: "Clerk account has no email address." });
@@ -331,12 +318,6 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       .where(eq(usersTable.email, email))
       .limit(1);
 
-    console.error(
-      "[sync-user] byEmail:", byEmail
-        ? `id=${byEmail.id} storedClerkId=${byEmail.clerkUserId ?? "null"} match=${byEmail.clerkUserId === clerkUserId}`
-        : "NOT FOUND"
-    );
-
     if (byEmail) {
       if (byEmail.clerkUserId && byEmail.clerkUserId !== clerkUserId) {
         // Before hard-rejecting, verify the stored clerkUserId still exists in
@@ -346,13 +327,9 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
         const lookupKey =
           process.env.CLERK_LOOKUP_SECRET_KEY ?? process.env.CLERK_SECRET_KEY;
         const oldUserResp = await clerkApi(`/users/${byEmail.clerkUserId}`, {}, lookupKey);
-        console.error(
-          "[sync-user] old clerkId check:", byEmail.clerkUserId,
-          "→ status:", oldUserResp.status
-        );
         if (oldUserResp.status === 404 && emailVerified) {
           // Old identity is gone — re-link to the new Clerk user.
-          console.error("[sync-user] re-linking stale clerkUserId →", clerkUserId);
+          console.error("[sync-user] re-linking stale clerkUserId", byEmail.clerkUserId, "→", clerkUserId);
           const [relinked] = await db
             .update(usersTable)
             .set({ clerkUserId })
@@ -364,12 +341,8 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
               isAdmin: usersTable.isAdmin,
               passwordUpgradeRequired: usersTable.passwordUpgradeRequired,
             });
-          if (relinked) {
-            console.error("[sync-user] RESPONSE 200 re-linked id=", relinked.id);
-            return res.json({ user: relinked });
-          }
+          if (relinked) return res.json({ user: relinked });
         }
-        console.error("[sync-user] RESPONSE 409 — cross-link conflict");
         return res.status(409).json({
           error: "This email is already linked to a different Clerk account.",
         });
@@ -387,11 +360,7 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
           .from(usersTable)
           .where(eq(usersTable.id, byEmail.id))
           .limit(1);
-        console.error("[sync-user] fast-path u:", u ? `id=${u.id} name=${u.name}` : "UNDEFINED");
-        if (u) {
-          console.error("[sync-user] RESPONSE 200 fast-path");
-          return res.json({ user: u });
-        }
+        if (u) return res.json({ user: u });
       }
       if (!emailVerified) {
         return res.status(403).json({
@@ -437,7 +406,6 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
     }
 
     // 4. Brand-new Clerk-native user: insert.
-    console.error("[sync-user] reaching INSERT path for email:", email);
     try {
       const [created] = await db
         .insert(usersTable)
@@ -455,7 +423,6 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
           isAdmin: usersTable.isAdmin,
           passwordUpgradeRequired: usersTable.passwordUpgradeRequired,
         });
-      console.error("[sync-user] RESPONSE 201 INSERT created:", created ? `id=${created.id}` : "UNDEFINED");
       return res.status(201).json({ user: created });
     } catch (err) {
       // Unique-violation race: a concurrent sync-user beat us to the insert.
