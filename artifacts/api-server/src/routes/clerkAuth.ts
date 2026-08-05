@@ -331,8 +331,15 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       .where(eq(usersTable.email, email))
       .limit(1);
 
+    console.error(
+      "[sync-user] byEmail:", byEmail
+        ? `id=${byEmail.id} storedClerkId=${byEmail.clerkUserId ?? "null"} match=${byEmail.clerkUserId === clerkUserId}`
+        : "NOT FOUND"
+    );
+
     if (byEmail) {
       if (byEmail.clerkUserId && byEmail.clerkUserId !== clerkUserId) {
+        console.error("[sync-user] RESPONSE 409 — cross-link conflict");
         return res.status(409).json({
           error: "This email is already linked to a different Clerk account.",
         });
@@ -350,7 +357,11 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
           .from(usersTable)
           .where(eq(usersTable.id, byEmail.id))
           .limit(1);
-        if (u) return res.json({ user: u });
+        console.error("[sync-user] fast-path u:", u ? `id=${u.id} name=${u.name}` : "UNDEFINED");
+        if (u) {
+          console.error("[sync-user] RESPONSE 200 fast-path");
+          return res.json({ user: u });
+        }
       }
       if (!emailVerified) {
         return res.status(403).json({
@@ -396,6 +407,7 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
     }
 
     // 4. Brand-new Clerk-native user: insert.
+    console.error("[sync-user] reaching INSERT path for email:", email);
     try {
       const [created] = await db
         .insert(usersTable)
@@ -413,6 +425,7 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
           isAdmin: usersTable.isAdmin,
           passwordUpgradeRequired: usersTable.passwordUpgradeRequired,
         });
+      console.error("[sync-user] RESPONSE 201 INSERT created:", created ? `id=${created.id}` : "UNDEFINED");
       return res.status(201).json({ user: created });
     } catch (err) {
       // Unique-violation race: a concurrent sync-user beat us to the insert.
