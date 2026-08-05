@@ -339,6 +339,36 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
 
     if (byEmail) {
       if (byEmail.clerkUserId && byEmail.clerkUserId !== clerkUserId) {
+        // Before hard-rejecting, verify the stored clerkUserId still exists in
+        // the current Clerk instance. If it returns 404, the account belongs to
+        // a retired tenant (e.g. the old Replit-managed Clerk) and re-linking
+        // to the new identity is safe — provided the incoming email is verified.
+        const lookupKey =
+          process.env.CLERK_LOOKUP_SECRET_KEY ?? process.env.CLERK_SECRET_KEY;
+        const oldUserResp = await clerkApi(`/users/${byEmail.clerkUserId}`, {}, lookupKey);
+        console.error(
+          "[sync-user] old clerkId check:", byEmail.clerkUserId,
+          "→ status:", oldUserResp.status
+        );
+        if (oldUserResp.status === 404 && emailVerified) {
+          // Old identity is gone — re-link to the new Clerk user.
+          console.error("[sync-user] re-linking stale clerkUserId →", clerkUserId);
+          const [relinked] = await db
+            .update(usersTable)
+            .set({ clerkUserId })
+            .where(eq(usersTable.id, byEmail.id))
+            .returning({
+              id: usersTable.id,
+              name: usersTable.name,
+              email: usersTable.email,
+              isAdmin: usersTable.isAdmin,
+              passwordUpgradeRequired: usersTable.passwordUpgradeRequired,
+            });
+          if (relinked) {
+            console.error("[sync-user] RESPONSE 200 re-linked id=", relinked.id);
+            return res.json({ user: relinked });
+          }
+        }
         console.error("[sync-user] RESPONSE 409 — cross-link conflict");
         return res.status(409).json({
           error: "This email is already linked to a different Clerk account.",
