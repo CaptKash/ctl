@@ -212,35 +212,89 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
       .limit(1);
     if (linked) return res.json({ user: linked });
 
-    // 2. Fetch Clerk profile (authoritative email + name).
-    const clerkResp = await clerkApi<ClerkUser>(`/users/${clerkUserId}`);
-    if (clerkResp.status >= 400) {
-      console.error(
-        "[sync-user] Clerk getUser failed:",
-        clerkResp.status,
-        clerkResp.body,
-      );
-      return res.status(502).json({ error: "Could not load Clerk profile." });
+    // 2. Fetch Clerk profile via the FAPI OAuth userinfo endpoint.
+    //
+    // We intentionally avoid clerkApi(/users/${clerkUserId}) here because
+    // that call requires CLERK_SECRET_KEY to point to the exact same Clerk
+    // instance the mobile app uses (dev vs prod). In practice the production
+    // deployment secret has been difficult to update reliably, so we fall
+    // back to Clerk's standard OAuth 2.0 userinfo endpoint instead — it
+    // accepts the user's own session token (already present in the request)
+    // and returns email + name without any backend secret.
+    const rawToken = (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+    const fapiBase =
+      process.env.CLERK_EXPECTED_ISSUER ||
+      expectedClerkIssuer(process.env.CLERK_PUBLISHABLE_KEY ?? "");
+
+    type UserInfoPayload = {
+      sub?: string;
+      email?: string;
+      email_verified?: boolean;
+      name?: string;
+      given_name?: string;
+      family_name?: string;
+    };
+
+    let userInfoData: UserInfoPayload | null = null;
+    if (fapiBase && rawToken) {
+      try {
+        const uiResp = await fetch(`${fapiBase}/oauth/userinfo`, {
+          headers: { Authorization: `Bearer ${rawToken}` },
+        });
+        if (uiResp.ok) {
+          userInfoData = (await uiResp.json()) as UserInfoPayload;
+        } else {
+          console.error("[sync-user] FAPI userinfo status:", uiResp.status);
+        }
+      } catch (e) {
+        console.error("[sync-user] FAPI userinfo fetch error:", e);
+      }
     }
-    const clerkUser = clerkResp.body as ClerkUser;
-    const email = pickPrimaryEmail(clerkUser);
+
+    // Fall back to Clerk Backend API if FAPI userinfo failed.
+    let email: string | null = null;
+    let clerkFirstName: string | null = null;
+    let clerkLastName: string | null = null;
+    let emailVerified = false;
+
+    if (userInfoData?.email) {
+      email = userInfoData.email.toLowerCase().trim();
+      emailVerified = userInfoData.email_verified ?? false;
+      clerkFirstName = userInfoData.given_name ?? null;
+      clerkLastName = userInfoData.family_name ?? null;
+    } else {
+      // Backend API fallback (requires correct CLERK_SECRET_KEY).
+      const clerkResp = await clerkApi<ClerkUser>(`/users/${clerkUserId}`);
+      if (clerkResp.status >= 400) {
+        console.error(
+          "[sync-user] Clerk getUser failed:",
+          clerkResp.status,
+          clerkResp.body,
+        );
+        return res.status(502).json({ error: "Could not load Clerk profile." });
+      }
+      const clerkUser = clerkResp.body as ClerkUser;
+      email = pickPrimaryEmail(clerkUser);
+      emailVerified = isPrimaryEmailVerified(clerkUser);
+      clerkFirstName = clerkUser.first_name ?? null;
+      clerkLastName = clerkUser.last_name ?? null;
+    }
+
     if (!email) {
       return res.status(400).json({ error: "Clerk account has no email address." });
     }
+
     // Name source priority:
-    //   1. Clerk's first_name/last_name (set when the Clerk instance has the
-    //      name fields enabled in its sign-up schema).
+    //   1. Clerk's first_name/last_name (from userinfo or backend API).
     //   2. Optional `name` in the request body — the mobile signup screen
-    //      passes the name the user typed at sign-up time. Used because the
-    //      Replit-managed Clerk instance does NOT accept first/last name on
-    //      signUp.create, so we'd otherwise lose the user's typed name.
+    //      passes the name the user typed at sign-up time.
     //   3. Email local-part as last-resort fallback.
     const bodyName =
       typeof (req.body as { name?: unknown })?.name === "string"
         ? ((req.body as { name?: string }).name ?? "").trim()
         : "";
     const name =
-      [clerkUser.first_name, clerkUser.last_name].filter(Boolean).join(" ").trim() ||
+      [clerkFirstName, clerkLastName].filter(Boolean).join(" ").trim() ||
       bodyName ||
       email.split("@")[0];
 
@@ -277,7 +331,7 @@ router.post("/auth/clerk/sync-user", requireClerkSession, async (req, res) => {
           .limit(1);
         if (u) return res.json({ user: u });
       }
-      if (!isPrimaryEmailVerified(clerkUser)) {
+      if (!emailVerified) {
         return res.status(403).json({
           error: "Please verify your email with the provider before linking.",
         });
