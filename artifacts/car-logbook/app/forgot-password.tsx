@@ -94,16 +94,29 @@ export default function ForgotPasswordScreen() {
           // emails too, so this is safe to call regardless.
           try {
             await apiPost("/auth/forgot-password", { email: email.trim() });
-          } catch { /* ignore — generic success either way */ }
+          } catch (legacyErr: unknown) {
+            // Rate-limit (429): the server returns a clear message — surface
+            // it so the user knows to wait rather than seeing a false
+            // "check your email" screen. All other errors (shouldn't happen
+            // on the happy path since the server returns 200 for unknown
+            // emails) fall through to linkSent to preserve original behaviour.
+            const msg = legacyErr instanceof Error ? legacyErr.message : "";
+            if (msg.toLowerCase().includes("too many") || msg.includes("429")) {
+              throw legacyErr;
+            }
+          }
           setStep("linkSent");
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           return;
         }
         throw clerkErr;
       }
-    } catch {
-      // Generic error to avoid revealing anything about the account.
-      setError(t("forgotPassword.errStart"));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      // Show the server's rate-limit message verbatim; fall back to the
+      // generic translation for all other errors (avoids leaking account info).
+      const isRateLimit = msg.toLowerCase().includes("too many");
+      setError(isRateLimit ? msg : t("forgotPassword.errStart"));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
