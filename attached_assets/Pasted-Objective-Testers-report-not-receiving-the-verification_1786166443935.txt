@@ -1,0 +1,29 @@
+Objective:
+Testers report not receiving the verification code email during the "forgot password" flow. Trace the complete flow end-to-end, identify the actual root cause(s), and report findings before making changes.
+
+Investigate, do not assume — inspect and report on each of the following:
+
+Trigger path: locate the forgot-password endpoint/handler and confirm it is actually invoked when a user submits the request (log the request reaching the handler).
+Code generation: inspect how the verification code is generated and stored (e.g., DB table/field, expiry, hashing) — confirm a code is actually being created for the affected flow, not just intended to be.
+Email dispatch: identify the email service/provider being used (e.g., SendGrid, Resend, SMTP, Nodemailer, etc.), and inspect the send call for the forgot-password template specifically. Check whether the send call is reached, what response/status it returns, and whether errors are being caught and logged or silently swallowed.
+Provider-side delivery: check the email provider's dashboard/API logs (bounces, blocks, spam classification, rate limits, sender domain/DKIM/SPF verification status) for the relevant sending domain/address.
+Template/link correctness: inspect the email template used for this specific flow — confirm the verification code or link is being correctly interpolated into the outgoing email body (not blank, not a stale/wrong template, not pointing to a dead route).
+Environment config: confirm the email provider API key/credentials and sender address are correctly set in the environment being tested (dev vs. staging vs. production), since misconfigured env vars per environment are a common cause of this exact symptom.
+Rate limiting/throttling: check if there's any logic that silently blocks repeated forgot-password requests (e.g., per-IP or per-account throttling) that could explain some testers getting no email while others do.
+
+Constraints:
+
+Do not modify the email template design, the password reset UI, or any unrelated authentication flows (login, signup, session handling).
+Do not rotate or regenerate API keys/secrets without flagging it first.
+Do not introduce a new email provider or library — work within the existing implementation.
+Do not perform a native/production build to test this — validate via logs, code inspection, and a test send in the dev/staging environment first.
+
+Deliverable before fixing:
+Report back with: (a) where in the flow the failure occurs (generation, dispatch, provider rejection, or template), (b) the specific root cause with supporting evidence (log line, error message, or provider dashboard finding), and (c) the smallest reliable fix you propose. Do not apply a fix without stating the root cause first — if the cause is ambiguous, say so explicitly and propose what additional inspection is needed rather than guessing.
+
+Definition of done:
+
+Root cause identified and explained with evidence.
+A test forgot-password request successfully results in a received email with a valid, correctly-formatted verification code, verified in the current environment.
+No changes made to unrelated flows or files.
+If a fix was applied, confirm it doesn't affect other email flows that may share the same sending logic (e.g., signup verification, notifications).
