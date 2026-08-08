@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { and, eq, sql, desc, inArray } from "drizzle-orm";
 import { z } from "zod/v4";
+import { Resend } from "resend";
 import {
   db,
   carsTable,
@@ -27,6 +28,9 @@ import {
   buildMaintenanceItems,
   buildInspectionItems,
 } from "../lib/upcomingItems";
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudios.com>";
 
 const router = Router();
 
@@ -637,6 +641,45 @@ router.post("/orgs/:orgId/members", async (req, res) => {
   if (!member) {
     return res.status(403).json({ error: "Seat limit reached for this plan." });
   }
+
+  // Fire-and-forget invite email — a delivery failure must not roll back the
+  // invite row or return an error to the admin who sent it.
+  const inviterName = req.user!.name ?? "A team admin";
+  const roleLabel = parsed.data.role === "admin" ? "admin" : "staff member";
+  if (resend) {
+    resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: `You've been invited to join ${org.name} on CTL`,
+      html: `
+        <div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#fff">
+          <div style="margin-bottom:24px">
+            <span style="font-size:28px;font-weight:800;color:#0F2D5E;letter-spacing:-1px">CTL</span>
+            <div style="display:inline-block;width:48px;height:4px;background:#1D4ED8;border-radius:2px;vertical-align:middle;margin-left:8px"></div>
+            <div style="display:inline-block;width:20px;height:4px;background:#0891B2;border-radius:2px;vertical-align:middle;margin-left:4px"></div>
+          </div>
+          <h2 style="color:#111827;font-size:20px;margin:0 0 12px">You've been invited to ${org.name}</h2>
+          <p style="color:#6B7280;font-size:15px;line-height:1.6;margin:0 0 24px">
+            <strong style="color:#111827">${inviterName}</strong> has invited you to join
+            <strong style="color:#111827">${org.name}</strong> as a ${roleLabel} on CTL — Car Technical Log.
+          </p>
+          <p style="color:#6B7280;font-size:15px;line-height:1.6;margin:0 0 24px">
+            Open the CTL app on your device to accept the invitation. You'll find it under
+            <strong style="color:#111827">Settings → Pending Invites</strong>.
+          </p>
+          <p style="color:#9CA3AF;font-size:13px;margin:24px 0 0">
+            If you don't have CTL yet, search for <strong>CTL Car Technical Log</strong> on the App Store or Google Play.
+            If you weren't expecting this invitation, you can safely ignore this email.
+          </p>
+        </div>
+      `,
+    }).catch((err: unknown) => {
+      console.error("[invite] Email send failed:", err instanceof Error ? err.message : String(err));
+    });
+  } else {
+    console.error("[invite] RESEND_API_KEY not configured — invite email not sent to", email);
+  }
+
   return res.status(201).json(member);
 });
 

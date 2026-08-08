@@ -222,10 +222,16 @@ export default function EnterpriseUpgradeScreen() {
             const active = selectedTier === tier;
             const price = pkg?.product.priceString ?? "—";
             const periodSub = period === "monthly" ? t("enterpriseUpgrade.perMonth") : t("enterpriseUpgrade.perYear");
+            // When real enterprise packages are loaded but this tier has no
+            // matching product yet (not fully configured in RevenueCat), treat
+            // the card as unavailable: grey it out and block selection so the
+            // "—" price doesn't look like a display bug.
+            const unavailable = !pkg && !usingMockPackages && realEnterprise.length > 0;
             return (
               <Pressable
                 key={tier}
                 onPress={() => {
+                  if (unavailable) return;
                   setSelectedTier(tier);
                   Haptics.selectionAsync();
                 }}
@@ -235,6 +241,7 @@ export default function EnterpriseUpgradeScreen() {
                     backgroundColor: C.card,
                     borderColor: active ? "#4338CA" : C.border,
                     borderWidth: active ? 2 : 1,
+                    opacity: unavailable ? 0.4 : 1,
                   },
                   isRTL && { flexDirection: "row-reverse" },
                 ]}
