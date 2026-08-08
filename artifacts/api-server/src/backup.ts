@@ -25,7 +25,7 @@ const TABLES = [
 async function runBackup(): Promise<void> {
   const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
   if (!resend) {
-    console.warn("[backup] RESEND_API_KEY not set — skipping backup email.");
+    console.error("[backup] RESEND_API_KEY not configured — email not sent");
     return;
   }
 

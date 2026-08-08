@@ -360,6 +360,8 @@ router.post("/auth/forgot-password", async (req, res) => {
             </div>
           `,
         });
+      } else {
+        console.error("[forgot-password] RESEND_API_KEY not configured — email not sent");
       }
     }
 

@@ -118,7 +118,7 @@ router.post("/feedback", optionalAuth, async (req, res) => {
       await Promise.all(sends);
       console.log(`[feedback] Sent via Resend to ${SUPPORT_EMAIL}${userEmail ? ` + thank you to ${userEmail}` : ""}`);
     } else {
-      console.log(`[feedback] No RESEND_API_KEY — ${subject}\n${message.trim()}`);
+      console.error(`[feedback] RESEND_API_KEY not configured — email not sent (${subject})`);
     }
 
     res.json({ ok: true });
@@ -175,7 +175,7 @@ router.post("/suggest-tool", optionalAuth, async (req, res) => {
       });
       console.log(`[suggest-tool] Sent via Resend to ${SUPPORT_EMAIL}`);
     } else {
-      console.log(`[suggest-tool] No RESEND_API_KEY — ${subject}\n${suggestion.trim()}`);
+      console.error(`[suggest-tool] RESEND_API_KEY not configured — email not sent (${subject})`);
     }
 
     res.json({ ok: true });
