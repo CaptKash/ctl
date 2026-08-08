@@ -18,6 +18,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useColors } from "@/context/ThemeContext";
 import { useSubscription } from "@/lib/revenuecat";
+
+const PRIVACY_URL = process.env.EXPO_PUBLIC_DOMAIN
+  ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/privacy`
+  : "https://ctl-car-technical-log.replit.app/privacy";
 import { PurchasesPackage } from "react-native-purchases";
 import { errorMessage, isUserCancelled } from "@/lib/errors";
 
@@ -279,7 +283,7 @@ export default function EnterpriseUpgradeScreen() {
           {t("enterpriseUpgrade.legal")}{"\n"}
           <Text
             style={[styles.legalLink, { color: C.tint }]}
-            onPress={() => Linking.openURL("https://ctl-car-technical-log.replit.app/privacy")}
+            onPress={() => Linking.openURL(PRIVACY_URL)}
           >{t("enterpriseUpgrade.privacy")}</Text>
           {"  ·  "}
           <Text
