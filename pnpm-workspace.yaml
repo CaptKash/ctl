@@ -35,7 +35,10 @@ patchedDependencies:
   expo-modules-core@57.0.6: patches/expo-modules-core@57.0.6.patch
 
 onlyBuiltDependencies:
+  - '@clerk/shared'
   - '@swc/core'
+  - browser-tabs-lock
+  - core-js
   - esbuild
   - msw
   - unrs-resolver
