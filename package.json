@@ -17,10 +17,5 @@
   },
   "dependencies": {
     "@replit/revenuecat-sdk": "^4.1.0"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "expo-modules-core@57.0.6": "patches/expo-modules-core@57.0.6.patch"
-    }
   }
 }
