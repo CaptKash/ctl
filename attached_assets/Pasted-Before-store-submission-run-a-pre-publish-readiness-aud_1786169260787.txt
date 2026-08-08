@@ -1,0 +1,14 @@
+Before store submission, run a pre-publish readiness audit. Do not make speculative changes — inspect and report first, then only fix issues you find with clear evidence.
+
+Check each of the following:
+
+Environment/config audit: search the entire codebase for hardcoded dev/staging URLs, Replit dev domains (.replit.dev), localhost references, or any other non-production endpoints — similar to the RESET_BASE_URL issue already fixed. Report every instance found, not just auth-related ones.
+Secrets exposure: confirm no API keys, database credentials, or provider secrets (Resend, Clerk, etc.) are present in client-side/bundled code. All sensitive keys should only be referenced server-side or via secure env vars.
+App identity config: confirm app.json/app.config.js has correct, final values for bundle identifier (iOS), package name (Android), app name, version, and build number — and that these match what's registered in App Store Connect and Google Play Console.
+Signing/provisioning: confirm EAS build profiles (eas.json) are configured correctly for production submission (correct production profile, correct credentials source — not using dev/adhoc profiles for the store build).
+Permissions: list every permission declared in app.json/native config (camera, location, notifications, etc.) and confirm each is actually used and has a clear, accurate usage description string — app review will reject vague or unused permission strings.
+Deep linking: confirm the URL scheme/associated domains config is correct for production (relevant if Clerk auth redirects or password reset links use deep links).
+Environment variable check: confirm all required production env vars are set in the production environment (this is the second time a missing env var has caused a silent failure — treat this as high-risk) and that none of them fall back silently without logging if missing.
+Backend URL config: confirm the app is pointed at the production API URL, not a dev/staging backend, in the production build profile specifically.
+
+Report findings for each item — pass/fail with evidence (file + line) — before making any fixes. Do not perform a native build yet; this is a static/config audit only.
