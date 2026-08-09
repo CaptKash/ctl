@@ -115,6 +115,9 @@ export default function LoginScreen() {
 
   const tryClerkSignIn = async (identifier: string, pw: string): Promise<boolean> => {
     if (!signIn || !setActive) return false;
+    // Clear any stale session JWT left by a previous OAuth sign-in so the Clerk
+    // SDK doesn't treat it as a cross-tenant token conflict and silently fail.
+    await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
     const result = await signIn.create({ identifier, password: pw });
     if (result.status === "complete" && result.createdSessionId) {
       await setActive({ session: result.createdSessionId });
