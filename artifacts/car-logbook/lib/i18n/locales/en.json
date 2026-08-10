@@ -4,9 +4,16 @@
   },
   "vehicleTypes": {
     "car": "Car",
+    "van": "Van",
+    "pickup_truck": "Pickup Truck",
+    "suv": "SUV",
     "truck": "Truck",
+    "bus": "Bus",
+    "motorcycle": "Motorcycle",
+    "ambulance": "Ambulance",
     "tractor": "Tractor",
     "digger": "Digger",
+    "forklift": "Forklift",
     "tow_truck": "Tow Truck",
     "other": "Other"
   },

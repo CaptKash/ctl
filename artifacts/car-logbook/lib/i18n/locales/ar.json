@@ -4,9 +4,16 @@
   },
   "vehicleTypes": {
     "car": "سيارة",
+    "van": "فان",
+    "pickup_truck": "بيك آب",
+    "suv": "دفع رباعي",
     "truck": "شاحنة",
+    "bus": "حافلة",
+    "motorcycle": "دراجة نارية",
+    "ambulance": "سيارة إسعاف",
     "tractor": "جرّار",
     "digger": "حفّارة",
+    "forklift": "رافعة شوكية",
     "tow_truck": "شاحنة سحب",
     "other": "أخرى"
   },

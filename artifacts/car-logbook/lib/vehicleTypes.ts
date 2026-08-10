@@ -5,9 +5,16 @@ export type MCIName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 export type VehicleType =
   | "car"
+  | "van"
+  | "pickup_truck"
+  | "suv"
   | "truck"
+  | "bus"
+  | "motorcycle"
+  | "ambulance"
   | "tractor"
   | "digger"
+  | "forklift"
   | "tow_truck"
   | "other";
 
@@ -15,20 +22,34 @@ export type UsageUnitKind = "distance" | "hours";
 
 export const VEHICLE_TYPES: VehicleType[] = [
   "car",
+  "van",
+  "pickup_truck",
+  "suv",
   "truck",
+  "bus",
+  "motorcycle",
+  "ambulance",
   "tractor",
   "digger",
+  "forklift",
   "tow_truck",
   "other",
 ];
 
-const HOUR_BASED_TYPES: VehicleType[] = ["tractor", "digger"];
+const HOUR_BASED_TYPES: VehicleType[] = ["tractor", "digger", "forklift"];
 
 const VEHICLE_TYPE_ICONS: Record<VehicleType, MCIName> = {
   car: "car",
+  van: "van-utility",
+  pickup_truck: "truck-flatbed",
+  suv: "car-side",
   truck: "truck",
+  bus: "bus",
+  motorcycle: "motorbike",
+  ambulance: "ambulance",
   tractor: "tractor",
   digger: "excavator",
+  forklift: "forklift",
   tow_truck: "tow-truck",
   other: "car-wrench",
 };
