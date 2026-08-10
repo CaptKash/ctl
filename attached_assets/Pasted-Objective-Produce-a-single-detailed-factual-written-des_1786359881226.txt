@@ -1,0 +1,21 @@
+Objective: Produce a single, detailed, factual written description of the CTL (Car Technical Log) product, based entirely on the actual codebase, configuration, and any product docs in the repo. This description will be shared with external AI agents and advisors to assess the product's value and possible monetization strategies — treat it as an external-facing product brief, not internal engineering notes. Do not make any code changes.
+
+Cover the following sections:
+
+Product overview — What CTL does, the core problem it solves, and who it's for (individual users vs. enterprise/org accounts). Pull this from README files, app store copy, onboarding screens, or marketing/landing content if present in the repo — quote or closely paraphrase rather than inventing a pitch.
+Target users & use cases — Distinguish between consumer/individual users and enterprise members (referencing the organization/member model). Describe what a typical user session or workflow looks like end to end.
+Core features — Walk through the main feature set as implemented (not aspirational): what a user can log, track, or manage; what the enterprise/admin features are (invites, roles, member management, etc.); any reporting, history, or record-keeping capabilities. Base this on actual routes, screens, and data models, not comments or TODOs.
+Data model — At a high level, what entities does the system track (vehicles, service records, users, organizations, etc.) and how are they related? No need for full schema dumps — a plain-language summary of the key objects and relationships.
+Technical architecture — Stack summary: mobile framework (Expo/React Native), backend framework, database, auth provider (Clerk), hosting/infra if evident from config, and any notable third-party integrations (e.g., RevenueCat, Resend, or others found in the codebase).
+Current monetization — Report exactly what's implemented today: is there a subscription/paywall (RevenueCat entitlements, price tiers, trial logic), any free vs. paid feature gating, or is monetization not yet built? Cite the specific code/config that shows this rather than assuming.
+Platform & distribution — iOS/Android/web availability, app store presence if referenced in config (bundle IDs, EAS config), current release/version state.
+Scale indicators — Anything in the codebase, admin tooling, or seed/analytics data that indicates current usage scale (user counts, org counts, environment — dev/staging/prod). If nothing is available, say so explicitly rather than guessing.
+Differentiators & gaps — Based only on what's implemented, note anything that stands out as distinctive (e.g., enterprise fleet features) and anything conspicuously missing that a competitor product in this space typically has.
+
+Constraints:
+
+This report will leave the Replit environment and be shared externally. Do NOT include API keys, secrets, credentials, internal URLs, environment variable values, database connection strings, or any real user/customer PII (names, emails, VINs, etc.). Use placeholders or describe the type of data instead.
+Be factual and cite where each claim comes from (file/route/config). If something is unclear or unimplemented, say so rather than filling the gap with a plausible guess.
+No code changes, no new dependencies.
+
+Deliverable: A structured written report (markdown is fine) covering all nine sections above, ready to hand to an external reader with no prior context on the codebase.
