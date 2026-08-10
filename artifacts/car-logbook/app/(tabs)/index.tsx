@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn, useSignUp, useClerk } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp } from "@clerk/clerk-expo";
 import { isClerkAPIResponseError } from "@clerk/clerk-expo";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -78,7 +78,6 @@ export default function LoginScreen() {
     isAuthenticated,
     isLoading: authLoading,
   } = useAuth();
-  const clerk = useClerk();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
   const { signUp } = useSignUp();
 
@@ -114,11 +113,22 @@ export default function LoginScreen() {
     isClerkAPIResponseError(err) &&
     err.errors.some((e) => e.code === "form_identifier_not_found");
 
+  // Wipe every SecureStore key the Clerk Expo SDK uses so no stale OAuth
+  // client/session data can block a fresh email sign-in. Clerk caches its
+  // client resource under __clerk_cache_client_XXXXX (last-5 of the pubkey)
+  // in addition to __clerk_client_jwt — clearing only the JWT is not enough.
+  const clearClerkCache = async () => {
+    const suffix = (process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "").slice(-5);
+    await Promise.allSettled([
+      SecureStore.deleteItemAsync("__clerk_client_jwt"),
+      SecureStore.deleteItemAsync(`__clerk_cache_client_${suffix}`),
+      SecureStore.deleteItemAsync(`__clerk_cache_session_jwt_${suffix}`),
+    ]);
+  };
+
   const tryClerkSignIn = async (identifier: string, pw: string): Promise<boolean> => {
     if (!signIn || !setActive) return false;
-    // Clear any stale session JWT left by a previous OAuth sign-in so the Clerk
-    // SDK doesn't treat it as a cross-tenant token conflict and silently fail.
-    await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
+    await clearClerkCache();
     const result = await signIn.create({ identifier, password: pw });
     if (result.status === "complete" && result.createdSessionId) {
       await setActive({ session: result.createdSessionId });
@@ -155,7 +165,7 @@ export default function LoginScreen() {
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
       try {
-        await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
+        await clearClerkCache();
         const result = await signIn.create({ strategy, redirectUrl, actionCompleteRedirectUrl: redirectUrl });
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
@@ -214,13 +224,6 @@ export default function LoginScreen() {
     setLoading(true);
     const identifier = email.trim();
     try {
-      // Force-clear any ghost Clerk sessions left by a previous OAuth flow.
-      // After Apple/Google sign-in completes via the transfer path, Clerk can
-      // leave a server-side session on the device client that hasn't been fully
-      // terminated yet. Without this, signIn.create() returns a session-exists
-      // error which the catch block surfaces as "invalid password".
-      await clerk.signOut().catch(() => {});
-
       // 1. Try Clerk directly (covers users who already migrated, or who
       //    signed up new in this build).
       try {
