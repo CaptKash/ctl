@@ -390,7 +390,7 @@ export default function MenuDashboardScreen() {
                 >
                   <Feather name="plus" size={13} color="#334155" />
                   <Text style={[styles.addCarChipText, { color: "#334155" }]}>
-                    {t("home.addCar")}
+                    {isOrgContext ? t("home.addVehicle") : t("home.addCar")}
                   </Text>
                 </LinearGradient>
               </Pressable>

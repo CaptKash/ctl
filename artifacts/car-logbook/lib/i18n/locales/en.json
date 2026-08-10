@@ -198,6 +198,7 @@
     "noCarsYet": "No cars registered yet",
     "carsRegisteredCount": "Number of registered cars: {{count}}",
     "addCar": "Add Car",
+    "addVehicle": "Add Vehicle",
     "quickActions": "Quick Actions",
     "logEvent": "Technical Log",
     "logEventSub": "Log a fault, repair, or renewal",
@@ -229,6 +230,7 @@
   },
   "addCar": {
     "title": "Add Car",
+    "titleVehicle": "Add Vehicle",
     "subtitle": "New vehicle",
     "sections": {
       "basic": "Basic Info",
@@ -1242,6 +1244,7 @@
     "emptyTitle": "No cars yet",
     "emptyDesc": "Add your first car to start logging maintenance, fuel, insurance, and more.",
     "addCar": "Add Car",
+    "addVehicle": "Add Vehicle",
     "deleteTitle": "Delete Car",
     "deleteMessage": "This will permanently delete {{car}} and ALL associated records — maintenance, fuel, parts, insurance, dealerships, and malfunctions.\n\nThis cannot be undone.",
     "deleteConfirm": "Delete Everything"

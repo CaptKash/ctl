@@ -220,7 +220,7 @@ export default function FleetScreen() {
               ionIcon="car-outline"
               title={t("fleet.emptyTitle")}
               description={t("fleet.emptyDesc")}
-              actionLabel={canManageCars ? t("fleet.addCar") : undefined}
+              actionLabel={canManageCars ? t(isOrgContext ? "fleet.addVehicle" : "fleet.addCar") : undefined}
               onAction={canManageCars ? handleAddCar : undefined}
             />
           }

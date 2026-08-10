@@ -155,7 +155,7 @@ export default function AddCarScreen() {
             <MaterialCommunityIcons name={vehicleTypeIcon(vehicleType)} size={24} color="#334155" />
           </LinearGradient>
           <View style={styles.headerText}>
-            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.title")}</Text>
+            <Text style={[styles.headerTitle, { color: C.text, textAlign: isRTL ? "right" : "left" }]}>{activeOrgId ? t("addCar.titleVehicle") : t("addCar.title")}</Text>
             <Text style={[styles.headerSub, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]}>{t("addCar.subtitle")}</Text>
           </View>
         </View>
