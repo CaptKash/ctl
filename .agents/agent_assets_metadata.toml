@@ -209,3 +209,10 @@ id = "nnLOYLSnY_JrKm3-VSS2V"
 uri = "file://car-logbook-source.zip"
 type = "unspecified"
 title = "CTL Car Logbook — Source Code"
+
+[[outputs]]
+id = "63WuSb4d57Fo0KVZyRHUn"
+uri = "file://attached_assets/CTL_Product_Brief.md"
+type = "text"
+title = "CTL Product Brief"
+description = "External-facing product brief covering all nine sections: overview, target users, core features, data model, technical architecture, monetization, platform/distribution, scale indicators, and differentiators & gaps. Ready to share with advisors or external AI agents."
