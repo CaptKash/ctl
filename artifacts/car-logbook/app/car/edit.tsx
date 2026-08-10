@@ -26,7 +26,7 @@ import { apiGet, apiPost, apiPut } from "@/hooks/useApi";
 import { useCar } from "@/hooks/useCar";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { Feather } from "@expo/vector-icons";
-import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
+import { getMakesForType, getModelsForTypedMake } from "@/constants/vehicleTypeData";
 import { useTranslation } from "react-i18next";
 import { VEHICLE_TYPES, usageUnitForType } from "@/lib/vehicleTypes";
 
@@ -124,13 +124,22 @@ export default function EditCarScreen() {
     }
   }, [carQuery.data, ready]);
 
-  const models = getModelsForMake(make);
+  const makes = getMakesForType(vehicleType);
+  const models = getModelsForTypedMake(vehicleType, make);
   const usageUnit = usageUnitForType(vehicleType);
   const usesHours = usageUnit === "hours";
   const vehicleTypeLabels = VEHICLE_TYPES.reduce((acc, vt) => {
     acc[vt] = t(`vehicleTypes.${vt}`);
     return acc;
   }, {} as Record<string, string>);
+
+  const handleVehicleTypeSelect = (value: string) => {
+    setVehicleType(value);
+    // Reset make and model — the new type's list is different.
+    setMake("");
+    setModel("");
+    if (!tankEdited) setTankCapacity("");
+  };
 
   const handleMakeSelect = (value: string) => {
     setMake(value);
@@ -248,7 +257,7 @@ export default function EditCarScreen() {
           <SelectField
             label={t("addCar.fields.vehicleType")}
             value={vehicleType}
-            onSelect={setVehicleType}
+            onSelect={handleVehicleTypeSelect}
             options={VEHICLE_TYPES}
             optionLabels={vehicleTypeLabels}
             required
@@ -269,7 +278,7 @@ export default function EditCarScreen() {
             label={t("addCar.fields.make")}
             value={make}
             onSelect={handleMakeSelect}
-            options={ALL_MAKES}
+            options={makes}
             placeholder={t("addCar.fields.makePlaceholder")}
             required
           />

@@ -26,7 +26,7 @@ import { apiPost } from "@/hooks/useApi";
 import { useDistanceUnit } from "@/context/DistanceUnitContext";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { ALL_MAKES, getModelsForMake } from "@/constants/carData";
+import { getMakesForType, getModelsForTypedMake } from "@/constants/vehicleTypeData";
 import { VEHICLE_TYPES, usageUnitForType, vehicleTypeIcon } from "@/lib/vehicleTypes";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -69,13 +69,22 @@ export default function AddCarScreen() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
 
-  const models = getModelsForMake(make);
+  const makes = getMakesForType(vehicleType);
+  const models = getModelsForTypedMake(vehicleType, make);
   const usageUnit = usageUnitForType(vehicleType);
   const usesHours = usageUnit === "hours";
   const vehicleTypeLabels = VEHICLE_TYPES.reduce((acc, vt) => {
     acc[vt] = t(`vehicleTypes.${vt}`);
     return acc;
   }, {} as Record<string, string>);
+
+  const handleVehicleTypeSelect = (value: string) => {
+    setVehicleType(value);
+    // Reset make and model — the new type's list is different.
+    setMake("");
+    setModel("");
+    if (!tankEdited) setTankCapacity("");
+  };
 
   const handleMakeSelect = (value: string) => {
     setMake(value);
@@ -176,7 +185,7 @@ export default function AddCarScreen() {
           <SelectField
             label={t("addCar.fields.vehicleType")}
             value={vehicleType}
-            onSelect={setVehicleType}
+            onSelect={handleVehicleTypeSelect}
             options={VEHICLE_TYPES}
             optionLabels={vehicleTypeLabels}
             required
@@ -197,7 +206,7 @@ export default function AddCarScreen() {
             label={t("addCar.fields.make")}
             value={make}
             onSelect={handleMakeSelect}
-            options={ALL_MAKES}
+            options={makes}
             placeholder={t("addCar.fields.makePlaceholder")}
             required
           />
