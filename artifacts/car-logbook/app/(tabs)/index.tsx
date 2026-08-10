@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon } from "react-native-svg";
-import { useSignIn, useSignUp } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp, useClerk } from "@clerk/clerk-expo";
 import { isClerkAPIResponseError } from "@clerk/clerk-expo";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -78,6 +78,7 @@ export default function LoginScreen() {
     isAuthenticated,
     isLoading: authLoading,
   } = useAuth();
+  const clerk = useClerk();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
   const { signUp } = useSignUp();
 
@@ -123,6 +124,8 @@ export default function LoginScreen() {
       await setActive({ session: result.createdSessionId });
       return true;
     }
+    // Non-complete status without an exception — log for diagnostics.
+    console.error("[tryClerkSignIn] non-complete status:", result.status, JSON.stringify(result));
     return false;
   };
 
@@ -211,6 +214,13 @@ export default function LoginScreen() {
     setLoading(true);
     const identifier = email.trim();
     try {
+      // Force-clear any ghost Clerk sessions left by a previous OAuth flow.
+      // After Apple/Google sign-in completes via the transfer path, Clerk can
+      // leave a server-side session on the device client that hasn't been fully
+      // terminated yet. Without this, signIn.create() returns a session-exists
+      // error which the catch block surfaces as "invalid password".
+      await clerk.signOut().catch(() => {});
+
       // 1. Try Clerk directly (covers users who already migrated, or who
       //    signed up new in this build).
       try {
