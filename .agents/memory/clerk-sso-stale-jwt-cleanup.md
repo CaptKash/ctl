@@ -11,6 +11,8 @@ description: Must delete __clerk_client_jwt from SecureStore before signIn.creat
 - For OAuth: SDK silently bails pre-fetch — `signIn.create()` returns `status: null` with no error thrown.
 - For email/password: SDK treats it as a cross-tenant conflict and returns an auth failure even when credentials are correct. This surfaces as "invalid username or password" to the user.
 
-**How to apply:** Before every `signIn.create()` call regardless of strategy. Already in place in `app/(tabs)/index.tsx` (`handleOAuth` and `tryClerkSignIn`) and `app/(tabs)/signup.tsx`.
+**How to apply:** Before every `signIn.create()` call regardless of strategy. Use the `clearClerkCache()` helper in `app/(tabs)/index.tsx` — it wipes all three keys. Deleting only `__clerk_client_jwt` is NOT enough; the client resource cache must also be cleared.
 
-**Note:** This is a `.catch(() => {})` no-op if the key doesn't exist — safe to always call.
+**Do NOT call `clerk.signOut()` inside `handleLogin`.** It mutates Clerk's state mid-flight while `signIn` is already captured in the closure (stale reference risk), and is redundant since `logout()` already calls it. The cache-clearing approach is the correct fix.
+
+**Note:** Keys are safe to delete even when absent — `deleteItemAsync` is a no-op on missing keys.
