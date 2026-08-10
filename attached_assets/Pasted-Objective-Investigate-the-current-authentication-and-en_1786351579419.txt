@@ -1,0 +1,21 @@
+Objective: Investigate the current authentication and enterprise-invite architecture. Do not make any code changes — this is a read-only investigation. Report findings back in plain language with file/line references.
+
+Context: We currently support email/password, Sign in with Apple, and Sign in with Google. We're evaluating whether to add a fourth auth path for enterprise members who don't have an email address (e.g., admin-provisioned username/password accounts). Before scoping that work, I need to understand what the current implementation assumes about email.
+
+Please inspect and report on:
+
+User schema — Is email a required and/or unique field on the user table? Is it used as a primary key or foreign key anywhere? List the exact column definition and any constraints (NOT NULL, UNIQUE, indexes).
+Auth flows — For each of the three existing sign-in methods (email/password, Apple, Google), confirm whether email is captured/stored, and whether Apple/Google sign-ins populate the same email column as email/password signups (including how Apple's private relay email is handled, if at all).
+Enterprise invite flow — Trace the full path from "admin sends an invite" to "member has an active account." Specifically:
+Where is the invite token/link generated?
+Is token generation coupled to sending an email (i.e., does the invite only exist as an email side effect), or is it a separate step that could be delivered another way (SMS, printed code, in-app)?
+What happens if an invite is created but the recipient never receives/opens the email — is there an admin-facing resend/regenerate option already?
+Downstream dependencies on email — Search for other places in the codebase that assume every user has an email: notifications, receipts/invoices, password reset, audit logs, support tooling, analytics, transactional email triggers, etc. List each with a one-line description of what breaks if email is null.
+Session/login identifier — When a user logs in today, what field(s) can they log in with (email only, or email + something else)? Is there any existing concept of a username field, even unused?
+
+Constraints:
+
+No code changes, no schema migrations, no new dependencies.
+Do not assume anything not visible in the code — if something is unclear, say so explicitly rather than guessing.
+
+Deliverable: A concise written report answering the five points above, organized by section, with file paths/line numbers as evidence for each claim.
