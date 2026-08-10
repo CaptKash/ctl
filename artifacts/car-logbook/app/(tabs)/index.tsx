@@ -113,11 +113,12 @@ export default function LoginScreen() {
     isClerkAPIResponseError(err) &&
     err.errors.some((e) => e.code === "form_identifier_not_found");
 
-  // Wipe every SecureStore key the Clerk Expo SDK uses so no stale OAuth
-  // client/session data can block a fresh email sign-in. Clerk caches its
-  // client resource under __clerk_cache_client_XXXXX (last-5 of the pubkey)
-  // in addition to __clerk_client_jwt — clearing only the JWT is not enough.
-  const clearClerkCache = async () => {
+  // Full cache wipe — used before OAuth only. Removes every SecureStore key
+  // the Clerk Expo SDK writes so a stale OAuth client state can't block the
+  // OAuth flow. Do NOT call this before email sign-in: deleting
+  // __clerk_cache_client_XXXXX while the SDK is initialized can cause a
+  // re-init race that makes signIn.create() fail.
+  const clearOAuthCache = async () => {
     const suffix = (process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "").slice(-5);
     await Promise.allSettled([
       SecureStore.deleteItemAsync("__clerk_client_jwt"),
@@ -128,8 +129,24 @@ export default function LoginScreen() {
 
   const tryClerkSignIn = async (identifier: string, pw: string): Promise<boolean> => {
     if (!signIn || !setActive) return false;
-    await clearClerkCache();
-    const result = await signIn.create({ identifier, password: pw });
+    // Only remove the JWT token — do NOT wipe the full client cache here.
+    // Wiping __clerk_cache_client causes a re-init race against signIn.create().
+    await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
+    let result;
+    try {
+      result = await signIn.create({ identifier, password: pw });
+    } catch (err: unknown) {
+      // Log the real Clerk error code before re-throwing so we can diagnose
+      // what's actually going wrong (error codes appear in Crashlytics / device logs).
+      if (isClerkAPIResponseError(err)) {
+        err.errors.forEach((e) =>
+          console.error("[tryClerkSignIn] Clerk error:", e.code, e.message, e.longMessage)
+        );
+      } else {
+        console.error("[tryClerkSignIn] unexpected error:", (err as any)?.message ?? err);
+      }
+      throw err;
+    }
     if (result.status === "complete" && result.createdSessionId) {
       await setActive({ session: result.createdSessionId });
       return true;
@@ -165,7 +182,7 @@ export default function LoginScreen() {
       setLoading(true);
       const redirectUrl = "car-logbook://sso-callback";
       try {
-        await clearClerkCache();
+        await clearOAuthCache();
         const result = await signIn.create({ strategy, redirectUrl, actionCompleteRedirectUrl: redirectUrl });
         const externalUrl = result?.firstFactorVerification?.externalVerificationRedirectURL;
         if (!externalUrl) {
@@ -234,7 +251,14 @@ export default function LoginScreen() {
         }
       } catch (err: unknown) {
         if (!isUnknownIdentifier(err)) {
-          // Wrong password (or any other Clerk failure) — generic 401 UX.
+          // Wrong password or unexpected Clerk failure — log so we can diagnose.
+          if (isClerkAPIResponseError(err)) {
+            err.errors.forEach((e) =>
+              console.error("[handleLogin] Clerk error (non-migrate path):", e.code, e.message)
+            );
+          } else {
+            console.error("[handleLogin] non-Clerk error:", (err as any)?.message ?? err);
+          }
           setError(GENERIC_ERROR);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
           return;
