@@ -11,3 +11,4 @@
 - [Clerk production redirect URL config](clerk-prod-redirect-urls.md) — prod Clerk allowlist is empty by default; every startSSOFlow redirectUrl must be registered via sk_live key before it works.
 - [Clerk SSO stale-closure fix](clerk-sso-stale-closure.md) — useSSO/startSSOFlow has stale-closure bug in Expo; call signIn.create() directly and use its return value instead.
 - [Clerk SSO stale JWT cleanup](clerk-sso-stale-jwt-cleanup.md) — must delete __clerk_client_jwt from SecureStore before signIn.create() for OAuth or SDK silently bails pre-fetch on cross-tenant JWT.
+- [Sign-in-after-sign-out bug root cause](signin-after-signout-bug.md) — two compounding bugs cause "Invalid email or password" on second email sign-in; fix: also clear __clerk_cache_session_jwt_{suffix} on email path + read 409 body in tryMigrate.

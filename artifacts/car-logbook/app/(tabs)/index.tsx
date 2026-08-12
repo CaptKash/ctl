@@ -128,10 +128,30 @@ export default function LoginScreen() {
   };
 
   const tryClerkSignIn = async (identifier: string, pw: string): Promise<boolean> => {
-    if (!signIn || !setActive) return false;
-    // Only remove the JWT token — do NOT wipe the full client cache here.
-    // Wiping __clerk_cache_client causes a re-init race against signIn.create().
-    await SecureStore.deleteItemAsync("__clerk_client_jwt").catch(() => {});
+    if (!signIn || !setActive) {
+      console.error("[tryClerkSignIn] signIn resource is null/undefined — Clerk client not ready");
+      return false;
+    }
+    // Clear stale Clerk SecureStore tokens before attempting sign-in.
+    //
+    // __clerk_client_jwt: safe to delete (prior investigation confirmed this).
+    //
+    // __clerk_cache_session_jwt_{suffix}: must also be cleared on the email
+    // path after a sign-out. clerk.signOut() terminates the session on Clerk's
+    // servers, but may leave the revoked session JWT in SecureStore. When
+    // signIn.create() is then called, the Clerk SDK reads this stale JWT,
+    // sends it to FAPI, and gets back a non-"complete" status (e.g.
+    // "needs_first_factor") instead of the expected "complete" — causing
+    // tryClerkSignIn to return false and fall through to tryMigrate.
+    //
+    // We do NOT delete __clerk_cache_client_{suffix} here — that triggers a
+    // full client re-initialisation that races with signIn.create() (the
+    // regression introduced in Build 110).
+    const suffix = (process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "").slice(-5);
+    await Promise.allSettled([
+      SecureStore.deleteItemAsync("__clerk_client_jwt"),
+      SecureStore.deleteItemAsync(`__clerk_cache_session_jwt_${suffix}`),
+    ]);
     let result;
     try {
       result = await signIn.create({ identifier, password: pw });
@@ -169,8 +189,21 @@ export default function LoginScreen() {
     if (res.status === 429) {
       throw new Error(t("login.errorTooManyAttempts"));
     }
-    if (!res.ok) return false; // 401 etc. → caller treats as bad credentials
+    // Read the body for ALL responses — including non-ok — so we can inspect
+    // alreadyMigrated. We must NOT bail early with `if (!res.ok) return false`
+    // because a 409 response carries meaningful information.
     const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      // 409 + alreadyMigrated means the password IS correct and the user IS
+      // already in Clerk. Returning true lets handleLogin proceed to the
+      // step-3 retry of tryClerkSignIn, which is the correct sign-in path.
+      if (data?.alreadyMigrated === true) {
+        console.error("[tryMigrate] 409 alreadyMigrated — flagging for Clerk retry");
+        return true;
+      }
+      // 401 or other error → genuinely bad credentials or server error.
+      return false;
+    }
     return data?.migrated === true || data?.alreadyMigrated === true;
   };
 

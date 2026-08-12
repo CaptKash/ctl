@@ -1,0 +1,35 @@
+Objective: Fix the bug where signing out and then signing back in with the same email/password returns "Invalid email or password," even though the credentials are correct.
+
+Current behavior: User signs in successfully with email/password. User signs out. User immediately tries to sign in again with the exact same email/password. Login fails with "Invalid email or password."
+
+Expected behavior: Signing in again with the same valid credentials after sign-out should succeed exactly as it did the first time.
+
+Investigate before making any changes — do not guess:
+1. Trace the complete sign-out flow: what gets cleared (tokens, session, AsyncStorage/SecureStore keys, auth state in memory, any global/context state), and in what order.
+2. Trace the complete sign-in flow: what the client sends to the backend, how the backend looks up the user, how the password is compared (hash comparison, case sensitivity, whitespace trimming on email).
+3. Check whether sign-out calls any backend endpoint that mutates the user record (e.g., invalidates a session token, rotates a password hash, clears a refresh token) rather than just clearing client-side state.
+4. Check whether "Invalid email or password" is a generic message masking a different actual error (e.g., network failure, expired/stale client state, a 401 caused by a leftover invalid auth header still being attached to the login request after sign-out).
+5. Check for race conditions — e.g., sign-out navigation firing before all async clearing (AsyncStorage/SecureStore writes) completes, so the next sign-in reads stale state.
+6. Check email normalization consistency between sign-up, sign-in, and any backend lookup (case sensitivity, trimming).
+7. Review server-side logs/error responses for the failed login attempt to see the actual reason the backend is rejecting it (user not found vs. password mismatch vs. some other check).
+8. Confirm whether this reproduces every time or intermittently, and whether it reproduces with a fresh app reload vs. only immediately after sign-out in the same session.
+
+Explain the root cause before or alongside implementing the fix. If the cause is unclear after investigation, report findings rather than guessing at a fix.
+
+Constraints:
+- Apply the smallest reliable fix for the identified root cause.
+- Do not rewrite the auth flow, sign-out logic, or unrelated screens.
+- Do not introduce a new session/token storage mechanism.
+- Do not change the database schema.
+- Do not weaken password validation or bypass auth checks to "make it work."
+
+Must remain unchanged: existing working sign-up flow, any other sign-in methods (Apple/Google, if present), session persistence for the "stay signed in" case, and all unrelated screens/navigation.
+
+Validation before declaring done:
+- Reproduce the exact sequence (sign in → sign out → sign in again with same credentials) and confirm it now succeeds.
+- Confirm sign-out still correctly clears the session (user is not left in a signed-in state after sign-out).
+- Confirm sign-in with a genuinely wrong password still correctly shows "Invalid email or password."
+- Confirm this doesn't regress sign-up or first-time sign-in.
+- No native build required to validate this — it should be verifiable via logs/backend inspection and in-app testing in the dev environment.
+
+Definition of done: Root cause identified and explained, smallest fix applied, the failing sequence above now works, no regressions in sign-up/sign-in/sign-out flows.
