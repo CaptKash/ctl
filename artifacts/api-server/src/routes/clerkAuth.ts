@@ -725,11 +725,24 @@ router.get("/auth/clerk/config", (_req, res) => {
 /**
  * POST /auth/diag
  *
- * Unauthenticated diagnostic endpoint used during active debugging to capture
- * client-side sign-in state that production Hermes does not forward to the
- * iOS system log. Safe to keep in — it logs nothing sensitive (the client
- * sends status strings and boolean flags, never credentials). Remove once the
- * sign-out → sign-in root cause is confirmed.
+ * TODO(TEMPORARY): Remove this endpoint once the sign-out → sign-in bug root
+ * cause is confirmed and fixed. It exists solely to capture client-side
+ * sign-in state from production devices where Hermes discards console output.
+ *
+ * Payload fields (never contains credentials):
+ *   label         — event name: "entry" | "null-signIn" | "clerk-error" |
+ *                   "unknown-error" | "complete" | "non-complete"
+ *   attempt       — 1 (first tryClerkSignIn call) or 3 (retry after migrate)
+ *   signInLoaded  — boolean; whether useSignIn().isLoaded was true at call time
+ *   signInIsNull  — boolean; whether the signIn resource itself was null/undefined
+ *   setActiveIsNull — boolean; same for the setActive function
+ *   status        — Clerk SignIn status string on non-complete path (e.g. "needs_first_factor")
+ *   code          — Clerk API error code string on error path (e.g. "form_identifier_not_found")
+ *   message       — Clerk/JS error message string — standard Clerk messages never echo credentials
+ *   ts            — client-side Unix timestamp (ms)
+ *
+ * This endpoint is unauthenticated by design (sign-in isn't established yet
+ * when these events fire). Do not add credential-bearing fields here.
  */
 router.post("/auth/diag", (req, res) => {
   console.error("[DIAG]", JSON.stringify(req.body));
