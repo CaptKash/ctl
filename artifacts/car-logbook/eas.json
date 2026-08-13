@@ -4,6 +4,24 @@
     "appVersionSource": "local"
   },
   "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "store",
+      "cache": {
+        "key": "sdk57-devclient-v1"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_Y2hhcm1lZC1nYXJmaXNoLTEuY2xlcmsuYWNjb3VudHMuZGV2JA",
+        "EXPO_PUBLIC_CLERK_PROXY_URL": "https://ctl-car-technical-log.replit.app/api/__clerk",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
+        "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ",
+        "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
+      },
+      "ios": {
+        "image": "sdk-54"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "env": {

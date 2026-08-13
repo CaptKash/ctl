@@ -127,9 +127,23 @@ export default function LoginScreen() {
     ]);
   };
 
-  const tryClerkSignIn = async (identifier: string, pw: string): Promise<boolean> => {
+  // Fire-and-forget diagnostic logger — posts to /api/auth/diag so we can
+  // observe client-side sign-in state in the server log without needing
+  // device console access (production Hermes discards console.error output).
+  // Never sends credentials — only status strings, booleans, and error codes.
+  const diag = (label: string, data: Record<string, unknown>) => {
+    fetch(`${BASE_URL}/auth/diag`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label, ...data, ts: Date.now() }),
+    }).catch(() => {});
+  };
+
+  const tryClerkSignIn = async (identifier: string, pw: string, attempt: number = 1): Promise<boolean> => {
+    diag("entry", { attempt, signInLoaded, signInIsNull: !signIn, setActiveIsNull: !setActive });
     if (!signIn || !setActive) {
       console.error("[tryClerkSignIn] signIn resource is null/undefined — Clerk client not ready");
+      diag("null-signIn", { attempt });
       return false;
     }
     // Clear stale Clerk SecureStore tokens before attempting sign-in.
@@ -159,20 +173,24 @@ export default function LoginScreen() {
       // Log the real Clerk error code before re-throwing so we can diagnose
       // what's actually going wrong (error codes appear in Crashlytics / device logs).
       if (isClerkAPIResponseError(err)) {
-        err.errors.forEach((e) =>
-          console.error("[tryClerkSignIn] Clerk error:", e.code, e.message, e.longMessage)
-        );
+        err.errors.forEach((e) => {
+          console.error("[tryClerkSignIn] Clerk error:", e.code, e.message, e.longMessage);
+          diag("clerk-error", { attempt, code: e.code, message: e.message });
+        });
       } else {
         console.error("[tryClerkSignIn] unexpected error:", (err as any)?.message ?? err);
+        diag("unknown-error", { attempt, message: (err as any)?.message ?? String(err) });
       }
       throw err;
     }
     if (result.status === "complete" && result.createdSessionId) {
       await setActive({ session: result.createdSessionId });
+      diag("complete", { attempt });
       return true;
     }
     // Non-complete status without an exception — log for diagnostics.
     console.error("[tryClerkSignIn] non-complete status:", result.status, JSON.stringify(result));
+    diag("non-complete", { attempt, status: result.status });
     return false;
   };
 
@@ -277,7 +295,7 @@ export default function LoginScreen() {
       // 1. Try Clerk directly (covers users who already migrated, or who
       //    signed up new in this build).
       try {
-        if (await tryClerkSignIn(identifier, password)) {
+        if (await tryClerkSignIn(identifier, password, 1)) {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           router.replace("/home");
           return;
@@ -309,7 +327,7 @@ export default function LoginScreen() {
 
       // 3. Retry Clerk sign-in now that the user exists in Clerk.
       try {
-        if (await tryClerkSignIn(identifier, password)) {
+        if (await tryClerkSignIn(identifier, password, 3)) {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           router.replace("/home");
           return;

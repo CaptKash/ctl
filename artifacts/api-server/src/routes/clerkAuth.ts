@@ -722,6 +722,20 @@ router.get("/auth/clerk/config", (_req, res) => {
   return res.json({ publishableKey });
 });
 
+/**
+ * POST /auth/diag
+ *
+ * Unauthenticated diagnostic endpoint used during active debugging to capture
+ * client-side sign-in state that production Hermes does not forward to the
+ * iOS system log. Safe to keep in — it logs nothing sensitive (the client
+ * sends status strings and boolean flags, never credentials). Remove once the
+ * sign-out → sign-in root cause is confirmed.
+ */
+router.post("/auth/diag", (req, res) => {
+  console.error("[DIAG]", JSON.stringify(req.body));
+  return res.json({ ok: true });
+});
+
 // ── Bulk migration ─────────────────────────────────────────────────────────
 
 /**
