@@ -1,0 +1,118 @@
+
+You want to build a development client build for platforms: iOS
+However, we detected that you don't have expo-dev-client installed for your project.
+✔ Do you want EAS CLI to install expo-dev-client for you? … yes
+
+Running expo install expo-dev-client
+
+[expo-cli] › Installing 1 SDK 54.0.0 compatible native module using pnpm
+[expo-cli] > pnpm add expo-dev-client@~6.0.21
+[expo-cli] ../..                                    | Progress: resolved 1, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 82, reused 0, downloaded 0, added 0
+[expo-cli] WARN  deprecated @clerk/clerk-expo@2.19.31: @clerk/clerk-expo is deprecated. Migrate to @clerk/expo by following the Core 3 upgrade guide https://clerk.com/docs/guides/development/upgrading/upgrade-guides/core-3
+[expo-cli] ../mockup-sandbox                        |  WARN  deprecated recharts@2.15.4
+[expo-cli] ../..                                    | Progress: resolved 139, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 141, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 142, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 202, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 272, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 363, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 404, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 495, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 610, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 699, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 828, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 942, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 1051, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 1119, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 1142, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 1154, reused 0, downloaded 0, added 0
+[expo-cli] ../..                                    | Progress: resolved 1155, reused 0, downloaded 0, added 0
+[expo-cli] WARN  8 deprecated subdependencies found: @clerk/clerk-react@5.61.3, @clerk/types@4.101.20, @ungap/structured-clone@1.3.0, @xmldom/xmldom@0.8.11, crypto-js@4.2.0, tsconfck@3.1.6, uuid@3.4.0, uuid@7.0.3
+[expo-cli] ../..                                    | Progress: resolved 1157, reused 0, downloaded 0, added 0, done
+[expo-cli] WARN  Issues with peer dependencies found
+[expo-cli] artifacts/car-logbook
+[expo-cli] ├─┬ expo-router 57.0.7
+[expo-cli] │ └─┬ @testing-library/user-event 14.6.1
+[expo-cli] │   └── ✕ missing peer @testing-library/dom@>=7.21.4
+[expo-cli] ├─┬ react-native 0.86.0
+[expo-cli] │ └─┬ @react-native/community-cli-plugin 0.86.0
+[expo-cli] │   └── ✕ missing peer @react-native/metro-config@0.86.0
+[expo-cli] ├─┬ react-native-worklets 0.10.0
+[expo-cli] │ └── ✕ missing peer @react-native/metro-config@"*"
+[expo-cli] └─┬ @clerk/clerk-expo 2.19.31
+[expo-cli]   └─┬ @clerk/clerk-js 5.125.10
+[expo-cli]     ├─┬ @solana/wallet-adapter-base 0.9.27
+[expo-cli]     │ └── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]     ├─┬ @solana/wallet-standard 1.1.4
+[expo-cli]     │ └─┬ @solana/wallet-standard-wallet-adapter 1.1.4
+[expo-cli]     │   ├─┬ @solana/wallet-standard-wallet-adapter-react 1.1.4
+[expo-cli]     │   │ └─┬ @solana/wallet-standard-wallet-adapter-base 1.1.4
+[expo-cli]     │   │   ├── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]     │   │   └─┬ @solana/wallet-adapter-base 0.9.27
+[expo-cli]     │   │     └── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]     │   └─┬ @solana/wallet-standard-wallet-adapter-base 1.1.4
+[expo-cli]     │     └── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]     └─┬ @solana/wallet-adapter-react 0.15.39
+[expo-cli]       ├── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]       ├─┬ @solana/wallet-adapter-base 0.9.27
+[expo-cli]       │ └── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]       ├─┬ @solana/wallet-standard-wallet-adapter-react 1.1.4
+[expo-cli]       │ └── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]       └─┬ @solana-mobile/wallet-adapter-mobile 2.2.8
+[expo-cli]         ├── ✕ missing peer @solana/web3.js@^1.98.4
+[expo-cli]         ├─┬ @solana/wallet-adapter-base 0.9.27
+[expo-cli]         │ └── ✕ missing peer @solana/web3.js@^1.98.0
+[expo-cli]         └─┬ @solana-mobile/mobile-wallet-adapter-protocol-web3js 2.2.8
+[expo-cli]           └── ✕ missing peer @solana/web3.js@^1.98.4
+[expo-cli] Peer dependencies that should be installed:
+[expo-cli]   @react-native/metro-config@0.86.0
+[expo-cli]   @solana/web3.js@">=1.98.4 <2.0.0-0"
+[expo-cli]   @testing-library/dom@>=7.21.4
+[expo-cli] 
+[expo-cli] ../..                                    | +348 -254 +++++++++++++++------------
+[expo-cli] .../node_modules/@clerk/shared postinstall$ node ./scripts/postinstall.mjs
+[expo-cli] .../core-js@3.41.0/node_modules/core-js postinstall$ node -e "try{require('./postinstall')}catch(e){}"
+[expo-cli] .../node_modules/browser-tabs-lock postinstall$ node scripts/postinstall.js
+[expo-cli] .../node_modules/browser-tabs-lock postinstall: Thank you for using browser-tabs-lock ( https://github.com/supertokens/browser-tabs-lock ).
+[expo-cli] .../node_modules/browser-tabs-lock postinstall: This library was created as a part of a larger project, SuperTokens( https://supertokens.io ) - an open source auth solution.
+[expo-cli] .../node_modules/browser-tabs-lock postinstall: You can also check out our other projects on https://github.com/supertokens
+[expo-cli] .../node_modules/browser-tabs-lock postinstall: 
+[expo-cli] .../core-js@3.41.0/node_modules/core-js postinstall: Done
+[expo-cli] .../node_modules/browser-tabs-lock postinstall: Done
+[expo-cli] .../node_modules/@clerk/shared postinstall: Attention: Clerk now collects telemetry data from its SDKs when connected to development instances.
+[expo-cli] .../node_modules/@clerk/shared postinstall: The data collected is used to inform Clerk's product roadmap.
+[expo-cli] .../node_modules/@clerk/shared postinstall: To learn more, including how to opt-out from the telemetry program, visit: https://clerk.com/docs/telemetry.
+[expo-cli] .../node_modules/@clerk/shared postinstall: Done
+[expo-cli] ../.. preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+[expo-cli] ../.. preinstall: Done
+[expo-cli] ../.. postinstall$ node scripts/fix-expo-swift.cjs
+[expo-cli] ../.. postinstall: Swift weak-let fix: patched 0 file(s).
+[expo-cli] ../.. postinstall: Done
+[expo-cli] Done in 31.4s using pnpm v10.26.1
+[expo-cli] Error: Cannot find module './utils/autoAddConfigPlugins.js'
+[expo-cli] Require stack:
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/applyPlugins.js
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/installAsync.js
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/index.js
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/bin/cli
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/expo@54.0.33_@babel+core@7.29.0_@expo+metro-runtime@6.1.2_expo-router@6.0.23_react-nati_565b6db172422c96ef98beeabc19b506/node_modules/expo/bin/cli
+[expo-cli] Error: Cannot find module './utils/autoAddConfigPlugins.js'
+[expo-cli] Require stack:
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/applyPlugins.js
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/installAsync.js
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/index.js
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/bin/cli
+[expo-cli] - /Users/kash/ctl/node_modules/.pnpm/expo@54.0.33_@babel+core@7.29.0_@expo+metro-runtime@6.1.2_expo-router@6.0.23_react-nati_565b6db172422c96ef98beeabc19b506/node_modules/expo/bin/cli
+[expo-cli]     at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+[expo-cli]     at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+[expo-cli]     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+[expo-cli]     at Module._load (node:internal/modules/cjs/loader:1242:25)
+[expo-cli]     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+[expo-cli]     at Module.require (node:internal/modules/cjs/loader:1556:12)
+[expo-cli]     at require (node:internal/modules/helpers:152:16)
+[expo-cli]     at /Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/applyPlugins.js:62:116
+[expo-cli]     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+[expo-cli]     at async applyPluginsAsync (/Users/kash/ctl/node_modules/.pnpm/@expo+cli@54.0.23_expo-router@6.0.23_expo@54.0.33_react-native@0.81.5_@babel+core@7.29._daef1aa59357a8cccc6b98050d411315/node_modules/@expo/cli/build/src/install/applyPlugins.js:62:43)
+/Users/kash/ctl/node_modules/.pnpm/expo@54.0.33_@babel+core@7.29.0_@expo+metro-runtime@6.1.2_expo-router@6.0.23_react-nati_565b6db172422c96ef98beeabc19b506/node_modules/expo/bin/cli install expo-dev-client exited with non-zero code: 1
+    Error: build command failed.
