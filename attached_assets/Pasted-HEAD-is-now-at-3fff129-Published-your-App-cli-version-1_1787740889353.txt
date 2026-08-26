@@ -1,0 +1,77 @@
+HEAD is now at 3fff129 Published your App
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "store",
+      "cache": {
+        "key": "sdk57-devclient-v1"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_Y2hhcm1lZC1nYXJmaXNoLTEuY2xlcmsuYWNjb3VudHMuZGV2JA",
+        "EXPO_PUBLIC_CLERK_PROXY_URL": "https://ctl-car-technical-log.replit.app/api/__clerk",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
+        "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ",
+        "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
+      },
+      "ios": {
+        "image": "sdk-54"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_Y2hhcm1lZC1nYXJmaXNoLTEuY2xlcmsuYWNjb3VudHMuZGV2JA",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
+        "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ",
+        "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "distribution": "store"
+      },
+      "environment": "preview"
+    },
+    "production": {
+      "distribution": "store",
+      "cache": {
+        "key": "sdk57-fix-v22"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "ctl-car-technical-log.replit.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_Y2hhcm1lZC1nYXJmaXNoLTEuY2xlcmsuYWNjb3VudHMuZGV2JA",
+        "EXPO_PUBLIC_CLERK_PROXY_URL": "https://ctl-car-technical-log.replit.app/api/__clerk",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_LRjDIRTvidTYYIqipELDpvRAyjX",
+        "EXPO_PUBLIC_REVENUECAT_TEST_API_KEY": "test_PBSHgnlulFoqCVjXUEsBEzNBWRQ",
+        "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "goog_FIsrsuflbNEdjOgxcIXJzwwCOtl"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "image": "sdk-54"
+      },
+      "environment": "production"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6760766535"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}
+kash@Mohammeds-MacBook-Pro car-logbook % 
