@@ -1,0 +1,68 @@
+const primary = "#1A56DB";
+const primaryDark = "#1E429F";
+
+const light = {
+  text: "#111827",
+  textSecondary: "#6B7280",
+  textTertiary: "#9CA3AF",
+  background: "#F9FAFB",
+  backgroundSecondary: "#FFFFFF",
+  backgroundTertiary: "#F3F4F6",
+  tint: primary,
+  tintDark: primaryDark,
+  tabIconDefault: "#9CA3AF",
+  tabIconSelected: primary,
+  border: "#E5E7EB",
+  borderLight: "#F3F4F6",
+  card: "#FFFFFF",
+  danger: "#EF4444",
+  dangerLight: "#FEE2E2",
+  success: "#10B981",
+  successLight: "#D1FAE5",
+  warning: "#F59E0B",
+  warningLight: "#FEF3C7",
+  info: "#3B82F6",
+  infoLight: "#DBEAFE",
+  shadow: "rgba(0,0,0,0.08)",
+  overlay: "rgba(0,0,0,0.5)",
+  heroBg: "#FFFFFF",
+  heroBorder: "#B8CADD",
+  heroText: "#0F2D5E",
+  heroTagline: "#2563EB",
+  heroAccent: "#DBEAFE",
+};
+
+const dark = {
+  text: "#F9FAFB",
+  textSecondary: "#9CA3AF",
+  textTertiary: "#6B7280",
+  background: "#0F172A",
+  backgroundSecondary: "#1E293B",
+  backgroundTertiary: "#334155",
+  tint: "#3B82F6",
+  tintDark: "#2563EB",
+  tabIconDefault: "#6B7280",
+  tabIconSelected: "#3B82F6",
+  border: "#334155",
+  borderLight: "#1E293B",
+  card: "#1E293B",
+  danger: "#F87171",
+  dangerLight: "#450A0A",
+  success: "#34D399",
+  successLight: "#022C22",
+  warning: "#FBBF24",
+  warningLight: "#451A03",
+  info: "#60A5FA",
+  infoLight: "#172554",
+  shadow: "rgba(0,0,0,0.3)",
+  overlay: "rgba(0,0,0,0.7)",
+  heroBg: "#0F2D5E",
+  heroBorder: "transparent",
+  heroText: "#FFFFFF",
+  heroTagline: "#93C5FD",
+  heroAccent: "#1D4A96",
+};
+
+export type ColorScheme = typeof light;
+
+export default { light, dark };

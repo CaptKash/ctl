@@ -1,0 +1,154 @@
+import { Feather } from "@expo/vector-icons";
+import React from "react";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { useTranslation } from "react-i18next";
+import { useColors } from "@/context/ThemeContext";
+import { MetalIcon } from "./MetalIcon";
+
+type Props = {
+  icon: keyof typeof Feather.glyphMap;
+  iconColor: string;
+  iconBg: string;
+  title: string;
+  subtitle?: string;
+  metaText?: string | null;
+  rightText?: string;
+  rightSubtext?: string;
+  onPress?: () => void;
+  onDelete?: () => void;
+  onComplete?: () => void;
+};
+
+export function RecordCard({
+  icon,
+  iconColor,
+  iconBg,
+  title,
+  subtitle,
+  metaText,
+  rightText,
+  rightSubtext,
+  onPress,
+  onDelete,
+  onComplete,
+}: Props) {
+  const C = useColors();
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, isRTL && styles.cardRTL, { backgroundColor: C.card, opacity: pressed ? 0.9 : 1 }]}
+    >
+      <MetalIcon icon={icon} color={iconColor} bg={iconBg} size={18} style={styles.iconBox} />
+      <View style={styles.content}>
+        <Text style={[styles.title, { color: C.text, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{title}</Text>
+        {subtitle ? (
+          <Text style={[styles.subtitle, { color: C.textSecondary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{subtitle}</Text>
+        ) : null}
+        {metaText ? (
+          <View style={[styles.metaRow, isRTL && { flexDirection: "row-reverse" }]}>
+            <Feather name="user" size={11} color={C.textTertiary} />
+            <Text style={[styles.metaText, { color: C.textTertiary, textAlign: isRTL ? "right" : "left" }]} numberOfLines={1}>{metaText}</Text>
+          </View>
+        ) : null}
+      </View>
+      <View style={[styles.right, isRTL && { alignItems: "flex-start" }]}>
+        {rightText ? (
+          <Text style={[styles.rightText, { color: C.text }]}>{rightText}</Text>
+        ) : null}
+        {rightSubtext ? (
+          <Text style={[styles.rightSubtext, { color: C.textTertiary }]}>{rightSubtext}</Text>
+        ) : null}
+      </View>
+      {onComplete && (
+        <Pressable
+          onPress={onComplete}
+          hitSlop={8}
+          style={({ pressed }) => [styles.actionBtn, { opacity: pressed ? 0.6 : 1 }]}
+        >
+          <Feather name="check-circle" size={16} color="#16A34A" />
+        </Pressable>
+      )}
+      {onDelete && (
+        <Pressable
+          onPress={onDelete}
+          hitSlop={8}
+          style={({ pressed }) => [styles.actionBtn, { opacity: pressed ? 0.6 : 1 }]}
+        >
+          <Feather name="trash-2" size={16} color={C.danger} />
+        </Pressable>
+      )}
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 10,
+    gap: 12,
+    shadowColor: "rgba(0,0,0,0.06)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  cardRTL: {
+    flexDirection: "row-reverse",
+  },
+  iconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  content: {
+    flex: 1,
+    gap: 2,
+  },
+  title: {
+    fontSize: 15,
+    fontFamily: "Inter_600SemiBold",
+  },
+  subtitle: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  metaText: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    flexShrink: 1,
+  },
+  right: {
+    alignItems: "flex-end",
+    gap: 2,
+  },
+  rightText: {
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
+  },
+  rightSubtext: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+  },
+  actionBtn: {
+    padding: 4,
+  },
+});

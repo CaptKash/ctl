@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <!-- Neon glow for CTL -->
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7"  result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Soft glow for car outline -->
+    <filter id="glow" x="-8%" y="-8%" width="116%" height="116%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Dark navy background -->
+  <rect width="1024" height="1024" fill="#080F1E" rx="190"/>
+
+  <!-- ================================================
+       JEEP COMMANDER FRONT — MINIMALIST OUTLINE
+       
+       Key: FLAT roof, near-VERTICAL A-pillars (boxy),
+       large round wheel arches at bottom corners,
+       tires visible, central bumper section.
+  ================================================ -->
+
+  <!-- OUTER BODY SILHOUETTE
+       Path goes clockwise:
+       top-left → top-right → right side down → right wheel arch →
+       down to bumper → across → up to left arch → left arch →
+       back up left side → closed
+  -->
+  <path d="
+    M 172 142
+    L 852 142
+    L 856 440
+    A 98 98 0 0 1 660 440
+    L 660 590
+    L 364 590
+    L 364 440
+    A 98 98 0 0 0 168 440
+    Z"
+    fill="none"
+    stroke="white"
+    stroke-width="9"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+    filter="url(#glow)"/>
+
+  <!-- RIGHT TYRE (visible in wheel arch opening) -->
+  <circle cx="758" cy="528" r="78"
+    fill="none" stroke="white" stroke-width="7"
+    filter="url(#glow)"/>
+
+  <!-- LEFT TYRE -->
+  <circle cx="266" cy="528" r="78"
+    fill="none" stroke="white" stroke-width="7"
+    filter="url(#glow)"/>
+
+  <!-- WINDSHIELD — tall, nearly rectangular (Jeep boxy style) -->
+  <path d="
+    M 196 158
+    L 828 158
+    L 824 382
+    L 200 382
+    Z"
+    fill="none"
+    stroke="white"
+    stroke-width="6"
+    stroke-linejoin="round"
+    opacity="0.55"
+    filter="url(#glow)"/>
+
+  <!-- ROOF RACK RAILS (subtle Jeep detail, two horizontal lines on roof) -->
+  <line x1="240" y1="142" x2="784" y2="142" stroke="white" stroke-width="5" opacity="0.9"/>
+  <line x1="260" y1="152" x2="764" y2="152" stroke="white" stroke-width="2.5" opacity="0.3"/>
+
+  <!-- HOOD LINE (line between windshield base and hood, minimal) -->
+  <line x1="200" y1="382" x2="824" y2="382" stroke="white" stroke-width="4" opacity="0.35"/>
+
+  <!-- LICENCE PLATE slot (centre of bumper) -->
+  <rect x="438" y="510" width="148" height="56" rx="5"
+    fill="none" stroke="white" stroke-width="4" opacity="0.45"/>
+
+  <!-- ================================================
+       CTL — NEON CYAN-BLUE
+  ================================================ -->
+  <text
+    x="512"
+    y="810"
+    font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
+    font-size="186"
+    font-weight="900"
+    text-anchor="middle"
+    fill="#00D0FF"
+    letter-spacing="20"
+    filter="url(#neon)">CTL</text>
+
+</svg>

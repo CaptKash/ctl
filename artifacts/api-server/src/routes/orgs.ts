@@ -1,0 +1,1075 @@
+import { Router } from "express";
+import { and, eq, sql, desc, inArray } from "drizzle-orm";
+import { z } from "zod/v4";
+import { Resend } from "resend";
+import {
+  db,
+  carsTable,
+  usersTable,
+  organizationsTable,
+  organizationMembersTable,
+  organizationCarLinksTable,
+  insertCarSchema,
+  maintenanceTable,
+  malfunctionsTable,
+  eventCompletionsTable,
+  inspectionsTable,
+  fuelTable,
+  partsTable,
+  insuranceTable,
+  dealershipsTable,
+  renewalsTable,
+} from "@workspace/db";
+import { requireAuth } from "../middlewares/auth";
+import { getAccessibleOrgCarIds, getActiveMembership, resolveOrgAccess } from "../middlewares/orgAccess";
+import { getEnterpriseSeatLimit } from "../lib/revenuecat";
+import {
+  buildLicenseItems,
+  buildInsuranceItems,
+  buildMaintenanceItems,
+  buildInspectionItems,
+} from "../lib/upcomingItems";
+import { canTransitionClientLink, clientCarSummary, sanitizeClientData } from "../lib/clientPortal";
+import {
+  canCreateOwnedOrganization,
+  countOccupiedSeats,
+  countActiveSeats,
+  decideSeatGrowth,
+  isRoleAllowedForOrganization,
+  isSeatMembership,
+  previewRepairShopConversion,
+  type OrganizationType,
+} from "../lib/organizationSeats";
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const FROM_EMAIL = process.env.FROM_EMAIL ?? "CTL App <noreply@inroomstudios.com>";
+
+const router = Router();
+
+router.use(requireAuth);
+router.param("orgId", resolveOrgAccess);
+
+// Seat limits are NEVER accepted from the client — they are derived server-side
+// from the owner's verified RevenueCat Enterprise entitlement (see
+// `getEnterpriseSeatLimit`). The schemas below therefore only carry the name.
+const createOrgSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  // Older released clients only send a name. Preserve their historical Fleet
+  // behavior while new clients choose explicitly.
+  organizationType: z.enum(["fleet", "repair_shop"]).default("fleet"),
+});
+
+const updateOrgSchema = z.object({
+  name: z.string().trim().min(1).max(120).optional(),
+}).strict();
+
+const inviteSchema = z.object({
+  email: z.string().trim().email().max(255),
+  role: z.enum(["admin", "staff", "client"]),
+});
+
+const roleSchema = z.object({ role: z.enum(["admin", "staff", "client"]) });
+const clientLinkSchema = z.object({ memberId: z.number().int().positive(), carId: z.number().int().positive() });
+const personalLinkSchema = z.object({ carId: z.number().int().positive() });
+const linkStatusSchema = z.object({ status: z.enum(["pending", "active", "rejected", "revoked", "suspended"]) });
+const convertOrganizationSchema = z.object({ confirm: z.literal(true) }).strict();
+
+async function decorateLinks(links: (typeof organizationCarLinksTable.$inferSelect)[], hideRequester = false) {
+  if (!links.length) return [];
+  const [cars, members] = await Promise.all([
+    db.select().from(carsTable).where(inArray(carsTable.id, [...new Set(links.map((l) => l.carId))])),
+    db.select({ id: organizationMembersTable.id, name: usersTable.name, email: organizationMembersTable.email, role: organizationMembersTable.role })
+      .from(organizationMembersTable).leftJoin(usersTable, eq(organizationMembersTable.userId, usersTable.id))
+      .where(inArray(organizationMembersTable.id, [...new Set(links.map((l) => l.memberId))])),
+  ]);
+  const carsById = new Map(cars.map((car) => [car.id, clientCarSummary(car)]));
+  const membersById = new Map(members.map((member) => [member.id, member]));
+  return links.map((link) => {
+    const { requestedByUserId, ...safeLink } = link;
+    return { ...(hideRequester ? safeLink : link), car: carsById.get(link.carId) ?? null, member: membersById.get(link.memberId) ?? null };
+  });
+}
+
+/** Count seats from the one policy used by every membership mutation. */
+async function countSeats(orgId: number, organizationType: OrganizationType): Promise<number> {
+  const members = await db
+    .select({ role: organizationMembersTable.role, status: organizationMembersTable.status })
+    .from(organizationMembersTable)
+    .where(eq(organizationMembersTable.orgId, orgId));
+  return countOccupiedSeats(organizationType, members);
+}
+
+/**
+ * Authoritative seat limit for an org, derived from the OWNER's verified
+ * RevenueCat entitlement (the owner is the subscriber). Returns `undefined`
+ * when the owner has no active Enterprise entitlement. Throws if RevenueCat
+ * is unreachable so callers fail closed.
+ */
+async function resolveOwnerSeatLimit(
+  ownerUserId: number,
+): Promise<number | null | undefined> {
+  const [owner] = await db
+    .select({ id: usersTable.id, isAdmin: usersTable.isAdmin })
+    .from(usersTable)
+    .where(eq(usersTable.id, ownerUserId))
+    .limit(1);
+  if (!owner) return undefined;
+  return getEnterpriseSeatLimit(owner);
+}
+
+// ── Organizations ─────────────────────────────────────────────────────────
+
+// Create an organization. The creator becomes its owner + an active admin.
+router.post("/orgs", async (req, res) => {
+  const userId = req.user!.id;
+  const parsed = createOrgSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid enterprise data", details: parsed.error.flatten() });
+  }
+
+  // Seat limit comes from the creator's verified Enterprise entitlement, never
+  // the request body — this prevents self-upgrading to a higher seat tier.
+  let seatLimit: number | null | undefined;
+  try {
+    seatLimit = await getEnterpriseSeatLimit(req.user!);
+  } catch {
+    return res.status(503).json({ error: "Could not verify your subscription. Please try again." });
+  }
+  if (seatLimit === undefined) {
+    return res.status(403).json({
+      error: "An active CTL Enterprise subscription is required to create an enterprise.",
+    });
+  }
+
+  const result = await db.transaction(async (tx) => {
+    // Lock the owner row so concurrent create requests for the same user are
+    // serialized. The second request checks again after the first commits and
+    // is rejected instead of creating a second enterprise.
+    const [owner] = await tx
+      .select({ email: usersTable.email })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .for("update")
+      .limit(1);
+    if (!owner) return { error: "owner_missing" as const };
+
+    const existingOwned = await tx
+      .select({ id: organizationsTable.id })
+      .from(organizationsTable)
+      .where(eq(organizationsTable.ownerUserId, userId))
+      .limit(1);
+    if (!canCreateOwnedOrganization(existingOwned.length)) {
+      return { error: "already_owns" as const };
+    }
+
+    const [created] = await tx
+      .insert(organizationsTable)
+      .values({ name: parsed.data.name, organizationType: parsed.data.organizationType, ownerUserId: userId, seatLimit })
+      .returning();
+    await tx.insert(organizationMembersTable).values({
+      orgId: created.id,
+      userId,
+      email: owner.email.toLowerCase(),
+      role: "admin",
+      status: "active",
+      invitedByUserId: userId,
+    });
+    return { organization: created };
+  });
+
+  if ("error" in result) {
+    if (result.error === "already_owns") {
+      return res.status(409).json({
+        error: "You can own one enterprise at a time. You may still join other enterprises as a member.",
+      });
+    }
+    return res.status(401).json({ error: "User account not found." });
+  }
+
+  return res.status(201).json({ organization: result.organization, role: "admin" as const });
+});
+
+// List organizations the current user is an active member of.
+router.get("/orgs", async (req, res) => {
+  const userId = req.user!.id;
+  const rows = await db
+    .select({
+      id: organizationsTable.id,
+      name: organizationsTable.name,
+      organizationType: organizationsTable.organizationType,
+      seatLimit: organizationsTable.seatLimit,
+      ownerUserId: organizationsTable.ownerUserId,
+      createdAt: organizationsTable.createdAt,
+      role: organizationMembersTable.role,
+    })
+    .from(organizationMembersTable)
+    .innerJoin(organizationsTable, eq(organizationMembersTable.orgId, organizationsTable.id))
+    .where(
+      and(
+        eq(organizationMembersTable.userId, userId),
+        eq(organizationMembersTable.status, "active"),
+      ),
+    );
+  return res.json(rows);
+});
+
+// Pending invites addressed to the current user's email (any org).
+router.get("/orgs/invites", async (req, res) => {
+  const userId = req.user!.id;
+  const [me] = await db
+    .select({ email: usersTable.email })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  const email = (me?.email ?? "").toLowerCase();
+  if (!email) return res.json([]);
+
+  const rows = await db
+    .select({
+      memberId: organizationMembersTable.id,
+      orgId: organizationsTable.id,
+      orgName: organizationsTable.name,
+      organizationType: organizationsTable.organizationType,
+      role: organizationMembersTable.role,
+      invitedAt: organizationMembersTable.createdAt,
+    })
+    .from(organizationMembersTable)
+    .innerJoin(organizationsTable, eq(organizationMembersTable.orgId, organizationsTable.id))
+    .where(
+      and(
+        eq(organizationMembersTable.email, email),
+        eq(organizationMembersTable.status, "invited"),
+      ),
+    );
+  return res.json(rows);
+});
+
+// Accept an invite by member-row id (must match the caller's email).
+router.post("/orgs/invites/:memberId/accept", async (req, res) => {
+  const userId = req.user!.id;
+  const memberId = parseInt(req.params.memberId, 10);
+  if (Number.isNaN(memberId)) return res.status(400).json({ error: "Invalid invite id." });
+
+  const [me] = await db
+    .select({ email: usersTable.email })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+  const email = (me?.email ?? "").toLowerCase();
+
+  const [initialInvite] = await db.select().from(organizationMembersTable)
+    .where(eq(organizationMembersTable.id, memberId)).limit(1);
+  if (!initialInvite || initialInvite.status !== "invited" || initialInvite.email.toLowerCase() !== email) {
+    return res.status(404).json({ error: "Invite not found" });
+  }
+  const [initialOrg] = await db.select().from(organizationsTable)
+    .where(eq(organizationsTable.id, initialInvite.orgId)).limit(1);
+  if (!initialOrg) return res.status(404).json({ error: "Invite not found" });
+  let freshLimit: number | null | undefined;
+  try {
+    freshLimit = await resolveOwnerSeatLimit(initialOrg.ownerUserId);
+  } catch {
+    return res.status(503).json({ error: "Could not verify the enterprise's subscription. Please try again." });
+  }
+
+  // Lock the organization before validating/activating. An invited row is a
+  // reservation, but activation is checked against projected ACTIVE usage.
+  const acceptance = await db.transaction(async (tx) => {
+    const [invite] = await tx.select().from(organizationMembersTable)
+      .where(eq(organizationMembersTable.id, memberId)).limit(1);
+    if (!invite || invite.status !== "invited" || invite.email.toLowerCase() !== email) return { error: "not_found" as const };
+    const [org] = await tx.select().from(organizationsTable)
+      .where(eq(organizationsTable.id, invite.orgId)).for("update").limit(1);
+    if (!org) return { error: "not_found" as const };
+    const organizationType = org.organizationType as OrganizationType;
+    if (!isRoleAllowedForOrganization(organizationType, invite.role, invite.userId === org.ownerUserId)) {
+      return { error: "invalid_role" as const };
+    }
+    const members = await tx.select({ role: organizationMembersTable.role, status: organizationMembersTable.status })
+      .from(organizationMembersTable).where(eq(organizationMembersTable.orgId, org.id));
+    const activeSeats = countActiveSeats(organizationType, members);
+    const decision = decideSeatGrowth(isSeatMembership(organizationType, invite), activeSeats, freshLimit);
+    if (freshLimit === undefined) {
+      // A cancelled entitlement freezes the recorded capacity at live active
+      // usage; pending reservations cannot consume a seat after cancellation.
+      await tx.update(organizationsTable).set({ seatLimit: activeSeats, updatedAt: new Date() }).where(eq(organizationsTable.id, org.id));
+    } else if (freshLimit !== org.seatLimit) {
+      await tx.update(organizationsTable).set({ seatLimit: freshLimit, updatedAt: new Date() }).where(eq(organizationsTable.id, org.id));
+    }
+    if (decision !== "allow") return { error: decision as "seat_limit" | "no_entitlement" };
+    const [updated] = await tx.update(organizationMembersTable)
+      .set({ userId, status: "active", updatedAt: new Date() })
+      .where(and(eq(organizationMembersTable.id, memberId), eq(organizationMembersTable.status, "invited")))
+      .returning();
+    return updated ? { updated } : { error: "handled" as const };
+  });
+  if ("error" in acceptance) {
+    if (acceptance.error === "not_found") return res.status(404).json({ error: "Invite not found" });
+    if (acceptance.error === "seat_limit") return res.status(409).json({ error: "Seat limit is no longer available for this invite." });
+    if (acceptance.error === "no_entitlement") return res.status(403).json({ error: "This enterprise's CTL Enterprise subscription is not active." });
+    if (acceptance.error === "invalid_role") return res.status(409).json({ error: "This invite role is not valid for this organization." });
+    return res.status(409).json({ error: "Invite already handled." });
+  }
+  const updated = acceptance.updated;
+  return res.json({ orgId: updated.orgId, role: updated.role });
+});
+
+// Reject an invite by member-row id. Rejection is explicit and prevents the
+// invite from later being accepted.
+router.post("/orgs/invites/:memberId/reject", async (req, res) => {
+  const memberId = parseInt(req.params.memberId, 10);
+  if (Number.isNaN(memberId)) return res.status(400).json({ error: "Invalid invite id." });
+  const [me] = await db.select({ email: usersTable.email }).from(usersTable).where(eq(usersTable.id, req.user!.id)).limit(1);
+  const [updated] = await db.update(organizationMembersTable)
+    .set({ status: "rejected", updatedAt: new Date() })
+    .where(and(eq(organizationMembersTable.id, memberId), eq(organizationMembersTable.status, "invited"), eq(organizationMembersTable.email, (me?.email ?? "").toLowerCase())))
+    .returning();
+  if (!updated) return res.status(404).json({ error: "Invite not found" });
+  return res.json({ orgId: updated.orgId, role: updated.role, status: updated.status });
+});
+
+// Organization detail + members (any active member).
+router.get("/orgs/:orgId", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  const memberWhere = role === "client"
+    ? and(eq(organizationMembersTable.orgId, org.id), eq(organizationMembersTable.userId, req.user!.id))
+    : eq(organizationMembersTable.orgId, org.id);
+  const members = await db
+    .select({
+      id: organizationMembersTable.id,
+      userId: organizationMembersTable.userId,
+      email: organizationMembersTable.email,
+      role: organizationMembersTable.role,
+      status: organizationMembersTable.status,
+      name: usersTable.name,
+    })
+    .from(organizationMembersTable)
+    .leftJoin(usersTable, eq(organizationMembersTable.userId, usersTable.id))
+    .where(memberWhere);
+  const memberIds = members.map((m) => m.id);
+  const links = memberIds.length
+    ? await db.select().from(organizationCarLinksTable).where(inArray(organizationCarLinksTable.memberId, memberIds))
+    : [];
+  const linkCounts = new Map<number, number>();
+  for (const link of links) if (link.status === "active") linkCounts.set(link.memberId, (linkCounts.get(link.memberId) ?? 0) + 1);
+  return res.json({ organization: org, role, members: members.map((m) => ({ ...m, assignedCarCount: linkCounts.get(m.id) ?? 0 })), links: await decorateLinks(links, role === "client") });
+});
+
+// Links are visible to admins/staff; a client receives only links attached to
+// their own membership.
+router.get("/orgs/:orgId/client-links", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  let memberId: number | undefined;
+  if (role === "client") {
+    const m = await getActiveMembership(req.user!.id, org.id);
+    memberId = m?.id;
+  }
+  const links = await db.select().from(organizationCarLinksTable).where(memberId == null
+    ? eq(organizationCarLinksTable.orgId, org.id)
+    : and(eq(organizationCarLinksTable.orgId, org.id), eq(organizationCarLinksTable.memberId, memberId)));
+  return res.json(await decorateLinks(links, role === "client"));
+});
+
+// Admin assigns a shop car to a client, or requests consent to link that
+// client's personal car. The personal car is never transferred to the org.
+router.post("/orgs/:orgId/client-links", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+  const parsed = clientLinkSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid client link data", details: parsed.error.flatten() });
+  const [[member], [car]] = await Promise.all([
+    db.select().from(organizationMembersTable).where(and(eq(organizationMembersTable.id, parsed.data.memberId), eq(organizationMembersTable.orgId, org.id), eq(organizationMembersTable.role, "client"))).limit(1),
+    db.select().from(carsTable).where(eq(carsTable.id, parsed.data.carId)).limit(1),
+  ]);
+  if (!member) return res.status(404).json({ error: "Client member not found" });
+  if (!car) return res.status(404).json({ error: "Car not found" });
+  const type = car.orgId === org.id ? "shop_assigned" : car.userId === member.userId && car.orgId == null ? "personal_link" : null;
+  if (!type) return res.status(403).json({ error: "Car cannot be linked to this client." });
+  const [link] = await db.insert(organizationCarLinksTable).values({
+    orgId: org.id, memberId: member.id, carId: car.id, type, status: "pending", requestedByUserId: req.user!.id,
+  }).returning();
+  return res.status(201).json((await decorateLinks([link]))[0]);
+});
+
+// A client explicitly consents to linking one of their own personal cars.
+router.post("/orgs/:orgId/client-links/personal", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "client") return res.status(403).json({ error: "Clients only." });
+  const parsed = personalLinkSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid car data", details: parsed.error.flatten() });
+  const [member, [car]] = await Promise.all([
+    getActiveMembership(req.user!.id, org.id),
+    db.select().from(carsTable).where(and(eq(carsTable.id, parsed.data.carId), eq(carsTable.userId, req.user!.id))).limit(1),
+  ]);
+  if (!member || !car || car.orgId != null) return res.status(404).json({ error: "Personal car not found" });
+  const [link] = await db.insert(organizationCarLinksTable).values({
+    orgId: org.id, memberId: member.id, carId: car.id, type: "personal_link", status: "active", requestedByUserId: req.user!.id,
+  }).onConflictDoUpdate({
+    target: [organizationCarLinksTable.orgId, organizationCarLinksTable.memberId, organizationCarLinksTable.carId],
+    set: { status: "active", requestedByUserId: req.user!.id, updatedAt: new Date() },
+  }).returning();
+  return res.status(201).json((await decorateLinks([link]))[0]);
+});
+
+router.patch("/orgs/:orgId/client-links/:linkId", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  const linkId = parseInt(req.params.linkId, 10);
+  const parsed = linkStatusSchema.safeParse(req.body);
+  if (Number.isNaN(linkId) || !parsed.success) return res.status(400).json({ error: "Invalid link status" });
+  const [link] = await db.select().from(organizationCarLinksTable).where(and(eq(organizationCarLinksTable.id, linkId), eq(organizationCarLinksTable.orgId, org.id))).limit(1);
+  if (!link) return res.status(404).json({ error: "Client link not found" });
+  if (role === "client") {
+    const member = await getActiveMembership(req.user!.id, org.id);
+    if (!member || link.memberId !== member.id) {
+      return res.status(403).json({ error: "You may only manage your own client link." });
+    }
+  } else if (role !== "admin") {
+    return res.status(403).json({ error: "Admins only." });
+  }
+  if (!canTransitionClientLink(role, link.type as "shop_assigned" | "personal_link", link.status as "pending" | "active" | "rejected" | "revoked" | "suspended", parsed.data.status)) {
+    return res.status(409).json({ error: "This link status transition is not permitted." });
+  }
+  const [updated] = await db.update(organizationCarLinksTable).set({ status: parsed.data.status, updatedAt: new Date() }).where(eq(organizationCarLinksTable.id, linkId)).returning();
+  return res.json((await decorateLinks([updated]))[0]);
+});
+
+// Update an organization's name (admin only). Organization type is immutable.
+router.patch("/orgs/:orgId", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+  const parsed = updateOrgSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid enterprise data", details: parsed.error.flatten() });
+  }
+  const next: Record<string, unknown> = { updatedAt: new Date() };
+  if (parsed.data.name !== undefined) next.name = parsed.data.name;
+
+  // Refresh the seat limit from the owner's current entitlement (authoritative)
+  // so plan upgrades/downgrades are reflected — never from client input. An
+  // `undefined` result means no active entitlement: freeze the stored limit at
+  // current usage so a stale purchased limit can never be used to grow the org.
+  // A verification failure must NOT block a plain name change: on error we
+  // leave the stored seat limit untouched and still apply the update.
+  try {
+    const seatLimit = await resolveOwnerSeatLimit(org.ownerUserId);
+    if (seatLimit === undefined) {
+      next.seatLimit = await countSeats(org.id, org.organizationType as OrganizationType);
+    } else {
+      if (seatLimit != null) {
+        const used = await countSeats(org.id, org.organizationType as OrganizationType);
+        if (seatLimit < used) {
+          return res.status(409).json({
+            error: `Your plan's seat limit (${seatLimit}) is below the current members (${used}). Remove members or upgrade your plan.`,
+          });
+        }
+      }
+      next.seatLimit = seatLimit;
+    }
+  } catch {
+    // RevenueCat unreachable — keep the existing seat limit and still rename.
+  }
+
+  const [updated] = await db
+    .update(organizationsTable)
+    .set(next)
+    .where(eq(organizationsTable.id, org.id))
+    .returning();
+  return res.json({ organization: updated });
+});
+
+async function loadConversionMembers(orgId: number) {
+  return db.select({
+    id: organizationMembersTable.id,
+    userId: organizationMembersTable.userId,
+    role: organizationMembersTable.role,
+    status: organizationMembersTable.status,
+  }).from(organizationMembersTable).where(eq(organizationMembersTable.orgId, orgId));
+}
+
+// Owner-only preview of the exact membership and seat checks used by conversion.
+router.get("/orgs/:orgId/repair-shop-conversion", async (req, res) => {
+  const { org } = req.orgAccess!;
+  if (org.ownerUserId !== req.user!.id) return res.status(403).json({ error: "Only the owner can convert this workspace." });
+  if (org.organizationType !== "fleet") return res.status(409).json({ error: "This workspace is already a Repair Shop." });
+  let seatLimit: number | null | undefined;
+  try {
+    seatLimit = await resolveOwnerSeatLimit(org.ownerUserId);
+  } catch {
+    return res.status(503).json({ error: "Could not verify your subscription. Please try again." });
+  }
+  const preview = previewRepairShopConversion(await loadConversionMembers(org.id), org.ownerUserId, seatLimit);
+  return res.json(preview);
+});
+
+// Conversion is irreversible. Re-verify entitlement, lock the org, and apply
+// only if a fresh membership snapshot still satisfies the preview rules.
+router.post("/orgs/:orgId/repair-shop-conversion", async (req, res) => {
+  const { org } = req.orgAccess!;
+  if (org.ownerUserId !== req.user!.id) return res.status(403).json({ error: "Only the owner can convert this workspace." });
+  const parsed = convertOrganizationSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Explicit conversion confirmation is required." });
+
+  let seatLimit: number | null | undefined;
+  try {
+    seatLimit = await resolveOwnerSeatLimit(org.ownerUserId);
+  } catch {
+    return res.status(503).json({ error: "Could not verify your subscription. Please try again." });
+  }
+  if (seatLimit === undefined) {
+    return res.status(403).json({ error: "An active CTL Enterprise subscription is required to convert this workspace." });
+  }
+
+  const result = await db.transaction(async (tx) => {
+    const [lockedOrg] = await tx.select().from(organizationsTable)
+      .where(eq(organizationsTable.id, org.id)).for("update").limit(1);
+    if (!lockedOrg) return { error: "not_found" as const };
+    if (lockedOrg.ownerUserId !== req.user!.id) return { error: "owner" as const };
+    if (lockedOrg.organizationType !== "fleet") return { error: "already_converted" as const };
+    const members = await tx.select({
+      id: organizationMembersTable.id,
+      userId: organizationMembersTable.userId,
+      role: organizationMembersTable.role,
+      status: organizationMembersTable.status,
+    }).from(organizationMembersTable).where(eq(organizationMembersTable.orgId, lockedOrg.id));
+    const preview = previewRepairShopConversion(members, lockedOrg.ownerUserId, seatLimit);
+    if (!preview.canConvert) return { error: "blocked" as const, preview };
+    const [updated] = await tx.update(organizationsTable).set({
+      organizationType: "repair_shop",
+      seatLimit,
+      updatedAt: new Date(),
+    }).where(eq(organizationsTable.id, lockedOrg.id)).returning();
+    return { organization: updated, preview };
+  });
+  if ("error" in result) {
+    if (result.error === "not_found") return res.status(404).json({ error: "Workspace not found." });
+    if (result.error === "owner") return res.status(403).json({ error: "Only the owner can convert this workspace." });
+    if (result.error === "already_converted") return res.status(409).json({ error: "This workspace is already a Repair Shop." });
+    return res.status(409).json({
+      error: "Resolve staff memberships and client seat overages before converting.",
+      preview: result.preview,
+    });
+  }
+  return res.json(result);
+});
+
+// Delete an organization (owner only). Cascades to members + org vehicles.
+router.delete("/orgs/:orgId", async (req, res) => {
+  const { org } = req.orgAccess!;
+  if (org.ownerUserId !== req.user!.id) {
+    return res.status(403).json({ error: "Only the owner can delete the enterprise." });
+  }
+  await db.delete(organizationsTable).where(eq(organizationsTable.id, org.id));
+  return res.json({ success: true });
+});
+
+// ── Organization vehicles ───────────────────────────────────────────────
+
+// List vehicles owned by the organization (any active member).
+router.get("/orgs/:orgId/cars", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  const ids = await getAccessibleOrgCarIds(req.user!.id, org.id);
+  if (!ids.length) return res.json([]);
+  const cars = await db
+    .select()
+    .from(carsTable)
+    .where(inArray(carsTable.id, ids))
+    .orderBy(carsTable.createdAt);
+  return res.json(role === "client" ? cars.map(clientCarSummary) : cars);
+});
+
+// All malfunctions across the organization's vehicles only. Mirrors the personal
+// `/malfunctions` feed but scopes cars by `orgId` instead of `userId` so a
+// member's personal/fleet faults never leak into the enterprise fault log.
+router.get("/orgs/:orgId/malfunctions", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  const ids = await getAccessibleOrgCarIds(req.user!.id, org.id);
+  if (!ids.length) return res.json([]);
+  const [records, completions, cars] = await Promise.all([
+    db
+      .select({ record: malfunctionsTable })
+      .from(malfunctionsTable)
+      .innerJoin(carsTable, and(eq(malfunctionsTable.carId, carsTable.id), inArray(carsTable.id, ids)))
+      .orderBy(desc(malfunctionsTable.createdAt)),
+    db.select().from(eventCompletionsTable).where(eq(eventCompletionsTable.recordType, "malfunction")),
+    db.select().from(carsTable).where(inArray(carsTable.id, ids)),
+  ]);
+  const completedIds = new Set(completions.map((c) => c.recordId));
+  const carsMap = new Map(cars.map((c) => [c.id, role === "client" ? clientCarSummary(c) : c]));
+  const response = records.map(({ record: r }) => ({
+    ...r,
+    completed: completedIds.has(r.id),
+    car: carsMap.get(r.carId) ?? null,
+  }));
+  return res.json(role === "client" ? sanitizeClientData(response) : response);
+});
+
+// All maintenance records across the organization's vehicles only. Mirrors the
+// personal `/maintenance` feed but scopes cars by `orgId` instead of `userId` so
+// a member's personal/fleet history never leaks into the enterprise history.
+router.get("/orgs/:orgId/maintenance", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  const ids = await getAccessibleOrgCarIds(req.user!.id, org.id);
+  if (!ids.length) return res.json([]);
+  const [records, cars] = await Promise.all([
+    db
+      .select({ record: maintenanceTable })
+      .from(maintenanceTable)
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), inArray(carsTable.id, ids)))
+      .orderBy(desc(maintenanceTable.date)),
+    db.select().from(carsTable).where(inArray(carsTable.id, ids)),
+  ]);
+  const carsMap = new Map(cars.map((c) => [c.id, role === "client" ? clientCarSummary(c) : c]));
+  const response = records.map(({ record: r }) => ({ ...r, car: carsMap.get(r.carId) ?? null }));
+  return res.json(role === "client" ? sanitizeClientData(response) : response);
+});
+
+// Upcoming events for the organization's vehicles only. Mirrors the personal
+// `/maintenance/upcoming` feed but scopes cars by `orgId` instead of `userId`
+// so a member's personal vehicles never leak into the org dashboard.
+router.get("/orgs/:orgId/maintenance/upcoming", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  const ids = await getAccessibleOrgCarIds(req.user!.id, org.id);
+  if (!ids.length) return res.json([]);
+  const [maintenanceRecords, cars, inspectionRecords] = await Promise.all([
+    db
+      .select({
+        id: maintenanceTable.id,
+        carId: maintenanceTable.carId,
+        type: maintenanceTable.type,
+        description: maintenanceTable.description,
+        nextDueDate: maintenanceTable.nextDueDate,
+        nextDueMileage: maintenanceTable.nextDueMileage,
+        make: carsTable.make,
+        model: carsTable.model,
+        year: carsTable.year,
+        nickname: carsTable.nickname,
+        usageUnit: carsTable.usageUnit,
+      })
+      .from(maintenanceTable)
+      .innerJoin(carsTable, and(eq(maintenanceTable.carId, carsTable.id), inArray(carsTable.id, ids)))
+      .orderBy(sql`${maintenanceTable.id} desc`), // latest first
+    db.select().from(carsTable).where(inArray(carsTable.id, ids)),
+    db
+      .select({
+        id: inspectionsTable.id,
+        carId: inspectionsTable.carId,
+        nextInspectionDate: inspectionsTable.nextInspectionDate,
+        place: inspectionsTable.place,
+        make: carsTable.make,
+        model: carsTable.model,
+        year: carsTable.year,
+        nickname: carsTable.nickname,
+        usageUnit: carsTable.usageUnit,
+      })
+      .from(inspectionsTable)
+      .innerJoin(carsTable, and(eq(inspectionsTable.carId, carsTable.id), inArray(carsTable.id, ids)))
+      .orderBy(sql`${inspectionsTable.id} desc`), // latest first
+  ]);
+
+  const licenseItems = buildLicenseItems(cars);
+  const insuranceItems = buildInsuranceItems(cars);
+  const maintenanceItems = buildMaintenanceItems(maintenanceRecords);
+  const inspectionItems = buildInspectionItems(inspectionRecords);
+
+  const all = [...maintenanceItems, ...licenseItems, ...insuranceItems, ...inspectionItems].sort(
+    (a, b) => a.nextDueDate!.localeCompare(b.nextDueDate!)
+  );
+
+  return res.json(role === "client" ? sanitizeClientData(all) : all);
+});
+
+// Add a vehicle to the organization (admin only). Org vehicles have no
+// personal owner (`userId` NULL); access flows through membership.
+router.post("/orgs/:orgId/cars", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+  const parsed = insertCarSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid car data", details: parsed.error.flatten() });
+  }
+  const [car] = await db
+    .insert(carsTable)
+    .values({ ...parsed.data, userId: null, orgId: org.id })
+    .returning();
+  return res.status(201).json(car);
+});
+
+// ── Oversight: recent activity ──────────────────────────────────────────
+
+type ActivityKind =
+  | "maintenance"
+  | "fault"
+  | "inspection"
+  | "fuel"
+  | "part"
+  | "insurance"
+  | "dealership"
+  | "renewal";
+
+type ActivityRaw = {
+  id: number;
+  carId: number;
+  byUserId: number | null;
+  createdAt: Date;
+  date: string | null;
+  title: string | null;
+  kind: ActivityKind;
+};
+
+// Per-table cap before merging — generous for an oversight feed, bounded so a
+// large fleet can never balloon the response.
+const ACTIVITY_PER_TABLE = 100;
+const ACTIVITY_LIMIT = 200;
+
+// Admin-only oversight feed: recent record activity across all of the org's
+// vehicles, attributed to the member who logged each entry. Staff are denied —
+// this is a management view. Filtering by vehicle/member is done client-side
+// from this feed.
+router.get("/orgs/:orgId/activity", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+
+  const cars = await db
+    .select({
+      id: carsTable.id,
+      make: carsTable.make,
+      model: carsTable.model,
+      year: carsTable.year,
+      nickname: carsTable.nickname,
+      vehicleType: carsTable.vehicleType,
+    })
+    .from(carsTable)
+    .where(eq(carsTable.orgId, org.id));
+  if (cars.length === 0) return res.json([]);
+
+  const carIds = cars.map((c) => c.id);
+  const carMap = new Map(cars.map((c) => [c.id, c]));
+
+  const collected: ActivityRaw[] = [];
+  const push = (
+    kind: ActivityKind,
+    rows: { id: number; carId: number; byUserId: number | null; createdAt: Date; date: string | null; title: string | null }[],
+  ) => {
+    for (const r of rows) collected.push({ ...r, kind });
+  };
+
+  const [maint, faults, inspections, fuel, parts, insurance, dealerships, renewals] =
+    await Promise.all([
+      db.select({ id: maintenanceTable.id, carId: maintenanceTable.carId, byUserId: maintenanceTable.createdByUserId, createdAt: maintenanceTable.createdAt, date: maintenanceTable.date, title: maintenanceTable.description })
+        .from(maintenanceTable).where(inArray(maintenanceTable.carId, carIds)).orderBy(sql`${maintenanceTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: malfunctionsTable.id, carId: malfunctionsTable.carId, byUserId: malfunctionsTable.createdByUserId, createdAt: malfunctionsTable.createdAt, date: malfunctionsTable.date, title: malfunctionsTable.description })
+        .from(malfunctionsTable).where(inArray(malfunctionsTable.carId, carIds)).orderBy(sql`${malfunctionsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: inspectionsTable.id, carId: inspectionsTable.carId, byUserId: inspectionsTable.createdByUserId, createdAt: inspectionsTable.createdAt, date: inspectionsTable.date, title: inspectionsTable.place })
+        .from(inspectionsTable).where(inArray(inspectionsTable.carId, carIds)).orderBy(sql`${inspectionsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: fuelTable.id, carId: fuelTable.carId, byUserId: fuelTable.createdByUserId, createdAt: fuelTable.createdAt, date: fuelTable.date, title: fuelTable.station })
+        .from(fuelTable).where(inArray(fuelTable.carId, carIds)).orderBy(sql`${fuelTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: partsTable.id, carId: partsTable.carId, byUserId: partsTable.createdByUserId, createdAt: partsTable.createdAt, date: partsTable.installedDate, title: partsTable.name })
+        .from(partsTable).where(inArray(partsTable.carId, carIds)).orderBy(sql`${partsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: insuranceTable.id, carId: insuranceTable.carId, byUserId: insuranceTable.createdByUserId, createdAt: insuranceTable.createdAt, date: insuranceTable.startDate, title: insuranceTable.provider })
+        .from(insuranceTable).where(inArray(insuranceTable.carId, carIds)).orderBy(sql`${insuranceTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: dealershipsTable.id, carId: dealershipsTable.carId, byUserId: dealershipsTable.createdByUserId, createdAt: dealershipsTable.createdAt, date: dealershipsTable.visitDate, title: dealershipsTable.name })
+        .from(dealershipsTable).where(inArray(dealershipsTable.carId, carIds)).orderBy(sql`${dealershipsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+      db.select({ id: renewalsTable.id, carId: renewalsTable.carId, byUserId: renewalsTable.createdByUserId, createdAt: renewalsTable.createdAt, date: renewalsTable.date, title: renewalsTable.type })
+        .from(renewalsTable).where(inArray(renewalsTable.carId, carIds)).orderBy(sql`${renewalsTable.createdAt} desc`).limit(ACTIVITY_PER_TABLE),
+    ]);
+
+  push("maintenance", maint);
+  push("fault", faults);
+  push("inspection", inspections);
+  push("fuel", fuel);
+  push("part", parts);
+  push("insurance", insurance);
+  push("dealership", dealerships);
+  push("renewal", renewals);
+
+  collected.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  const top = collected.slice(0, ACTIVITY_LIMIT);
+
+  // Resolve creator names for attribution (distinct, non-null only).
+  const userIds = [...new Set(top.map((a) => a.byUserId).filter((v): v is number => v != null))];
+  const userMap = new Map<number, { name: string | null; email: string }>();
+  if (userIds.length > 0) {
+    const users = await db
+      .select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
+      .from(usersTable)
+      .where(inArray(usersTable.id, userIds));
+    for (const u of users) userMap.set(u.id, { name: u.name, email: u.email });
+  }
+
+  const items = top.map((a) => {
+    const car = carMap.get(a.carId);
+    const by = a.byUserId != null ? userMap.get(a.byUserId) : undefined;
+    return {
+      id: a.id,
+      kind: a.kind,
+      carId: a.carId,
+      car: car
+        ? { id: car.id, make: car.make, model: car.model, year: car.year, nickname: car.nickname, vehicleType: car.vehicleType }
+        : null,
+      byUserId: a.byUserId,
+      byName: by?.name ?? null,
+      byEmail: by?.email ?? null,
+      date: a.date,
+      createdAt: a.createdAt,
+      title: a.title,
+    };
+  });
+
+  return res.json(items);
+});
+
+// ── Members ─────────────────────────────────────────────────────────────
+
+router.get("/orgs/:orgId/members", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  const members = await db
+    .select({
+      id: organizationMembersTable.id,
+      userId: organizationMembersTable.userId,
+      email: organizationMembersTable.email,
+      role: organizationMembersTable.role,
+      status: organizationMembersTable.status,
+      name: usersTable.name,
+    })
+    .from(organizationMembersTable)
+    .leftJoin(usersTable, eq(organizationMembersTable.userId, usersTable.id))
+    .where(role === "client"
+      ? and(eq(organizationMembersTable.orgId, org.id), eq(organizationMembersTable.userId, req.user!.id))
+      : eq(organizationMembersTable.orgId, org.id));
+  return res.json(members);
+});
+
+// Invite a member by email (admin only). Enforces the seat limit. If a user
+// with that email already exists, the invite is linked to them immediately so
+// it appears in their pending invites; they still accept explicitly.
+router.post("/orgs/:orgId/members", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+  const parsed = inviteSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid invite data", details: parsed.error.flatten() });
+  }
+  const email = parsed.data.email.toLowerCase();
+
+  if (!isRoleAllowedForOrganization(org.organizationType as OrganizationType, parsed.data.role)) {
+    return res.status(400).json({ error: "Repair shops may only invite clients." });
+  }
+
+  // Re-derive the authoritative limit from the owner's CURRENT entitlement so a
+  // lapsed/downgraded plan is enforced regardless of the stored value. An
+  // `undefined` result means the owner has no active Enterprise entitlement —
+  // deny growth outright (never fall back to a stale stored limit). A thrown
+  // error means RevenueCat is unreachable — fail closed with 503.
+  let effectiveLimit: number | null | undefined;
+  try {
+    const fresh = await resolveOwnerSeatLimit(org.ownerUserId);
+    effectiveLimit = fresh;
+    if (fresh !== undefined && fresh !== org.seatLimit) {
+      await db
+        .update(organizationsTable)
+        .set({ seatLimit: fresh, updatedAt: new Date() })
+        .where(eq(organizationsTable.id, org.id));
+    }
+  } catch {
+    return res.status(503).json({ error: "Could not verify the enterprise's subscription. Please try again." });
+  }
+
+  // Count seats and insert atomically: lock the org row so concurrent invites
+  // for the same org serialize and cannot both pass the seat check before
+  // committing (prevents over-allocation past the entitlement cap).
+  const inviteResult = await db.transaction(async (tx) => {
+    const [lockedOrg] = await tx
+      .select()
+      .from(organizationsTable)
+      .where(eq(organizationsTable.id, org.id))
+      .for("update")
+      .limit(1);
+    if (!lockedOrg) return { error: "not_found" as const };
+    const organizationType = lockedOrg.organizationType as OrganizationType;
+    if (!isRoleAllowedForOrganization(organizationType, parsed.data.role)) return { error: "invalid_role" as const };
+    const [existing] = await tx.select({ id: organizationMembersTable.id }).from(organizationMembersTable)
+      .where(and(eq(organizationMembersTable.orgId, org.id), eq(organizationMembersTable.email, email))).limit(1);
+    if (existing) return { error: "exists" as const };
+
+    const members = await tx.select({ role: organizationMembersTable.role, status: organizationMembersTable.status })
+      .from(organizationMembersTable).where(eq(organizationMembersTable.orgId, org.id));
+    const seatBearing = isSeatMembership(organizationType, { role: parsed.data.role, status: "invited" });
+    const decision = decideSeatGrowth(seatBearing, countOccupiedSeats(organizationType, members), effectiveLimit);
+    if (effectiveLimit === undefined) {
+      const activeSeats = countActiveSeats(organizationType, members);
+      await tx.update(organizationsTable).set({ seatLimit: activeSeats, updatedAt: new Date() }).where(eq(organizationsTable.id, org.id));
+    }
+    if (decision !== "allow") return { error: decision as "seat_limit" | "no_entitlement" };
+
+    const [created] = await tx
+      .insert(organizationMembersTable)
+      .values({
+        orgId: org.id,
+        email,
+        role: parsed.data.role,
+        status: "invited",
+        invitedByUserId: req.user!.id,
+      })
+      .returning();
+    return { member: created };
+  });
+
+  if ("error" in inviteResult) {
+    if (inviteResult.error === "exists") return res.status(409).json({ error: "This email is already a member or has a pending invite." });
+    if (inviteResult.error === "invalid_role") return res.status(400).json({ error: "Repair shops may only invite clients." });
+    if (inviteResult.error === "no_entitlement") return res.status(403).json({ error: "This enterprise's CTL Enterprise subscription is not active. Renew it to add members." });
+    return res.status(403).json({ error: "Seat limit reached for this plan." });
+  }
+  const member = inviteResult.member;
+
+  // Fire-and-forget invite email — a delivery failure must not roll back the
+  // invite row or return an error to the admin who sent it.
+  const inviterName = req.user!.name ?? "A team admin";
+  const roleLabel = parsed.data.role === "admin" ? "admin" : parsed.data.role === "client" ? "client" : "staff member";
+  if (resend) {
+    resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: `You've been invited to join ${org.name} on CTL`,
+      html: `
+        <div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#fff">
+          <div style="margin-bottom:24px">
+            <span style="font-size:28px;font-weight:800;color:#0F2D5E;letter-spacing:-1px">CTL</span>
+            <div style="display:inline-block;width:48px;height:4px;background:#1D4ED8;border-radius:2px;vertical-align:middle;margin-left:8px"></div>
+            <div style="display:inline-block;width:20px;height:4px;background:#0891B2;border-radius:2px;vertical-align:middle;margin-left:4px"></div>
+          </div>
+          <h2 style="color:#111827;font-size:20px;margin:0 0 12px">You've been invited to ${org.name}</h2>
+          <p style="color:#6B7280;font-size:15px;line-height:1.6;margin:0 0 24px">
+            <strong style="color:#111827">${inviterName}</strong> has invited you to join
+            <strong style="color:#111827">${org.name}</strong> as a ${roleLabel} on CTL — Car Technical Log.
+          </p>
+          <p style="color:#6B7280;font-size:15px;line-height:1.6;margin:0 0 24px">
+            Open the CTL app on your device to accept the invitation. You'll find it under
+            <strong style="color:#111827">Settings → Pending Invites</strong>.
+          </p>
+          <p style="color:#9CA3AF;font-size:13px;margin:24px 0 0">
+            If you don't have CTL yet, search for <strong>CTL Car Technical Log</strong> on the App Store or Google Play.
+            If you weren't expecting this invitation, you can safely ignore this email.
+          </p>
+        </div>
+      `,
+    }).catch((err: unknown) => {
+      console.error("[invite] Email send failed:", err instanceof Error ? err.message : String(err));
+    });
+  } else {
+    console.error("[invite] RESEND_API_KEY not configured — invite email not sent to", email);
+  }
+
+  return res.status(201).json({ ...member, organizationType: org.organizationType });
+});
+
+// Change a member's role (admin only). Cannot demote the owner; cannot remove
+// the last admin.
+router.patch("/orgs/:orgId/members/:memberId", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+  const memberId = parseInt(req.params.memberId, 10);
+  if (Number.isNaN(memberId)) return res.status(400).json({ error: "Invalid member id." });
+  const parsed = roleSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid role", details: parsed.error.flatten() });
+  }
+
+  const [member] = await db
+    .select()
+    .from(organizationMembersTable)
+    .where(
+      and(
+        eq(organizationMembersTable.id, memberId),
+        eq(organizationMembersTable.orgId, org.id),
+      ),
+    )
+    .limit(1);
+  if (!member) return res.status(404).json({ error: "Member not found" });
+
+  const organizationType = org.organizationType as OrganizationType;
+  const initiallyAddsSeat = !isSeatMembership(organizationType, member)
+    && isSeatMembership(organizationType, { role: parsed.data.role, status: member.status });
+  let freshLimit: number | null | undefined;
+  if (initiallyAddsSeat) {
+    try {
+      freshLimit = await resolveOwnerSeatLimit(org.ownerUserId);
+    } catch {
+      return res.status(503).json({ error: "Could not verify the enterprise's subscription. Please try again." });
+    }
+  }
+
+  const result = await db.transaction(async (tx) => {
+    const [lockedOrg] = await tx.select().from(organizationsTable).where(eq(organizationsTable.id, org.id)).for("update").limit(1);
+    if (!lockedOrg) return { error: "not_found" as const };
+    const [current] = await tx.select().from(organizationMembersTable)
+      .where(and(eq(organizationMembersTable.id, memberId), eq(organizationMembersTable.orgId, lockedOrg.id))).limit(1);
+    if (!current) return { error: "not_found" as const };
+    const lockedType = lockedOrg.organizationType as OrganizationType;
+    if (!isRoleAllowedForOrganization(lockedType, parsed.data.role, current.userId === lockedOrg.ownerUserId)) return { error: "invalid_role" as const };
+    if (current.userId === lockedOrg.ownerUserId && parsed.data.role !== "admin") return { error: "owner" as const };
+    if (current.role === "admin" && parsed.data.role !== "admin") {
+      const [{ n: adminCount }] = await tx.select({ n: sql<number>`count(*)::int` }).from(organizationMembersTable)
+        .where(and(eq(organizationMembersTable.orgId, lockedOrg.id), eq(organizationMembersTable.role, "admin")));
+      if (adminCount <= 1) return { error: "last_admin" as const };
+    }
+    const addsSeat = !isSeatMembership(lockedType, current)
+      && isSeatMembership(lockedType, { role: parsed.data.role, status: current.status });
+    if (addsSeat) {
+      // All seat-increasing edits resolve entitlement before acquiring this
+      // lock. This fallback fails closed if a legacy concurrent edit changed
+      // the row between the initial read and lock acquisition.
+      if (!initiallyAddsSeat) return { error: "retry" as const };
+      const members = await tx.select({ role: organizationMembersTable.role, status: organizationMembersTable.status })
+        .from(organizationMembersTable).where(eq(organizationMembersTable.orgId, lockedOrg.id));
+      const decision = decideSeatGrowth(true, countOccupiedSeats(lockedType, members), freshLimit);
+      if (freshLimit === undefined) {
+        await tx.update(organizationsTable).set({ seatLimit: countActiveSeats(lockedType, members), updatedAt: new Date() }).where(eq(organizationsTable.id, lockedOrg.id));
+      } else if (freshLimit !== lockedOrg.seatLimit) {
+        await tx.update(organizationsTable).set({ seatLimit: freshLimit, updatedAt: new Date() }).where(eq(organizationsTable.id, lockedOrg.id));
+      }
+      if (decision !== "allow") return { error: decision as "no_entitlement" | "seat_limit" };
+    }
+    const [updated] = await tx.update(organizationMembersTable).set({ role: parsed.data.role, updatedAt: new Date() })
+      .where(eq(organizationMembersTable.id, current.id)).returning();
+    return { updated };
+  });
+  if ("error" in result) {
+    if (result.error === "not_found") return res.status(404).json({ error: "Member not found" });
+    if (result.error === "invalid_role") return res.status(409).json({ error: "Repair shops only allow the owner to be an admin; all other members must be clients." });
+    if (result.error === "owner") return res.status(409).json({ error: "The owner must remain an admin." });
+    if (result.error === "last_admin") return res.status(409).json({ error: "An enterprise must keep at least one admin." });
+    if (result.error === "no_entitlement") return res.status(403).json({ error: "This enterprise's CTL Enterprise subscription is not active." });
+    if (result.error === "seat_limit") return res.status(403).json({ error: "Seat limit reached for this plan." });
+    return res.status(409).json({ error: "Member changed concurrently; please retry." });
+  }
+  return res.json(result.updated);
+});
+
+// Remove a member (admin only). The owner cannot be removed.
+router.delete("/orgs/:orgId/members/:memberId", async (req, res) => {
+  const { org, role } = req.orgAccess!;
+  if (role !== "admin") return res.status(403).json({ error: "Admins only." });
+  const memberId = parseInt(req.params.memberId, 10);
+  if (Number.isNaN(memberId)) return res.status(400).json({ error: "Invalid member id." });
+
+  const [member] = await db
+    .select()
+    .from(organizationMembersTable)
+    .where(
+      and(
+        eq(organizationMembersTable.id, memberId),
+        eq(organizationMembersTable.orgId, org.id),
+      ),
+    )
+    .limit(1);
+  if (!member) return res.status(404).json({ error: "Member not found" });
+  if (member.userId === org.ownerUserId) {
+    return res.status(409).json({ error: "The owner cannot be removed." });
+  }
+
+  await db.delete(organizationMembersTable).where(eq(organizationMembersTable.id, memberId));
+  return res.json({ success: true });
+});
+
+export default router;

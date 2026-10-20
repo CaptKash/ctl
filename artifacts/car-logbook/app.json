@@ -1,0 +1,92 @@
+{
+  "expo": {
+    "name": "CTL",
+    "slug": "car-logbook",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "car-logbook",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ctl.carlogbook",
+      "buildNumber": "117",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "CTL uses your location to find nearby service centers and repair shops, for example showing the closest oil change or tire shop near you.",
+        "NSCameraUsageDescription": "CTL uses the camera so you can take photos of your vehicle, receipts, and damage to attach to maintenance and fault log entries \u2014 for example, snapping a photo of an oil change receipt or a check engine warning light.",
+        "NSPhotoLibraryUsageDescription": "CTL accesses your photo library so you can attach existing photos to maintenance records, fault logs, and vehicle profiles \u2014 for example, selecting a previously taken photo of your car's odometer or a service invoice.",
+        "NSPhotoLibraryAddUsageDescription": "CTL saves generated reports and exported photos to your photo library so you can keep records of your vehicle's history."
+      }
+    },
+    "android": {
+      "package": "com.inroomstudio.ctl",
+      "versionCode": 26,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0F2D5E"
+      },
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "com.android.vending.BILLING"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "./plugins/fix-expo-swift",
+      [
+        "expo-router",
+        {
+          "origin": "https://ctl-car-technical-log.replit.app/"
+        }
+      ],
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#0F2D5E"
+        }
+      ],
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#1D4ED8",
+          "defaultChannel": "service-reminders",
+          "iosDisplayInForeground": true
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow CTL to add service reminders to your calendar."
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-localization",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2984157c-0a32-485b-8b48-1048d72a1520"
+      }
+    },
+    "owner": "mkashour"
+  }
+}
